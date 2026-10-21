@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RGBKart · Red &amp; Green Basket</title>
+<meta name="description" content="RGBKart: a Bangladesh multi-vendor marketplace in English and Bangla. Coming soon.">
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&family=Hind+Siliguri:wght@400;600&display=swap">
+<style>
+:root{--band:#00802B;--band-strong:#006622;--yellow:#F5C400;--red:#E30613;--green:#00802B;--bg:#F4F7F5;--surface:#fff;--line:#D9E2DC;--ink:#14211C;--muted:#5A6A62;
+ --f-head:"Poppins","Hind Siliguri",system-ui,sans-serif;--f-body:"Roboto","Hind Siliguri",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--band:#0E5A28;--band-strong:#0A4420;--bg:#0D1411;--surface:#141E1A;--line:#2A3832;--ink:#E6EEEA;--muted:#9CACA4;--green:#2EBB5C;--red:#FF4D55;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--band);color:#fff;border-bottom:3px solid var(--yellow)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{width:50px;height:50px}
+.logo b{font-family:var(--f-head);font-size:1.4rem;display:block;line-height:1.1}
+.logo b i{font-style:normal;color:#FFD21F}
+.logo small{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.lang{display:inline-flex;border:1px solid rgba(255,255,255,.5);border-radius:999px;overflow:hidden}
+.lang button{background:none;border:0;color:#fff;padding:5px 12px;cursor:pointer;font:inherit;font-size:.85rem}
+.lang button[aria-pressed="true"]{background:#fff;color:#006622;font-weight:700}
+main{padding-block:32px}
+h1{font-family:var(--f-head);font-size:1.9rem;margin:0 0 6px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 24px;max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.card h2{font-family:var(--f-head);font-size:1.05rem;margin:0 0 12px}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.checks li{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px}
+.dot{flex:none;width:26px;height:26px;border-radius:99px;display:grid;place-items:center;font-weight:700;font-size:.85rem;color:#fff;background:var(--muted)}
+.ok .dot{background:var(--green)} .bad .dot{background:var(--red)} .wait .dot{background:#C98A00}
+.checks b{display:block}
+.checks span.sub{font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:600;border:1.5px solid var(--green);color:var(--green);background:var(--surface)}
+.btn.pri{background:var(--green);color:#fff}
+.btn:hover{background:var(--red);border-color:var(--red);color:#fff}
+footer{color:var(--muted);font-size:.8rem;padding-block:24px}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+ <div class="logo"><img src="assets/logo/rgb-badge-112.png" alt=""><span><b>RGB<i>Kart</i></b><small data-t="tagline">Red &amp; Green Basket</small></span></div>
+ <div class="lang" role="group" aria-label="Language"><button data-lang="en" aria-pressed="true">English</button><button data-lang="bn" aria-pressed="false">বাংলা</button></div>
+</div></header>
+<main class="wrap">
+ <h1 data-t="title">RGBKart is being built</h1>
+ <p class="lead" data-t="lead">A Bangladesh marketplace for independent shops, in English and Bangla. This page checks that the building blocks are connected.</p>
+ <section class="card" aria-live="polite">
+  <h2 id="phase">Phase 0 · Setup</h2>
+  <ul class="checks">
+   <li id="c-site" class="ok"><span class="dot">✓</span><span><b data-t="c1">Website published</b><span class="sub" id="c-site-sub">rgbkartdemo.hkmanik.com</span></span></li>
+   <li id="c-cfg" class="wait"><span class="dot">…</span><span><b data-t="c2">Supabase settings added</b><span class="sub" id="c-cfg-sub"></span></span></li>
+   <li id="c-db" class="wait"><span class="dot">…</span><span><b data-t="c3">Database answers</b><span class="sub" id="c-db-sub"></span></span></li>
+  </ul>
+  <div class="row"><a class="btn pri" href="prototype/" data-t="proto">Open the clickable prototype →</a></div>
+ </section>
+ <footer id="ver"></footer>
+</main>
+<script src="config.js"></script>
+<script>
+"use strict";
+const T={
+ en:{tagline:"Red & Green Basket",title:"RGBKart is being built",lead:"A Bangladesh marketplace for independent shops, in English and Bangla. This page checks that the building blocks are connected.",c1:"Website published",c2:"Supabase settings added",c3:"Database answers",proto:"Open the clickable prototype →",
+  cfgMissing:"Waiting for the Project URL and anon key in config.js",cfgOk:"Project: ",dbWait:"Checking…",dbOk:"Connected. Status row: ",dbNoTable:"Connected, but the status table is missing. Run supabase/migrations/0001_phase0_status.sql in the SQL Editor.",dbFail:"Could not reach the database: ",dbSkip:"Needs the Supabase settings first",built:"Last published "},
+ bn:{tagline:"রেড অ্যান্ড গ্রিন বাস্কেট",title:"RGBKart তৈরি হচ্ছে",lead:"স্বতন্ত্র দোকানগুলোর জন্য বাংলাদেশের একটি মার্কেটপ্লেস, ইংরেজি ও বাংলায়। এই পেজ দেখায় মূল অংশগুলো সংযুক্ত হয়েছে কি না।",c1:"ওয়েবসাইট প্রকাশিত",c2:"Supabase সেটিংস যোগ হয়েছে",c3:"ডেটাবেস সাড়া দিচ্ছে",proto:"ক্লিকযোগ্য প্রোটোটাইপ খুলুন →",
+  cfgMissing:"config.js-এ Project URL ও anon key-এর অপেক্ষায়",cfgOk:"প্রজেক্ট: ",dbWait:"যাচাই চলছে…",dbOk:"সংযুক্ত। স্ট্যাটাস: ",dbNoTable:"সংযুক্ত, কিন্তু স্ট্যাটাস টেবিল নেই। SQL Editor-এ supabase/migrations/0001_phase0_status.sql চালান।",dbFail:"ডেটাবেসে পৌঁছানো যায়নি: ",dbSkip:"আগে Supabase সেটিংস দরকার",built:"সর্বশেষ প্রকাশ "}
+};
+let lang="en"; try{lang=localStorage.getItem("rgb_lang")||"en"}catch(e){}
+const state={};
+const cfg=window.RGBKART_CONFIG||{};
+const $=id=>document.getElementById(id);
+function set(id,cls,mark,sub){const li=$(id);li.className=cls;li.querySelector(".dot").textContent=mark;$(id+"-sub").textContent=sub}
+function paint(){
+ const t=T[lang]; document.documentElement.lang=lang;
+ document.querySelectorAll("[data-t]").forEach(el=>{el.textContent=t[el.dataset.t]});
+ document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===lang)));
+ $("phase").textContent=cfg.BUILD_PHASE||"Phase 0";
+ $("c-site-sub").textContent=location.host||"local file";
+ if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){set("c-cfg","wait","…",t.cfgMissing);set("c-db","wait","…",t.dbSkip)}
+ else{set("c-cfg","ok","✓",t.cfgOk+cfg.SUPABASE_URL.replace(/^https?:\/\//,""));
+  if(state.db==="ok")set("c-db","ok","✓",t.dbOk+state.detail);
+  else if(state.db==="notable")set("c-db","wait","!",t.dbNoTable);
+  else if(state.db==="fail")set("c-db","bad","✕",t.dbFail+state.detail);
+  else set("c-db","wait","…",t.dbWait)}
+ if(state.ver)$("ver").textContent=t.built+state.ver;
+}
+async function checkDb(){
+ if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)return;
+ try{
+  const r=await fetch(cfg.SUPABASE_URL.replace(/\/$/,"")+"/rest/v1/app_status?select=phase,message&id=eq.1",{headers:{apikey:cfg.SUPABASE_ANON_KEY,Authorization:"Bearer "+cfg.SUPABASE_ANON_KEY}});
+  if(r.status===404||r.status===400){state.db="notable"}
+  else if(!r.ok){state.db="fail";state.detail="HTTP "+r.status}
+  else{const rows=await r.json();if(rows.length){state.db="ok";state.detail=rows[0].phase+" · "+rows[0].message}else{state.db="notable"}}
+ }catch(e){state.db="fail";state.detail=e.message}
+ paint();
+}
+async function loadVersion(){try{const r=await fetch("version.json",{cache:"no-store"});if(r.ok){const v=await r.json();state.ver=new Date(v.built).toLocaleString(lang==="bn"?"bn-BD":"en-GB")+" · "+String(v.commit).slice(0,7);paint()}}catch(e){}}
+document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>{lang=b.dataset.lang;try{localStorage.setItem("rgb_lang",lang)}catch(e){}paint();loadVersion()}));
+paint(); checkDb(); loadVersion();
+</script>
+</body>
+</html>

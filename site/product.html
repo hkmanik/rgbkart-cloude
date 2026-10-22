@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RGBKart Product</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: gallery left, buying panel right (stacked on phones, with a sticky action bar at the bottom) */
+  :root {
+    --bg: #f4f6f5; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896; --line: #dfe6e4;
+    --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
+    --buy: #e8590c; --buy-hover: #c94b08; --wa: #128c4b;
+    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #f5a524;
+    --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5; --danger: #b3392f; --danger-soft: #f8e3e0;
+    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e; --line: #263634;
+      --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36; --buy: #ff7a33; --buy-hover: #ff9257; --wa: #25d366;
+      --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17; --danger: #ec7d72; --danger-soft: #3d201d; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+  a { color: var(--accent); }
+  .top { background: #0e2f2c; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .top-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { font: 600 1.3rem var(--display); color: #fff; text-decoration: none; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .psearch { flex: 1; max-width: 520px; display: flex; background: #fff; border-radius: 10px; overflow: hidden; min-width: 0; }
+  .psearch input { flex: 1; min-width: 0; border: 0; padding: 9px 12px; font: inherit; font-size: 15px; color: #17201e; background: #fff; }
+  .psearch button { border: 0; background: var(--amber); padding: 0 14px; cursor: pointer; }
+  @media (max-width: 760px) { .top-in { flex-wrap: wrap; } .psearch { order: 3; flex-basis: 100%; max-width: none; } #acctLink, .top-actions .sell { display: none; } }
+  .top-actions a, .top-actions button { color: #fff; text-decoration: none; font-size: .92rem; background: none; border: 1px solid #2c5a55; border-radius: 999px; padding: 6px 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .top-actions .sell { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .cart-ic { position: relative; display: inline-flex !important; align-items: center; gap: 6px; }
+  .cart-count { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--buy); color: #fff; font: 700 .72rem/20px var(--body); text-align: center; border: 2px solid #0e2f2c; }
+  @media (max-width: 760px) { .cart-lbl { display: none; } }
+  .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: var(--t-red); } .rgb i:nth-child(2) { background: var(--t-green); } .rgb i:nth-child(3) { background: var(--t-blue); }
+
+  main { max-width: 1180px; margin: 0 auto; padding-block: 18px 110px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+  .crumbs { font-size: .88rem; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; }
+  .preview { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
+
+  /* Gallery */
+  .gallery { display: grid; gap: 10px; position: sticky; top: 16px; }
+  @media (max-width: 860px) { .gallery { position: static; } }
+  .main-img { aspect-ratio: 1; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; place-items: center; position: relative; }
+  .main-img img { width: 100%; height: 100%; object-fit: contain; }
+  .badge-feat { position: absolute; top: 12px; left: 12px; background: var(--amber); color: #2a1a00; font-weight: 700; font-size: .78rem; padding: 3px 10px; border-radius: 999px; }
+  .thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+  .thumbs button { flex: none; width: 68px; height: 68px; padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; background: var(--surface); cursor: pointer; }
+  .thumbs button[aria-current="true"] { border-color: var(--accent); }
+  .thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Info */
+  .info { display: grid; gap: 16px; min-width: 0; }
+  h1 { font: 600 1.7rem/1.2 var(--display); margin: 0; text-wrap: balance; overflow-wrap: anywhere; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: .76rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .chip.used { background: #eef0ff; color: #3f51b5; }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .price-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .price { font: 700 2rem/1 var(--body); font-variant-numeric: tabular-nums; }
+  .was { color: var(--faint); text-decoration: line-through; font-size: 1.05rem; }
+  .off { background: var(--danger-soft); color: var(--danger); font-weight: 700; font-size: .85rem; padding: 2px 8px; border-radius: 6px; }
+  .nego { color: var(--muted); font-size: .92rem; }
+  .short { color: var(--muted); margin: 0; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 14px; }
+  .lbl { font-size: .82rem; font-weight: 700; color: var(--muted); letter-spacing: .03em; text-transform: uppercase; }
+  .opts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .opt { background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 7px 14px; font: 600 .9rem var(--body); color: var(--fg); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+  .opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .opt.dim { opacity: .55; border-style: dashed; }
+  .sw { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgb(0 0 0 / .25); }
+  .qty { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .qty button { width: 40px; height: 40px; border: 0; background: var(--bg); font-size: 1.2rem; cursor: pointer; color: var(--fg); }
+  .qty input { width: 56px; height: 40px; border: 0; text-align: center; font: 600 1rem var(--body); background: var(--surface); color: var(--fg); }
+  .stock { font-size: .9rem; font-weight: 600; }
+  .stock.in { color: var(--good); } .stock.low { color: var(--warn); } .stock.out { color: var(--danger); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { font: 700 1rem var(--body); border-radius: 12px; padding: 14px 16px; cursor: pointer; border: 1.5px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: background-color .15s, border-color .15s, box-shadow .15s; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-cart { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .btn-cart:hover:not(:disabled) { background: var(--accent); color: var(--accent-fg); }
+  .btn-buy { background: var(--buy); color: #fff; }
+  .btn-buy:hover:not(:disabled) { background: var(--buy-hover); box-shadow: 0 4px 14px rgb(232 89 12 / .3); }
+  .btn-contact { background: var(--surface); color: var(--fg); border-color: var(--line); grid-column: 1 / -1; }
+  .btn-contact:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-contact.solo { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn-contact.solo:hover { background: var(--accent-hover); color: var(--accent-fg); }
+  .contact-box { border: 1.5px solid var(--accent); border-radius: 12px; padding: 14px; display: grid; gap: 10px; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+  .phone-num { font: 700 1.4rem var(--body); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+  .contact-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+  .btn-mail { background: var(--surface); color: var(--fg); border-color: var(--line); }
+  .btn-mail:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-msg { background: var(--surface); color: var(--accent); border-color: var(--accent); grid-column: 1 / -1; }
+  .btn-msg:hover { background: var(--accent-soft); }
+  .btn-msg.solo { background: var(--accent); color: var(--accent-fg); }
+  .btn-msg.solo:hover { background: var(--accent-hover); }
+  .msg-form label { display: grid; gap: 5px; font-size: .85rem; font-weight: 600; color: var(--muted); }
+  .msg-form input, .msg-form textarea { font: inherit; font-size: 16px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; min-width: 0; }
+  .msg-form textarea { min-height: 90px; resize: vertical; }
+  .msg-form input:focus-visible, .msg-form textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .msg-err { color: var(--danger); font-size: .9rem; margin: 0; }
+  .free-note { font-size: .85rem; color: var(--muted); margin: 0; display: flex; gap: 6px; }
+  .feat-note { font-size: .85rem; color: #8a5a00; background: #fff4dc; border-radius: 8px; padding: 6px 10px; margin: 0; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .feat-note { background: #3a2f17; color: #f0c060; } }
+  .msg-top { position: relative; }
+  .msg-top .cart-count { right: -6px; }
+  .btn-call { background: var(--accent); color: var(--accent-fg); }
+  .btn-wa { background: var(--wa); color: #fff; }
+  .safety { font-size: .85rem; color: var(--muted); margin: 0; padding-left: 18px; }
+  .facts { display: grid; gap: 8px; font-size: .92rem; }
+  .fact { display: flex; gap: 10px; align-items: baseline; }
+  .fact .ic { width: 22px; flex: none; text-align: center; }
+  .tiers { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .tiers td { padding: 6px 0; border-top: 1px solid var(--line); }
+  .tiers td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .seller { display: flex; gap: 12px; align-items: center; }
+  .seller .logo { width: 52px; height: 52px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font: 600 1.3rem var(--display); overflow: hidden; flex: none; }
+  .seller .logo img { width: 100%; height: 100%; object-fit: cover; }
+  .seller b { display: block; overflow-wrap: anywhere; }
+  .seller span { color: var(--muted); font-size: .88rem; }
+
+  .below { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .below { grid-template-columns: minmax(0, 1fr); } }
+  h2 { font: 600 1.2rem var(--display); margin: 0; }
+  .desc { white-space: pre-wrap; margin: 0; overflow-wrap: anywhere; }
+  .specs { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  .specs th { text-align: left; color: var(--muted); font-weight: 600; padding: 8px 12px 8px 0; width: 42%; vertical-align: top; border-top: 1px solid var(--line); }
+  .specs td { padding: 8px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+  .specs tr:first-child th, .specs tr:first-child td { border-top: 0; }
+
+  /* Phone action bar */
+  .mbar { display: none; }
+  @media (max-width: 860px) {
+    .mbar { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line);
+      box-shadow: 0 -6px 18px rgb(0 0 0 / .08); padding-block: 10px max(10px, env(safe-area-inset-bottom, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
+    .mbar .btn { padding: 12px 8px; font-size: .92rem; }
+  }
+
+  /* Cart drawer */
+  .scrim { position: fixed; inset: 0; background: rgb(0 0 0 / .45); z-index: 50; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); background: var(--surface); z-index: 51; display: flex; flex-direction: column; box-shadow: -8px 0 30px rgb(0 0 0 / .2); }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; padding-top: max(16px, env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--line); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 8px 18px; }
+  .drawer-foot { padding: 14px 18px max(14px, env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); display: grid; gap: 10px; }
+  .cart-item { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); align-items: center; }
+  .cart-item:first-child { border-top: 0; }
+  .cart-item img, .cart-item .noimg { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--bg); }
+  .cart-item .t { font-weight: 600; font-size: .92rem; overflow-wrap: anywhere; }
+  .cart-item .m { color: var(--muted); font-size: .84rem; }
+  .x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 6px; }
+  .total { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; }
+  .soon { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 10px 12px; font-size: .88rem; }
+  .icon-x { background: none; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--fg); }
+  .empty-state { text-align: center; padding: 60px 16px; display: grid; gap: 10px; justify-items: center; }
+  .toast { position: fixed; left: 50%; bottom: max(90px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 60; max-width: calc(100vw - 32px); }
+  button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><div class="top-in">
+    <a class="brand" href="index.html">RGBKart</a>
+    <form class="psearch" action="browse.html" role="search"><input name="q" type="search" placeholder="Search RGBKart" aria-label="Search products"><button type="submit" aria-label="Search">🔍</button></form>
+    <div class="top-actions">
+      <a class="sell" href="sell.html">+ Sell</a>
+      <a href="messages.html" id="msgTop" class="msg-top" hidden>Messages<span class="cart-count" id="msgTopN" hidden></span></a>
+      <a href="login.html" id="acctLink">Sign in</a>
+      <button type="button" id="cartBtn" class="cart-ic" aria-label="Cart"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3h2.6l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.1L21 7H6"/></svg><span class="cart-lbl">Cart</span><span class="cart-count" id="cartCount" hidden></span></button>
+    </div>
+  </div></div>
+  <div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div>
+</header>
+
+<main id="main">
+  <div class="empty-state" id="loading"><p>Loading…</p></div>
+  <div class="empty-state" id="notFound" hidden>
+    <h1>This product isn't available</h1>
+    <p class="short">It may have been sold, removed, or is still being checked.</p>
+    <a href="index.html">Back to RGBKart</a>
+  </div>
+
+  <div id="page" hidden style="display:grid;gap:18px">
+    <nav class="crumbs" id="crumbs" aria-label="Category"></nav>
+    <div class="preview" id="preview" hidden></div>
+
+    <div class="layout">
+      <div class="gallery">
+        <div class="main-img" id="mainImg"></div>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+
+      <div class="info">
+        <div class="chips" id="chips"></div>
+        <h1 id="title"></h1>
+        <div class="price-row" id="priceRow"></div>
+        <p class="short" id="short" hidden></p>
+
+        <div class="panel" id="buyPanel">
+          <div id="variants" style="display:grid;gap:12px"></div>
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap" id="qtyRow">
+            <div class="qty"><button type="button" id="qMinus" aria-label="Less">−</button><input id="qty" type="number" min="1" value="1" inputmode="numeric" aria-label="Quantity"><button type="button" id="qPlus" aria-label="More">+</button></div>
+            <span class="stock" id="stock"></span>
+          </div>
+          <div class="actions" id="actions">
+            <button type="button" class="btn btn-cart" id="addCart">Add to cart</button>
+            <button type="button" class="btn btn-buy" id="buyNow">Buy now</button>
+            <button type="button" class="btn btn-contact" id="contactBtn">📞 Contact seller</button>
+            <button type="button" class="btn btn-msg" id="msgBtn" hidden>💬 Message seller</button>
+          </div>
+          <p class="free-note" id="freeNote" hidden><span aria-hidden="true">🔒</span><span>This seller keeps their number private. Send them a message on RGBKart and they'll reply here.</span></p>
+          <p class="feat-note" id="featNote" hidden>★ Featured seller: call, WhatsApp, email or message</p>
+          <form class="contact-box msg-form" id="msgBox" hidden novalidate>
+            <span class="lbl">Message to <b id="msgTo"></b></span>
+            <label id="nameRow">Your name<input id="buyerName" type="text" maxlength="60" autocomplete="name"></label>
+            <label>Message<textarea id="msgText" maxlength="1000"></textarea></label>
+            <p class="msg-err" id="msgErr" role="alert" hidden></p>
+            <button type="submit" class="btn btn-call" id="msgSend">Send message</button>
+            <p class="short" style="font-size:.85rem">Replies appear in <a href="messages.html">Messages</a> on this phone or browser.</p>
+          </form>
+          <div class="contact-box" id="msgDone" hidden>
+            <b>✓ Message sent</b>
+            <span class="short">The seller will reply in your <a id="msgDoneLink" href="messages.html">Messages</a>. Keep using this phone or browser to see it.</span>
+          </div>
+          <div class="contact-box" id="contactBox" hidden>
+            <span class="lbl" id="contactName"></span>
+            <div class="phone-num" id="phoneNum"></div>
+            <div class="contact-btns">
+              <a class="btn btn-call" id="callBtn" href="#">Call</a>
+              <a class="btn btn-wa" id="waBtn" href="#" target="_blank" rel="noopener">WhatsApp</a>
+              <a class="btn btn-mail" id="mailBtn" href="#" hidden>✉ Email</a>
+            </div>
+            <ul class="safety" id="safety" hidden>
+              <li>Meet in a safe public place and check the item before you pay.</li>
+              <li>Never send advance money to someone you haven't met.</li>
+            </ul>
+          </div>
+          <table class="tiers" id="tiers" hidden></table>
+        </div>
+
+        <div class="panel facts" id="facts"></div>
+
+        <div class="panel">
+          <span class="lbl" id="sellerLbl">Sold by</span>
+          <div class="seller" id="seller"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="below">
+      <section class="panel">
+        <h2>Description</h2>
+        <p class="desc" id="desc"></p>
+        <div id="filesWrap" hidden style="display:grid;gap:6px"><span class="lbl">You'll get</span><ul id="files" style="margin:0;padding-left:18px"></ul></div>
+      </section>
+      <section class="panel" id="specsWrap" hidden>
+        <h2>Details</h2>
+        <table class="specs" id="specs"></table>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div class="mbar" id="mbar" hidden></div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-labelledby="cartTitle">
+  <div class="drawer-head"><h2 id="cartTitle">Your cart</h2><button type="button" class="icon-x" id="closeCart" aria-label="Close cart">✕</button></div>
+  <div class="drawer-body" id="cartItems"></div>
+  <div class="drawer-foot">
+    <div class="total"><span>Total</span><span id="cartTotal">৳0</span></div>
+    <div class="soon">Checkout with bKash, Nagad, card and cash on delivery is coming soon. Your cart is saved on this device.</div>
+    <a class="btn btn-cart" href="cart.html" style="text-decoration:none">View full cart</a>
+    <button type="button" class="btn btn-buy" disabled>Checkout (coming soon)</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const $ = id => document.getElementById(id);
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null || v === false) continue;
+      if (k.startsWith('on')) el[k] = v; else if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v; else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  }
+  const money = n => '৳' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  const imgUrl = (bucket, path) => db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  const LABELS = {
+    delivery: { same_day: 'Ships today', '1_2_days': 'Ships in 1–2 days', '3_5_days': 'Ships in 3–5 days', '6_10_days': 'Ships in 6–10 days' },
+    area: { all_bangladesh: 'Delivers all over Bangladesh', inside_dhaka: 'Delivers inside Dhaka only', outside_dhaka: 'Delivers outside Dhaka only' },
+    svcArea: { all_bangladesh: 'Available all over Bangladesh', inside_dhaka: 'Available inside Dhaka', outside_dhaka: 'Available outside Dhaka' },
+    returns: { no_returns: 'No returns', '3_days': '3-day returns', '7_days': '7-day returns', '15_days': '15-day returns', '30_days': '30-day returns' },
+    svcMode: { at_customer: 'At your place', at_shop: "At the seller's shop", online: 'Online / remote' },
+    svcDur: { '30_min': 'About 30 minutes', '1_hour': 'About 1 hour', '2_hours': 'About 2 hours', half_day: 'Half a day', full_day: 'A full day', multi_day: 'Several days' },
+  };
+
+  let P = null, shop = null, attrs = new Map(), images = [], variations = [], picked = {}, current = null;
+
+  // ---------- load ----------
+  async function load() {
+    const q = new URLSearchParams(location.search);
+    const id = Number(q.get('id')), slug = q.get('p');
+    let sel = db.from('products').select('*, product_images(*), product_variations(*, product_variation_options(*)), product_price_tiers(*), product_attribute_values(*), product_downloads(file_name, size_bytes)');
+    sel = id ? sel.eq('id', id) : sel.eq('slug', slug || '');
+    const r = await sel.maybeSingle();
+    $('loading').hidden = true;
+    if (r.error || !r.data) { $('notFound').hidden = false; return; }
+    P = r.data;
+    const attrIds = new Set([...(P.product_attribute_values || []).map(v => v.attribute_id), ...(P.product_variations || []).flatMap(v => v.product_variation_options.map(o => o.attribute_id))]);
+    const [s, a, c] = await Promise.all([
+      db.from('shops').select('*').eq('user_id', P.seller_id).maybeSingle(),
+      attrIds.size ? db.from('attributes').select('id, name, unit, input_type, attribute_options(id, value, color_hex, sort_order)').in('id', [...attrIds]) : Promise.resolve({ data: [] }),
+      db.from('categories').select('id, parent_id, name, slug'),
+    ]);
+    shop = s.data;
+    (a.data || []).forEach(x => attrs.set(x.id, x));
+    await loadContact();
+    render(c.data || []);
+  }
+
+  function render(cats) {
+    $('page').hidden = false;
+    document.title = `${P.title} | RGBKart`;
+    // breadcrumb
+    const chain = []; let cur = cats.find(c => c.id === P.category_id);
+    while (cur) { chain.unshift(cur); cur = cats.find(c => c.id === cur.parent_id); }
+    $('crumbs').append(h('a', { href: 'index.html', text: 'Home' }), ...chain.flatMap(c => [h('span', { text: '›' }), h('a', { href: 'browse.html?c=' + encodeURIComponent(c.slug), text: c.name })]));
+    if (P.status !== 'approved') {
+      $('preview').hidden = false;
+      $('preview').textContent = `Preview only: this product is "${{ draft: 'draft', pending: 'waiting for review', rejected: 'rejected', archived: 'hidden' }[P.status]}". Shoppers can't see it yet.`;
+    }
+
+    images = [...(P.product_images || [])].sort((a, b) => a.sort_order - b.sort_order).map(i => ({ id: i.id, url: imgUrl('product-images', i.storage_path) }));
+    variations = (P.product_variations || []).filter(v => v.is_active).sort((a, b) => a.sort_order - b.sort_order)
+      .map(v => ({ ...v, opts: Object.fromEntries(v.product_variation_options.map(o => [o.attribute_id, o.option_id])) }));
+    drawGallery(images[0] && images[0].id);
+
+    // chips
+    const chips = $('chips');
+    chips.append(h('span', { class: 'chip' + (P.listing_type === 'pre_owned' ? ' used' : ''), text: P.listing_type === 'pre_owned' ? 'Pre-owned' : 'New' }));
+    if (P.is_preorder) chips.append(h('span', { class: 'chip warn', text: 'Pre-order · ships ' + new Date(P.preorder_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
+    if (P.is_downloadable) chips.append(h('span', { class: 'chip', text: 'Digital download' }));
+    if (P.is_service) chips.append(h('span', { class: 'chip', text: 'Service' }));
+    if (P.is_gift_card) chips.append(h('span', { class: 'chip', text: 'Gift card' }));
+    if (P.free_delivery && !P.contact_only) chips.append(h('span', { class: 'chip', text: 'Free delivery' }));
+    $('title').textContent = P.title;
+    if (P.short_description) { $('short').hidden = false; $('short').textContent = P.short_description; }
+    $('desc').textContent = P.description || 'The seller hasn\'t added a description.';
+    if ((P.product_downloads || []).length) { $('filesWrap').hidden = false; P.product_downloads.forEach(f => $('files').append(h('li', { text: f.file_name }))); }
+
+    drawVariants();
+    drawSpecs();
+    drawFacts();
+    drawSeller();
+    drawTiers();
+    setupActions();
+    update();
+  }
+
+  // ---------- gallery ----------
+  function drawGallery(activeId) {
+    const main = $('mainImg'); main.innerHTML = '';
+    const act = images.find(i => i.id === activeId) || images[0];
+    if (act) main.append(h('img', { src: act.url, alt: P.title }));
+    else main.append(h('span', { class: 'short', text: 'No photo' }));
+    if (P.is_featured) main.append(h('span', { class: 'badge-feat', text: '★ Featured' }));
+    const t = $('thumbs'); t.innerHTML = '';
+    if (images.length > 1) images.forEach((im, i) => t.append(h('button', { type: 'button', 'aria-label': `Photo ${i + 1}`, 'aria-current': String(act && im.id === act.id), onclick: () => drawGallery(im.id) }, h('img', { src: im.url, alt: '' }))));
+  }
+
+  // ---------- variations ----------
+  function drawVariants() {
+    const box = $('variants'); box.innerHTML = '';
+    if (P.product_type !== 'variable' || !variations.length) return;
+    const ids = [...new Set(variations.flatMap(v => Object.keys(v.opts).map(Number)))];
+    // start with the first in-stock version
+    const first = variations.find(v => v.stock > 0) || variations[0];
+    if (!Object.keys(picked).length) picked = { ...first.opts };
+    for (const aid of ids) {
+      const a = attrs.get(aid); if (!a) continue;
+      const used = new Set(variations.map(v => v.opts[aid]));
+      const opts = a.attribute_options.filter(o => used.has(o.id)).sort((x, y) => x.sort_order - y.sort_order);
+      const chosen = opts.find(o => o.id === picked[aid]);
+      box.append(h('div', { style: 'display:grid;gap:8px' },
+        h('span', { class: 'lbl' }, a.name, chosen ? h('span', { style: 'text-transform:none;letter-spacing:0;color:var(--fg);font-weight:600', text: ': ' + chosen.value + (a.unit ? ' ' + a.unit : '') }) : ''),
+        h('div', { class: 'opts', role: 'group', 'aria-label': a.name }, opts.map(o => {
+          const test = { ...picked, [aid]: o.id };
+          const exists = variations.some(v => Object.entries(test).every(([k, val]) => v.opts[k] === val));
+          return h('button', { type: 'button', class: 'opt' + (!exists && picked[aid] !== o.id ? ' dim' : ''), 'aria-pressed': String(picked[aid] === o.id),
+            onclick: () => { picked[aid] = o.id; if (!findVariation()) { const v = variations.find(x => x.opts[aid] === o.id); if (v) picked = { ...v.opts }; } drawVariants(); update(); } },
+            o.color_hex && h('span', { class: 'sw', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''));
+        }))));
+    }
+  }
+  const findVariation = () => variations.find(v => Object.entries(v.opts).every(([k, val]) => picked[k] === val));
+
+  // ---------- price / stock ----------
+  function onSale(p) {
+    if (!p.sale_price) return false;
+    const now = Date.now();
+    if (p.sale_starts_at && new Date(p.sale_starts_at) > now) return false;
+    if (p.sale_ends_at && new Date(p.sale_ends_at) < now) return false;
+    return true;
+  }
+  function update() {
+    current = P.product_type === 'variable' ? findVariation() : null;
+    const base = current || P;
+    const sale = current ? (current.sale_price ? true : false) : onSale(P);
+    const price = sale ? base.sale_price : base.price;
+    const row = $('priceRow'); row.innerHTML = '';
+    if (P.product_type === 'variable' && !current) {
+      const ps = variations.map(v => v.sale_price || v.price);
+      row.append(h('span', { class: 'price', text: ps.length ? `${money(Math.min(...ps))} – ${money(Math.max(...ps))}` : '—' }));
+    } else {
+      row.append(h('span', { class: 'price', text: money(price) }));
+      if (sale) row.append(h('span', { class: 'was', text: money(base.price) }), h('span', { class: 'off', text: `-${Math.round((1 - base.sale_price / base.price) * 100)}%` }));
+      if (P.price_negotiable) row.append(h('span', { class: 'nego', text: 'Price negotiable' }));
+    }
+    if (current && current.image_id) drawGallery(current.image_id);
+
+    // stock
+    const st = $('stock'); st.className = 'stock';
+    let max = 99;
+    if (P.is_service || P.is_downloadable || P.is_gift_card) { st.textContent = ''; }
+    else if (current) { max = current.stock; setStock(st, current.stock, P.low_stock_threshold); }
+    else if (P.manage_stock) { max = P.stock; setStock(st, P.stock, P.low_stock_threshold); }
+    else { st.textContent = { in_stock: 'In stock', out_of_stock: 'Out of stock', on_backorder: 'Available to order' }[P.stock_status]; st.classList.add(P.stock_status === 'out_of_stock' ? 'out' : 'in'); if (P.stock_status === 'out_of_stock') max = 0; }
+    if (P.backorders !== 'no' && max === 0) { max = 99; st.textContent = 'Available to order'; st.className = 'stock low'; }
+    if (P.is_preorder) { max = 99; st.textContent = `Pre-order · expected ${new Date(P.preorder_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`; st.className = 'stock low'; }
+    if (P.sold_individually) max = Math.min(max, 1);
+    $('qty').max = Math.max(1, max);
+    if (Number($('qty').value) > max) $('qty').value = Math.max(1, max);
+    const unavailable = max <= 0 || (P.product_type === 'variable' && !current);
+    $('addCart').disabled = $('buyNow').disabled = unavailable || P.status !== 'approved';
+    drawBar();
+  }
+  function setStock(el, n, low) {
+    if (n <= 0) { el.textContent = 'Out of stock'; el.classList.add('out'); }
+    else if (low != null && n <= low) { el.textContent = `Only ${n} left`; el.classList.add('low'); }
+    else { el.textContent = 'In stock'; el.classList.add('in'); }
+  }
+  $('qMinus').onclick = () => { $('qty').value = Math.max(1, Number($('qty').value) - 1); };
+  $('qPlus').onclick = () => { $('qty').value = Math.min(Number($('qty').max) || 99, Number($('qty').value) + 1); };
+
+  function drawTiers() {
+    const tiers = [...(P.product_price_tiers || [])].sort((a, b) => a.min_qty - b.min_qty);
+    if (!tiers.length || P.contact_only) return;
+    const t = $('tiers'); t.hidden = false;
+    t.append(h('caption', { class: 'lbl', style: 'text-align:left;padding-bottom:6px', text: 'Buy more, pay less' }));
+    tiers.forEach(x => t.append(h('tr', {}, h('td', { text: `${x.min_qty}+ pieces` }), h('td', { text: money(x.unit_price) + ' each' }))));
+  }
+
+  // ---------- facts ----------
+  function drawFacts() {
+    const f = $('facts'); const add = (ic, text) => f.append(h('div', { class: 'fact' }, h('span', { class: 'ic', 'aria-hidden': 'true', text: ic }), h('span', { text })));
+    if (P.contact_only) {
+      add('🤝', 'Deal directly with the seller. RGBKart does not handle payment or delivery for this listing.');
+      if (shop && shop.city) add('📍', 'Seller is in ' + [shop.area, shop.city].filter(Boolean).join(', '));
+    } else if (P.is_service) {
+      add('🛠️', LABELS.svcMode[P.service_mode] || 'Service');
+      if (P.service_duration) add('⏱️', LABELS.svcDur[P.service_duration]);
+      add('📍', LABELS.svcArea[P.ships_to] || '');
+    } else if (P.is_downloadable) {
+      add('⬇️', 'Download link after payment' + (P.download_limit ? ` · ${P.download_limit} downloads` : '') + (P.download_expiry_days ? ` · link works ${P.download_expiry_days} days` : ''));
+    } else if (P.is_gift_card) {
+      add('🎁', `Gift card code sent after payment · valid ${Math.round((P.gift_card_validity_days || 365) / 30)} months · use in ${shop ? shop.shop_name : 'this shop'}`);
+    } else {
+      add('🚚', (P.free_delivery ? 'Free delivery · ' : '') + (LABELS.area[P.ships_to] || ''));
+      if (!P.is_preorder) add('📦', LABELS.delivery[P.delivery_time] || '');
+    }
+    if (!P.contact_only) {
+      add('💵', P.cod_allowed ? 'Cash on delivery available' : 'Pay online (no cash on delivery)');
+      add('↩️', LABELS.returns[P.return_policy] || '');
+      if (P.is_preorder && P.preorder_advance_percent) add('💳', `${P.preorder_advance_percent === 100 ? 'Full' : P.preorder_advance_percent + '%'} payment when ordering`);
+    }
+  }
+
+  // ---------- specs ----------
+  function drawSpecs() {
+    const rows = new Map();
+    for (const v of P.product_attribute_values || []) {
+      const a = attrs.get(v.attribute_id); if (!a) continue;
+      const val = v.bool_value != null ? (v.bool_value ? 'Yes' : 'No') : ((a.attribute_options.find(o => o.id === v.option_id) || {}).value || '') + (a.unit ? ' ' + a.unit : '');
+      rows.set(a.name, [...(rows.get(a.name) || []), val]);
+    }
+    if (P.sku) rows.set('Product code', [P.sku]);
+    if (P.weight_kg) rows.set('Weight', [P.weight_kg + ' kg']);
+    if (P.length_cm && P.width_cm && P.height_cm) rows.set('Size', [`${P.length_cm} × ${P.width_cm} × ${P.height_cm} cm`]);
+    if (!rows.size) return;
+    $('specsWrap').hidden = false;
+    for (const [k, v] of rows) $('specs').append(h('tr', {}, h('th', { scope: 'row', text: k }), h('td', { text: v.join(', ') })));
+  }
+
+  // ---------- seller + contact ----------
+  function drawSeller() {
+    const box = $('seller');
+    const oneTime = P.contact_only;
+    $('sellerLbl').textContent = oneTime ? 'Listed by' : 'Sold by';
+    if (!shop) { box.append(h('span', { text: 'Seller details unavailable' })); return; }
+    const logo = h('div', { class: 'logo' });
+    if (shop.logo_path) logo.append(h('img', { src: imgUrl('shop-assets', shop.logo_path), alt: '' })); else logo.textContent = (shop.shop_name || '?').charAt(0).toUpperCase();
+    box.append(logo, h('div', { style: 'min-width:0' }, h('b', { text: shop.shop_name }),
+      h('span', { text: [oneTime ? 'Individual seller' : 'Shop on RGBKart', [shop.area, shop.city].filter(Boolean).join(', '), 'since ' + new Date(shop.created_at).getFullYear()].filter(Boolean).join(' · ') }),
+      shop.vacation_mode && h('span', { style: 'display:block;color:var(--warn)', text: 'On holiday: ' + (shop.vacation_message || 'not taking orders right now') })));
+  }
+
+  // What a buyer may see: shops → phone/WhatsApp; one-time sellers → only when Featured (checked by the database)
+  let contact = null, contactRpcOk = true, myId = null, myIsGuest = true;
+  async function loadContact() {
+    const r = await db.rpc('listing_contact', { p_product: P.id });
+    if (r.error) {   // contact_messages.sql not run yet: old behaviour
+      contactRpcOk = false;
+      contact = shop ? { phone: shop.phone_public, whatsapp: shop.whatsapp, email: null, featured: false } : null;
+      return;
+    }
+    contact = (r.data || [])[0] || null;
+  }
+  const phoneOf = () => contact && (contact.phone || contact.whatsapp);
+  const hasDirect = () => !!(contact && (contact.phone || contact.whatsapp || contact.email));
+  const canMessage = () => contactRpcOk && P.status === 'approved' && P.seller_id !== myId;
+  function toIntl(n) { const d = (n || '').replace(/[^0-9]/g, ''); return d.startsWith('880') ? d : d.startsWith('0') ? '88' + d : '880' + d; }
+
+  function setupActions() {
+    const contactOnly = P.contact_only, direct = hasDirect();
+    $('addCart').hidden = $('buyNow').hidden = contactOnly;
+    $('qtyRow').hidden = contactOnly;
+    $('contactBtn').hidden = !direct;
+    $('contactBtn').classList.toggle('solo', contactOnly);
+    $('msgBtn').hidden = !canMessage();
+    $('msgBtn').classList.toggle('solo', contactOnly && !direct);
+    $('freeNote').hidden = !(contactOnly && !direct && canMessage());
+    $('featNote').hidden = !(contactOnly && contact && contact.featured);
+    if (contactOnly && !direct && !canMessage()) $('actions').append(h('p', { class: 'short', style: 'grid-column:1/-1', text: P.seller_id === myId ? 'This is your listing. Buyers\'ll message you; see Messages.' : 'Contact options aren\'t available for this listing yet.' }));
+    if (shop && shop.vacation_mode && !contactOnly) { $('addCart').disabled = $('buyNow').disabled = true; }
+    $('safety').hidden = !contactOnly;
+  }
+  function showContact() {
+    if (!hasDirect()) return;
+    const phone = phoneOf();
+    $('contactBox').hidden = false;
+    $('contactName').textContent = shop ? shop.shop_name : 'Seller';
+    $('phoneNum').textContent = phone || '';
+    $('phoneNum').hidden = !phone;
+    $('callBtn').hidden = !contact.phone && !contact.whatsapp;
+    $('callBtn').href = 'tel:+' + toIntl(contact.phone || contact.whatsapp);
+    const wa = contact.whatsapp || contact.phone;
+    const text = `Hi, I'm interested in "${P.title}" on RGBKart: ${location.href}`;
+    $('waBtn').hidden = !wa;
+    if (wa) $('waBtn').href = `https://wa.me/${toIntl(wa)}?text=${encodeURIComponent(text)}`;
+    $('mailBtn').hidden = !contact.email;
+    if (contact.email) $('mailBtn').href = `mailto:${contact.email}?subject=${encodeURIComponent('RGBKart: ' + P.title)}&body=${encodeURIComponent(text)}`;
+    $('contactBtn').hidden = true;
+    $('contactBox').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    drawBar();
+  }
+  $('contactBtn').onclick = showContact;
+
+  // ---------- message the seller on RGBKart ----------
+  function openMsg() {
+    if (!canMessage()) return;
+    $('msgBox').hidden = false; $('msgBtn').hidden = true; $('msgDone').hidden = true;
+    $('msgTo').textContent = shop ? shop.shop_name : 'the seller';
+    $('nameRow').hidden = !myIsGuest;
+    try { $('buyerName').value = $('buyerName').value || localStorage.getItem('rgbkart-name') || ''; } catch (_) {}
+    if (!$('msgText').value) $('msgText').value = `Hi, is "${P.title}" still available?`;
+    $('msgBox').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    ($('nameRow').hidden || $('buyerName').value ? $('msgText') : $('buyerName')).focus();
+  }
+  $('msgBtn').onclick = openMsg;
+  $('msgBox').onsubmit = async e => {
+    e.preventDefault();
+    const body = $('msgText').value.trim(), name = $('buyerName').value.trim();
+    const err = t => { $('msgErr').textContent = t; $('msgErr').hidden = !t; };
+    err('');
+    if (myIsGuest && name.length < 2) return err('Enter your name so the seller knows who is asking.');
+    if (!body) return err('Write a message.');
+    $('msgSend').disabled = true; $('msgSend').textContent = 'Sending…';
+    try {
+      if (!myId) {
+        const { data, error } = await db.auth.signInAnonymously();
+        if (error) throw /anonymous/i.test(error.message) ? new Error('Messaging isn\'t switched on yet. Please try again later.') : error;
+        myId = data.user.id;
+      }
+      try { if (name) localStorage.setItem('rgbkart-name', name); } catch (_) {}
+      const r = await db.rpc('send_message', { p_body: body, p_product: P.id, p_conversation: null, p_name: name || null });
+      if (r.error) throw r.error;
+      $('msgBox').hidden = true; $('msgDone').hidden = false; $('msgText').value = '';
+      $('msgDoneLink').href = 'messages.html?c=' + r.data;
+      $('msgTop').hidden = false;
+      $('msgDone').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } catch (ex) {
+      const m = (ex && ex.message) || '';
+      err(/Failed to fetch|NetworkError/i.test(m) ? 'No internet connection. Try again.' : m || 'Couldn\'t send. Please try again.');
+    } finally { $('msgSend').disabled = false; $('msgSend').textContent = 'Send message'; }
+  };
+
+  // ---------- phone action bar ----------
+  function drawBar() {
+    const bar = $('mbar'); bar.innerHTML = ''; bar.hidden = false;
+    const direct = hasDirect() && $('contactBox').hidden;
+    if (P.contact_only) {
+      if (canMessage()) bar.append(h('button', { type: 'button', class: 'btn ' + (direct ? 'btn-contact' : 'btn-call'), style: 'grid-column:auto', text: '💬 Message', onclick: openMsg }));
+      if (direct) bar.append(h('button', { type: 'button', class: 'btn btn-call', style: 'grid-column:auto', text: '📞 Contact', onclick: showContact }));
+    } else {
+      if (direct) bar.append(h('button', { type: 'button', class: 'btn btn-contact', style: 'grid-column:auto', text: 'Contact', onclick: showContact }));
+      else if (canMessage()) bar.append(h('button', { type: 'button', class: 'btn btn-contact', style: 'grid-column:auto', text: 'Message', onclick: openMsg }));
+      bar.append(h('button', { type: 'button', class: 'btn btn-cart', text: 'Add to cart', disabled: $('addCart').disabled, onclick: () => addToCart(false) }),
+                 h('button', { type: 'button', class: 'btn btn-buy', text: 'Buy now', disabled: $('buyNow').disabled, onclick: () => addToCart(true) }));
+    }
+    if (!bar.children.length) bar.hidden = true;
+  }
+
+  // ---------- cart (saved on this device until checkout is built) ----------
+  const CART_KEY = 'rgbkart-cart';
+  const readCart = () => { try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch (_) { return []; } };
+  const writeCart = c => { try { localStorage.setItem(CART_KEY, JSON.stringify(c)); } catch (_) {} drawCartCount(); };
+  function addToCart(openNow) {
+    if ($('addCart').disabled) return;
+    const qty = Math.max(1, Math.min(Number($('qty').value) || 1, Number($('qty').max) || 99));
+    const base = current || P;
+    const unit = current ? (current.sale_price || current.price) : (onSale(P) ? P.sale_price : P.price);
+    const label = current ? Object.entries(current.opts).map(([a, o]) => { const at = attrs.get(Number(a)); const op = at && at.attribute_options.find(x => x.id === o); return op ? op.value + (at.unit ? ' ' + at.unit : '') : ''; }).join(' / ') : '';
+    const cart = readCart();
+    const key = `${P.id}-${current ? current.id : 0}`;
+    const ex = cart.find(i => i.key === key);
+    if (ex) ex.qty = P.sold_individually ? 1 : ex.qty + qty;
+    else cart.push({ key, product_id: P.id, variation_id: current ? current.id : null, title: P.title, variant: label, qty, unit_price: Number(unit), image: (images.find(i => current && i.id === current.image_id) || images[0] || {}).url || null });
+    writeCart(cart);
+    toast('Added to cart');
+    if (openNow) openCart();
+  }
+  $('addCart').onclick = () => addToCart(false);
+  $('buyNow').onclick = () => addToCart(true);
+
+  function drawCartCount() { const n = readCart().reduce((s, i) => s + i.qty, 0); $('cartCount').hidden = !n; $('cartCount').textContent = n; }
+  function openCart() {
+    const box = $('cartItems'); box.innerHTML = '';
+    const cart = readCart();
+    if (!cart.length) box.append(h('p', { class: 'short', style: 'padding:20px 0', text: 'Your cart is empty.' }));
+    cart.forEach((i, k) => box.append(h('div', { class: 'cart-item' },
+      i.image ? h('img', { src: i.image, alt: '' }) : h('div', { class: 'noimg' }),
+      h('div', { style: 'min-width:0' }, h('div', { class: 't', text: i.title }), h('div', { class: 'm', text: [i.variant, `${i.qty} × ${money(i.unit_price)}`].filter(Boolean).join(' · ') })),
+      h('button', { type: 'button', class: 'x', text: '✕', 'aria-label': 'Remove ' + i.title, onclick: () => { cart.splice(k, 1); writeCart(cart); openCart(); } }))));
+    $('cartTotal').textContent = money(cart.reduce((s, i) => s + i.qty * i.unit_price, 0));
+    $('drawer').hidden = $('scrim').hidden = false;
+  }
+  function closeCart() { $('drawer').hidden = $('scrim').hidden = true; }
+  $('cartBtn').onclick = openCart; $('closeCart').onclick = $('scrim').onclick = closeCart;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCart(); });
+
+  let tt; function toast(t) { $('toast').textContent = t; $('toast').hidden = false; clearTimeout(tt); tt = setTimeout(() => $('toast').hidden = true, 2200); }
+
+  drawCartCount();
+  (async () => {
+    try {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        myId = session.user.id; myIsGuest = !!session.user.is_anonymous;
+        if (!myIsGuest) $('acctLink').textContent = 'My account';
+        $('msgTop').hidden = false;
+        db.rpc('my_unread_count').then(r => { if (!r.error && r.data) { $('msgTopN').hidden = false; $('msgTopN').textContent = r.data; } });
+      }
+    } catch (_) {}
+    load();
+  })();
+</script>
+</body>
+</html>

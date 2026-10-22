@@ -3,110 +3,123 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RGBKart · Red &amp; Green Basket</title>
-<meta name="description" content="RGBKart: a Bangladesh multi-vendor marketplace in English and Bangla. Coming soon.">
-<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
-<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<title>RGBKart</title>
+<meta name="description" content="Buy and sell new and pre-owned products across Bangladesh.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&family=Hind+Siliguri:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="shop.css?v=2">
 <style>
-:root{--band:#00802B;--band-strong:#006622;--yellow:#F5C400;--red:#E30613;--green:#00802B;--bg:#F4F7F5;--surface:#fff;--line:#D9E2DC;--ink:#14211C;--muted:#5A6A62;
- --f-head:"Poppins","Hind Siliguri",system-ui,sans-serif;--f-body:"Roboto","Hind Siliguri",system-ui,sans-serif;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--band:#0E5A28;--band-strong:#0A4420;--bg:#0D1411;--surface:#141E1A;--line:#2A3832;--ink:#E6EEEA;--muted:#9CACA4;--green:#2EBB5C;--red:#FF4D55;color-scheme:dark}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
-.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{background:var(--band);color:#fff;border-bottom:3px solid var(--yellow)}
-header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
-.logo{display:flex;align-items:center;gap:10px}
-.logo img{width:50px;height:50px}
-.logo b{font-family:var(--f-head);font-size:1.4rem;display:block;line-height:1.1}
-.logo b i{font-style:normal;color:#FFD21F}
-.logo small{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
-.lang{display:inline-flex;border:1px solid rgba(255,255,255,.5);border-radius:999px;overflow:hidden}
-.lang button{background:none;border:0;color:#fff;padding:5px 12px;cursor:pointer;font:inherit;font-size:.85rem}
-.lang button[aria-pressed="true"]{background:#fff;color:#006622;font-weight:700}
-main{padding-block:32px}
-h1{font-family:var(--f-head);font-size:1.9rem;margin:0 0 6px;text-wrap:balance}
-.lead{color:var(--muted);margin:0 0 24px;max-width:60ch}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
-.card h2{font-family:var(--f-head);font-size:1.05rem;margin:0 0 12px}
-.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.checks li{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px}
-.dot{flex:none;width:26px;height:26px;border-radius:99px;display:grid;place-items:center;font-weight:700;font-size:.85rem;color:#fff;background:var(--muted)}
-.ok .dot{background:var(--green)} .bad .dot{background:var(--red)} .wait .dot{background:#C98A00}
-.checks b{display:block}
-.checks span.sub{font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
-.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
-.btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:600;border:1.5px solid var(--green);color:var(--green);background:var(--surface)}
-.btn.pri{background:var(--green);color:#fff}
-.btn:hover{background:var(--red);border-color:var(--red);color:#fff}
-footer{color:var(--muted);font-size:.8rem;padding-block:24px}
-:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
+  main { padding-block: 20px 60px; display: grid; gap: 36px; }
+  .hero { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+  .hero-main { border-radius: 18px; padding: 32px; color: #fff; display: grid; gap: 14px; align-content: center; min-height: 240px; overflow: hidden;
+    background: radial-gradient(120% 120% at 100% 0%, #4f8cff 0%, transparent 55%), radial-gradient(90% 120% at 0% 100%, #ff5c7a 0%, transparent 50%), linear-gradient(135deg, #0e2f2c, #0f766e); }
+  .hero-main h1 { font: 600 clamp(1.7rem, 3.6vw, 2.6rem)/1.1 var(--display); margin: 0; max-width: 20ch; text-wrap: balance; }
+  .hero-main p { margin: 0; max-width: 48ch; opacity: .92; }
+  .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; font: 700 .98rem var(--body); text-decoration: none; padding: 11px 18px; border-radius: 10px; transition: background-color .15s; }
+  .btn-light { background: #fff; color: #0e2f2c; } .btn-light:hover { background: #e9f7f4; }
+  .btn-outline { color: #fff; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .7); } .btn-outline:hover { background: rgb(255 255 255 / .12); }
+  .hero-side { display: grid; gap: 14px; }
+  .promo { border-radius: 18px; padding: 20px; text-decoration: none; display: grid; gap: 4px; align-content: end; min-height: 113px; color: #fff; position: relative; transition: transform .18s, filter .18s; }
+  .promo b { font: 600 1.25rem var(--display); } .promo span { opacity: .92; font-size: .92rem; }
+  .promo.deals { background: linear-gradient(135deg, #b91c1c, #f97316); }
+  .promo.used { background: linear-gradient(135deg, #3f51b5, #6b4fd8); }
+  .promo::after { content: "→"; position: absolute; top: 16px; right: 18px; font-size: 1.3rem; opacity: .85; transition: transform .18s; }
+  .promo:hover { transform: translateY(-3px); filter: brightness(1.06); } .promo:hover::after { transform: translateX(4px); }
+  .sell-band { background: var(--surface); border: 1.5px solid var(--accent); border-radius: 18px; padding: 22px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .sell-band b { font: 600 1.3rem var(--display); display: block; } .sell-band span { color: var(--muted); }
+  .btn-acc { background: var(--accent); color: var(--accent-fg); } .btn-acc:hover { background: var(--accent-hover); }
 </style>
 </head>
 <body>
-<header><div class="wrap">
- <div class="logo"><img src="assets/logo/rgb-badge-112.png" alt=""><span><b>RGB<i>Kart</i></b><small data-t="tagline">Red &amp; Green Basket</small></span></div>
- <div class="lang" role="group" aria-label="Language"><button data-lang="en" aria-pressed="true">English</button><button data-lang="bn" aria-pressed="false">বাংলা</button></div>
-</div></header>
 <main class="wrap">
- <h1 data-t="title">RGBKart is being built</h1>
- <p class="lead" data-t="lead">A Bangladesh marketplace for independent shops, in English and Bangla. This page checks that the building blocks are connected.</p>
- <section class="card" aria-live="polite">
-  <h2 id="phase">Phase 0 · Setup</h2>
-  <ul class="checks">
-   <li id="c-site" class="ok"><span class="dot">✓</span><span><b data-t="c1">Website published</b><span class="sub" id="c-site-sub">rgbkartdemo.hkmanik.com</span></span></li>
-   <li id="c-cfg" class="wait"><span class="dot">…</span><span><b data-t="c2">Supabase settings added</b><span class="sub" id="c-cfg-sub"></span></span></li>
-   <li id="c-db" class="wait"><span class="dot">…</span><span><b data-t="c3">Database answers</b><span class="sub" id="c-db-sub"></span></span></li>
-  </ul>
-  <div class="row"><a class="btn pri" href="prototype/" data-t="proto">Open the clickable prototype →</a></div>
- </section>
- <footer id="ver"></footer>
+  <section class="hero">
+    <div class="hero-main">
+      <h1>Buy and sell anything, anywhere in Bangladesh</h1>
+      <p>New and pre-owned products from trusted shops and people near you. Every listing is checked by our team.</p>
+      <div class="hero-btns"><a class="btn btn-light" href="browse.html">Start shopping</a><a class="btn btn-outline" href="sell.html">+ Sell an item</a></div>
+    </div>
+    <div class="hero-side">
+      <a class="promo deals" href="browse.html?deals=1"><b>Deals of the Day</b><span>Prices cut for a limited time</span></a>
+      <a class="promo used" href="browse.html?condition=pre_owned"><b>Pre-owned deals</b><span>Phones, laptops and more at second-hand prices</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="catTitle">
+    <div class="sec-head"><div><h2 id="catTitle">Shop by category</h2></div><a href="categories.html">View all</a></div>
+    <div class="grid6" id="cats"></div>
+  </section>
+
+  <div id="sections" style="display:grid;gap:36px"></div>
+
+  <section class="sell-band">
+    <div style="flex:1 1 380px;min-width:0"><b>Have something you don't use?</b><span>Sell it on RGBKart for free. No account needed. Buyers call or WhatsApp you.</span></div>
+    <a class="btn btn-acc" href="sell.html">+ Sell an item</a>
+  </section>
 </main>
-<script src="config.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="shop.js?v=2"></script>
 <script>
-"use strict";
-const T={
- en:{tagline:"Red & Green Basket",title:"RGBKart is being built",lead:"A Bangladesh marketplace for independent shops, in English and Bangla. This page checks that the building blocks are connected.",c1:"Website published",c2:"Supabase settings added",c3:"Database answers",proto:"Open the clickable prototype →",
-  cfgMissing:"Waiting for the Project URL and anon key in config.js",cfgOk:"Project: ",dbWait:"Checking…",dbOk:"Connected. Status row: ",dbNoTable:"Connected, but the status table is missing. Run supabase/migrations/0001_phase0_status.sql in the SQL Editor.",dbFail:"Could not reach the database: ",dbSkip:"Needs the Supabase settings first",built:"Last published "},
- bn:{tagline:"রেড অ্যান্ড গ্রিন বাস্কেট",title:"RGBKart তৈরি হচ্ছে",lead:"স্বতন্ত্র দোকানগুলোর জন্য বাংলাদেশের একটি মার্কেটপ্লেস, ইংরেজি ও বাংলায়। এই পেজ দেখায় মূল অংশগুলো সংযুক্ত হয়েছে কি না।",c1:"ওয়েবসাইট প্রকাশিত",c2:"Supabase সেটিংস যোগ হয়েছে",c3:"ডেটাবেস সাড়া দিচ্ছে",proto:"ক্লিকযোগ্য প্রোটোটাইপ খুলুন →",
-  cfgMissing:"config.js-এ Project URL ও anon key-এর অপেক্ষায়",cfgOk:"প্রজেক্ট: ",dbWait:"যাচাই চলছে…",dbOk:"সংযুক্ত। স্ট্যাটাস: ",dbNoTable:"সংযুক্ত, কিন্তু স্ট্যাটাস টেবিল নেই। SQL Editor-এ supabase/migrations/0001_phase0_status.sql চালান।",dbFail:"ডেটাবেসে পৌঁছানো যায়নি: ",dbSkip:"আগে Supabase সেটিংস দরকার",built:"সর্বশেষ প্রকাশ "}
-};
-let lang="en"; try{lang=localStorage.getItem("rgb_lang")||"en"}catch(e){}
-const state={};
-const cfg=window.RGBKART_CONFIG||{};
-const $=id=>document.getElementById(id);
-function set(id,cls,mark,sub){const li=$(id);li.className=cls;li.querySelector(".dot").textContent=mark;$(id+"-sub").textContent=sub}
-function paint(){
- const t=T[lang]; document.documentElement.lang=lang;
- document.querySelectorAll("[data-t]").forEach(el=>{el.textContent=t[el.dataset.t]});
- document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===lang)));
- $("phase").textContent=cfg.BUILD_PHASE||"Phase 0";
- $("c-site-sub").textContent=location.host||"local file";
- if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){set("c-cfg","wait","…",t.cfgMissing);set("c-db","wait","…",t.dbSkip)}
- else{set("c-cfg","ok","✓",t.cfgOk+cfg.SUPABASE_URL.replace(/^https?:\/\//,""));
-  if(state.db==="ok")set("c-db","ok","✓",t.dbOk+state.detail);
-  else if(state.db==="notable")set("c-db","wait","!",t.dbNoTable);
-  else if(state.db==="fail")set("c-db","bad","✕",t.dbFail+state.detail);
-  else set("c-db","wait","…",t.dbWait)}
- if(state.ver)$("ver").textContent=t.built+state.ver;
-}
-async function checkDb(){
- if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)return;
- try{
-  const r=await fetch(cfg.SUPABASE_URL.replace(/\/$/,"")+"/rest/v1/app_status?select=phase,message&id=eq.1",{headers:{apikey:cfg.SUPABASE_ANON_KEY,Authorization:"Bearer "+cfg.SUPABASE_ANON_KEY}});
-  if(r.status===404||r.status===400){state.db="notable"}
-  else if(!r.ok){state.db="fail";state.detail="HTTP "+r.status}
-  else{const rows=await r.json();if(rows.length){state.db="ok";state.detail=rows[0].phase+" · "+rows[0].message}else{state.db="notable"}}
- }catch(e){state.db="fail";state.detail=e.message}
- paint();
-}
-async function loadVersion(){try{const r=await fetch("version.json",{cache:"no-store"});if(r.ok){const v=await r.json();state.ver=new Date(v.built).toLocaleString(lang==="bn"?"bn-BD":"en-GB")+" · "+String(v.commit).slice(0,7);paint()}}catch(e){}}
-document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>{lang=b.dataset.lang;try{localStorage.setItem("rgb_lang",lang)}catch(e){}paint();loadVersion()}));
-paint(); checkDb(); loadVersion();
+  // Used when the home_sections table hasn't been set up yet
+  const DEFAULT_SECTIONS = [
+    { title: 'Featured Products', subtitle: 'Top picks promoted by our sellers', section_type: 'featured', item_count: 12 },
+    { title: 'Deals of the Day', subtitle: 'Prices cut for a limited time', section_type: 'deals', item_count: 12 },
+    { title: 'New Arrivals', subtitle: 'Fresh listings from across Bangladesh', section_type: 'newest', item_count: 12 },
+    { title: 'Pre-owned Deals', subtitle: 'Quality second-hand items at great prices', section_type: 'pre_owned', item_count: 12 },
+  ];
+  let cats = [];
+  const kids = id => cats.filter(c => (c.parent_id ?? null) === id);
+  const descendants = id => [id, ...kids(id).flatMap(k => descendants(k.id))];
+
+  async function loadCats() {
+    const box = $('cats'); skeletons(box, 12);
+    const r = await db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
+    cats = r.data || [];
+    box.innerHTML = '';
+    cats.filter(c => !c.parent_id).slice(0, 12).forEach((c, i) => box.append(categoryCard(c, i)));
+  }
+
+  function seeAllLink(s) {
+    const cat = cats.find(c => c.id === s.category_id);
+    return { featured: 'browse.html?featured=1', deals: 'browse.html?deals=1', newest: 'browse.html?sort=newest', pre_owned: 'browse.html?condition=pre_owned',
+      free_delivery: 'browse.html?free=1', category: cat ? `browse.html?c=${encodeURIComponent(cat.slug)}` : 'browse.html' }[s.section_type];
+  }
+
+  async function renderSection(s, holder) {
+    const grid = h('div', { class: 'grid6' });
+    const sec = h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: s.title }), s.subtitle && h('p', { text: s.subtitle })), h('a', { href: seeAllLink(s), text: 'View all' })), grid);
+    holder.append(sec);
+    skeletons(grid, Math.min(s.item_count, 6));
+    let q = db.from('products').select(CARD_FIELDS).eq('status', 'approved');
+    const n = s.item_count;
+    if (s.section_type === 'featured') q = q.eq('is_featured', true);
+    if (s.section_type === 'deals') q = q.not('sale_price', 'is', null);
+    if (s.section_type === 'pre_owned') q = q.eq('listing_type', 'pre_owned');
+    if (s.section_type === 'free_delivery') q = q.eq('free_delivery', true);
+    if (s.section_type === 'category') { if (!cats.some(c => c.id === s.category_id)) { sec.remove(); return; } q = q.in('category_id', descendants(s.category_id)); }
+    const r = await q.order('published_at', { ascending: false, nullsFirst: false }).limit(s.section_type === 'deals' ? n * 2 : n);
+    let list = r.data || [];
+    if (s.section_type === 'deals') list = list.filter(saleActive).slice(0, n);
+    if (!list.length) { sec.remove(); return; }       // hide empty sections
+    const shops = await shopsFor(list);
+    grid.innerHTML = '';
+    list.forEach(p => grid.append(card(p, shops)));
+  }
+
+  async function loadSections() {
+    const r = await db.from('home_sections').select('*').eq('is_active', true).order('sort_order');
+    const list = r.error ? DEFAULT_SECTIONS : r.data;
+    const holder = $('sections');
+    // keep the page order stable while sections load in parallel
+    const slots = list.map(() => { const d = h('div'); holder.append(d); return d; });
+    await Promise.all(list.map((s, i) => renderSection(s, slots[i])));
+    if (!holder.querySelector('section')) holder.append(h('div', { class: 'empty', text: 'No products yet. Be the first to sell something!' }));
+  }
+
+  (async () => { db.rpc('expire_featured').then(() => {}, () => {}); await initShell(); await loadCats(); loadSections(); })();
 </script>
 </body>
 </html>

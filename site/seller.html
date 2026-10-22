@@ -1,0 +1,1898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>RGBKart Seller Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: fixed left sidebar (teal, to tell it apart from the indigo admin) + main area; editor is one long form with a sticky action bar */
+  :root {
+    --bg: #f1f5f4; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896;
+    --line: #d7e0de; --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
+    --side: #0e2f2c; --side-2: #08201e; --side-fg: #d3e8e4; --side-muted: #7fa29d; --side-line: #1d4541;
+    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --t-amber: #f5a524; --t-teal: #2dd4bf;
+    --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5;
+    --danger: #b3392f; --danger-soft: #f8e3e0; --info: #3f51b5; --info-soft: #e7e9fb;
+    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e;
+      --line: #263634; --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36;
+      --side: #0b2422; --side-2: #061614; --side-fg: #d3e8e4; --side-muted: #6f9590; --side-line: #18403b;
+      --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17;
+      --danger: #ec7d72; --danger-soft: #3d201d; --info: #9aa8ff; --info-soft: #222746; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); }
+  h1 { font: 600 1.6rem/1.15 var(--display); margin: 0; }
+  h2 { font: 600 1.15rem/1.2 var(--display); margin: 0; }
+  h3 { font: 600 .78rem var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  a { color: var(--accent); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+  label, .lbl { font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: grid; gap: 6px; }
+  .req::after { content: " *"; color: var(--danger); }
+  .check { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 500; color: var(--fg); }
+  .check input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; flex: none; }
+  input[type=text], input[type=number], input[type=url], input[type=date], input[type=search], select, textarea {
+    font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; width: 100%; text-transform: none; letter-spacing: 0; min-width: 0; }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { font-size: .82rem; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .taka { position: relative; }
+  .taka input { padding-left: 28px; }
+  .taka::before { content: "৳"; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+
+  button { font: 600 14px var(--body); border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1px solid transparent; white-space: nowrap; color: inherit;
+    transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s, transform .05s; }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  .primary { background: var(--accent); color: var(--accent-fg); box-shadow: 0 1px 2px rgb(15 118 110 / .25); }
+  .primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgb(15 118 110 / .3); }
+  .ghost { background: var(--surface); color: var(--fg); border-color: var(--line); }
+  .ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .bad { background: transparent; color: var(--danger); border-color: var(--danger); }
+  .bad:hover:not(:disabled) { background: var(--danger); color: #fff; }
+  .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; }
+  .link:hover { text-decoration: underline; }
+  .icon-btn { background: var(--surface); border: 1px solid var(--line); color: var(--muted); padding: 5px 9px; font-size: .85rem; }
+  .icon-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .msg { font-size: .9rem; margin: 0; }
+  .msg.error { color: var(--danger); }
+  .muted { color: var(--muted); }
+
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 600; letter-spacing: .03em; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .chip.draft { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+  .chip.pending, .chip.awaiting_payment { background: var(--warn-soft); color: var(--warn); }
+  .chip.approved, .chip.active { background: var(--good-soft); color: var(--good); }
+  .chip.rejected { background: var(--danger-soft); color: var(--danger); }
+  .chip.archived { background: var(--bg); color: var(--faint); border: 1px dashed var(--line); }
+  .chip.info { background: var(--info-soft); color: var(--info); }
+  .swatch { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgb(0 0 0 / .25); display: inline-block; flex: none; }
+
+  /* Shell */
+  .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100%; }
+  .side { background: linear-gradient(180deg, var(--side), var(--side-2)); color: var(--side-fg); display: flex; flex-direction: column; gap: 4px; padding: 20px 12px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .side-brand { font: 600 1.35rem var(--display); color: #fff; padding: 0 10px 6px; display: flex; align-items: baseline; gap: 8px; }
+  .side-brand span { font: 600 .66rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--t-teal); }
+  .rgb-bar { display: flex; height: 3px; margin: 0 10px 10px; border-radius: 2px; overflow: hidden; }
+  .rgb-bar i { flex: 1; } .rgb-bar i:nth-child(1) { background: var(--t-red); } .rgb-bar i:nth-child(2) { background: var(--t-green); } .rgb-bar i:nth-child(3) { background: var(--t-blue); }
+  .shop-name { padding: 2px 10px 10px; font-size: .88rem; color: #fff; font-weight: 600; overflow-wrap: anywhere; }
+  .shop-name small { display: block; font-weight: 500; color: var(--side-muted); }
+  .nav-group { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--side-muted); padding: 14px 10px 4px; }
+  .nav { --tone: var(--t-teal); display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: var(--side-fg); padding: 8px 10px; border-radius: 7px; font-weight: 500; }
+  .nav svg { width: 17px; height: 17px; flex: none; color: var(--tone); }
+  .nav:hover:not(:disabled) { background: rgb(255 255 255 / .07); color: #fff; }
+  .nav[aria-current="page"] { background: color-mix(in srgb, var(--tone) 22%, transparent); color: #fff; box-shadow: inset 3px 0 0 var(--tone); font-weight: 600; }
+  .nav:disabled { color: var(--side-muted); cursor: default; opacity: 1; }
+  .nav:disabled svg { color: var(--side-muted); }
+  .nav .soon { margin-left: auto; font-size: .66rem; font-weight: 600; color: var(--side-muted); border: 1px solid var(--side-line); border-radius: 4px; padding: 0 5px; }
+  .side-foot { margin-top: auto; border-top: 1px solid var(--side-line); padding: 14px 10px 0; display: grid; gap: 8px; font-size: .85rem; }
+  .side-foot .email { color: #fff; overflow-wrap: anywhere; }
+  .side-foot a { color: var(--t-teal); }
+  .side-foot button { background: transparent; border: 1px solid var(--side-line); color: var(--side-fg); justify-self: start; }
+  .side-foot button:hover { background: var(--t-red); border-color: var(--t-red); color: #fff; }
+  .mobile-bar, .scrim { display: none; }
+  .main { min-width: 0; padding-block: 28px 120px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; align-content: start; }
+  .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .page-head p { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
+  .banner { border-radius: 10px; padding: 12px 16px; font-size: .92rem; display: grid; gap: 4px; }
+  .banner.warn { background: var(--warn-soft); color: var(--warn); }
+  .banner.bad { background: var(--danger-soft); color: var(--danger); }
+  .banner b { color: inherit; }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+    .side { position: fixed; inset: 0 auto 0 0; width: 264px; z-index: 30; transform: translateX(-100%); transition: transform .2s ease; padding-left: max(12px, env(safe-area-inset-left, 0px)); }
+    .shell.open .side { transform: none; }
+    .shell.open .scrim { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .45); z-index: 25; }
+    .mobile-bar { display: flex; align-items: center; gap: 12px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--side); color: #fff; padding-block: 10px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); font: 600 1.1rem var(--display); }
+    .mobile-bar button { background: none; border: 1px solid var(--side-line); color: #fff; padding: 6px 10px; }
+    body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--side); }
+    .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-top: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .side, button { transition: none; } }
+
+  /* Stats + list */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .tile { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--tone, var(--accent)); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+  .tile b { font: 600 1.8rem/1.1 var(--display); font-variant-numeric: tabular-nums; }
+  .tile span { color: var(--muted); font-size: .86rem; }
+  .tone-green { --tone: var(--t-green); } .tone-amber { --tone: var(--t-amber); } .tone-blue { --tone: var(--t-blue); } .tone-red { --tone: var(--t-red); } .tone-teal { --tone: var(--t-teal); }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .toolbar input[type=search] { flex: 1; min-width: 180px; width: auto; }
+  .filters { display: flex; gap: 4px; padding: 3px; background: var(--bg); border: 1px solid var(--line); border-radius: 9px; flex-wrap: wrap; }
+  .filters button { background: none; color: var(--muted); padding: 6px 10px; font-size: .85rem; }
+  .filters button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+  .plist { display: grid; }
+  .prow { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 6px; border-top: 1px solid var(--line); border-radius: 6px; }
+  .prow:first-child { border-top: 0; }
+  .prow:hover { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+  .thumb { width: 64px; height: 64px; border-radius: 8px; background: var(--bg); object-fit: cover; display: grid; place-items: center; color: var(--faint); font-size: .7rem; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .ptitle { font-weight: 600; overflow-wrap: anywhere; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .pmeta { color: var(--muted); font-size: .86rem; overflow-wrap: anywhere; }
+  .price { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--fg); }
+  .price s { color: var(--faint); font-weight: 400; margin-left: 4px; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: end; }
+  @media (max-width: 640px) { .prow { grid-template-columns: 56px minmax(0, 1fr); } .prow .actions { grid-column: 1 / -1; justify-content: start; } .thumb { width: 56px; height: 56px; } }
+  .empty { color: var(--muted); text-align: center; padding: 32px 12px; display: grid; gap: 10px; justify-items: center; }
+
+  /* Editor */
+  .editor { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 18px; align-items: start; }
+  .editor-main, .editor-side { display: grid; gap: 18px; min-width: 0; }
+  .editor-side { position: sticky; top: 16px; }
+  @media (max-width: 1100px) { .editor { grid-template-columns: minmax(0, 1fr); } .editor-side { position: static; } }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  .types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 540px) { .types { grid-template-columns: minmax(0, 1fr); } }
+  .type-card { text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; font-weight: 500; }
+  .type-card b { font-size: 1rem; color: var(--fg); }
+  .type-card span { font-size: .82rem; color: var(--muted); font-weight: 400; white-space: normal; }
+  .type-card:hover { border-color: var(--accent); }
+  .type-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+
+  .choice { display: grid; gap: 8px; }
+  .types.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 540px) { .types.two { grid-template-columns: minmax(0, 1fr); } }
+  .type-card:disabled { opacity: .55; cursor: not-allowed; }
+  .type-card .tag { display: inline-block; margin-left: 6px; font-size: .74rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--t-amber); color: #2a1a00; vertical-align: middle; }
+  .type-card.feat[aria-pressed="true"] { border-color: var(--t-amber); background: color-mix(in srgb, var(--t-amber) 12%, var(--surface)); box-shadow: inset 0 0 0 1px var(--t-amber); }
+  .feat-box { border: 1px solid color-mix(in srgb, var(--t-amber) 55%, var(--line)); background: color-mix(in srgb, var(--t-amber) 7%, var(--surface)); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+  .feat-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: .9rem; }
+  .feat-box li { display: flex; gap: 8px; align-items: baseline; }
+  .feat-box li::before { content: "★"; color: var(--t-amber); flex: none; }
+  .feat-price { font: 600 1.5rem/1 var(--display); font-variant-numeric: tabular-nums; }
+  .feat-price small { font: 500 .9rem var(--body); color: var(--muted); margin-left: 4px; }
+  .plan-pick { display: flex; gap: 8px; flex-wrap: wrap; }
+  .photo-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 700px) { .photo-layout { grid-template-columns: minmax(0, 1fr); } }
+  .photo-col { display: grid; gap: 8px; align-content: start; min-width: 0; }
+  .main-slot { width: 100%; max-width: 220px; }
+  .main-slot .photo, .main-slot .drop { width: 100%; }
+  .more-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 12px; padding: 14px 18px; width: 100%; }
+  .more-toggle > span:first-child { display: grid; gap: 2px; }
+  .more-toggle b { font-size: 1rem; }
+  .more-toggle .hint { white-space: normal; }
+  .more-toggle:hover { border-color: var(--accent); }
+  .more-toggle[aria-expanded="true"] { border-style: solid; border-color: var(--accent); background: var(--accent-soft); }
+  .more-toggle .chev { font-size: 1.1rem; color: var(--muted); transition: transform .15s; }
+  .more-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .ptypes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 1250px) { .ptypes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .ptypes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ptype { text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; font-weight: 500; white-space: normal; }
+  .ptype b { font-size: .95rem; color: var(--fg); }
+  .ptype span { font-size: .78rem; color: var(--muted); font-weight: 400; line-height: 1.35; }
+  .ptype:hover:not(:disabled) { border-color: var(--accent); }
+  .ptype[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+  .ptype:disabled { opacity: .45; cursor: not-allowed; }
+  .kinds { display: flex; gap: 8px; flex-wrap: wrap; }
+  .kind { border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 10px; background: var(--surface); cursor: pointer; }
+  .kind:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .kind:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+  .sub-block { border-top: 1px dashed var(--line); padding-top: 14px; display: grid; gap: 12px; }
+  .tier-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+  .file-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); }
+  .file-row:first-child { border-top: 0; }
+  .file-row .ic { width: 32px; height: 32px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: .7rem; font-weight: 700; text-transform: uppercase; }
+  .file-list { border: 1px solid var(--line); border-radius: 10px; display: grid; }
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); overflow-x: auto; margin: -4px -4px 0; }
+  .tabs button { background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--muted); padding: 9px 12px; font-size: .9rem; }
+  .tabs button:hover { color: var(--fg); }
+  .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+  .photo { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo .bar { position: absolute; inset: auto 0 0; display: flex; justify-content: space-between; gap: 2px; padding: 4px; background: linear-gradient(transparent, rgb(0 0 0 / .55)); }
+  .photo .bar button { background: rgb(255 255 255 / .92); color: #222; border: 0; padding: 2px 7px; font-size: .78rem; }
+  .photo .bar button:hover { background: #fff; color: var(--accent); }
+  .photo .main-tag { position: absolute; top: 6px; left: 6px; background: var(--accent); color: var(--accent-fg); font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+  .photo .new-tag { position: absolute; top: 6px; right: 6px; background: var(--t-amber); color: #2a1a00; font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+  .drop { border: 2px dashed var(--line); border-radius: 10px; aspect-ratio: 1; display: grid; place-content: center; text-align: center; gap: 4px; color: var(--muted); font-size: .85rem; cursor: pointer; background: var(--bg); padding: 8px; }
+  .drop:hover, .drop.over { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .drop b { font-size: 1.6rem; line-height: 1; }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .opt { background: var(--surface); border: 1px solid var(--line); color: var(--fg); border-radius: 999px; padding: 5px 11px; font-weight: 500; font-size: .86rem; display: inline-flex; align-items: center; gap: 6px; }
+  .opt:hover { border-color: var(--accent); }
+  .opt[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .attr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+  .attr-grid .wide { grid-column: 1 / -1; }
+  .attr-grid label { align-content: start; }
+  @media (max-width: 640px) { .attr-grid { grid-template-columns: minmax(0, 1fr); } }
+  .from { font-weight: 400; color: var(--faint); text-transform: none; letter-spacing: 0; }
+
+  .var-attr { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th { text-align: left; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--bg); }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  td input, td select { padding: 6px 8px; min-width: 84px; }
+  td input[type=number] { min-width: 108px; }
+  td.combo { font-weight: 600; white-space: nowrap; }
+  tr.off td { opacity: .5; }
+  .bulk { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  .bulk label { min-width: 120px; flex: 1; }
+
+  .pick-list { border: 1px solid var(--line); border-radius: 10px; max-height: 220px; overflow-y: auto; display: grid; }
+  .pick-list .check { padding: 8px 12px; border-top: 1px solid var(--line); }
+  .pick-list .check:first-child { border-top: 0; }
+
+  .actionbar { position: fixed; left: 240px; right: 0; bottom: 0; z-index: 15; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px rgb(0 0 0 / .06);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-block: 12px max(12px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); }
+  .actionbar .spacer { flex: 1; }
+  .actionbar .msg { flex-basis: 100%; }
+  @media (max-width: 860px) { .actionbar { left: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+
+  /* Shop settings */
+  .shop-preview { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .shop-banner { aspect-ratio: 4 / 1; max-width: 100%; background: linear-gradient(120deg, #0f766e, #4f8cff 55%, #ff5c7a); background-size: cover; background-position: center; position: relative; }
+  .shop-head { display: flex; gap: 14px; align-items: end; padding: 0 18px 16px; margin-top: -36px; position: relative; flex-wrap: wrap; }
+  .shop-logo { width: 84px; height: 84px; border-radius: 16px; border: 4px solid var(--surface); background: var(--accent-soft); display: grid; place-items: center; font: 600 1.8rem var(--display); color: var(--accent); overflow: hidden; flex: none; box-shadow: 0 2px 8px rgb(0 0 0 / .12); }
+  .shop-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .shop-head .nm { font: 600 1.25rem var(--display); overflow-wrap: anywhere; }
+  .shop-head .tg { color: var(--muted); font-size: .9rem; }
+  .img-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .img-row .prev { width: 96px; height: 96px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); overflow: hidden; display: grid; place-items: center; color: var(--faint); font-size: .75rem; flex: none; }
+  .img-row .prev.wide { width: 240px; max-width: 100%; height: 60px; border-radius: 8px; }
+  .img-row .prev img { width: 100%; height: 100%; object-fit: cover; }
+  .addr { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--bg); }
+  .addr span { padding: 9px 4px 9px 12px; color: var(--muted); white-space: nowrap; font-size: .92rem; display: flex; align-items: center; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .addr input { border: 0 !important; border-radius: 0 !important; padding-left: 2px !important; }
+  .switch-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+  .toast { position: fixed; left: 50%; bottom: max(84px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 60; box-shadow: 0 6px 20px rgb(0 0 0 / .2); max-width: calc(100vw - 32px); }
+  .gate { min-height: 100%; display: grid; place-content: center; padding: 40px 16px; }
+  .gate .card { width: min(440px, calc(100vw - 32px)); }
+</style>
+</head>
+<body>
+
+<!-- Shown while checking sign-in, or when this page isn't for this account -->
+<div class="gate" id="gate">
+  <div class="card">
+    <h1>RGBKart <span style="font:600 .75rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)">Seller Center</span></h1>
+    <p class="msg" id="gateMsg">Checking your account…</p>
+    <a href="login.html" id="gateLink" hidden>Go to sign in</a>
+  </div>
+</div>
+
+<div class="shell" id="shell" hidden>
+  <div class="mobile-bar">
+    <button type="button" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+    <span id="mobileTitle">My products</span>
+  </div>
+  <div class="scrim" id="scrim"></div>
+
+  <nav class="side" id="side" aria-label="Seller menu">
+    <div class="side-brand">RGBKart <span>Seller</span></div>
+    <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="shop-name" id="shopName"></div>
+
+    <div class="nav-group">Catalog</div>
+    <button class="nav" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>My products</button>
+    <button class="nav" data-view="new" id="navNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add product</button>
+    <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured requests</button>
+
+    <div class="nav-group">Selling</div>
+    <a class="nav tone-blue" href="messages.html" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>Messages<span id="navMsg" hidden style="margin-left:auto;background:#e8590c;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></a>
+    <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders<span class="soon">4.2</span></button>
+    <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Shop page<span class="soon">1.8</span></button>
+    <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payouts<span class="soon">5.3</span></button>
+
+    <div class="nav-group">Settings</div>
+    <button class="nav tone-blue" data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Shop settings</button>
+
+    <div class="side-foot">
+      <span class="email" id="meEmail"></span>
+      <a href="index.html">Back to the shop</a>
+      <button id="signOut" type="button">Sign out</button>
+    </div>
+  </nav>
+
+  <main class="main" id="main">
+    <div class="banner warn" id="pendingBanner" hidden><b>Your shop is waiting for approval.</b>You can add products once the RGBKart team approves your shop. This usually takes 1–2 working days.</div>
+    <div class="banner bad" id="rejectedBanner" hidden><b>Your shop wasn't approved.</b>Contact RGBKart support to find out why and what to change.</div>
+
+    <!-- ===== Product list ===== -->
+    <section data-page="products">
+      <div class="page-head">
+        <div><h1>My products</h1><p>Everything you sell on RGBKart. New products are checked by our team before shoppers can see them.</p></div>
+        <button class="primary need-approved" type="button" id="addBtn">+ Add product</button>
+      </div>
+      <div class="tiles" style="margin-top:16px">
+        <div class="tile tone-green"><b id="sLive">0</b><span>Live on RGBKart</span></div>
+        <div class="tile tone-amber"><b id="sPending">0</b><span>Waiting for review</span></div>
+        <div class="tile tone-blue"><b id="sDraft">0</b><span>Drafts</span></div>
+        <div class="tile tone-red"><b id="sLow">0</b><span>Low or out of stock</span></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="toolbar">
+          <div class="filters" id="statusFilter">
+            <button type="button" data-s="all" aria-pressed="true">All</button>
+            <button type="button" data-s="draft" aria-pressed="false">Drafts</button>
+            <button type="button" data-s="pending" aria-pressed="false">In review</button>
+            <button type="button" data-s="approved" aria-pressed="false">Live</button>
+            <button type="button" data-s="rejected" aria-pressed="false">Rejected</button>
+            <button type="button" data-s="archived" aria-pressed="false">Archived</button>
+          </div>
+          <input type="search" id="pSearch" placeholder="Search by name, code or tag">
+        </div>
+        <div class="plist" id="plist"></div>
+      </div>
+    </section>
+
+    <!-- ===== Featured requests ===== -->
+    <section data-page="featured">
+      <div class="page-head"><div><h1>Featured requests</h1><p>Products you asked to feature on the home page or at the top of their category. Payment opens once RGBKart sets the rates.</p></div></div>
+      <div class="card" style="margin-top:16px"><div class="plist" id="flist"></div></div>
+    </section>
+
+    <!-- ===== Shop settings ===== -->
+    <form data-page="settings" id="settingsForm" novalidate>
+      <div class="page-head"><div><h1>Shop settings</h1><p>How your shop looks to shoppers and how they can reach you.</p></div></div>
+      <div class="editor" style="margin-top:16px">
+        <div class="editor-main">
+          <div class="card">
+            <h2>Branding</h2>
+            <div class="img-row">
+              <div class="prev" id="logoPrev">No logo</div>
+              <div style="display:grid;gap:6px">
+                <span class="lbl">Shop logo</span>
+                <span class="hint">Square, at least 400 × 400 px. JPG, PNG or WebP.</span>
+                <div class="toolbar"><button type="button" class="ghost" id="logoPick">Upload logo</button><button type="button" class="icon-btn" id="logoRemove" hidden>Remove</button></div>
+              </div>
+            </div>
+            <div class="img-row">
+              <div class="prev wide" id="bannerPrev">No banner</div>
+              <div style="display:grid;gap:6px">
+                <span class="lbl">Shop banner</span>
+                <span class="hint">Wide, about 1600 × 400 px (4 : 1). Shown across the top of your shop page.</span>
+                <div class="toolbar"><button type="button" class="ghost" id="bannerPick">Upload banner</button><button type="button" class="icon-btn" id="bannerRemove" hidden>Remove</button></div>
+              </div>
+            </div>
+            <input type="file" id="logoFile" accept="image/jpeg,image/png,image/webp" hidden>
+            <input type="file" id="bannerFile" accept="image/jpeg,image/png,image/webp" hidden>
+            <div class="grid2">
+              <label><span class="req">Shop name</span><input id="sName" type="text" maxlength="80"></label>
+              <label>Tagline<input id="sTagline" type="text" maxlength="120" placeholder="e.g. Original gadgets with warranty"></label>
+            </div>
+            <label><span class="req">Shop web address</span>
+              <div class="addr"><span>rgbkart.com/shop/</span><input id="sSlug" type="text" maxlength="60"></div>
+              <span class="hint">Lowercase letters, numbers and dashes. Changing it breaks links you've already shared.</span></label>
+            <label>About your shop<textarea id="sAbout" maxlength="1000" placeholder="What you sell, since when, why buy from you"></textarea></label>
+          </div>
+
+          <div class="card">
+            <h2>Contact</h2>
+            <p class="hint" style="margin:0">Shown on your shop page. Leave blank to keep private.</p>
+            <div class="grid3">
+              <label>Phone<input id="sPhone" type="text" inputmode="tel" placeholder="01XXXXXXXXX"></label>
+              <label>WhatsApp<input id="sWhatsapp" type="text" inputmode="tel" placeholder="01XXXXXXXXX"></label>
+              <label>Email<input id="sEmail" type="text" inputmode="email" placeholder="shop@example.com"></label>
+            </div>
+            <div class="grid2">
+              <label><span class="req">Business address</span><input id="sAddress" type="text" maxlength="200"></label>
+              <label><span class="req">District</span><select id="sDistrict"></select></label>
+            </div>
+            <label>Trade licence no. <span class="from">(only RGBKart sees this)</span><input id="sLicence" type="text" maxlength="60"></label>
+          </div>
+
+          <div class="card">
+            <h2>Social links</h2>
+            <div class="grid2">
+              <label>Facebook page<input id="sFacebook" type="url" placeholder="https://facebook.com/yourshop"></label>
+              <label>Instagram<input id="sInstagram" type="url" placeholder="https://instagram.com/yourshop"></label>
+              <label>YouTube<input id="sYoutube" type="url" placeholder="https://youtube.com/@yourshop"></label>
+              <label>TikTok<input id="sTiktok" type="url" placeholder="https://tiktok.com/@yourshop"></label>
+            </div>
+            <label>Website<input id="sWebsite" type="url" placeholder="https://"></label>
+          </div>
+
+        </div>
+
+        <div class="editor-side">
+          <div class="card">
+            <h2>Preview</h2>
+            <div class="shop-preview">
+              <div class="shop-banner" id="pvBanner"></div>
+              <div class="shop-head">
+                <div class="shop-logo" id="pvLogo"></div>
+                <div style="min-width:0;padding-bottom:2px"><div class="nm" id="pvName"></div><div class="tg" id="pvTag"></div></div>
+              </div>
+            </div>
+            <span class="hint" id="pvAddr"></span>
+          </div>
+          <div class="card">
+            <div class="switch-row"><h2>Vacation mode</h2><label class="check"><input id="sVacation" type="checkbox"> On</label></div>
+            <p class="hint" style="margin:0">Pause your shop while you're away. Shoppers can still see your products but can't order.</p>
+            <label id="vacMsgWrap" hidden>Message to shoppers<textarea id="sVacMsg" maxlength="300" style="min-height:70px" placeholder="Closed for Eid until 15 April. Orders resume after."></textarea></label>
+          </div>
+        </div>
+      </div>
+      <div class="actionbar" id="settingsBar">
+        <span class="hint">Changes show on your shop page right away.</span>
+        <span class="spacer"></span>
+        <button type="submit" class="primary" id="settingsSave">Save settings</button>
+        <p class="msg error" id="settingsMsg" role="alert" hidden></p>
+      </div>
+    </form>
+
+    <!-- ===== Product editor ===== -->
+    <form data-page="editor" id="editor" novalidate>
+      <div class="page-head">
+        <div>
+          <button type="button" class="link" id="backBtn">← My products</button>
+          <h1 id="edTitle" style="margin-top:6px">Add product</h1>
+        </div>
+        <span class="chip draft" id="edStatus">Draft</span>
+      </div>
+      <div class="banner bad" id="edRejected" hidden style="margin-top:12px"></div>
+
+      <div class="editor" style="margin-top:16px">
+        <div class="editor-main">
+          <!-- Listing type -->
+          <div class="card">
+            <h2>What are you listing?</h2>
+            <div class="choice">
+              <span class="lbl">Product</span>
+              <div class="types two" id="typeCards" role="group" aria-label="Product condition">
+                <button type="button" class="type-card" data-type="new"><b>New</b><span>Unused, in original packaging</span></button>
+                <button type="button" class="type-card" data-type="pre_owned"><b>Pre-owned</b><span>Used or refurbished</span></button>
+              </div>
+            </div>
+            <div class="choice">
+              <span class="lbl">Listing</span>
+              <div class="types two" id="listCards" role="group" aria-label="Listing type">
+                <button type="button" class="type-card" data-list="free"><b>Free listing</b><span>No charge. Shown in its category and in search.</span></button>
+                <button type="button" class="type-card feat" data-list="featured" id="featCardBtn"><b>Featured<span class="tag" id="featTag"></span></b><span id="featCardSub">Extra visibility for a fixed fee</span></button>
+              </div>
+              <div class="feat-box" id="featBox" hidden>
+                <div class="plan-pick" id="planPick"></div>
+                <div class="feat-price" id="featPrice"></div>
+                <ul id="featBenefits"></ul>
+                <p class="hint" style="margin:0" id="featNote"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category + basics -->
+          <div class="card">
+            <h2>Basic information</h2>
+            <label><span class="req">Category</span>
+              <select id="fCategory"></select>
+              <span class="hint">The category decides which details you'll be asked for below.</span>
+            </label>
+            <label><span class="req">Product name</span>
+              <input id="fTitle" type="text" maxlength="200" placeholder="e.g. Samsung Galaxy A55 5G, 8GB/256GB">
+            </label>
+            <div class="grid2">
+              <label id="basicPriceWrap"><span class="req">Price</span><span class="taka"><input id="fPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
+              <label id="basicStockWrap"><span class="req">Quantity in stock</span><input id="fStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label>
+            </div>
+            <p class="hint" id="basicVarNote" hidden style="margin:-4px 0 0">Price and stock are set for each version under More options → Variations.</p>
+            <label>Description <span class="from">(optional)</span>
+              <textarea id="fDesc" maxlength="5000" style="min-height:140px" placeholder="Features, what's in the box, size guide, condition notes…"></textarea>
+              <span class="hint" id="descCount">0 / 5000</span>
+            </label>
+          </div>
+
+          <!-- Photos -->
+          <div class="card">
+            <h2>Photos</h2>
+            <p class="hint" style="margin:0">JPG, PNG or WebP. Large photos are resized automatically. Use a clean, bright background.</p>
+            <div class="photo-layout">
+              <div class="photo-col">
+                <span class="lbl"><span class="req">Main image</span></span>
+                <span class="hint">The photo shoppers see first in search and on the product page. Square works best.</span>
+                <div class="main-slot" id="mainPhoto"></div>
+              </div>
+              <div class="photo-col">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span class="lbl">Gallery images</span><span class="hint" id="photoCount">0 / 7</span></div>
+                <span class="hint">Up to 7 more: other angles, close-ups, size, what's in the box.</span>
+                <div class="photos" id="photos"></div>
+              </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple hidden>
+            <input type="file" id="mainInput" accept="image/jpeg,image/png,image/webp" hidden>
+          </div>
+
+          <button type="button" class="more-toggle" id="moreBtn" aria-expanded="false" aria-controls="moreOptions">
+            <span><b>More options</b><span class="hint">Sale price, versions (size/colour), digital files, services, gift cards, wholesale, pre-order, shipping and more</span></span>
+            <span class="chev" aria-hidden="true">▾</span>
+          </button>
+          <div id="moreOptions" hidden style="display:grid;gap:18px">
+          <div class="card">
+            <h2>Extra details</h2>
+            <label>Short description
+              <textarea id="fShort" maxlength="600" style="min-height:64px" placeholder="1–3 lines shown next to the photos"></textarea>
+            </label>
+            <div class="grid2">
+              <label>Tags
+                <input id="fTags" type="text" placeholder="gaming, rgb, wireless">
+                <span class="hint">Separate with commas. Helps shoppers find it in search.</span>
+              </label>
+              <label>Video link (optional)
+                <input id="fVideo" type="url" placeholder="https://youtube.com/…">
+              </label>
+            </div>
+          </div>
+          <!-- Product data (WooCommerce-style tabs) -->
+          <div class="card">
+            <h2>Product data</h2>
+            <div class="choice">
+              <span class="lbl">Product type</span>
+              <div class="ptypes" id="ptypes" role="radiogroup" aria-label="Product type">
+                <button type="button" role="radio" class="ptype" data-kind="simple"><b>Simple</b><span>One version, one price</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="variable"><b>Variable</b><span>Sizes, colours… each with its own price</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="downloadable"><b>Downloadable</b><span>Digital file: eBook, software</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="service"><b>Service</b><span>Repair, installation, tuition</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="gift"><b>Gift card</b><span>Voucher worth ৳X in your shop</span></button>
+              </div>
+            </div>
+            <!-- internal state driven by the buttons above -->
+            <select id="fProductType" hidden><option value="simple">Simple</option><option value="variable">Variable</option></select>
+            <input id="kDownload" type="checkbox" hidden><input id="kService" type="checkbox" hidden><input id="kGift" type="checkbox" hidden>
+            <div class="tabs" role="tablist" id="dataTabs">
+              <button type="button" role="tab" data-tab="pricing" aria-selected="true">Pricing</button>
+              <button type="button" role="tab" data-tab="inventory" aria-selected="false">Inventory</button>
+              <button type="button" role="tab" data-tab="variations" aria-selected="false" id="tabVariations">Variations</button>
+              <button type="button" role="tab" data-tab="downloads" aria-selected="false" id="tabDownloads" hidden>Downloads</button>
+              <button type="button" role="tab" data-tab="service" aria-selected="false" id="tabService" hidden>Service</button>
+              <button type="button" role="tab" data-tab="shipping" aria-selected="false" id="tabShipping">Shipping</button>
+              <button type="button" role="tab" data-tab="linked" aria-selected="false">Linked products</button>
+              <button type="button" role="tab" data-tab="advanced" aria-selected="false">Advanced</button>
+            </div>
+
+            <div data-panel="pricing" style="display:grid;gap:14px">
+              <p class="hint" id="freeNote" hidden style="margin:0">Free items are listed at ৳0. Buyers only pay for delivery, unless you offer free delivery.</p>
+              <p class="hint" id="varPriceNote" hidden style="margin:0">Each variation has its own price. Set them on the Variations tab.</p>
+              <div class="grid2" id="priceFields">
+                <label>Sale price<span class="taka"><input id="fSale" type="number" min="1" step="1" inputmode="numeric" placeholder="Optional"></span>
+                  <span class="hint" id="saleHint"></span></label>
+              </div>
+              <div class="grid2" id="saleDates">
+                <label>Sale starts <input id="fSaleFrom" type="date"></label>
+                <label>Sale ends <input id="fSaleTo" type="date"></label>
+              </div>
+              <div class="sub-block" id="giftBlock" hidden>
+                <span class="lbl">Gift card</span>
+                <p class="hint" style="margin:0">The price is the card's value. Buyers get a code they can spend in your shop.</p>
+                <label style="max-width:280px">Valid for
+                  <select id="fGiftValid"><option value="180">6 months</option><option value="365" selected>1 year</option><option value="730">2 years</option><option value="1095">3 years</option></select></label>
+              </div>
+              <div class="sub-block" id="tierBlock">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span class="lbl" style="display:block">Wholesale price <span class="from">(optional)</span></span><button type="button" class="link" id="addTier">+ Add price break</button></div>
+                <p class="hint" style="margin:0">Lower price per piece when buyers order more. For example: 10 or more at ৳450 each.</p>
+                <div id="tiers" style="display:grid;gap:8px"></div>
+              </div>
+              <div class="sub-block" id="codBlock">
+                <label class="check"><input id="fCod" type="checkbox" checked> Allow cash on delivery</label>
+                <span class="hint" style="margin-top:-6px">Turn off for expensive, custom-made or easily misused items. Buyers will pay online instead.</span>
+              </div>
+            </div>
+
+            <div data-panel="inventory" style="display:grid;gap:14px" hidden>
+              <label>Product code (SKU) <input id="fSku" type="text" maxlength="60" placeholder="Your own code, e.g. SAM-A55-256-BLK"></label>
+              <label class="check" id="manageWrap"><input id="fManage" type="checkbox" checked> Track stock quantity</label>
+              <div class="grid2" id="stockFields">
+                <label>Low-stock alert at <input id="fLow" type="number" min="0" step="1" placeholder="e.g. 2"></label>
+                <label>When out of stock
+                  <select id="fBackorders">
+                    <option value="no">Stop selling</option>
+                    <option value="notify">Take orders, tell the buyer</option>
+                    <option value="yes">Keep taking orders</option>
+                  </select></label>
+              </div>
+              <label id="stockStatusWrap" hidden>Stock status
+                <select id="fStockStatus"><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="on_backorder">Available to order</option></select></label>
+              <label class="check"><input id="fSoldInd" type="checkbox"> Limit to 1 per order</label>
+              <div class="sub-block" id="preBlock">
+                <label class="check"><input id="fPre" type="checkbox"> Take pre-orders <span class="from">· sell before stock arrives</span></label>
+                <div class="grid2" id="preFields" hidden>
+                  <label><span class="req">Expected to ship on</span><input id="fPreDate" type="date"></label>
+                  <label>Advance payment
+                    <select id="fPreAdv"><option value="0">None (pay on delivery)</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="50">50%</option><option value="100">Full payment</option></select></label>
+                </div>
+              </div>
+              <p class="hint" id="varStockNote" hidden style="margin:0">Each variation has its own stock. Set it on the Variations tab.</p>
+            </div>
+
+            <div data-panel="variations" style="display:grid;gap:14px" hidden>
+              <p class="hint" style="margin:0" id="varIntro">Choose what changes between versions (for example Colour and Storage), tick the options you sell, then create the combinations.</p>
+              <div id="varAttrs" style="display:grid;gap:10px"></div>
+              <div class="toolbar"><button type="button" class="ghost" id="genVars">Create combinations</button><span class="hint" id="varCount"></span></div>
+              <div class="bulk" id="bulkBar" hidden>
+                <label>Price for all<span class="taka"><input id="bulkPrice" type="number" min="1" step="1"></span></label>
+                <label>Stock for all<input id="bulkStock" type="number" min="0" step="1"></label>
+                <button type="button" class="ghost" id="bulkApply">Apply to all</button>
+              </div>
+              <div class="table-wrap" id="varTableWrap" hidden>
+                <table><thead><tr><th>On</th><th>Version</th><th>Price ৳</th><th>Sale ৳</th><th>Stock</th><th>SKU</th><th>Photo</th></tr></thead><tbody id="varRows"></tbody></table>
+              </div>
+            </div>
+
+            <div data-panel="downloads" style="display:grid;gap:14px" hidden>
+              <p class="hint" style="margin:0">Files buyers download after paying, such as a PDF, ZIP or MP3. Up to 5 files, 50 MB each. Files stay private: only buyers get a link.</p>
+              <div class="file-list" id="fileList"></div>
+              <div class="toolbar"><button type="button" class="ghost" id="addFileBtn">+ Upload file</button><span class="hint" id="fileCount"></span></div>
+              <input type="file" id="dlInput" multiple hidden>
+              <div class="grid2">
+                <label>Download limit
+                  <select id="fDlLimit"><option value="">Unlimited</option><option value="1">1 time</option><option value="3">3 times</option><option value="5">5 times</option><option value="10">10 times</option></select></label>
+                <label>Link works for
+                  <select id="fDlExpiry"><option value="">Never expires</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label>
+              </div>
+            </div>
+
+            <div data-panel="service" style="display:grid;gap:14px" hidden>
+              <div class="grid3">
+                <label><span class="req">Where</span>
+                  <select id="fSvcMode"><option value="">Choose…</option><option value="at_customer">At the customer's place</option><option value="at_shop">At my shop</option><option value="online">Online / remote</option></select></label>
+                <label>Takes about
+                  <select id="fSvcDur"><option value="">Choose…</option><option value="30_min">30 minutes</option><option value="1_hour">1 hour</option><option value="2_hours">2 hours</option><option value="half_day">Half a day</option><option value="full_day">A full day</option><option value="multi_day">Several days</option></select></label>
+                <label>Service area
+                  <select id="fSvcArea"><option value="all_bangladesh">All of Bangladesh</option><option value="inside_dhaka">Inside Dhaka only</option><option value="outside_dhaka">Outside Dhaka only</option></select></label>
+              </div>
+              <p class="hint" style="margin:0">Buyers book and pay. You contact them to fix the time. Booking slots come later.</p>
+            </div>
+
+            <div data-panel="shipping" style="display:grid;gap:14px" hidden>
+              <div class="grid4">
+                <label>Weight (kg)<input id="fWeight" type="number" min="0" step="0.01" placeholder="0.5"></label>
+                <label>Length (cm)<input id="fLen" type="number" min="0" step="0.1"></label>
+                <label>Width (cm)<input id="fWid" type="number" min="0" step="0.1"></label>
+                <label>Height (cm)<input id="fHei" type="number" min="0" step="0.1"></label>
+              </div>
+              <div class="grid3">
+                <label>Parcel type
+                  <select id="fShipClass">
+                    <option value="standard">Standard parcel</option><option value="small">Small / document</option>
+                    <option value="large">Large item</option><option value="heavy">Heavy item</option><option value="fragile">Fragile</option>
+                  </select></label>
+                <label>Ready to ship in
+                  <select id="fDelivery">
+                    <option value="same_day">Same day</option><option value="1_2_days">1–2 days</option><option value="3_5_days">3–5 days</option>
+                    <option value="6_10_days">6–10 days</option>
+                  </select></label>
+                <label>Delivers to
+                  <select id="fShipsTo"><option value="all_bangladesh">All of Bangladesh</option><option value="inside_dhaka">Inside Dhaka only</option><option value="outside_dhaka">Outside Dhaka only</option></select></label>
+              </div>
+              <label class="check"><input id="fFreeDel" type="checkbox"> Free delivery (you pay the delivery charge)</label>
+            </div>
+
+            <div data-panel="linked" style="display:grid;gap:14px" hidden>
+              <p class="hint" style="margin:0">Suggest your other products to shoppers.</p>
+              <div class="grid2">
+                <div style="display:grid;gap:6px"><span class="lbl">You may also like <span class="from">(better or similar items)</span></span>
+                  <input type="search" id="upSearch" placeholder="Search your products"><div class="pick-list" id="upList"></div></div>
+                <div style="display:grid;gap:6px"><span class="lbl">Frequently bought together <span class="from">(add-ons)</span></span>
+                  <input type="search" id="crossSearch" placeholder="Search your products"><div class="pick-list" id="crossList"></div></div>
+              </div>
+            </div>
+
+            <div data-panel="advanced" style="display:grid;gap:14px" hidden>
+              <label>Return policy
+                <select id="fReturn">
+                  <option value="no_returns">No returns</option><option value="3_days">3-day return</option><option value="7_days">7-day return</option>
+                  <option value="15_days">15-day return</option><option value="30_days">30-day return</option>
+                </select></label>
+              <label>Note to buyer after purchase (optional)
+                <textarea id="fNote" maxlength="1000" placeholder="e.g. Keep the box for warranty claims. Call 017XXXXXXXX for setup help."></textarea></label>
+            </div>
+          </div>
+
+          </div>
+          <!-- Category attributes (hidden: kept only so Condition is saved) -->
+          <div class="card" id="detailsCard" hidden>
+            <h2>Product details</h2>
+            <p class="hint" style="margin:0" id="detailsHint">Choose a category first.</p>
+            <div class="attr-grid" id="attrFields"></div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="editor-side">
+          <div class="card">
+            <h2>Summary</h2>
+            <div id="summary" style="display:grid;gap:8px;font-size:.9rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actionbar" id="actionbar">
+        <span class="chip draft" id="barStatus">Draft</span>
+        <span class="hint" id="barHint"></span>
+        <span class="spacer"></span>
+        <button type="button" class="ghost" id="saveBtn">Save draft</button>
+        <button type="button" class="primary" id="submitBtn">Send for review</button>
+        <p class="msg error" id="edMsg" role="alert" hidden></p>
+      </div>
+    </form>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const BUCKET = 'product-images';
+  const MAX_GALLERY = 7;
+  const MAX_PHOTOS = 1 + MAX_GALLERY;   // main image + gallery
+
+  const $ = id => document.getElementById(id);
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null || v === false) continue;
+      if (k.startsWith('on')) el[k] = v;
+      else if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'value') el.value = v;
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  }
+  const money = n => '৳' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  const STATUS = { draft: 'Draft', pending: 'In review', approved: 'Live', rejected: 'Rejected', archived: 'Archived' };
+  const FEAT = { awaiting_payment: 'Awaiting payment', payment_submitted: 'Payment being checked', active: 'Featured now', expired: 'Ended', cancelled: 'Cancelled', rejected: 'Rejected' };
+  const PLACE = { home: 'Home page', category: 'Top of category', home_and_category: 'Home page + top of category' };
+  let plans = [];   // Featured plans set by the admin
+
+  let me = null, shop = null;
+  let cats = [], catAttrs = [], attrs = [], attrById = new Map();
+  let products = [], featured = [];
+  let statusFilter = 'all';
+
+  // ===================== Start =====================
+  function gate(text, showLink) { $('gate').hidden = false; $('shell').hidden = true; $('gateMsg').textContent = text; $('gateLink').hidden = !showLink; }
+
+  async function start() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return gate('Please sign in with your seller account first.', true);
+    me = session.user;
+    const { data: profile, error } = await db.from('profiles').select('*, seller_details(*)').eq('id', me.id).maybeSingle();
+    if (error) return gate(friendly(error), false);
+    if (profile && profile.role === 'individual') { location.href = 'sell.html'; return; }
+    if (!profile || profile.role !== 'seller') return gate('Seller Center is for seller accounts. You are signed in as a customer.', true);
+    shop = Array.isArray(profile.seller_details) ? profile.seller_details[0] : profile.seller_details;
+    $('gate').hidden = true; $('shell').hidden = false;
+    $('meEmail').textContent = me.email;
+    $('shopName').innerHTML = '';
+    $('shopName').append(shop ? shop.shop_name : 'My shop', h('small', { text: shop ? ({ pending: 'Waiting for approval', approved: 'Approved shop', rejected: 'Not approved' }[shop.status]) : '' }));
+    db.rpc('my_unread_count').then(r => { if (!r.error && r.data) { $('navMsg').hidden = false; $('navMsg').textContent = r.data; } });
+    const approved = shop && shop.status === 'approved';
+    $('pendingBanner').hidden = !(shop && shop.status === 'pending');
+    $('rejectedBanner').hidden = !(shop && shop.status === 'rejected');
+    document.querySelectorAll('.need-approved').forEach(b => b.disabled = !approved);
+    $('navNew').disabled = !approved;
+    await loadCatalog();
+    await loadProducts();
+    const start = location.hash.slice(1);
+    if (start === 'featured') go('featured');
+    else if (start === 'settings') go('settings');
+    else if (start === 'new' && approved) openEditor(null);
+    else go('products');
+  }
+  db.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') location.href = 'login.html'; });
+  $('signOut').onclick = () => db.auth.signOut();
+
+  async function loadCatalog() {
+    const [c, ca, a] = await Promise.all([
+      db.from('categories').select('id, parent_id, name, slug, sort_order, is_active').order('sort_order').order('name'),
+      db.from('category_attributes').select('*'),
+      db.from('attributes').select('*, attribute_options(*)').order('name'),
+    ]);
+    const err = c.error || ca.error || a.error;
+    if (err) return toast(friendly(err));
+    cats = c.data.filter(x => x.is_active); catAttrs = ca.data;
+    attrs = a.data.map(x => ({ ...x, attribute_options: (x.attribute_options || []).sort((p, q) => p.sort_order - q.sort_order || p.id - q.id) }));
+    attrById = new Map(attrs.map(x => [x.id, x]));
+    const fp = await db.from('featured_plans').select('*').eq('is_active', true).order('sort_order').order('price');
+    plans = fp.error ? [] : (fp.data || []);
+  }
+  const catById = id => cats.find(c => c.id === id);
+  const childrenOf = id => cats.filter(c => (c.parent_id ?? null) === id);
+  function chainOf(id) { const out = []; let c = catById(id); while (c) { out.unshift(c); c = catById(c.parent_id); } return out; }
+  const catPath = id => chainOf(id).map(c => c.name).join(' › ');
+  // Attributes a category asks for, including inherited ones (closest category wins)
+  function effectiveAttrs(catId) {
+    const chain = chainOf(catId).reverse();
+    const seen = new Map();
+    chain.forEach((c, depth) => catAttrs.filter(x => x.category_id === c.id).sort((p, q) => p.sort_order - q.sort_order)
+      .forEach(x => { if (!seen.has(x.attribute_id)) seen.set(x.attribute_id, { attr: attrById.get(x.attribute_id), required: x.is_required, from: depth ? c.name : null, depth }); }));
+    return [...seen.values()].filter(x => x.attr).sort((p, q) => q.depth - p.depth);
+  }
+
+  async function loadProducts() {
+    const [p, f] = await Promise.all([
+      db.from('products').select('*, product_images(id, storage_path, sort_order), product_variations(price, sale_price, stock, is_active)').eq('seller_id', me.id).order('updated_at', { ascending: false }),
+      db.from('featured_requests').select('*').eq('seller_id', me.id).order('created_at', { ascending: false }),
+    ]);
+    if (p.error) return toast(friendly(p.error));
+    products = p.data; featured = f.data || [];
+    drawList(); drawFeatured();
+  }
+  const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  const mainPhoto = p => { const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0]; return im ? photoUrl(im.storage_path) : null; };
+
+  // ===================== Navigation =====================
+  function go(view) {
+    document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
+    document.querySelectorAll('.nav[data-view]').forEach(b => b.dataset.view === (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view) ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+    $('mobileTitle').textContent = { products: 'My products', featured: 'Featured requests', editor: 'Product', settings: 'Shop settings' }[view];
+    if (view === 'settings') loadSettings();
+    try { history.replaceState(null, '', '#' + (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view)); } catch (_) {}
+    setMenu(false); window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => b.dataset.view === 'new' ? openEditor(null) : (b.dataset.view === 'products' ? loadProducts().then(() => go('products')) : go(b.dataset.view)));
+  function setMenu(open) { $('shell').classList.toggle('open', open); $('menuBtn').setAttribute('aria-expanded', open); }
+  $('menuBtn').onclick = () => setMenu(!$('shell').classList.contains('open'));
+  $('scrim').onclick = () => setMenu(false);
+  $('addBtn').onclick = () => openEditor(null);
+  $('backBtn').onclick = () => { loadProducts(); go('products'); };
+
+  // ===================== Product list =====================
+  $('statusFilter').querySelectorAll('button').forEach(b => b.onclick = () => {
+    statusFilter = b.dataset.s;
+    $('statusFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    drawList();
+  });
+  $('pSearch').oninput = drawList;
+
+  function stockOf(p) {
+    if (p.product_type === 'variable') return (p.product_variations || []).filter(v => v.is_active).reduce((s, v) => s + v.stock, 0);
+    return p.manage_stock ? p.stock : null;
+  }
+  function isLow(p) {
+    const s = stockOf(p);
+    if (s == null) return p.stock_status === 'out_of_stock';
+    return s === 0 || (p.low_stock_threshold != null && s <= p.low_stock_threshold);
+  }
+  function priceText(p) {
+    if (p.listing_type === 'free') return h('span', { class: 'price', text: 'Free' });
+    if (p.product_type === 'variable') {
+      const ps = (p.product_variations || []).filter(v => v.is_active).map(v => v.sale_price || v.price);
+      if (!ps.length) return h('span', { class: 'price', text: '—' });
+      const lo = Math.min(...ps), hi = Math.max(...ps);
+      return h('span', { class: 'price', text: lo === hi ? money(lo) : `${money(lo)} – ${money(hi)}` });
+    }
+    return p.sale_price ? h('span', { class: 'price' }, money(p.sale_price), h('s', { text: money(p.price) })) : h('span', { class: 'price', text: money(p.price) });
+  }
+
+  function drawList() {
+    $('sLive').textContent = products.filter(p => p.status === 'approved').length;
+    $('sPending').textContent = products.filter(p => p.status === 'pending').length;
+    $('sDraft').textContent = products.filter(p => p.status === 'draft').length;
+    $('sLow').textContent = products.filter(p => p.status !== 'archived' && isLow(p)).length;
+
+    const q = $('pSearch').value.trim().toLowerCase();
+    const rows = products.filter(p => (statusFilter === 'all' || p.status === statusFilter)
+      && (!q || p.title.toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q) || (p.tags || []).some(t => t.includes(q))));
+    const box = $('plist'); box.innerHTML = '';
+    if (!products.length) {
+      box.append(h('div', { class: 'empty' },
+        h('b', { text: 'No products yet', style: 'color:var(--fg)' }),
+        h('span', { text: shop && shop.status === 'approved' ? 'Add your first product. It takes about 5 minutes.' : 'You can add products once your shop is approved.' }),
+        shop && shop.status === 'approved' && h('button', { type: 'button', class: 'primary', text: '+ Add product', onclick: () => openEditor(null) })));
+      return;
+    }
+    if (!rows.length) { box.append(h('p', { class: 'empty', text: 'No products match.' })); return; }
+    for (const p of rows) {
+      const url = mainPhoto(p);
+      const s = stockOf(p);
+      const fr = featured.find(f => f.product_id === p.id && ['awaiting_payment', 'payment_submitted', 'active'].includes(f.status));
+      const canSubmit = ['draft', 'rejected'].includes(p.status);
+      box.append(h('div', { class: 'prow' },
+        h('div', { class: 'thumb' }, url ? h('img', { src: url, alt: '', loading: 'lazy' }) : 'No photo'),
+        h('div', { style: 'min-width:0;display:grid;gap:3px' },
+          h('div', { class: 'ptitle' }, p.title, h('span', { class: 'chip ' + p.status, text: STATUS[p.status] }),
+            p.listing_type === 'pre_owned' && h('span', { class: 'chip info', text: 'Pre-owned' }),
+            p.is_downloadable && h('span', { class: 'chip info', text: 'Digital' }),
+            p.is_service && h('span', { class: 'chip info', text: 'Service' }),
+            p.is_gift_card && h('span', { class: 'chip info', text: 'Gift card' }),
+            p.is_preorder && h('span', { class: 'chip info', text: 'Pre-order' }),
+            fr && h('span', { class: 'chip awaiting_payment', text: '★ ' + FEAT[fr.status] })),
+          h('div', { class: 'pmeta' }, priceText(p), ' · ',
+            s == null ? (p.stock_status === 'out_of_stock' ? 'Out of stock' : 'In stock') : `${s} in stock`,
+            isLow(p) && p.status !== 'archived' ? h('b', { style: 'color:var(--danger)', text: ' · low' }) : '',
+            ' · ', catPath(p.category_id) || 'No category'),
+          p.status === 'rejected' && p.review_note && h('div', { class: 'pmeta', style: 'color:var(--danger)', text: 'Reason: ' + p.review_note })),
+        h('div', { class: 'actions' },
+          h('a', { class: 'icon-btn', href: `product.html?id=${p.id}`, target: '_blank', rel: 'noopener', text: p.status === 'approved' ? 'View' : 'Preview', style: 'text-decoration:none;display:inline-flex;align-items:center' }),
+          h('button', { type: 'button', class: 'ghost', text: 'Edit', onclick: () => openEditor(p.id) }),
+          canSubmit && h('button', { type: 'button', class: 'primary', text: 'Send for review', onclick: e => quickSubmit(p, e.target) }),
+          p.status !== 'archived' && p.status !== 'draft' && h('button', { type: 'button', class: 'icon-btn', text: 'Hide', title: 'Archive: hide from shoppers', onclick: () => archive(p, true) }),
+          p.status === 'archived' && h('button', { type: 'button', class: 'icon-btn', text: 'Restore', onclick: () => archive(p, false) }),
+          confirmBtn('Delete', 'Confirm delete', () => removeProduct(p)))));
+    }
+  }
+
+  async function quickSubmit(p, btn) {
+    btn.disabled = true;
+    const { error } = await db.rpc('submit_product', { p_product: p.id });
+    btn.disabled = false;
+    if (error) { toast(friendly(error)); openEditor(p.id, friendly(error)); return; }
+    toast('Sent for review'); loadProducts();
+  }
+  async function archive(p, on) {
+    const { error } = await db.rpc('archive_product', { p_product: p.id, p_archive: on });
+    if (error) return toast(friendly(error));
+    toast(on ? 'Hidden from shoppers' : 'Moved back to drafts'); loadProducts();
+  }
+  async function removeProduct(p) {
+    const paths = (p.product_images || []).map(i => i.storage_path);
+    const { error } = await db.from('products').delete().eq('id', p.id);
+    if (error) return toast(friendly(error));
+    if (paths.length) await db.storage.from(BUCKET).remove(paths);
+    toast('Deleted'); loadProducts();
+  }
+
+  function drawFeatured() {
+    const box = $('flist'); box.innerHTML = '';
+    if (!featured.length) { box.append(h('div', { class: 'empty' }, h('b', { text: 'No requests yet', style: 'color:var(--fg)' }), h('span', { text: 'Tick "Request Featured listing" when editing a product.' }))); return; }
+    for (const f of featured) {
+      const p = products.find(x => x.id === f.product_id);
+      const url = p && mainPhoto(p);
+      box.append(h('div', { class: 'prow' },
+        h('div', { class: 'thumb' }, url ? h('img', { src: url, alt: '' }) : ''),
+        h('div', { style: 'min-width:0;display:grid;gap:3px' },
+          h('div', { class: 'ptitle' }, p ? p.title : 'Deleted product', h('span', { class: 'chip ' + f.status, text: FEAT[f.status] })),
+          h('div', { class: 'pmeta', text: `${f.price != null ? money(f.price) + ' · ' : ''}${f.days} days · ${PLACE[f.placement] || ''} · requested ${new Date(f.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` }),
+          f.status === 'awaiting_payment' && h('div', { class: 'pmeta', text: 'Payment by bKash or Nagad opens here soon. We will notify you.' })),
+        h('div', { class: 'actions' },
+          p && h('button', { type: 'button', class: 'ghost', text: 'Open product', onclick: () => openEditor(p.id) }),
+          f.status === 'awaiting_payment' && confirmBtn('Cancel request', 'Confirm cancel', async () => {
+            const { error } = await db.from('featured_requests').delete().eq('id', f.id);
+            if (error) return toast(friendly(error));
+            toast('Request cancelled'); loadProducts();
+          }))));
+    }
+  }
+
+  // ===================== Editor =====================
+  let editing = null;       // product row being edited (null fields for new)
+  let values = new Map();   // attribute_id -> Set(option ids) | true | false
+  let photos = [];          // { id?, storage_path?, url, file?, blob? }
+  let removedPhotos = [];
+  let varAttrIds = [];      // attributes used for variations
+  let varPicked = new Map();// attribute_id -> Set(option ids)
+  let variations = [];      // { id?, options: {attrId: optId}, price, sale_price, stock, sku, image_id, is_active }
+  let links = { upsell: new Set(), cross_sell: new Set() };
+  let openFeat = null;
+  let wantFeatured = false, planId = null;
+  let dirty = false;
+  let downloads = [], removedDownloads = [], tiers = [];
+  const DL_BUCKET = 'product-downloads';
+  const MAX_FILES = 5;
+
+  const FIELDS = ['fTitle', 'fShort', 'fDesc', 'fTags', 'fVideo', 'fPrice', 'fSale', 'fSaleFrom', 'fSaleTo', 'fSku', 'fStock', 'fLow', 'fBackorders', 'fStockStatus',
+    'fWeight', 'fLen', 'fWid', 'fHei', 'fShipClass', 'fDelivery', 'fShipsTo', 'fReturn', 'fNote'];
+
+  function blank() {
+    return { id: null, listing_type: 'new', product_type: 'simple', category_id: null, title: '', short_description: '', description: '', tags: [], video_url: '',
+      price: '', sale_price: '', sale_starts_at: null, sale_ends_at: null, sku: '', manage_stock: true, stock: 1, low_stock_threshold: null, backorders: 'no',
+      stock_status: 'in_stock', sold_individually: false, weight_kg: '', length_cm: '', width_cm: '', height_cm: '', shipping_class: 'standard',
+      delivery_time: '1_2_days', ships_to: 'all_bangladesh', free_delivery: false, purchase_note: '', return_policy: '7_days', status: 'draft', review_note: null,
+      is_downloadable: false, download_limit: null, download_expiry_days: null, is_service: false, service_mode: null, service_duration: null,
+      is_gift_card: false, gift_card_validity_days: 365, is_preorder: false, preorder_date: null, preorder_advance_percent: 0, cod_allowed: true };
+  }
+  const toDateInput = iso => iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }) : '';
+  const fromDateInput = (v, end) => v ? new Date(`${v}T${end ? '23:59:59' : '00:00:00'}+06:00`).toISOString() : null;
+
+  async function openEditor(id, errorText) {
+    if (!shop || shop.status !== 'approved') return toast('You can add products once your shop is approved.');
+    setMsg('');
+    editing = blank(); values = new Map(); photos = []; removedPhotos = []; varAttrIds = []; varPicked = new Map(); variations = [];
+    downloads = []; removedDownloads = []; tiers = [];
+    links = { upsell: new Set(), cross_sell: new Set() }; openFeat = null; wantFeatured = false; planId = plans[0] ? plans[0].id : null;
+
+    if (id) {
+      const [p, im, pv, vr, ln, tr, dl] = await Promise.all([
+        db.from('products').select('*').eq('id', id).single(),
+        db.from('product_images').select('*').eq('product_id', id).order('sort_order'),
+        db.from('product_attribute_values').select('*').eq('product_id', id),
+        db.from('product_variations').select('*, product_variation_options(*)').eq('product_id', id).order('sort_order'),
+        db.from('product_links').select('*').eq('product_id', id),
+        db.from('product_price_tiers').select('*').eq('product_id', id).order('min_qty'),
+        db.from('product_downloads').select('*').eq('product_id', id).order('sort_order'),
+      ]);
+      const err = p.error || im.error || pv.error || vr.error || ln.error;
+      if (tr.error && /does not exist|Could not find the table/i.test(tr.error.message)) setMsg('Run product_options.sql in Supabase to use downloads, wholesale prices and pre-orders.');
+      if (err) return toast(friendly(err));
+      editing = { ...blank(), ...p.data };
+      photos = im.data.map(i => ({ id: i.id, storage_path: i.storage_path, url: photoUrl(i.storage_path) }));
+      for (const v of pv.data) {
+        const a = attrById.get(v.attribute_id); if (!a) continue;
+        if (a.input_type === 'boolean') values.set(v.attribute_id, v.bool_value);
+        else { if (!values.has(v.attribute_id)) values.set(v.attribute_id, new Set()); values.get(v.attribute_id).add(v.option_id); }
+      }
+      variations = vr.data.map(v => ({ id: v.id, options: Object.fromEntries(v.product_variation_options.map(o => [o.attribute_id, o.option_id])),
+        price: v.price, sale_price: v.sale_price, stock: v.stock, sku: v.sku || '', image_id: v.image_id, is_active: v.is_active }));
+      for (const v of variations) for (const [a, o] of Object.entries(v.options)) {
+        const aid = Number(a); if (!varAttrIds.includes(aid)) varAttrIds.push(aid);
+        if (!varPicked.has(aid)) varPicked.set(aid, new Set()); varPicked.get(aid).add(o);
+      }
+      ln.data.forEach(l => links[l.kind].add(l.linked_product_id));
+      tiers = (tr.data || []).map(t => ({ min_qty: t.min_qty, unit_price: Number(t.unit_price) }));
+      downloads = (dl.data || []).map(d => ({ id: d.id, file_name: d.file_name, storage_path: d.storage_path, size_bytes: d.size_bytes }));
+      openFeat = featured.find(f => f.product_id === id && ['awaiting_payment', 'payment_submitted', 'active'].includes(f.status)) || null;
+      if (editing.listing_type === 'free') editing.listing_type = 'new';
+      if (openFeat) { wantFeatured = true; if (openFeat.plan_id) planId = openFeat.plan_id; }
+    }
+    fillForm();
+    go('editor');
+    if (errorText) setMsg(errorText);
+    dirty = false;
+  }
+
+  function fillForm() {
+    const p = editing;
+    $('edTitle').textContent = p.id ? 'Edit product' : 'Add product';
+    statusChips();
+    $('edRejected').hidden = !(p.status === 'rejected' && p.review_note);
+    $('edRejected').textContent = p.review_note ? 'Not approved: ' + p.review_note + ' Fix this, then send for review again.' : '';
+
+    // category select: grouped by top-level category
+    const sel = $('fCategory'); sel.innerHTML = '';
+    sel.append(h('option', { value: '', text: 'Choose a category…' }));
+    for (const top of childrenOf(null)) {
+      const kids = childrenOf(top.id);
+      if (!kids.length) { sel.append(h('option', { value: top.id, text: top.name })); continue; }
+      const g = h('optgroup', { label: top.name });
+      const walk = (pid, depth) => childrenOf(pid).forEach(c => { g.append(h('option', { value: c.id, text: ' '.repeat(depth * 3) + c.name })); walk(c.id, depth + 1); });
+      walk(top.id, 0);
+      sel.append(g);
+    }
+    sel.value = p.category_id || '';
+
+    $('fTitle').value = p.title; $('fShort').value = p.short_description || ''; $('fDesc').value = p.description || '';
+    $('fTags').value = (p.tags || []).join(', '); $('fVideo').value = p.video_url || '';
+    $('fPrice').value = p.listing_type === 'free' ? '' : (p.price || ''); $('fSale').value = p.sale_price || '';
+    $('fSaleFrom').value = toDateInput(p.sale_starts_at); $('fSaleTo').value = toDateInput(p.sale_ends_at);
+    $('fSku').value = p.sku || ''; $('fManage').checked = p.manage_stock; $('fStock').value = p.stock ?? 0;
+    $('fLow').value = p.low_stock_threshold ?? ''; $('fBackorders').value = p.backorders; $('fStockStatus').value = p.stock_status;
+    $('fSoldInd').checked = p.sold_individually;
+    $('fWeight').value = p.weight_kg ?? ''; $('fLen').value = p.length_cm ?? ''; $('fWid').value = p.width_cm ?? ''; $('fHei').value = p.height_cm ?? '';
+    $('fShipClass').value = p.shipping_class; $('fDelivery').value = p.delivery_time; $('fShipsTo').value = p.ships_to; $('fFreeDel').checked = p.free_delivery;
+    $('fReturn').value = p.return_policy; $('fNote').value = p.purchase_note || '';
+    $('fProductType').value = p.product_type;
+    $('kDownload').checked = !!p.is_downloadable; $('kService').checked = !!p.is_service; $('kGift').checked = !!p.is_gift_card;
+    $('fProductType').value = currentKind() === 'variable' ? 'variable' : 'simple';
+    $('fGiftValid').value = String(p.gift_card_validity_days || 365);
+    $('fCod').checked = p.cod_allowed !== false;
+    $('fPre').checked = !!p.is_preorder; $('fPreDate').value = p.preorder_date || ''; $('fPreAdv').value = String(p.preorder_advance_percent || 0);
+    $('fDlLimit').value = p.download_limit ? String(p.download_limit) : ''; $('fDlExpiry').value = p.download_expiry_days ? String(p.download_expiry_days) : '';
+    $('fSvcMode').value = p.service_mode || ''; $('fSvcDur').value = p.service_duration || ''; $('fSvcArea').value = p.ships_to || 'all_bangladesh';
+    $('fPreDate').min = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
+    drawTiers(); drawFiles();
+    selectTab('pricing');
+    setMore(!!p.id && (currentKind() !== 'simple' || !!p.sale_price || tiers.length > 0 || p.is_preorder || p.cod_allowed === false || !!p.short_description || (p.tags || []).length > 0 || !!p.video_url || links.upsell.size + links.cross_sell.size > 0));
+    syncType(); drawPhotos(); drawAttrFields(); drawVarAttrs(); drawVarRows(); drawLinks(); syncFeat(); syncDesc(); drawSummary();
+  }
+
+  function statusChips() {
+    for (const id of ['edStatus', 'barStatus']) { $(id).className = 'chip ' + editing.status; $(id).textContent = STATUS[editing.status]; }
+    const hint = { draft: 'Not visible to shoppers yet.', pending: 'Our team is checking it. You can still edit.', approved: 'Live. Changing the name, description or category sends it back for review.',
+      rejected: 'Fix the issue and send it again.', archived: 'Hidden from shoppers.' }[editing.status];
+    $('barHint').textContent = hint;
+    $('submitBtn').hidden = !['draft', 'rejected', 'archived'].includes(editing.status);
+    $('saveBtn').textContent = editing.status === 'draft' || !editing.id ? 'Save draft' : 'Save changes';
+  }
+
+  // ---------- listing type / product type ----------
+  $('typeCards').querySelectorAll('.type-card').forEach(b => b.onclick = () => { editing.listing_type = b.dataset.type; syncType(); syncCondition(); drawSummary(); dirty = true; });
+  $('listCards').querySelectorAll('.type-card').forEach(b => b.onclick = () => { wantFeatured = b.dataset.list === 'featured'; syncFeat(); drawSummary(); dirty = true; });
+  function setMore(open) { $('moreOptions').hidden = !open; $('moreBtn').setAttribute('aria-expanded', String(open)); }
+  $('moreBtn').onclick = () => setMore($('moreOptions').hidden);
+
+  // One product type at a time: Simple, Variable, Downloadable, Service or Gift card
+  function currentKind() {
+    if ($('kGift').checked) return 'gift';
+    if ($('kDownload').checked) return 'downloadable';
+    if ($('kService').checked) return 'service';
+    return $('fProductType').value === 'variable' ? 'variable' : 'simple';
+  }
+  function setKind(kind) {
+    $('fProductType').value = kind === 'variable' ? 'variable' : 'simple';
+    $('kDownload').checked = kind === 'downloadable';
+    $('kService').checked = kind === 'service';
+    $('kGift').checked = kind === 'gift';
+    syncType(); drawSummary();
+    if (kind === 'variable') selectTab('variations');
+    else if (kind === 'downloadable') selectTab('downloads');
+    else if (kind === 'service') selectTab('service');
+    else selectTab('pricing');
+  }
+  $('ptypes').querySelectorAll('.ptype').forEach(b => b.onclick = () => { setKind(b.dataset.kind); dirty = true; });
+
+  function syncType() {
+    const free = editing.listing_type === 'free';
+    const variable = $('fProductType').value === 'variable' && !free;
+    $('typeCards').querySelectorAll('.type-card').forEach(b => b.setAttribute('aria-pressed', b.dataset.type === editing.listing_type));
+    $('freeNote').hidden = !free;
+    $('varPriceNote').hidden = !variable;
+    $('priceFields').hidden = free || variable;
+    $('saleDates').hidden = free || variable;
+    $('tabVariations').hidden = !variable;
+    $('manageWrap').hidden = variable; $('stockFields').hidden = variable || !$('fManage').checked; $('stockStatusWrap').hidden = variable || $('fManage').checked;
+    $('varStockNote').hidden = !variable;
+    $('basicPriceWrap').hidden = variable;
+    $('basicStockWrap').hidden = variable || !$('fManage').checked;
+    $('basicVarNote').hidden = !variable;
+    const kind = currentKind();
+    $('ptypes').querySelectorAll('.ptype').forEach(b => b.setAttribute('aria-checked', String(b.dataset.kind === kind)));
+    // product kinds
+    const gift = $('kGift').checked, dl = $('kDownload').checked && !gift, svc = $('kService').checked && !gift;
+    if (gift) { $('kDownload').checked = $('kService').checked = false; if ($('fProductType').value === 'variable') { $('fProductType').value = 'simple'; return syncType(); } }
+    $('giftBlock').hidden = !gift;
+    $('tierBlock').hidden = variable || gift;
+    const digital = dl || gift;
+    $('codBlock').hidden = digital;
+    $('preBlock').hidden = digital || svc;
+    $('preFields').hidden = !$('fPre').checked;
+    $('tabDownloads').hidden = !dl;
+    $('tabService').hidden = !svc;
+    $('tabShipping').hidden = dl || svc || gift;
+    const cur = document.querySelector('#dataTabs [aria-selected=true]');
+    if (cur && cur.hidden) selectTab('pricing');
+    drawAttrFields();
+  }
+  $('fManage').onchange = syncType;
+  $('fPre').addEventListener('change', () => { syncType(); drawSummary(); dirty = true; });
+  ['fCod', 'fGiftValid', 'fPreDate', 'fPreAdv', 'fDlLimit', 'fDlExpiry', 'fSvcMode', 'fSvcDur', 'fSvcArea'].forEach(id => $(id).addEventListener('change', () => { dirty = true; }));
+
+  // ---------- wholesale price breaks ----------
+  function drawTiers() {
+    const box = $('tiers'); box.innerHTML = '';
+    tiers.forEach((t, i) => {
+      const q = h('input', { type: 'number', min: 2, step: 1, value: t.min_qty ?? '', 'aria-label': 'Minimum quantity' });
+      const p = h('input', { type: 'number', min: 1, step: 1, value: t.unit_price ?? '', 'aria-label': 'Price per piece' });
+      q.oninput = () => { t.min_qty = q.value === '' ? '' : Number(q.value); dirty = true; };
+      p.oninput = () => { t.unit_price = p.value === '' ? '' : Number(p.value); dirty = true; };
+      box.append(h('div', { class: 'tier-row' },
+        h('label', {}, 'Buy at least', q), h('label', {}, 'Price each', h('span', { class: 'taka' }, p)),
+        h('button', { type: 'button', class: 'icon-btn', text: '✕', 'aria-label': 'Remove price break', onclick: () => { tiers.splice(i, 1); drawTiers(); dirty = true; } })));
+    });
+    $('addTier').hidden = tiers.length >= 4;
+  }
+  $('addTier').onclick = () => { const last = tiers[tiers.length - 1]; tiers.push({ min_qty: last && last.min_qty ? last.min_qty * 2 : 10, unit_price: '' }); drawTiers(); dirty = true; };
+
+  // ---------- download files ----------
+  const fmtSize = b => b == null ? '' : b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1048576).toFixed(1)} MB`;
+  function drawFiles() {
+    const box = $('fileList'); box.innerHTML = '';
+    if (!downloads.length) box.append(h('p', { class: 'hint', style: 'margin:0;padding:12px', text: 'No files yet.' }));
+    downloads.forEach((f, i) => {
+      const ext = (f.file_name.split('.').pop() || 'file').slice(0, 4);
+      box.append(h('div', { class: 'file-row' }, h('span', { class: 'ic', text: ext }),
+        h('span', { style: 'min-width:0;overflow-wrap:anywhere;font-weight:500' }, f.file_name, !f.id && h('span', { class: 'from', text: ' · new' })),
+        h('span', { class: 'hint', text: fmtSize(f.size_bytes) }),
+        h('button', { type: 'button', class: 'icon-btn', text: '✕', 'aria-label': 'Remove ' + f.file_name, onclick: () => { const [r] = downloads.splice(i, 1); if (r.id) removedDownloads.push(r); drawFiles(); dirty = true; } })));
+    });
+    $('addFileBtn').hidden = downloads.length >= MAX_FILES;
+    $('fileCount').textContent = `${downloads.length} / ${MAX_FILES}`;
+  }
+  $('addFileBtn').onclick = () => $('dlInput').click();
+  $('dlInput').onchange = () => {
+    for (const f of $('dlInput').files) {
+      if (downloads.length >= MAX_FILES) { toast(`Up to ${MAX_FILES} files.`); break; }
+      if (f.size > 50 * 1048576) { toast(`${f.name} is larger than 50 MB.`); continue; }
+      downloads.push({ file_name: f.name, size_bytes: f.size, file: f });
+    }
+    $('dlInput').value = ''; drawFiles(); dirty = true;
+  };
+
+  // ---------- tabs ----------
+  $('dataTabs').querySelectorAll('button').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
+  function selectTab(t) {
+    $('dataTabs').querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+    document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== t);
+  }
+
+  // ---------- simple field events ----------
+  $('fCategory').onchange = () => {
+    editing.category_id = Number($('fCategory').value) || null;
+    const allowed = new Set(effectiveAttrs(editing.category_id).map(x => x.attr.id));
+    for (const k of [...values.keys()]) if (!allowed.has(k)) values.delete(k);
+    varAttrIds = varAttrIds.filter(a => allowed.has(a));
+    drawAttrFields(); syncCondition(); drawVarAttrs(); drawVarRows(); drawSummary(); dirty = true;
+  };
+  FIELDS.forEach(id => $(id).addEventListener('input', () => { dirty = true; if (['fTitle', 'fPrice', 'fSale', 'fStock'].includes(id)) drawSummary(); }));
+  $('fDesc').addEventListener('input', syncDesc);
+  function syncDesc() { $('descCount').textContent = `${$('fDesc').value.length} / 5000`; }
+  $('fSale').addEventListener('input', saleHint); $('fPrice').addEventListener('input', saleHint);
+  function saleHint() {
+    const p = Number($('fPrice').value), s = Number($('fSale').value);
+    $('saleHint').textContent = p && s ? (s < p ? `${Math.round((1 - s / p) * 100)}% off` : 'Must be lower than the regular price') : '';
+    $('saleHint').style.color = p && s && s >= p ? 'var(--danger)' : '';
+  }
+
+  // ---------- photos ----------
+  function photoTile(ph, i, isMain) {
+    const tile = h('div', { class: 'photo' },
+      h('img', { src: ph.url, alt: isMain ? 'Main image' : `Gallery image ${i}` }),
+      isMain && h('span', { class: 'main-tag', text: 'Main' }),
+      !ph.id && h('span', { class: 'new-tag', text: 'New' }));
+    const bar = h('div', { class: 'bar' });
+    if (isMain) {
+      bar.append(h('button', { type: 'button', text: 'Change', onclick: () => $('mainInput').click() }),
+                 h('button', { type: 'button', text: '✕', 'aria-label': 'Remove main image', onclick: () => removePhoto(0) }));
+    } else {
+      bar.append(h('button', { type: 'button', text: '←', 'aria-label': 'Move left', disabled: i === 1, onclick: () => { [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]]; drawPhotos(); dirty = true; } }),
+                 h('button', { type: 'button', text: 'Make main', onclick: () => { [photos[0], photos[i]] = [photos[i], photos[0]]; drawPhotos(); drawVarRows(); dirty = true; } }),
+                 h('button', { type: 'button', text: '✕', 'aria-label': `Remove gallery image ${i}`, onclick: () => removePhoto(i) }));
+    }
+    tile.append(bar);
+    return tile;
+  }
+  function dropZone(label, onFiles, pick) {
+    const drop = h('div', { class: 'drop', role: 'button', tabindex: '0', onclick: pick,
+      onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } } },
+      h('b', { text: '+' }), h('span', { text: label }), h('span', { class: 'hint', text: 'or drag here' }));
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+    drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); onFiles(e.dataTransfer.files); };
+    return drop;
+  }
+  function removePhoto(i) { const [r] = photos.splice(i, 1); if (r.id) removedPhotos.push(r); drawPhotos(); drawVarRows(); dirty = true; }
+
+  function drawPhotos() {
+    const main = $('mainPhoto'); main.innerHTML = '';
+    main.append(photos[0] ? photoTile(photos[0], 0, true) : dropZone('Add main image', fl => setMain(fl), () => $('mainInput').click()));
+    const box = $('photos'); box.innerHTML = '';
+    photos.slice(1).forEach((ph, k) => box.append(photoTile(ph, k + 1, false)));
+    const gallery = Math.max(0, photos.length - 1);
+    if (gallery < MAX_GALLERY) box.append(dropZone(gallery ? 'Add more' : 'Add gallery images', fl => addFiles(fl), () => $('fileInput').click()));
+    $('photoCount').textContent = `${gallery} / ${MAX_GALLERY}`;
+    drawSummary();
+  }
+  $('mainInput').onchange = () => { setMain($('mainInput').files); $('mainInput').value = ''; };
+  // Put a new photo in the main slot; the old main image is removed.
+  async function setMain(list) {
+    const f = [...list].find(x => /^image\/(jpeg|png|webp)$/.test(x.type));
+    if (!f) return toast('Use a JPG, PNG or WebP photo.');
+    try {
+      const blob = await shrink(f);
+      const fresh = { blob, url: URL.createObjectURL(blob) };
+      if (photos[0]) { if (photos[0].id) removedPhotos.push(photos[0]); photos[0] = fresh; } else photos.unshift(fresh);
+      dirty = true; drawPhotos(); drawVarRows();
+    } catch (_) { toast(`Couldn't read ${f.name}.`); }
+  }
+  $('fileInput').onchange = () => { addFiles($('fileInput').files); $('fileInput').value = ''; };
+
+  async function addFiles(list) {
+    const files = [...list].filter(f => /^image\/(jpeg|png|webp)$/.test(f.type));
+    if (files.length < list.length) toast('Only JPG, PNG and WebP photos can be added.');
+    for (const f of files) {
+      if (photos.length >= MAX_PHOTOS) { toast(`The gallery holds up to ${MAX_GALLERY} images.`); break; }
+      try {
+        const blob = await shrink(f);
+        photos.push({ blob, url: URL.createObjectURL(blob) });
+      } catch (_) { toast(`Couldn't read ${f.name}.`); }
+    }
+    dirty = true; drawPhotos();
+  }
+  // Resize to max 1600px and save as WebP (or JPEG) so uploads are fast and under 5 MB.
+  function shrink(file, maxDim = 1600) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        c.toBlob(b => b && b.type === 'image/webp' ? resolve(b) : c.toBlob(j => j ? resolve(j) : reject(), 'image/jpeg', .86), 'image/webp', .85);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  // ---------- category details (attributes) ----------
+  const varCandidates = () => effectiveAttrs(editing.category_id).filter(x => ['select', 'color'].includes(x.attr.input_type));
+  const isVariable = () => $('fProductType').value === 'variable' && editing.listing_type !== 'free';
+
+  function syncCondition() {
+    const cond = attrs.find(a => a.name === 'Condition');
+    if (!cond || !effectiveAttrs(editing.category_id).some(x => x.attr.id === cond.id)) return;
+    const newOpt = cond.attribute_options.find(o => o.value === 'New');
+    const cur = values.get(cond.id);
+    if (editing.listing_type === 'new' && newOpt) values.set(cond.id, new Set([newOpt.id]));
+    else if (editing.listing_type === 'pre_owned' && cur && newOpt && cur.has(newOpt.id)) values.delete(cond.id);
+    drawAttrFields();
+  }
+
+  function drawAttrFields() {
+    const box = $('attrFields'); box.innerHTML = '';
+    if (!editing.category_id) { $('detailsHint').hidden = false; $('detailsHint').textContent = 'Choose a category first.'; return; }
+    const list = effectiveAttrs(editing.category_id).filter(x => !(isVariable() && varAttrIds.includes(x.attr.id)));
+    $('detailsHint').hidden = false;
+    $('detailsHint').textContent = list.length ? 'Pick from the lists. Fields marked * are required before you can send for review.' : 'This category has no extra details.';
+    const cond = attrs.find(a => a.name === 'Condition');
+    for (const { attr: a, required, from } of list) {
+      const id = 'attr-' + a.id;
+      const title = h('span', { class: required ? 'req' : '' }, a.name + (a.unit ? ` (${a.unit})` : ''));
+      const cur = values.get(a.id);
+      let control;
+      if (a.input_type === 'boolean') {
+        control = h('select', { id }, h('option', { value: '', text: 'Choose…' }), h('option', { value: 'true', text: 'Yes' }), h('option', { value: 'false', text: 'No' }));
+        control.value = cur === true ? 'true' : cur === false ? 'false' : '';
+        control.onchange = () => { control.value === '' ? values.delete(a.id) : values.set(a.id, control.value === 'true'); dirty = true; };
+        box.append(h('label', { for: id }, title, control));
+      } else if (a.input_type === 'select') {
+        let opts = a.attribute_options;
+        if (cond && a.id === cond.id && editing.listing_type === 'pre_owned') opts = opts.filter(o => o.value !== 'New');
+        control = h('select', { id }, h('option', { value: '', text: 'Choose…' }), opts.map(o => h('option', { value: o.id, text: o.value + (a.unit ? ' ' + a.unit : '') })));
+        control.value = cur && cur.size ? [...cur][0] : '';
+        control.disabled = !!(cond && a.id === cond.id && editing.listing_type === 'new');
+        control.onchange = () => { control.value ? values.set(a.id, new Set([Number(control.value)])) : values.delete(a.id); dirty = true; };
+        box.append(h('label', { for: id }, title, control, control.disabled && h('span', { class: 'hint', text: 'Set by "New" above.' })));
+      } else {
+        // colour (one) or several options: chips
+        const multi = a.input_type === 'multiselect';
+        const set = cur instanceof Set ? cur : new Set();
+        const chips = h('div', { class: 'chips', role: 'group', 'aria-label': a.name });
+        for (const o of a.attribute_options) {
+          const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) },
+            o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value);
+          b.onclick = () => {
+            const s = values.get(a.id) instanceof Set ? values.get(a.id) : new Set();
+            if (multi) s.has(o.id) ? s.delete(o.id) : s.add(o.id);
+            else { const was = s.has(o.id); s.clear(); if (!was) s.add(o.id); }
+            s.size ? values.set(a.id, s) : values.delete(a.id);
+            chips.querySelectorAll('.opt').forEach((x, i) => x.setAttribute('aria-pressed', String((values.get(a.id) || new Set()).has(a.attribute_options[i].id))));
+            dirty = true;
+          };
+          chips.append(b);
+        }
+        box.append(h('div', { class: 'lbl wide', style: 'display:grid;gap:6px' }, h('span', {}, title, multi && h('span', { class: 'from', text: ' · choose any' }), from && h('span', { class: 'from', text: ' · from ' + from })), chips));
+        continue;
+      }
+      if (from) box.lastChild.firstChild.append(h('span', { class: 'from', text: ' · from ' + from }));
+    }
+  }
+
+  // ---------- variations ----------
+  function drawVarAttrs() {
+    const box = $('varAttrs'); box.innerHTML = '';
+    if (!editing.category_id) { box.append(h('p', { class: 'hint', text: 'Choose a category first.' })); return; }
+    const cands = varCandidates();
+    if (!cands.length) { box.append(h('p', { class: 'hint', text: 'This category has no options that can vary.' })); return; }
+    for (const { attr: a } of cands) {
+      const on = varAttrIds.includes(a.id);
+      const cb = h('input', { type: 'checkbox', id: 'va-' + a.id, checked: on });
+      cb.onchange = () => {
+        if (cb.checked) { varAttrIds.push(a.id); if (!varPicked.has(a.id)) varPicked.set(a.id, new Set()); values.delete(a.id); }
+        else varAttrIds = varAttrIds.filter(x => x !== a.id);
+        drawVarAttrs(); drawAttrFields(); dirty = true;
+      };
+      const wrap = h('div', { class: 'var-attr' }, h('label', { class: 'check', for: 'va-' + a.id }, cb, a.name + (a.unit ? ` (${a.unit})` : '')));
+      if (on) {
+        const set = varPicked.get(a.id) || new Set(); varPicked.set(a.id, set);
+        const chips = h('div', { class: 'chips' });
+        a.attribute_options.forEach(o => {
+          const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) }, o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''));
+          b.onclick = () => { set.has(o.id) ? set.delete(o.id) : set.add(o.id); b.setAttribute('aria-pressed', String(set.has(o.id))); dirty = true; };
+          chips.append(b);
+        });
+        wrap.append(chips);
+      }
+      box.append(wrap);
+    }
+  }
+
+  $('genVars').onclick = () => {
+    const ids = varAttrIds.filter(a => (varPicked.get(a) || new Set()).size);
+    if (!ids.length) return toast('Tick at least one attribute and choose its options.');
+    let combos = [{}];
+    for (const a of ids) combos = combos.flatMap(c => [...varPicked.get(a)].map(o => ({ ...c, [a]: o })));
+    if (combos.length > 100) return toast(`That makes ${combos.length} versions. The limit is 100, so choose fewer options.`);
+    const keyOf = o => Object.keys(o).sort((x, y) => x - y).map(k => o[k]).join('-');
+    const old = new Map(variations.map(v => [keyOf(v.options), v]));
+    const base = Number($('fPrice').value) || '';
+    variations = combos.map(o => old.get(keyOf(o)) || { options: o, price: base, sale_price: '', stock: 0, sku: '', image_id: null, is_active: true });
+    varAttrIds = ids;
+    drawVarAttrs(); drawVarRows(); drawAttrFields(); drawSummary(); dirty = true;
+    toast(`${variations.length} version${variations.length === 1 ? '' : 's'} ready. Set prices and stock below.`);
+  };
+
+  function comboLabel(v) {
+    return Object.entries(v.options).map(([a, o]) => { const at = attrById.get(Number(a)); const op = at && at.attribute_options.find(x => x.id === o); return op ? op.value + (at.unit ? ' ' + at.unit : '') : '?'; }).join(' / ');
+  }
+  function drawVarRows() {
+    const body = $('varRows'); body.innerHTML = '';
+    $('varTableWrap').hidden = $('bulkBar').hidden = !variations.length;
+    $('varCount').textContent = variations.length ? `${variations.filter(v => v.is_active).length} of ${variations.length} versions on sale` : '';
+    const saved = photos.filter(p => p.id);
+    variations.forEach((v, i) => {
+      const on = h('input', { type: 'checkbox', checked: v.is_active, 'aria-label': 'Sell ' + comboLabel(v) });
+      on.onchange = () => { v.is_active = on.checked; drawVarRows(); drawSummary(); dirty = true; };
+      const num = (key, extra = {}) => { const el = h('input', { type: 'number', min: key === 'stock' ? 0 : 1, step: 1, value: v[key] ?? '', 'aria-label': key + ' for ' + comboLabel(v), ...extra });
+        el.oninput = () => { v[key] = el.value === '' ? '' : Number(el.value); drawSummary(); dirty = true; }; return el; };
+      const sku = h('input', { type: 'text', value: v.sku || '', maxlength: 60, 'aria-label': 'SKU for ' + comboLabel(v) });
+      sku.oninput = () => { v.sku = sku.value; dirty = true; };
+      const pic = h('select', { 'aria-label': 'Photo for ' + comboLabel(v) }, h('option', { value: '', text: 'Main image' }), saved.map(p => { const n = photos.indexOf(p); return h('option', { value: p.id, text: n === 0 ? 'Main image' : 'Gallery ' + n }); }));
+      pic.value = v.image_id || ''; pic.onchange = () => { v.image_id = Number(pic.value) || null; dirty = true; };
+      body.append(h('tr', { class: v.is_active ? '' : 'off' }, h('td', {}, on), h('td', { class: 'combo', text: comboLabel(v) }),
+        h('td', {}, num('price')), h('td', {}, num('sale_price', { placeholder: '—' })), h('td', {}, num('stock')), h('td', {}, sku), h('td', {}, pic)));
+    });
+    if (variations.length && photos.some(p => !p.id)) body.append(h('tr', {}, h('td', { colspan: 7, class: 'hint', text: 'Save first to use newly added photos for versions.' })));
+  }
+  $('bulkApply').onclick = () => {
+    const p = $('bulkPrice').value, s = $('bulkStock').value;
+    variations.forEach(v => { if (p !== '') v.price = Number(p); if (s !== '') v.stock = Number(s); });
+    drawVarRows(); drawSummary(); dirty = true;
+  };
+
+  // ---------- linked products ----------
+  function drawLinks() {
+    for (const [kind, listId, searchId] of [['upsell', 'upList', 'upSearch'], ['cross_sell', 'crossList', 'crossSearch']]) {
+      const draw = () => {
+        const q = $(searchId).value.trim().toLowerCase();
+        const box = $(listId); box.innerHTML = '';
+        const others = products.filter(p => p.id !== editing.id && p.status !== 'archived' && (!q || p.title.toLowerCase().includes(q)));
+        if (!others.length) { box.append(h('p', { class: 'hint', style: 'padding:10px 12px;margin:0', text: products.length > 1 ? 'No matches.' : 'Your other products will appear here.' })); return; }
+        for (const p of others) {
+          const cb = h('input', { type: 'checkbox', checked: links[kind].has(p.id) });
+          cb.onchange = () => { cb.checked ? links[kind].add(p.id) : links[kind].delete(p.id); dirty = true; };
+          box.append(h('label', { class: 'check' }, cb, p.title));
+        }
+      };
+      $(searchId).value = ''; $(searchId).oninput = draw; draw();
+    }
+  }
+
+  // ---------- featured ----------
+  function planText(p) { return p ? `${money(p.price)} for ${p.days} day${p.days === 1 ? '' : 's'}` : ''; }
+  function syncFeat() {
+    const locked = openFeat && openFeat.status !== 'awaiting_payment';
+    const available = plans.length > 0 || !!openFeat;
+    if (!available) wantFeatured = false;
+    $('listCards').querySelectorAll('.type-card').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.list === 'featured') === wantFeatured)));
+    $('listCards').querySelector('[data-list=free]').disabled = !!locked;
+    $('featCardBtn').disabled = !available;
+    const cheapest = plans.length ? plans.reduce((a, b) => (Number(a.price) <= Number(b.price) ? a : b)) : null;
+    $('featTag').textContent = openFeat ? planText({ price: openFeat.price ?? 0, days: openFeat.days }) : cheapest ? (plans.length > 1 ? 'from ' : '') + planText(cheapest) : '';
+    $('featTag').hidden = !$('featTag').textContent;
+    $('featCardSub').textContent = available ? 'Top placement and a Featured badge for a fixed fee' : 'Not available right now';
+    $('featBox').hidden = !wantFeatured;
+    if (!wantFeatured) return;
+    const pick = $('planPick'); pick.innerHTML = '';
+    if (!openFeat && plans.length > 1) plans.forEach(p => pick.append(h('button', { type: 'button', class: 'opt', 'aria-pressed': String(p.id === planId),
+      onclick: () => { planId = p.id; syncFeat(); drawSummary(); dirty = true; } }, `${p.name} · ${planText(p)}`)));
+    pick.hidden = !pick.children.length;
+    const plan = plans.find(p => p.id === (openFeat ? openFeat.plan_id : planId)) || (openFeat ? null : plans[0]);
+    if (!openFeat && plan) planId = plan.id;
+    const price = openFeat ? openFeat.price : plan && plan.price, days = openFeat ? openFeat.days : plan && plan.days;
+    $('featPrice').innerHTML = '';
+    $('featPrice').append(money(price ?? 0), h('small', { text: `for ${days} days · ${PLACE[openFeat ? openFeat.placement : plan.placement] || ''}` }));
+    const ul = $('featBenefits'); ul.innerHTML = '';
+    ((plan && plan.benefits) || []).forEach(b => ul.append(h('li', { text: b })));
+    $('featNote').textContent = openFeat
+      ? `Status: ${FEAT[openFeat.status]}.` + (openFeat.status === 'awaiting_payment' ? ' Choose "Free listing" to cancel the request.' : '')
+      : 'The fee is set by RGBKart. After you save, pay from the Featured requests page. Featuring starts once your product is approved and the payment is confirmed.';
+  }
+
+  // ---------- summary ----------
+  function drawSummary() {
+    const box = $('summary'); box.innerHTML = '';
+    const free = editing.listing_type === 'free';
+    let price = '—';
+    if (free) price = 'Free (৳0)';
+    else if (isVariable()) { const ps = variations.filter(v => v.is_active && Number(v.price) > 0).map(v => Number(v.sale_price) || Number(v.price)); if (ps.length) { const lo = Math.min(...ps), hi = Math.max(...ps); price = lo === hi ? money(lo) : `${money(lo)} – ${money(hi)}`; } }
+    else if (Number($('fPrice').value)) price = Number($('fSale').value) ? `${money($('fSale').value)} (was ${money($('fPrice').value)})` : money($('fPrice').value);
+    const rows = [
+      ['Product', { new: 'New', pre_owned: 'Pre-owned', free: 'New' }[editing.listing_type]],
+      ['Listing', wantFeatured ? 'Featured' + (openFeat ? ` (${money(openFeat.price ?? 0)})` : (plans.find(p => p.id === planId) ? ` (${planText(plans.find(p => p.id === planId))})` : '')) : 'Free listing'],
+      ['Type', { simple: 'Simple', variable: 'Variable', downloadable: 'Downloadable', service: 'Service', gift: 'Gift card' }[currentKind()] + ($('fPre').checked && !$('preBlock').hidden ? ' · Pre-order' : '')],
+      ['Category', editing.category_id ? catPath(editing.category_id) : 'Not chosen'],
+      ['Price', price],
+      ['Photos', photos.length ? `Main + ${photos.length - 1} in gallery` : 'No main image yet'],
+      isVariable() && ['Versions', `${variations.filter(v => v.is_active).length} on sale`],
+    ].filter(Boolean);
+    rows.forEach(([k, v]) => box.append(h('div', { style: 'display:flex;justify-content:space-between;gap:10px' }, h('span', { class: 'muted', text: k }), h('b', { text: v, style: 'text-align:right;overflow-wrap:anywhere;font-weight:600' }))));
+  }
+
+  // ---------- save ----------
+  $('saveBtn').onclick = () => save(false);
+  $('submitBtn').onclick = () => save(true);
+
+  function collect() {
+    const free = editing.listing_type === 'free', variable = isVariable();
+    const num = id => $(id).value === '' ? null : Number($(id).value);
+    const row = {
+      category_id: editing.category_id, title: $('fTitle').value.trim(), listing_type: editing.listing_type, product_type: variable ? 'variable' : 'simple',
+      short_description: $('fShort').value.trim() || null, description: $('fDesc').value.trim() || null,
+      tags: $('fTags').value.split(',').map(t => t.trim()).filter(Boolean).slice(0, 20), video_url: $('fVideo').value.trim() || null,
+      sku: $('fSku').value.trim() || null, sold_individually: $('fSoldInd').checked,
+      weight_kg: num('fWeight') || null, length_cm: num('fLen') || null, width_cm: num('fWid') || null, height_cm: num('fHei') || null,
+      shipping_class: $('fShipClass').value, delivery_time: $('fDelivery').value, ships_to: $('fShipsTo').value, free_delivery: $('fFreeDel').checked,
+      return_policy: $('fReturn').value, purchase_note: $('fNote').value.trim() || null,
+    };
+    if (free) Object.assign(row, { price: 0, sale_price: null, sale_starts_at: null, sale_ends_at: null });
+    else if (variable) {
+      const act = variations.filter(v => v.is_active && Number(v.price) > 0);
+      Object.assign(row, { price: act.length ? Math.min(...act.map(v => Number(v.price))) : 1, sale_price: null, sale_starts_at: null, sale_ends_at: null });
+    } else Object.assign(row, { price: num('fPrice'), sale_price: num('fSale') || null, sale_starts_at: fromDateInput($('fSaleFrom').value), sale_ends_at: fromDateInput($('fSaleTo').value, true) });
+    if (variable) Object.assign(row, { manage_stock: true, stock: variations.filter(v => v.is_active).reduce((s, v) => s + (Number(v.stock) || 0), 0), low_stock_threshold: num('fLow'), backorders: $('fBackorders').value, stock_status: 'in_stock' });
+    else Object.assign(row, { manage_stock: $('fManage').checked, stock: $('fManage').checked ? (num('fStock') ?? 0) : 0, low_stock_threshold: $('fManage').checked ? num('fLow') : null,
+      backorders: $('fBackorders').value, stock_status: $('fManage').checked ? 'in_stock' : $('fStockStatus').value });
+    const gift = $('kGift').checked, dl = $('kDownload').checked && !gift, svc = $('kService').checked && !gift;
+    Object.assign(row, {
+      is_gift_card: gift, gift_card_validity_days: gift ? Number($('fGiftValid').value) : null,
+      is_downloadable: dl, download_limit: dl && $('fDlLimit').value ? Number($('fDlLimit').value) : null, download_expiry_days: dl && $('fDlExpiry').value ? Number($('fDlExpiry').value) : null,
+      is_service: svc, service_mode: svc ? ($('fSvcMode').value || null) : null, service_duration: svc ? ($('fSvcDur').value || null) : null,
+      is_preorder: !(dl || gift || svc) && $('fPre').checked, preorder_date: !(dl || gift || svc) && $('fPre').checked ? ($('fPreDate').value || null) : null,
+      preorder_advance_percent: !(dl || gift || svc) && $('fPre').checked ? Number($('fPreAdv').value) : null,
+      cod_allowed: (dl || gift) ? false : $('fCod').checked,
+    });
+    if (svc) row.ships_to = $('fSvcArea').value;
+    if (dl || svc || gift) Object.assign(row, { weight_kg: null, length_cm: null, width_cm: null, height_cm: null, free_delivery: false });
+    return row;
+  }
+
+  function validate(row, forReview) {
+    const errs = [];
+    if (!row.category_id) errs.push('Choose a category.');
+    if (row.title.length < 3) errs.push('Enter a product name (at least 3 letters).');
+    if (row.listing_type !== 'free' && row.product_type === 'simple') {
+      if (!(row.price > 0)) errs.push('Enter a regular price.');
+      if (row.sale_price && row.sale_price >= row.price) errs.push('The sale price must be lower than the regular price.');
+      if (row.sale_starts_at && row.sale_ends_at && row.sale_ends_at <= row.sale_starts_at) errs.push('The sale must end after it starts.');
+    }
+    if (row.product_type === 'variable') {
+      if (!variations.length) errs.push('Create your versions on the Variations tab.');
+      if (row.listing_type !== 'free' && variations.some(v => v.is_active && !(Number(v.price) > 0))) errs.push('Every version that is on sale needs a price.');
+      if (variations.some(v => v.sale_price && Number(v.sale_price) >= Number(v.price))) errs.push('A version\'s sale price must be lower than its price.');
+    }
+    if (row.video_url && !/^https?:\/\//i.test(row.video_url)) errs.push('The video link must start with https://');
+    if (row.is_preorder) {
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
+      if (!row.preorder_date) errs.push('Choose the date pre-orders are expected to ship.');
+      else if (row.preorder_date < today) errs.push('The pre-order date can\'t be in the past.');
+    }
+    const useTiers = row.product_type === 'simple' && !row.is_gift_card;
+    if (useTiers && tiers.length) {
+      const qs = tiers.map(t => Number(t.min_qty)), ps = tiers.map(t => Number(t.unit_price));
+      if (qs.some(q => !(q >= 2)) || ps.some(p => !(p > 0))) errs.push('Each wholesale price break needs a quantity of 2 or more and a price.');
+      else if (new Set(qs).size !== qs.length) errs.push('Two wholesale price breaks have the same quantity.');
+      else if (ps.some(p => p >= Number(row.sale_price || row.price))) errs.push('Wholesale prices must be lower than the normal price.');
+    }
+    if (forReview && row.is_downloadable && !downloads.length) errs.push('Upload the file buyers will download (Downloads tab).');
+    if (forReview && row.is_service && !row.service_mode) errs.push('Choose where the service happens (Service tab).');
+    if (forReview) {
+      if (!photos.length) errs.push('Add a main image.');
+    }
+    return errs;
+  }
+
+  async function save(forReview) {
+    setMsg('');
+    const row = collect();
+    const errs = validate(row, forReview);
+    if (errs.length) return setMsg(errs.join(' '));
+    $('saveBtn').disabled = $('submitBtn').disabled = true;
+    try {
+      // 1. product
+      const res = editing.id ? await db.from('products').update(row).eq('id', editing.id).select().single()
+                             : await db.from('products').insert(row).select().single();
+      if (res.error) throw res.error;
+      const id = res.data.id; editing = { ...editing, ...res.data };
+
+      // 2. photos: remove, upload, reorder
+      if (removedPhotos.length) {
+        await db.from('product_images').delete().in('id', removedPhotos.map(p => p.id));
+        await db.storage.from(BUCKET).remove(removedPhotos.map(p => p.storage_path));
+        removedPhotos = [];
+      }
+      for (let i = 0; i < photos.length; i++) {
+        const ph = photos[i];
+        if (!ph.id) {
+          const ext = ph.blob.type === 'image/webp' ? 'webp' : 'jpg';
+          const path = `${me.id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+          const up = await db.storage.from(BUCKET).upload(path, ph.blob, { contentType: ph.blob.type, cacheControl: '31536000' });
+          if (up.error) throw up.error;
+          const ins = await db.from('product_images').insert({ product_id: id, storage_path: path, sort_order: i * 10 }).select().single();
+          if (ins.error) throw ins.error;
+          Object.assign(ph, { id: ins.data.id, storage_path: path });
+        } else {
+          const r = await db.from('product_images').update({ sort_order: i * 10 }).eq('id', ph.id);
+          if (r.error) throw r.error;
+        }
+      }
+
+      // 3. details (attributes that don't vary)
+      let r = await db.from('product_attribute_values').delete().eq('product_id', id);
+      if (r.error) throw r.error;
+      const allowed = new Set(effectiveAttrs(row.category_id).map(x => x.attr.id));
+      const pav = [];
+      for (const [aid, v] of values) {
+        if (!allowed.has(aid) || (row.product_type === 'variable' && varAttrIds.includes(aid))) continue;
+        if (v instanceof Set) v.forEach(o => pav.push({ product_id: id, attribute_id: aid, option_id: o }));
+        else pav.push({ product_id: id, attribute_id: aid, bool_value: v });
+      }
+      if (pav.length) { r = await db.from('product_attribute_values').insert(pav); if (r.error) throw r.error; }
+
+      // 4. variations: keep ids for versions that still exist
+      const existing = await db.from('product_variations').select('id').eq('product_id', id);
+      if (existing.error) throw existing.error;
+      const keep = new Set();
+      if (row.product_type === 'variable') {
+        for (let i = 0; i < variations.length; i++) {
+          const v = variations[i];
+          const key = Object.keys(v.options).sort((x, y) => x - y).map(k => v.options[k]).join('-');
+          const vr = { product_id: id, options_key: key, price: row.listing_type === 'free' ? 0 : Number(v.price) || 0, sale_price: Number(v.sale_price) || null,
+            stock: Number(v.stock) || 0, sku: (v.sku || '').trim() || null, image_id: v.image_id || null, is_active: v.is_active, sort_order: i * 10 };
+          const out = v.id ? await db.from('product_variations').update(vr).eq('id', v.id).select().single()
+                           : await db.from('product_variations').upsert(vr, { onConflict: 'product_id,options_key' }).select().single();
+          if (out.error) throw out.error;
+          v.id = out.data.id; keep.add(v.id);
+          r = await db.from('product_variation_options').delete().eq('variation_id', v.id); if (r.error) throw r.error;
+          r = await db.from('product_variation_options').insert(Object.entries(v.options).map(([a, o]) => ({ variation_id: v.id, attribute_id: Number(a), option_id: o })));
+          if (r.error) throw r.error;
+        }
+      }
+      const drop = existing.data.map(x => x.id).filter(x => !keep.has(x));
+      if (drop.length) { r = await db.from('product_variations').delete().in('id', drop); if (r.error) throw r.error; }
+
+      // 5. linked products
+      r = await db.from('product_links').delete().eq('product_id', id); if (r.error) throw r.error;
+      const lk = [...[...links.upsell].map((x, i) => ({ product_id: id, linked_product_id: x, kind: 'upsell', sort_order: i })),
+                  ...[...links.cross_sell].map((x, i) => ({ product_id: id, linked_product_id: x, kind: 'cross_sell', sort_order: i }))];
+      if (lk.length) { r = await db.from('product_links').insert(lk); if (r.error) throw r.error; }
+
+      // 6. wholesale price breaks
+      r = await db.from('product_price_tiers').delete().eq('product_id', id); if (r.error) throw r.error;
+      if (row.product_type === 'simple' && !row.is_gift_card && tiers.length) {
+        r = await db.from('product_price_tiers').insert(tiers.map(t => ({ product_id: id, min_qty: Number(t.min_qty), unit_price: Number(t.unit_price) }))); if (r.error) throw r.error;
+      }
+
+      // 7. download files (private bucket)
+      const dropFiles = row.is_downloadable ? removedDownloads : [...removedDownloads, ...downloads.filter(d => d.id)];
+      if (dropFiles.length) {
+        r = await db.from('product_downloads').delete().in('id', dropFiles.map(d => d.id)); if (r.error) throw r.error;
+        await db.storage.from(DL_BUCKET).remove(dropFiles.map(d => d.storage_path));
+        removedDownloads = []; if (!row.is_downloadable) downloads = [];
+      }
+      if (row.is_downloadable) {
+        for (let i = 0; i < downloads.length; i++) {
+          const d = downloads[i];
+          if (d.id) { r = await db.from('product_downloads').update({ sort_order: i * 10 }).eq('id', d.id); if (r.error) throw r.error; continue; }
+          const safe = d.file_name.replace(/[^A-Za-z0-9._-]+/g, '_').slice(-80);
+          const path = `${me.id}/${id}/${Date.now()}-${safe}`;
+          const up = await db.storage.from(DL_BUCKET).upload(path, d.file, { contentType: d.file.type || 'application/octet-stream' });
+          if (up.error) throw up.error;
+          const ins = await db.from('product_downloads').insert({ product_id: id, file_name: d.file_name, storage_path: path, size_bytes: d.size_bytes, sort_order: i * 10 }).select().single();
+          if (ins.error) throw ins.error;
+          Object.assign(d, { id: ins.data.id, storage_path: path }); delete d.file;
+        }
+      }
+
+      // 8. featured request
+      if (wantFeatured && !openFeat && planId) {
+        const f = await db.from('featured_requests').insert({ product_id: id, plan_id: planId }).select().single();
+        if (f.error) throw f.error; openFeat = f.data;
+      } else if (!wantFeatured && openFeat && openFeat.status === 'awaiting_payment') {
+        r = await db.from('featured_requests').delete().eq('id', openFeat.id); if (r.error) throw r.error; openFeat = null;
+      }
+
+      // 7. send for review
+      if (forReview) {
+        const s = await db.rpc('submit_product', { p_product: id });
+        if (s.error) { await loadProducts(); await openEditor(id, friendly(s.error)); toast('Saved as draft'); return; }
+      }
+      dirty = false;
+      await loadProducts();
+      await openEditor(id);
+      toast(forReview ? 'Sent for review. We usually check within 24 hours.' : 'Saved');
+    } catch (e) {
+      setMsg(friendly(e));
+    } finally {
+      $('saveBtn').disabled = $('submitBtn').disabled = false;
+    }
+  }
+
+  window.addEventListener('beforeunload', e => { if (dirty && !$('editor').hidden) { e.preventDefault(); e.returnValue = ''; } });
+
+  // ===================== Shop settings =====================
+  const SHOP_BUCKET = 'shop-assets';
+  const DISTRICTS = {
+    'Dhaka': ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail'],
+    'Chattogram': ['Chattogram', 'Bandarban', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Cumilla', 'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati'],
+    'Rajshahi': ['Rajshahi', 'Bogura', 'Chapai Nawabganj', 'Joypurhat', 'Naogaon', 'Natore', 'Pabna', 'Sirajganj'],
+    'Khulna': ['Khulna', 'Bagerhat', 'Chuadanga', 'Jashore', 'Jhenaidah', 'Kushtia', 'Magura', 'Meherpur', 'Narail', 'Satkhira'],
+    'Barishal': ['Barishal', 'Barguna', 'Bhola', 'Jhalokathi', 'Patuakhali', 'Pirojpur'],
+    'Sylhet': ['Sylhet', 'Habiganj', 'Moulvibazar', 'Sunamganj'],
+    'Rangpur': ['Rangpur', 'Dinajpur', 'Gaibandha', 'Kurigram', 'Lalmonirhat', 'Nilphamari', 'Panchagarh', 'Thakurgaon'],
+    'Mymensingh': ['Mymensingh', 'Jamalpur', 'Netrokona', 'Sherpur'],
+  };
+  let shopImg = { logo: null, banner: null };      // { path, url, blob }
+  let shopImgRemoved = { logo: null, banner: null };
+
+  async function loadSettings() {
+    setSMsg('');
+    const sd = await db.from('seller_details').select('*').eq('user_id', me.id).single();
+    if (sd.error) return setSMsg(/shop_slug|logo_path|column/i.test(sd.error.message) ? 'Shop settings need a database update. Run shop_settings.sql in Supabase, then reload.' : friendly(sd.error));
+    shop = sd.data;
+    shopImg = { logo: shop.logo_path ? { path: shop.logo_path, url: shopUrl(shop.logo_path) } : null, banner: shop.banner_path ? { path: shop.banner_path, url: shopUrl(shop.banner_path) } : null };
+    shopImgRemoved = { logo: null, banner: null };
+    const v = (id, x) => $(id).value = x || '';
+    v('sName', shop.shop_name); v('sTagline', shop.tagline); v('sSlug', shop.shop_slug); v('sAbout', shop.shop_description);
+    v('sPhone', shop.phone_public); v('sWhatsapp', shop.whatsapp); v('sEmail', shop.email_public); v('sAddress', shop.business_address); v('sLicence', shop.trade_license);
+    v('sFacebook', shop.facebook_url); v('sInstagram', shop.instagram_url); v('sYoutube', shop.youtube_url); v('sTiktok', shop.tiktok_url); v('sWebsite', shop.website_url);
+    $('sVacation').checked = !!shop.vacation_mode; v('sVacMsg', shop.vacation_message);
+    const sel = $('sDistrict'); sel.innerHTML = '';
+    sel.append(h('option', { value: '', text: 'Choose your district' }));
+    for (const [div, list] of Object.entries(DISTRICTS)) sel.append(h('optgroup', { label: div + ' Division' }, list.map(d => h('option', { value: d, text: d }))));
+    if (shop.city && !Object.values(DISTRICTS).flat().includes(shop.city)) sel.append(h('option', { value: shop.city, text: shop.city }));
+    sel.value = shop.city || '';
+    $('vacMsgWrap').hidden = !$('sVacation').checked;
+    drawShopImages(); drawPreview();
+  }
+  const shopUrl = path => db.storage.from(SHOP_BUCKET).getPublicUrl(path).data.publicUrl;
+
+  function drawShopImages() {
+    for (const kind of ['logo', 'banner']) {
+      const box = $(kind + 'Prev'); box.innerHTML = '';
+      const im = shopImg[kind];
+      if (im) box.append(h('img', { src: im.url, alt: kind === 'logo' ? 'Shop logo' : 'Shop banner' })); else box.textContent = kind === 'logo' ? 'No logo' : 'No banner';
+      $(kind + 'Remove').hidden = !im;
+      $(kind + 'Pick').textContent = im ? `Change ${kind}` : `Upload ${kind}`;
+    }
+  }
+  function drawPreview() {
+    const name = $('sName').value.trim() || 'Your shop';
+    $('pvName').textContent = name; $('pvTag').textContent = $('sTagline').value.trim();
+    const logo = $('pvLogo'); logo.innerHTML = '';
+    if (shopImg.logo) logo.append(h('img', { src: shopImg.logo.url, alt: '' })); else logo.textContent = name.trim().charAt(0).toUpperCase();
+    $('pvBanner').style.backgroundImage = shopImg.banner ? `url("${shopImg.banner.url}")` : '';
+    $('pvAddr').textContent = 'rgbkart.com/shop/' + ($('sSlug').value.trim() || '…');
+  }
+  ['sName', 'sTagline', 'sSlug'].forEach(id => $(id).addEventListener('input', drawPreview));
+  $('sSlug').addEventListener('input', () => { const c = $('sSlug').selectionStart; $('sSlug').value = $('sSlug').value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'); $('sSlug').setSelectionRange(c, c); drawPreview(); });
+  $('sVacation').onchange = () => { $('vacMsgWrap').hidden = !$('sVacation').checked; };
+
+  for (const kind of ['logo', 'banner']) {
+    $(kind + 'Pick').onclick = () => $(kind + 'File').click();
+    $(kind + 'File').onchange = async () => {
+      const f = $(kind + 'File').files[0]; $(kind + 'File').value = '';
+      if (!f) return;
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return toast('Use a JPG, PNG or WebP image.');
+      try {
+        const blob = await shrink(f, kind === 'logo' ? 512 : 1920);
+        if (shopImg[kind] && shopImg[kind].path) shopImgRemoved[kind] = shopImg[kind].path;
+        shopImg[kind] = { blob, url: URL.createObjectURL(blob) };
+        drawShopImages(); drawPreview();
+      } catch (_) { toast("Couldn't read that image."); }
+    };
+    $(kind + 'Remove').onclick = () => { if (shopImg[kind] && shopImg[kind].path) shopImgRemoved[kind] = shopImg[kind].path; shopImg[kind] = null; drawShopImages(); drawPreview(); };
+  }
+
+
+  function setSMsg(t) { $('settingsMsg').textContent = t; $('settingsMsg').hidden = !t; }
+
+  $('settingsForm').onsubmit = async e => {
+    e.preventDefault(); setSMsg('');
+    const val = id => $(id).value.trim() || null;
+    const errs = [];
+    if (!val('sName') || val('sName').length < 2) errs.push('Enter your shop name.');
+    const slug = val('sSlug');
+    if (slug && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) errs.push('The web address can only use lowercase letters, numbers and single dashes, and can\'t start or end with a dash.');
+    if (slug && slug.length < 3) errs.push('The web address needs at least 3 characters.');
+    if (!val('sAddress')) errs.push('Enter your business address.');
+    if (!$('sDistrict').value) errs.push('Choose your district.');
+    for (const [id, label] of [['sPhone', 'Phone'], ['sWhatsapp', 'WhatsApp']]) if (val(id) && !/^\+?[0-9 -]{6,20}$/.test(val(id))) errs.push(`${label} should be a phone number, like 01711000000.`);
+    if (val('sEmail') && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('sEmail'))) errs.push('Check the email address.');
+    for (const [id, label] of [['sFacebook', 'Facebook'], ['sInstagram', 'Instagram'], ['sYoutube', 'YouTube'], ['sTiktok', 'TikTok'], ['sWebsite', 'Website']])
+      if (val(id) && !/^https?:\/\//i.test(val(id))) errs.push(`${label} link must start with https://`);
+    if (errs.length) return setSMsg(errs.join(' '));
+
+    $('settingsSave').disabled = true;
+    try {
+      const paths = { logo: shopImg.logo ? shopImg.logo.path || null : null, banner: shopImg.banner ? shopImg.banner.path || null : null };
+      for (const kind of ['logo', 'banner']) {
+        const im = shopImg[kind];
+        if (im && im.blob) {
+          const ext = im.blob.type === 'image/webp' ? 'webp' : 'jpg';
+          const path = `${me.id}/${kind}-${Date.now()}.${ext}`;
+          const up = await db.storage.from(SHOP_BUCKET).upload(path, im.blob, { contentType: im.blob.type, cacheControl: '31536000' });
+          if (up.error) throw up.error;
+          im.path = path; delete im.blob; paths[kind] = path;
+        }
+      }
+      const row = {
+        shop_name: val('sName'), tagline: val('sTagline'), shop_slug: slug, shop_description: val('sAbout'),
+        phone_public: val('sPhone'), whatsapp: val('sWhatsapp'), email_public: val('sEmail'), business_address: val('sAddress'), city: $('sDistrict').value, trade_license: val('sLicence'),
+        facebook_url: val('sFacebook'), instagram_url: val('sInstagram'), youtube_url: val('sYoutube'), tiktok_url: val('sTiktok'), website_url: val('sWebsite'),
+        vacation_mode: $('sVacation').checked, vacation_message: $('sVacation').checked ? val('sVacMsg') : null,
+        logo_path: paths.logo, banner_path: paths.banner,
+      };
+      const res = await db.from('seller_details').update(row).eq('user_id', me.id).select().single();
+      if (res.error) throw res.error;
+      shop = res.data;
+      const old = Object.values(shopImgRemoved).filter(Boolean);
+      if (old.length) await db.storage.from(SHOP_BUCKET).remove(old);
+      shopImgRemoved = { logo: null, banner: null };
+
+      $('shopName').innerHTML = ''; $('shopName').append(shop.shop_name, h('small', { text: { pending: 'Waiting for approval', approved: 'Approved shop', rejected: 'Not approved' }[shop.status] }));
+      $('sSlug').value = shop.shop_slug || ''; drawShopImages(); drawPreview();
+      toast('Shop settings saved');
+    } catch (err) {
+      const msg = err.message || '';
+      setSMsg(/seller_details_slug_key|duplicate key/i.test(msg) ? 'That web address is taken by another shop. Try a different one.'
+        : /seller_details_settings_rules/.test(msg) ? 'Some values aren\'t allowed. Check the phone numbers, email, links and web address.' : friendly(err));
+    } finally { $('settingsSave').disabled = false; }
+  };
+
+  // ===================== Helpers =====================
+  function setMsg(t) { $('edMsg').textContent = t; $('edMsg').hidden = !t; }
+  function confirmBtn(label, confirmLabel, onConfirm) {
+    const b = h('button', { type: 'button', class: 'bad', text: label });
+    let armed = false, timer;
+    b.onclick = async () => {
+      if (!armed) { armed = true; b.textContent = confirmLabel; timer = setTimeout(() => { armed = false; b.textContent = label; }, 4000); return; }
+      clearTimeout(timer); b.disabled = true;
+      try { await onConfirm(); } finally { b.disabled = false; armed = false; b.textContent = label; }
+    };
+    return b;
+  }
+  let toastTimer;
+  function toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3200); }
+  function friendly(error) {
+    const m = (error && (error.message || error.error || String(error))) || 'Something went wrong.';
+    if (/products_options_rules/.test(m)) return 'Some option values aren\'t allowed. Check the pre-order date, gift card and download settings.';
+    if (/product_price_tiers|product_downloads|is_downloadable|cod_allowed/.test(m) && /does not exist|Could not find|column/i.test(m)) return 'Run product_options.sql in Supabase to use these product options, then reload.';
+    if (/products_rules/.test(m)) return 'Some values aren\'t allowed. Check the price, sale price, dates and video link.';
+    if (/listing_type|product_type|tags|sale_price/.test(m) && /column|schema cache/i.test(m)) return 'The product database needs updating. Run products_v2.sql in Supabase, then reload.';
+    if (/does not exist|Could not find the (table|function)/i.test(m)) return 'The product database isn’t set up yet. Run products.sql and products_v2.sql in Supabase, then reload.';
+    if (/row-level security|permission denied/i.test(m)) return 'You can’t make this change. Your shop may not be approved yet.';
+    if (/Payload too large|exceeded the maximum/i.test(m)) return 'A photo is too large. Use photos under 5 MB.';
+    if (/mime type/i.test(m)) return 'Only JPG, PNG and WebP photos can be uploaded.';
+    return m;
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); if ((e.ctrlKey || e.metaKey) && e.key === 's' && !$('editor').hidden) { e.preventDefault(); save(false); } });
+
+  start();
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RGBKart Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600&display=swap">
+<style>
+  /* Layout: one centered column, a card for the active view */
+  :root {
+    --bg: #f3f5f2; --surface: #ffffff; --fg: #1d2420; --muted: #66706a;
+    --line: #dde3dd; --accent: #1f7a5a; --accent-fg: #ffffff; --accent-soft: #e2f1ea;
+    --danger: #b3392f; --warn: #8a5a00; --warn-soft: #fbefd5;
+    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121614; --surface: #1b211e; --fg: #e6ece8; --muted: #95a29b;
+      --line: #2c3530; --accent: #4fbf93; --accent-fg: #0e1411; --accent-soft: #1d3329;
+      --danger: #ec7d72; --warn: #f0c060; --warn-soft: #3a2f17; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body);
+    padding-block: 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  main { max-width: 480px; margin: 0 auto; display: grid; gap: 20px; }
+  .sell-cta { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; text-decoration: none; color: var(--fg);
+    background: var(--surface); border: 1.5px solid var(--accent); border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 10px rgb(0 0 0 / .05); }
+  .sell-cta > span:first-child { display: grid; gap: 2px; min-width: 0; flex: 1 1 220px; }
+  .sell-cta span span { color: var(--muted); font-size: .88rem; }
+  .sell-btn { background: var(--accent); color: var(--accent-fg); font-weight: 700; padding: 10px 16px; border-radius: 10px; white-space: nowrap; }
+  .sell-cta:hover .sell-btn { filter: brightness(.92); }
+  .sell-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  /* floating button on phones, always within thumb reach */
+  .sell-fab { display: none; }
+  @media (max-width: 640px) {
+    .sell-fab { display: inline-flex; position: fixed; z-index: 40; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px));
+      background: var(--accent); color: var(--accent-fg); font-weight: 700; text-decoration: none; padding: 13px 20px; border-radius: 999px; box-shadow: 0 6px 18px rgb(0 0 0 / .25); }
+  }
+  h1 { font: 600 2rem/1.1 var(--display); margin: 0; text-wrap: balance; }
+  h2 { font: 600 1.25rem/1.2 var(--display); margin: 0; }
+  .sub { color: var(--muted); margin: 4px 0 0; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; }
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 14px; min-width: 0; }
+  label { font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: grid; gap: 6px; }
+  input[type=email], input[type=password], input[type=text], input[type=tel], textarea, select {
+    font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; width: 100%; text-transform: none; letter-spacing: 0; }
+  textarea { min-height: 72px; resize: vertical; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button { font: 600 15px var(--body); border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1px solid transparent; }
+  .primary { background: var(--accent); color: var(--accent-fg); }
+  .ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+  .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 500; }
+  .small { font-size: .85rem; justify-self: end; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > input { flex: 1; min-width: 0; }
+  .msg { font-size: .9rem; margin: 0; }
+  .msg.error { color: var(--danger); }
+
+  .social { display: grid; gap: 10px; }
+  .oauth { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .oauth svg { width: 18px; height: 18px; flex: none; }
+  .divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: .8rem; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  /* Customer / Seller switch */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+  .seg button { background: transparent; color: var(--muted); padding: 10px 8px; display: grid; gap: 2px; }
+  .seg button small { font-weight: 400; font-size: .78rem; }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+  .seg button[aria-pressed="true"] small { color: var(--muted); }
+  .section-label { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 6px 0 -4px; }
+
+  /* Signed-in view */
+  .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .who { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+  .profile { display: grid; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .profile-name { font: 600 1.25rem/1.2 var(--display); overflow-wrap: anywhere; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .chip.pending { background: var(--warn-soft); color: var(--warn); }
+  .chip.rejected { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+  .detail { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+
+  ul { list-style: none; margin: 0; padding: 0; display: grid; }
+  li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+  li:first-child { border-top: 0; }
+  li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  li.done span { color: var(--muted); text-decoration: line-through; }
+  li input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .del { background: none; border: 0; color: var(--muted); padding: 4px 8px; font-size: 1.1rem; }
+  .del:hover { color: var(--danger); }
+  .empty { color: var(--muted); text-align: center; padding: 12px 0; }
+  .count { color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<a class="sell-fab" href="sell.html" aria-label="Sell an item">+ Sell</a>
+<main>
+  <header>
+    <h1><a href="index.html" style="color:inherit;text-decoration:none">RGBKart</a></h1>
+    <p class="sub" id="tagline">Sign in, or create an account to shop or sell.</p>
+  </header>
+
+  <a class="sell-cta" href="sell.html">
+    <span><b>Have something to sell?</b><span>List it free, no account needed. Live after a quick check.</span></span>
+    <span class="sell-btn">+ Sell an item</span>
+  </a>
+
+  <!-- Sign in / Create account / Forgot password -->
+  <form id="auth" class="card" hidden>
+    <div class="seg" id="signupRole" role="group" aria-label="Account type" hidden>
+      <button type="button" data-role="customer" aria-pressed="true">As Customer<small>I want to buy</small></button>
+      <button type="button" data-role="seller" aria-pressed="false">As Seller<small>I want to sell</small></button>
+    </div>
+    <div class="social" id="social">
+      <button type="button" class="ghost oauth" data-provider="google">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        Continue with Google
+      </button>
+      <button type="button" class="ghost oauth" data-provider="facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>
+        Continue with Facebook
+      </button>
+    </div>
+    <div class="divider" id="divider"><span>or use email</span></div>
+    <fieldset id="signupFields" hidden disabled></fieldset>
+    <p class="section-label" id="loginLabel" hidden>Login details</p>
+    <label>Email <input id="email" type="email" autocomplete="email" required></label>
+    <label id="pwLabel">Password <input id="password" type="password" autocomplete="current-password" minlength="6" required></label>
+    <button id="forgotBtn" class="link small" type="button">Forgot password?</button>
+    <button id="authBtn" class="primary" type="submit">Sign in</button>
+    <p class="msg">
+      <span id="switchText">No account yet?</span>
+      <button id="switchBtn" class="link" type="button">Create one</button>
+    </p>
+    <p id="authMsg" class="msg" role="status"></p>
+  </form>
+
+  <!-- First sign-in with Google/Facebook: choose account type -->
+  <form id="onboard" class="card" hidden>
+    <h2>Finish setting up your account</h2>
+    <p class="msg">Tell us how you'll use RGBKart. You can't change this later.</p>
+    <div class="seg" id="onboardRole" role="group" aria-label="Account type">
+      <button type="button" data-role="customer" aria-pressed="true">As Customer<small>I want to buy</small></button>
+      <button type="button" data-role="seller" aria-pressed="false">As Seller<small>I want to sell</small></button>
+    </div>
+    <fieldset id="onboardFields"></fieldset>
+    <button id="onboardBtn" class="primary" type="submit">Save and continue</button>
+    <button id="onboardSignOut" class="link" type="button">Sign out</button>
+    <p id="onboardMsg" class="msg" role="status"></p>
+  </form>
+
+  <!-- Set new password (opened from the reset email link) -->
+  <form id="resetForm" class="card" hidden>
+    <h2>Set a new password</h2>
+    <label>New password <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required></label>
+    <button id="resetBtn" class="primary" type="submit">Save password</button>
+    <p id="resetMsg" class="msg" role="status"></p>
+  </form>
+
+  <!-- Signed in -->
+  <section id="app" class="card" hidden>
+    <div class="topbar">
+      <span class="who" id="who"></span>
+      <button id="signOut" class="ghost" type="button">Sign out</button>
+    </div>
+    <div class="profile">
+      <span class="profile-name" id="pName"></span>
+      <div class="chips"><span class="chip" id="pRole"></span><span class="chip" id="pStatus" hidden></span></div>
+      <span class="detail" id="pDetail"></span>
+    </div>
+    <div class="row" style="flex-wrap:wrap">
+      <a class="primary" href="index.html" style="flex:1;text-align:center;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600">Start shopping</a>
+      <a class="ghost" href="sell.html" style="flex:1;text-align:center;text-decoration:none;padding:10px 16px;border-radius:8px;font-weight:600;border:1px solid var(--line);color:var(--fg)">Sell an item</a>
+    </div>
+    <p class="detail" style="margin:0">Your orders, wishlist and addresses will appear here once checkout opens.</p>
+    <!-- old starter to-do list, kept hidden -->
+    <form id="addForm" class="row" hidden><input id="newTodo" type="text"><button type="submit">Add</button></form>
+    <ul id="list" hidden></ul><span class="count" id="count" hidden></span>
+    <p id="appMsg" class="msg error" role="alert"></p>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const $ = id => document.getElementById(id);
+  const VIEWS = ['auth', 'onboard', 'resetForm', 'app'];
+  const show = id => VIEWS.forEach(v => $(v).hidden = v !== id);
+
+  // Where Google, Facebook and email links send the user back to.
+  const RETURN_URL = location.origin + location.pathname;
+  const isFile = location.protocol === 'file:';
+
+  let mode = 'signin';
+  let signupRole = 'customer';
+  let onboardRole = 'customer';
+  let recovering = false;
+  let todos = [];
+
+  // ---------- Account-type forms ----------
+  const FIELDS = {
+    common: [
+      { k: 'full_name', label: 'Full name', req: true, ac: 'name' },
+      { k: 'phone', label: 'Phone', req: true, type: 'tel', ac: 'tel', ph: '01XXXXXXXXX' },
+    ],
+    customer: [
+      { section: 'Delivery details' },
+      { k: 'address', label: 'Delivery address', req: true, ac: 'street-address', ph: 'House, road, area' },
+      { k: 'city', label: 'District', req: true, districts: true },
+      { k: 'postal_code', label: 'Postal code (optional)', ac: 'postal-code', ph: '1207' },
+    ],
+    seller: [
+      { section: 'Shop details' },
+      { k: 'shop_name', label: 'Shop name', req: true, ac: 'organization' },
+      { k: 'shop_description', label: 'What do you sell? (optional)', area: true },
+      { k: 'business_address', label: 'Business address', req: true, ac: 'street-address', ph: 'House, road, area' },
+      { k: 'city', label: 'District', req: true, districts: true },
+      { k: 'trade_license', label: 'Trade license no. (optional)' },
+    ],
+  };
+
+  // All 64 districts of Bangladesh, by division (Dhaka listed first in its division)
+  const DISTRICTS = {
+    'Dhaka': ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail'],
+    'Chattogram': ['Chattogram', 'Bandarban', 'Brahmanbaria', 'Chandpur', 'Cox\'s Bazar', 'Cumilla', 'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati'],
+    'Rajshahi': ['Rajshahi', 'Bogura', 'Chapai Nawabganj', 'Joypurhat', 'Naogaon', 'Natore', 'Pabna', 'Sirajganj'],
+    'Khulna': ['Khulna', 'Bagerhat', 'Chuadanga', 'Jashore', 'Jhenaidah', 'Kushtia', 'Magura', 'Meherpur', 'Narail', 'Satkhira'],
+    'Barishal': ['Barishal', 'Barguna', 'Bhola', 'Jhalokathi', 'Patuakhali', 'Pirojpur'],
+    'Sylhet': ['Sylhet', 'Habiganj', 'Moulvibazar', 'Sunamganj'],
+    'Rangpur': ['Rangpur', 'Dinajpur', 'Gaibandha', 'Kurigram', 'Lalmonirhat', 'Nilphamari', 'Panchagarh', 'Thakurgaon'],
+    'Mymensingh': ['Mymensingh', 'Jamalpur', 'Netrokona', 'Sherpur'],
+  };
+  function districtSelect(value) {
+    const sel = document.createElement('select');
+    const first = new Option('Choose your district', ''); first.disabled = true; sel.append(first);
+    for (const [division, list] of Object.entries(DISTRICTS)) {
+      const g = document.createElement('optgroup'); g.label = division + ' Division';
+      list.forEach(d => g.append(new Option(d, d)));
+      sel.append(g);
+    }
+    // keep an older free-typed value if it isn't in the list
+    if (value && !Object.values(DISTRICTS).flat().includes(value)) sel.append(new Option(value, value));
+    sel.value = value || '';
+    return sel;
+  }
+
+  function collect(box) {
+    return Object.fromEntries([...box.querySelectorAll('input, textarea, select')].map(el => [el.name, el.value.trim()]));
+  }
+
+  function renderFields(box, role, prefix, prefill = {}) {
+    const keep = { ...prefill, ...collect(box) };   // keep what was typed when switching type
+    box.innerHTML = '';
+    const p = document.createElement('p');
+    p.className = 'section-label'; p.textContent = 'About you';
+    box.append(p);
+    for (const f of [...FIELDS.common, ...FIELDS[role]]) {
+      if (f.section) {
+        const s = document.createElement('p');
+        s.className = 'section-label'; s.textContent = f.section;
+        box.append(s); continue;
+      }
+      const label = document.createElement('label');
+      label.textContent = f.label;
+      let el;
+      if (f.districts) {
+        el = districtSelect(keep[f.k]);
+      } else {
+        el = document.createElement(f.area ? 'textarea' : 'input');
+        if (!f.area) el.type = f.type || 'text';
+        el.maxLength = f.area ? 500 : 120;
+        if (f.ac) el.autocomplete = f.ac;
+        if (f.ph) el.placeholder = f.ph;
+        if (keep[f.k]) el.value = keep[f.k];
+      }
+      el.id = prefix + '-' + f.k; el.name = f.k;
+      el.required = !!f.req;
+      label.append(el); box.append(label);
+    }
+  }
+
+  function wireRoleSwitch(groupId, onPick) {
+    $(groupId).querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        $(groupId).querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+        onPick(btn.dataset.role);
+      };
+    });
+  }
+  wireRoleSwitch('signupRole', r => { signupRole = r; renderFields($('signupFields'), r, 'su'); updateSignupButton(); });
+  wireRoleSwitch('onboardRole', r => { onboardRole = r; renderFields($('onboardFields'), r, 'ob'); });
+
+  function updateSignupButton() {
+    if (mode === 'signup') $('authBtn').textContent = signupRole === 'seller' ? 'Create seller account' : 'Create customer account';
+  }
+
+  // ---------- Sign in / Create account / Forgot ----------
+  function setMode(next) {
+    mode = next;
+    const signup = mode === 'signup', forgot = mode === 'forgot';
+    $('signupRole').hidden = !signup;
+    $('signupFields').hidden = !signup;
+    $('signupFields').disabled = !signup;
+    $('loginLabel').hidden = !signup;
+    if (signup) renderFields($('signupFields'), signupRole, 'su');
+    $('social').hidden = forgot;
+    $('divider').hidden = forgot;
+    $('pwLabel').hidden = forgot;
+    $('password').required = !forgot;
+    $('forgotBtn').hidden = mode !== 'signin';
+    $('authBtn').textContent = { signin: 'Sign in', signup: '', forgot: 'Send reset link' }[mode];
+    updateSignupButton();
+    $('switchText').textContent = signup ? 'Already have an account?' : forgot ? 'Remembered it?' : 'No account yet?';
+    $('switchBtn').textContent = mode === 'signin' ? 'Create one' : 'Sign in';
+    $('password').autocomplete = signup ? 'new-password' : 'current-password';
+    setMsg('authMsg', '');
+  }
+  $('switchBtn').onclick = () => setMode(mode === 'signin' ? 'signup' : 'signin');
+  $('forgotBtn').onclick = () => setMode('forgot');
+
+  function needsServer(msgId = 'authMsg') {
+    if (!isFile) return false;
+    setMsg(msgId, 'This needs the app to run from a web address (for example http://localhost:5500), not from a file you double-clicked.', true);
+    return true;
+  }
+
+  document.querySelectorAll('.oauth').forEach(btn => {
+    btn.onclick = async () => {
+      if (needsServer()) return;
+      if (mode === 'signup') {
+        try { sessionStorage.setItem('rgbkart-role', signupRole); } catch (_) {}
+      }
+      const { error } = await db.auth.signInWithOAuth({
+        provider: btn.dataset.provider,
+        options: { redirectTo: RETURN_URL }
+      });
+      if (error) setMsg('authMsg', error.message, true);
+    };
+  });
+
+  $('auth').onsubmit = async e => {
+    e.preventDefault();
+    const email = $('email').value.trim(), password = $('password').value;
+    setMsg('authMsg', '');
+    $('authBtn').disabled = true;
+
+    try {
+      if (mode === 'forgot') {
+        if (needsServer()) return;
+        const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: RETURN_URL });
+        if (error) return setMsg('authMsg', error.message, true);
+        return setMsg('authMsg', 'If that email has an account, a reset link is on its way. Open it on this device.');
+      }
+
+      if (mode === 'signin') {
+        const { error } = await db.auth.signInWithPassword({ email, password });
+        if (error) setMsg('authMsg', error.message, true);
+        return;
+      }
+
+      // Create account: the role and form fields travel with the sign-up,
+      // and the database turns them into a profile automatically.
+      const meta = { role: signupRole, ...collect($('signupFields')) };
+      const options = { data: meta };
+      if (!isFile) options.emailRedirectTo = RETURN_URL;
+      const { data, error } = await db.auth.signUp({ email, password, options });
+      if (error) return setMsg('authMsg', error.message, true);
+      if (!data.session) {
+        setMsg('authMsg', 'Account created. Check your email for a confirmation link, then sign in here.');
+      }
+    } finally {
+      $('authBtn').disabled = false;
+    }
+  };
+
+  // ---------- Choose account type after Google / Facebook ----------
+  $('onboard').onsubmit = async e => {
+    e.preventDefault();
+    $('onboardBtn').disabled = true;
+    setMsg('onboardMsg', '');
+    const meta = { role: onboardRole, ...collect($('onboardFields')) };
+    const { error } = await db.rpc('complete_profile', { meta });
+    $('onboardBtn').disabled = false;
+    if (error) return setMsg('onboardMsg', friendly(error), true);
+    try { sessionStorage.removeItem('rgbkart-role'); } catch (_) {}
+    const { data } = await db.auth.getSession();
+    render(data.session);
+  };
+  $('onboardSignOut').onclick = () => db.auth.signOut();
+
+  // ---------- Reset password ----------
+  $('resetForm').onsubmit = async e => {
+    e.preventDefault();
+    $('resetBtn').disabled = true;
+    const { error } = await db.auth.updateUser({ password: $('newPassword').value });
+    $('resetBtn').disabled = false;
+    if (error) return setMsg('resetMsg', error.message, true);
+    recovering = false;
+    $('newPassword').value = '';
+    const { data } = await db.auth.getSession();
+    render(data.session);
+  };
+
+  $('signOut').onclick = () => db.auth.signOut();
+
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') recovering = true;
+    if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') return;
+    // Defer so Supabase finishes its own work before we query the database.
+    setTimeout(() => render(session), 0);
+  });
+
+  // ---------- Signed-in view ----------
+  const one = x => Array.isArray(x) ? x[0] : x;
+
+  async function render(session) {
+    if (!session) { todos = []; recovering = false; show('auth'); return; }
+    if (recovering) { show('resetForm'); return; }
+
+    const { data: p, error } = await db.from('profiles')
+      .select('*, customer_details(*), seller_details(*)')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if (error) { show('app'); showDbError(error); return; }
+
+    if (!p || !p.role) {
+      // Team members don't need a customer/seller profile: send them to the admin panel.
+      const { data: staffRole } = await db.rpc('my_staff_role');
+      if (staffRole) { location.href = 'admin.html'; return; }
+      let picked = 'customer';
+      try { picked = sessionStorage.getItem('rgbkart-role') || 'customer'; } catch (_) {}
+      onboardRole = picked;
+      $('onboardRole').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.role === picked));
+      $('onboardFields').innerHTML = '';
+      renderFields($('onboardFields'), picked, 'ob', { full_name: (p && p.full_name) || session.user.user_metadata.full_name || '' });
+      show('onboard');
+      return;
+    }
+
+    // Sellers manage their shop in Seller Center
+    if (p.role === 'seller') { location.href = 'seller.html'; return; }
+    if (p.role === 'individual') { location.href = 'sell.html'; return; }
+    drawProfile(p, session.user.email);
+    show('app');
+    // (starter to-do list no longer loaded)
+  }
+
+  function drawProfile(p, email) {
+    $('who').textContent = email;
+    $('pName').textContent = p.full_name || email;
+    $('pRole').textContent = p.role === 'seller' ? 'Seller' : 'Customer';
+    const status = $('pStatus');
+    status.hidden = true;
+    if (p.role === 'seller') {
+      const s = one(p.seller_details);
+      $('pDetail').textContent = s ? s.shop_name + (s.city ? ' · ' + s.city : '') : '';
+      if (s) {
+        status.hidden = false;
+        status.className = 'chip ' + s.status;
+        status.textContent = { pending: 'Pending approval', approved: 'Approved', rejected: 'Not approved' }[s.status] || s.status;
+      }
+    } else {
+      const c = one(p.customer_details);
+      $('pDetail').textContent = c ? [c.address, c.city, c.postal_code].filter(Boolean).join(', ') : '';
+    }
+  }
+
+  // ---------- Todos ----------
+  async function loadTodos() {
+    const { data, error } = await db.from('todos').select('*').order('created_at', { ascending: true });
+    if (error) return showDbError(error);
+    todos = data; drawList();
+  }
+
+  $('addForm').onsubmit = async e => {
+    e.preventDefault();
+    const title = $('newTodo').value.trim();
+    if (!title) return;
+    const { data, error } = await db.from('todos').insert({ title }).select().single();
+    if (error) return showDbError(error);
+    todos.push(data); $('newTodo').value = ''; drawList();
+  };
+
+  async function toggle(todo) {
+    const { error } = await db.from('todos').update({ is_done: !todo.is_done }).eq('id', todo.id);
+    if (error) return showDbError(error);
+    todo.is_done = !todo.is_done; drawList();
+  }
+
+  async function remove(todo) {
+    const { error } = await db.from('todos').delete().eq('id', todo.id);
+    if (error) return showDbError(error);
+    todos = todos.filter(t => t.id !== todo.id); drawList();
+  }
+
+  function drawList() {
+    const list = $('list'); list.innerHTML = '';
+    if (!todos.length) list.innerHTML = '<li class="empty">No tasks yet. Add your first one above.</li>';
+    for (const t of todos) {
+      const li = document.createElement('li');
+      li.className = t.is_done ? 'done' : '';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = t.is_done; cb.id = 'todo-' + t.id;
+      cb.setAttribute('aria-label', 'Mark "' + t.title + '" done');
+      cb.onchange = () => toggle(t);
+      const span = document.createElement('span'); span.textContent = t.title;
+      const del = document.createElement('button');
+      del.className = 'del'; del.type = 'button'; del.textContent = '×';
+      del.setAttribute('aria-label', 'Delete "' + t.title + '"');
+      del.onclick = () => remove(t);
+      li.append(cb, span, del); list.append(li);
+    }
+    const left = todos.filter(t => !t.is_done).length;
+    $('count').textContent = todos.length ? `${left} of ${todos.length} left` : '';
+    setMsg('appMsg', '');
+  }
+
+  // ---------- Messages ----------
+  function friendly(error) {
+    if (/does not exist|Could not find the (table|function)/i.test(error.message)) {
+      return 'The database isn’t set up yet. Run setup.sql and profiles.sql in your Supabase SQL Editor, then reload.';
+    }
+    return error.message;
+  }
+  function showDbError(error) { setMsg('appMsg', friendly(error), true); }
+
+  function setMsg(id, text, isError) {
+    $(id).textContent = text;
+    if (id !== 'appMsg') $(id).classList.toggle('error', !!isError);
+  }
+
+  setMode('signin');
+</script>
+</body>
+</html>

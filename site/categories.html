@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RGBKart Categories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="shop.css?v=2">
+<style>
+  /* Layout: every category as a card (picture, name, its sub-categories as links) — 4 per row on desktop */
+  main { padding-block: 20px 60px; display: grid; gap: 18px; }
+  .crumbs { font-size: .88rem; color: var(--muted); display: flex; gap: 6px; }
+  .crumbs a { text-decoration: none; }
+  h1 { font: 600 1.8rem/1.15 var(--display); margin: 0; }
+  .lead { color: var(--muted); margin: 4px 0 0; }
+  .catgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 1100px) { .catgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .catgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+  @media (max-width: 420px) { .catgrid { grid-template-columns: minmax(0, 1fr); } }
+  .catbox { --hue: 170; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform .18s, box-shadow .18s, border-color .18s; min-width: 0; }
+  .catbox:hover { transform: translateY(-3px); box-shadow: 0 12px 26px hsl(var(--hue) 60% 30% / .18); border-color: hsl(var(--hue) 55% 55%); }
+  .catbox .top-link { text-decoration: none; display: block; }
+  .catbox .cimg { aspect-ratio: 16 / 9; max-width: 100%; display: grid; place-items: center; font-size: 2.8rem; overflow: hidden;
+    background: linear-gradient(135deg, hsl(var(--hue) 70% 92%), hsl(calc(var(--hue) + 40) 75% 84%)); }
+  .catbox .cimg img { width: 100%; height: 100%; object-fit: cover; }
+  .catbox .cimg span { transition: transform .25s; filter: drop-shadow(0 4px 6px rgb(0 0 0 / .15)); }
+  .catbox:hover .cimg span { transform: scale(1.15) rotate(-4deg); }
+  .catbox .cname { display: block; padding: 12px 12px 4px; text-align: center; font: 700 1.05rem var(--body); color: hsl(var(--hue) 65% 30%); }
+  .catbox .top-link:hover .cname { text-decoration: underline; text-underline-offset: 3px; }
+  .subs { list-style: none; margin: 0; padding: 6px 12px 14px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .subs a { display: inline-block; padding: 5px 11px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--fg); text-decoration: none; font-size: .84rem; font-weight: 600; transition: background-color .15s, color .15s, border-color .15s; }
+  .subs a:hover { background: hsl(var(--hue) 65% 35%); border-color: hsl(var(--hue) 65% 35%); color: #fff; }
+  .subs .all a { background: none; border-style: dashed; color: hsl(var(--hue) 65% 32%); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .catbox .cimg { background: linear-gradient(135deg, hsl(var(--hue) 35% 22%), hsl(calc(var(--hue) + 40) 40% 28%)); }
+    :root:not([data-theme="light"]) .catbox .cname, :root:not([data-theme="light"]) .subs .all a { color: hsl(var(--hue) 65% 75%); }
+  }
+  @media (prefers-reduced-motion: reduce) { .catbox, .catbox .cimg span { transition: none; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>›</span><span>All categories</span></nav>
+  <div><h1>All categories</h1><p class="lead" id="lead">Pick a category, or jump straight to a sub-category.</p></div>
+  <div class="catgrid" id="grid"></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="shop.js?v=2"></script>
+<script>
+  (async () => {
+    await initShell();
+    const box = $('grid'); skeletons(box, 8);
+    const r = await db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const cats = r.data || [];
+    const kids = id => cats.filter(c => c.parent_id === id);
+    box.innerHTML = '';
+    const tops = cats.filter(c => !c.parent_id);
+    $('lead').textContent = `${tops.length} categories and ${cats.length - tops.length} sub-categories. Pick one to start browsing.`;
+    tops.forEach((c, i) => {
+      const img = h('div', { class: 'cimg', 'aria-hidden': 'true' });
+      if (/^https?:\/\//.test(c.icon || '')) img.append(h('img', { src: c.icon, alt: '', loading: 'lazy' })); else img.append(h('span', { text: c.icon || '🛍️' }));
+      const subs = kids(c.id);
+      box.append(h('article', { class: 'catbox', style: `--hue:${Math.round(catHue(c, i))}` },
+        h('a', { class: 'top-link', href: `browse.html?c=${encodeURIComponent(c.slug)}` }, img, h('span', { class: 'cname', text: c.name })),
+        h('ul', { class: 'subs', 'aria-label': c.name + ' sub-categories' },
+          subs.map(s => h('li', {}, h('a', { href: `browse.html?c=${encodeURIComponent(s.slug)}`, text: s.name }))),
+          h('li', { class: 'all' }, h('a', { href: `browse.html?c=${encodeURIComponent(c.slug)}`, text: subs.length ? 'See all →' : 'Browse →' })))));
+    });
+  })();
+</script>
+</body>
+</html>

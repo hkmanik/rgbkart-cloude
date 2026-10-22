@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sell on RGBKart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: one friendly mobile-first column; three numbered steps (they are done in order) */
+  :root {
+    --bg: #f1f5f4; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896; --line: #d7e0de;
+    --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
+    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #f5a524;
+    --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5; --gold-soft: #fff4dc; --danger: #b3392f; --danger-soft: #f8e3e0;
+    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e; --line: #263634;
+      --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36;
+      --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17; --gold-soft: #3a2f17; --danger: #ec7d72; --danger-soft: #3d201d; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+  .top { background: #0e2f2c; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .top-in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { font: 600 1.3rem var(--display); color: #fff; text-decoration: none; }
+  .top a.small { color: #9fe3d8; font-size: .9rem; }
+  .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: var(--t-red); } .rgb i:nth-child(2) { background: var(--t-green); } .rgb i:nth-child(3) { background: var(--t-blue); }
+  main { max-width: 640px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+  h1 { font: 600 1.8rem/1.15 var(--display); margin: 0; text-wrap: balance; }
+  h2 { font: 600 1.15rem/1.2 var(--display); margin: 0; display: flex; align-items: center; gap: 10px; }
+  .step { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); font: 700 .85rem var(--body); display: grid; place-items: center; flex: none; }
+  .lead { color: var(--muted); margin: 6px 0 0; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+  label { font-size: .85rem; font-weight: 600; color: var(--muted); display: grid; gap: 6px; }
+  .req::after { content: " *"; color: var(--danger); }
+  .check { display: flex; align-items: center; gap: 8px; font-size: .95rem; font-weight: 500; color: var(--fg); }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+  input[type=text], input[type=tel], input[type=email], input[type=number], select, textarea {
+    font: inherit; font-size: 16px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; width: 100%; min-width: 0; }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { font-size: .82rem; color: var(--muted); font-weight: 400; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+  .taka { position: relative; }
+  .taka input { padding-left: 30px; font-weight: 600; }
+  .taka::before { content: "৳"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 700; }
+  button { font: 600 15px var(--body); border-radius: 10px; padding: 11px 16px; cursor: pointer; border: 1px solid transparent; color: inherit; transition: background-color .15s, border-color .15s, box-shadow .15s; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .primary { background: var(--accent); color: var(--accent-fg); }
+  .primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgb(15 118 110 / .3); }
+  .big { width: 100%; padding: 14px; font-size: 1.05rem; }
+  .ghost { background: var(--surface); border-color: var(--line); color: var(--fg); }
+  .ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .bad { background: transparent; color: var(--danger); border-color: var(--danger); padding: 7px 12px; font-size: .88rem; }
+  .bad:hover { background: var(--danger); color: #fff; }
+  .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .seg button { background: var(--surface); border: 1.5px solid var(--line); text-align: left; display: grid; gap: 2px; }
+  .seg button span { font-size: .8rem; color: var(--muted); font-weight: 400; }
+  .seg button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+  .photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .photos .ph { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+  .photos .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photos .ph .tag { position: absolute; top: 6px; left: 6px; background: var(--accent); color: var(--accent-fg); font-size: .7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+  .photos .ph .x { position: absolute; top: 5px; right: 5px; width: 28px; height: 28px; padding: 0; border-radius: 50%; background: rgb(0 0 0 / .6); color: #fff; font-size: .9rem; }
+  .photos .add { aspect-ratio: 1; max-width: 100%; border: 2px dashed var(--line); border-radius: 10px; display: grid; place-content: center; text-align: center; color: var(--muted); background: var(--bg); gap: 2px; font-size: .85rem; }
+  .photos .add b { font-size: 1.8rem; line-height: 1; color: var(--accent); }
+  .photos .add:hover { border-color: var(--accent); color: var(--accent); }
+  .notice { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 12px 14px; font-size: .9rem; }
+  .msg { margin: 0; font-size: .92rem; }
+  .msg.error { color: var(--danger); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .done { text-align: center; justify-items: center; padding: 28px 18px; }
+  .done .tick { width: 64px; height: 64px; border-radius: 50%; background: var(--good-soft); color: var(--good); display: grid; place-items: center; font-size: 2rem; }
+  .listing { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .listing:first-child { border-top: 0; }
+  .listing img, .listing .noimg { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; background: var(--bg); }
+  .listing .t { font-weight: 600; overflow-wrap: anywhere; }
+  .listing .m { color: var(--muted); font-size: .88rem; }
+  .listing .acts { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .chip { display: inline-block; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .chip.pending { background: var(--warn-soft); color: var(--warn); }
+  .chip.approved { background: var(--good-soft); color: var(--good); }
+  .chip.rejected { background: var(--danger-soft); color: var(--danger); }
+  .chip.archived, .chip.draft { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+  /* Listing choice: Free vs Featured */
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 520px) { .plans { grid-template-columns: 1fr; } }
+  .plan { text-align: left; display: grid; gap: 8px; align-content: start; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 14px; position: relative; }
+  .plan:hover { border-color: var(--accent); }
+  .plan[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+  .plan.feat[aria-pressed="true"] { border-color: #d48806; background: var(--gold-soft); box-shadow: inset 0 0 0 1px #d48806; }
+  .plan .pt { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 1.05rem; font-weight: 700; }
+  .plan .price { font: 600 1.25rem var(--display); color: var(--accent); white-space: nowrap; }
+  .plan.feat .price { color: #b26b00; }
+  .plan .price small { font: 500 .78rem var(--body); color: var(--muted); }
+  .plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 5px; font-size: .86rem; font-weight: 500; color: var(--fg); }
+  .plan li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 4px; }
+  .plan li.no { color: var(--faint); }
+  .plan li::before { content: "✓"; color: var(--good); font-weight: 800; }
+  .plan li.no::before { content: "✕"; color: var(--faint); }
+  .ways { display: flex; flex-wrap: wrap; gap: 5px; }
+  .way { font-size: .74rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+  .way.on { background: var(--good-soft); border-color: transparent; color: var(--good); }
+  .plan .tagline { font-size: .8rem; color: var(--muted); font-weight: 400; }
+  .ribbon { position: absolute; top: -10px; right: 12px; background: var(--amber); color: #2a1a00; font-size: .7rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; letter-spacing: .03em; }
+  .paynote { background: var(--gold-soft); color: var(--fg); border-radius: 10px; padding: 10px 12px; font-size: .86rem; }
+  .chip.feat { background: var(--amber); color: #2a1a00; }
+  .chip.wait { background: var(--gold-soft); color: #8a5a00; }
+  .msglink { display: inline-flex; gap: 6px; align-items: center; }
+  .msglink b { background: #e8590c; color: #fff; border-radius: 999px; font-size: .72rem; padding: 0 7px; }
+  .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 60; max-width: calc(100vw - 32px); }
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><div class="top-in"><a class="brand" href="index.html">RGBKart</a><span style="display:flex;gap:14px;align-items:center"><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
+  <div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div>
+</header>
+
+<main>
+  <div>
+    <h1>Sell an item</h1>
+    <p class="lead">No account needed. Fill in three short steps. We check every listing, then buyers contact you. Choose a free listing or make it Featured to get more buyers.</p>
+  </div>
+
+  <div class="notice" id="hasAccount" hidden></div>
+
+  <!-- My listings (shown when this browser has listed before) -->
+  <section class="card" id="mineCard" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>Your listings</h2><a class="msglink" href="messages.html" style="font-weight:700">💬 Messages<b id="msgMineN" hidden></b></a></div>
+    <div id="mine"></div>
+  </section>
+
+  <form id="sellForm" novalidate style="display:grid;gap:16px">
+    <section class="card">
+      <h2><span class="step">1</span>Photos</h2>
+      <p class="hint" style="margin:0">Up to 5 clear photos. The first one is the main photo buyers see.</p>
+      <div class="photos" id="photos"></div>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple hidden>
+    </section>
+
+    <section class="card">
+      <h2><span class="step">2</span>About the item</h2>
+      <label><span class="req">What are you selling?</span><input id="title" type="text" maxlength="120" placeholder="e.g. iPhone 12, 128GB, Blue"></label>
+      <label><span class="req">Category</span><select id="category"></select></label>
+      <div style="display:grid;gap:6px"><span class="req" style="font-size:.85rem;font-weight:600;color:var(--muted)">Condition</span>
+        <div class="seg" id="condition" role="group" aria-label="Condition">
+          <button type="button" data-v="pre_owned" aria-pressed="true">Used<span>Pre-owned or refurbished</span></button>
+          <button type="button" data-v="new" aria-pressed="false">New<span>Unused, in its box</span></button>
+        </div></div>
+      <div class="row2">
+        <label><span class="req">Price</span><span class="taka"><input id="price" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
+        <label class="check" style="align-self:end;padding-bottom:12px"><input id="negotiable" type="checkbox"> Price is negotiable</label>
+      </div>
+      <label>Description <span class="hint">(optional)</span><textarea id="desc" maxlength="2000" placeholder="Condition, how long used, what's included, reason for selling…"></textarea></label>
+    </section>
+
+    <section class="card" id="listingCard">
+      <h2><span class="step">3</span>Listing type</h2>
+      <div class="plans" id="plans" role="group" aria-label="Listing type">
+        <button type="button" class="plan" data-v="free" aria-pressed="true">
+          <span class="pt">Free listing <span class="price">৳0</span></span>
+          <span class="ways"><span class="way on">💬 Message</span><span class="way">📞 Call</span><span class="way">WhatsApp</span><span class="way">✉ Email</span></span>
+          <ul>
+            <li>Buyers send you messages on RGBKart</li>
+            <li>Your phone number stays private</li>
+            <li class="no">Buyers can't call, WhatsApp or email you</li>
+            <li class="no">Normal position in search</li>
+          </ul>
+        </button>
+        <button type="button" class="plan feat" data-v="featured" aria-pressed="false" id="featBtn" hidden>
+          <span class="ribbon">MORE BUYERS</span>
+          <span class="pt">★ Featured <span class="price" id="featPrice"></span></span>
+          <span class="ways"><span class="way on">💬 Message</span><span class="way on">📞 Call</span><span class="way on">WhatsApp</span><span class="way on">✉ Email</span></span>
+          <ul id="featBenefits">
+            <li>Buyers can call, WhatsApp, email or message you</li>
+          </ul>
+        </button>
+      </div>
+      <p class="paynote" id="payNote" hidden></p>
+    </section>
+
+    <section class="card">
+      <h2><span class="step">4</span>Your contact</h2>
+      <label><span class="req">Your name</span><input id="name" type="text" maxlength="80" autocomplete="name"></label>
+      <div class="row2">
+        <label><span class="req">Mobile number</span><input id="phone" type="tel" inputmode="tel" maxlength="16" placeholder="01XXXXXXXXX" autocomplete="tel"></label>
+        <label>WhatsApp<input id="whatsapp" type="tel" inputmode="tel" maxlength="16" placeholder="Same as mobile"></label>
+      </div>
+      <div class="row2">
+        <label><span class="req">District</span><select id="district"></select></label>
+        <label>Area<input id="area" type="text" maxlength="40" list="areaList" autocomplete="off" placeholder="Choose district first" disabled>
+          <span class="hint" id="areaHint">Pick from the list or type a new one</span></label>
+        <datalist id="areaList"></datalist>
+      </div>
+      <label>Email <span class="hint" id="emailHint">(optional)</span><input id="email" type="email" maxlength="120" autocomplete="email" placeholder="you@example.com"></label>
+      <div class="hp" aria-hidden="true"><label>Leave this empty<input id="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+      <p class="hint" style="margin:0" id="contactHint"></p>
+    </section>
+
+    <p class="msg error" id="msg" role="alert" hidden></p>
+    <button type="submit" class="primary big" id="submitBtn">Submit for approval</button>
+    <p class="hint" style="text-align:center;margin:0">RGBKart checks each listing, usually within 24 hours. Selling often? <a href="login.html">Open a free shop</a>.</p>
+  </form>
+
+  <section class="card done" id="doneCard" hidden>
+    <div class="tick" aria-hidden="true">✓</div>
+    <h2 style="justify-content:center">Thanks! Your listing is waiting for approval.</h2>
+    <p class="lead" style="margin:0" id="doneText">We'll check it soon. Once approved, buyers can see it and contact you. Keep using this phone or browser to manage your listings.</p>
+    <button type="button" class="primary" id="againBtn">Sell another item</button>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const BUCKET = 'product-images';
+  const MAX_PHOTOS = 5;
+  const $ = id => document.getElementById(id);
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null || v === false) continue;
+      if (k.startsWith('on')) el[k] = v; else if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v; else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  }
+  const DISTRICTS = {
+    'Dhaka': ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail'],
+    'Chattogram': ['Chattogram', 'Bandarban', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Cumilla', 'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati'],
+    'Rajshahi': ['Rajshahi', 'Bogura', 'Chapai Nawabganj', 'Joypurhat', 'Naogaon', 'Natore', 'Pabna', 'Sirajganj'],
+    'Khulna': ['Khulna', 'Bagerhat', 'Chuadanga', 'Jashore', 'Jhenaidah', 'Kushtia', 'Magura', 'Meherpur', 'Narail', 'Satkhira'],
+    'Barishal': ['Barishal', 'Barguna', 'Bhola', 'Jhalokathi', 'Patuakhali', 'Pirojpur'],
+    'Sylhet': ['Sylhet', 'Habiganj', 'Moulvibazar', 'Sunamganj'],
+    'Rangpur': ['Rangpur', 'Dinajpur', 'Gaibandha', 'Kurigram', 'Lalmonirhat', 'Nilphamari', 'Panchagarh', 'Thakurgaon'],
+    'Mymensingh': ['Mymensingh', 'Jamalpur', 'Netrokona', 'Sherpur'],
+  };
+  const STATUS = { draft: 'Not sent', pending: 'Waiting for approval', approved: 'Live', rejected: 'Not approved', archived: 'Sold / hidden' };
+
+  let photos = [];          // { blob, url }
+  let condition = 'pre_owned';
+  let me = null, profile = null, myProducts = [];
+  let pendingProductId = null;   // product created but not yet sent (retry after an error)
+  let listing = 'free', plan = null, featReqs = [];
+
+  // ---------- setup ----------
+  function fillSelects(cats) {
+    const sel = $('category'); sel.innerHTML = '';
+    sel.append(h('option', { value: '', text: 'Choose a category' }));
+    const kids = id => cats.filter(c => c.parent_id === id).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+    for (const top of kids(null)) {
+      const subs = kids(top.id);
+      if (!subs.length) { sel.append(h('option', { value: top.id, text: top.name })); continue; }
+      sel.append(h('optgroup', { label: top.name }, subs.map(c => h('option', { value: c.id, text: c.name }))));
+    }
+    const d = $('district'); d.innerHTML = '';
+    d.append(h('option', { value: '', text: 'Choose your district' }));
+    for (const [div, list] of Object.entries(DISTRICTS)) d.append(h('optgroup', { label: div + ' Division' }, list.map(x => h('option', { value: x, text: x }))));
+  }
+
+  async function start() {
+    const c = await db.from('categories').select('id, parent_id, name, sort_order, is_active').eq('is_active', true);
+    fillSelects(c.data || []);
+    drawPhotos();
+    await loadPlan();
+    setListing('free');
+    const { data: { session } } = await db.auth.getSession();
+    if (session) await loadMe(session.user);
+  }
+
+  // ---------- Free vs Featured ----------
+  async function loadPlan() {
+    const r = await db.from('featured_plans').select('id, name, price, days, benefits').eq('is_active', true).order('sort_order').order('price').limit(1);
+    plan = (r.data || [])[0] || null;
+    $('featBtn').hidden = !plan;
+    if (!plan) return;
+    $('featPrice').innerHTML = '';
+    $('featPrice').append(money(plan.price), h('small', { text: ` / ${plan.days} days` }));
+    const ul = $('featBenefits'); ul.innerHTML = '';
+    ul.append(h('li', { text: 'Buyers can call, WhatsApp, email or message you' }));
+    (plan.benefits || []).forEach(b => ul.append(h('li', { text: b })));
+    $('payNote').textContent = `Pay ${money(plan.price)} after we approve your listing. Our team will contact you on your mobile number with payment details. Featured starts as soon as your payment is confirmed. Until then it shows as a free listing.`;
+  }
+  function setListing(v) {
+    listing = v;
+    $('plans').querySelectorAll('.plan').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    $('payNote').hidden = v !== 'featured';
+    $('emailHint').textContent = v === 'featured' ? '(optional, shown to buyers)' : '(optional, kept private)';
+    $('contactHint').textContent = v === 'featured'
+      ? 'Once Featured starts, buyers see your mobile, WhatsApp and email on this listing.'
+      : 'Your number stays private. Buyers message you on RGBKart; we only use your number to reach you about your listing.';
+  }
+  $('plans').querySelectorAll('.plan').forEach(b => b.onclick = () => setListing(b.dataset.v));
+
+  async function loadUnread() {
+    const r = await db.rpc('my_unread_count');
+    const n = r.error ? 0 : r.data;
+    $('msgTop').hidden = false;
+    [$('msgTopN'), $('msgMineN')].forEach(el => { el.hidden = !n; el.textContent = n; });
+  }
+
+  async function loadMe(user) {
+    me = user;
+    const p = await db.from('profiles').select('role, full_name, phone, seller_details(*)').eq('id', user.id).maybeSingle();
+    profile = p.data;
+    const role = profile && profile.role;
+    if (role === 'seller') {
+      $('hasAccount').hidden = false; $('hasAccount').innerHTML = '';
+      $('hasAccount').append('You have a shop on RGBKart. Add products from ', h('a', { href: 'seller.html#new', text: 'Seller Center' }), '.');
+      $('sellForm').hidden = true; return;
+    }
+    if (role === 'customer') {
+      $('hasAccount').hidden = false; $('hasAccount').innerHTML = '';
+      $('hasAccount').append('You are signed in as a customer. To sell one item, ',
+        h('button', { type: 'button', class: 'link', text: 'sign out', onclick: async () => { await db.auth.signOut(); location.reload(); } }),
+        ' first, or open a shop from the sign-in page.');
+      $('sellForm').hidden = true; return;
+    }
+    if (role === 'individual') {
+      const sd = Array.isArray(profile.seller_details) ? profile.seller_details[0] : profile.seller_details;
+      $('name').value = profile.full_name || ''; $('phone').value = profile.phone || '';
+      if (sd) { $('whatsapp').value = sd.whatsapp || ''; $('email').value = sd.email_public || ''; $('district').value = sd.city || ''; await loadAreas(sd.city || ''); $('area').value = sd.area || sd.business_address || ''; }
+      await loadMine();
+    }
+    loadUnread();
+  }
+
+  async function loadMine() {
+    const r = await db.from('products').select('id, title, price, price_negotiable, status, review_note, product_images(storage_path, sort_order)').eq('seller_id', me.id).order('created_at', { ascending: false });
+    myProducts = r.data || [];
+    const f = await db.from('featured_requests').select('id, product_id, status, ends_at').eq('seller_id', me.id);
+    featReqs = f.error ? [] : f.data;
+    drawMine();
+  }
+  const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  const money = n => '৳' + Number(n || 0).toLocaleString('en-IN');
+
+  function drawMine() {
+    const box = $('mine'); box.innerHTML = '';
+    $('mineCard').hidden = !myProducts.length;
+    for (const p of myProducts) {
+      const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0];
+      const fr = featReqs.find(x => x.product_id === p.id && ['awaiting_payment', 'payment_submitted', 'active'].includes(x.status));
+      const featChip = fr && (fr.status === 'active'
+        ? h('span', { class: 'chip feat', text: '★ Featured until ' + new Date(fr.ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) })
+        : h('span', { class: 'chip wait', text: '★ Featured: waiting for payment' }));
+      const canFeature = plan && !fr && ['approved', 'pending'].includes(p.status);
+      box.append(h('div', { class: 'listing' },
+        im ? h('img', { src: photoUrl(im.storage_path), alt: '' }) : h('div', { class: 'noimg' }),
+        h('div', { style: 'min-width:0' },
+          h('div', { class: 't' }, p.title, h('span', { class: 'chip ' + p.status, text: STATUS[p.status] }), featChip),
+          h('div', { class: 'm', text: money(p.price) + (p.price_negotiable ? ' · negotiable' : '') }),
+          p.status === 'rejected' && p.review_note && h('div', { class: 'm', style: 'color:var(--danger)', text: 'Reason: ' + p.review_note }),
+          h('div', { class: 'acts' },
+            h('a', { class: 'ghost', href: `product.html?id=${p.id}`, style: 'padding:7px 12px;font-size:.88rem;border-radius:10px;text-decoration:none;font-weight:600;border:1px solid var(--line);color:var(--fg)', text: p.status === 'approved' ? 'View' : 'Preview' }),
+            canFeature && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem;border-color:#d48806', text: `★ Make Featured (${money(plan.price)})`,
+              onclick: async () => { const { error } = await db.from('featured_requests').insert({ product_id: p.id, plan_id: plan.id }); if (error) return toast(friendly(error)); toast('Featured requested. Our team will contact you about payment.'); loadMine(); } }),
+            fr && fr.status === 'awaiting_payment' && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Keep it free',
+              onclick: async () => { const { error } = await db.from('featured_requests').delete().eq('id', fr.id); if (error) return toast(friendly(error)); toast('Featured request cancelled'); loadMine(); } }),
+            ['approved', 'pending'].includes(p.status) && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Mark as sold',
+              onclick: async () => { const { error } = await db.rpc('archive_product', { p_product: p.id, p_archive: true }); if (error) return toast(friendly(error)); toast('Marked as sold'); loadMine(); } }),
+            confirmBtn('Delete', 'Tap again to delete', async () => {
+              const paths = (p.product_images || []).map(i => i.storage_path);
+              const { error } = await db.from('products').delete().eq('id', p.id);
+              if (error) return toast(friendly(error));
+              if (paths.length) await db.storage.from(BUCKET).remove(paths);
+              toast('Deleted'); loadMine();
+            })))));
+    }
+  }
+
+  // ---------- areas (list grows as sellers add new ones) ----------
+  const areaCache = {};
+  async function loadAreas(district) {
+    const input = $('area'), list = $('areaList');
+    list.innerHTML = '';
+    input.disabled = !district;
+    input.placeholder = district ? 'e.g. ' + (district === 'Dhaka' ? 'Rampura' : district === 'Chattogram' ? 'Agrabad' : district + ' Sadar') : 'Choose district first';
+    if (!district) return;
+    if (!areaCache[district]) {
+      const r = await db.from('areas').select('name').eq('district', district).order('name');
+      areaCache[district] = r.error ? [] : r.data.map(x => x.name);
+    }
+    areaCache[district].forEach(n => list.append(h('option', { value: n })));
+    $('areaHint').textContent = areaCache[district].length ? `Pick from ${areaCache[district].length} areas or type a new one` : 'Type your area';
+  }
+  $('district').addEventListener('change', () => { $('area').value = ''; loadAreas($('district').value); });
+
+  // ---------- photos ----------
+  function drawPhotos() {
+    const box = $('photos'); box.innerHTML = '';
+    photos.forEach((p, i) => box.append(h('div', { class: 'ph' }, h('img', { src: p.url, alt: i ? `Photo ${i + 1}` : 'Main photo' }),
+      i === 0 && h('span', { class: 'tag', text: 'Main' }),
+      h('button', { type: 'button', class: 'x', text: '✕', 'aria-label': 'Remove photo', onclick: () => { photos.splice(i, 1); drawPhotos(); } }))));
+    if (photos.length < MAX_PHOTOS) {
+      const add = h('button', { type: 'button', class: 'add', onclick: () => $('fileInput').click() }, h('b', { text: '+' }), photos.length ? 'Add more' : 'Add photos');
+      add.ondragover = e => e.preventDefault();
+      add.ondrop = e => { e.preventDefault(); addFiles(e.dataTransfer.files); };
+      box.append(add);
+    }
+  }
+  $('fileInput').onchange = () => { addFiles($('fileInput').files); $('fileInput').value = ''; };
+  async function addFiles(list) {
+    for (const f of list) {
+      if (photos.length >= MAX_PHOTOS) { toast(`Up to ${MAX_PHOTOS} photos.`); break; }
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { toast('Use JPG, PNG or WebP photos.'); continue; }
+      try { const blob = await shrink(f); photos.push({ blob, url: URL.createObjectURL(blob) }); } catch (_) { toast(`Couldn't read ${f.name}.`); }
+    }
+    drawPhotos();
+  }
+  function shrink(file, maxDim = 1600) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        c.toBlob(b => b && b.type === 'image/webp' ? resolve(b) : c.toBlob(j => j ? resolve(j) : reject(), 'image/jpeg', .86), 'image/webp', .85);
+      };
+      img.onerror = reject; img.src = URL.createObjectURL(file);
+    });
+  }
+
+  // ---------- condition ----------
+  $('condition').querySelectorAll('button').forEach(b => b.onclick = () => {
+    condition = b.dataset.v; $('condition').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  });
+
+  // ---------- submit ----------
+  const BD_MOBILE = /^(\+?880)?01[3-9][0-9]{8}$/;
+  const cleanPhone = v => v.replace(/[^0-9+]/g, '');
+
+  $('sellForm').onsubmit = async e => {
+    e.preventDefault(); setMsg('');
+    if ($('website').value) return;   // a bot filled the hidden field
+    const v = {
+      title: $('title').value.trim(), category: Number($('category').value) || null, price: Number($('price').value),
+      negotiable: $('negotiable').checked, desc: $('desc').value.trim(),
+      name: $('name').value.trim(), phone: cleanPhone($('phone').value), whatsapp: cleanPhone($('whatsapp').value),
+      district: $('district').value, area: $('area').value.trim(), email: $('email').value.trim(),
+    };
+    const errs = [];
+    if (!photos.length) errs.push('Add at least one photo.');
+    if (v.title.length < 3) errs.push('Write what you are selling.');
+    if (!v.category) errs.push('Choose a category.');
+    if (!(v.price >= 1)) errs.push('Enter a price.');
+    if (v.name.length < 2) errs.push('Enter your name.');
+    if (!BD_MOBILE.test(v.phone)) errs.push('Enter a valid mobile number, like 01711000000.');
+    if (v.whatsapp && !BD_MOBILE.test(v.whatsapp)) errs.push('Check the WhatsApp number.');
+    if (!v.district) errs.push('Choose your district.');
+    if (v.email && !/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v.email)) errs.push('Check the email address.');
+    if (v.area && !/^[A-Za-z0-9][A-Za-z0-9 .\/'()-]{1,39}$/.test(v.area)) errs.push('Use only letters, numbers and spaces for the area, like "Rampura".');
+    if (errs.length) return setMsg(errs.join(' '));
+
+    $('submitBtn').disabled = true; $('submitBtn').textContent = 'Sending…';
+    try {
+      // 1. invisible sign-in for this browser (no registration)
+      if (!me) {
+        const { data, error } = await db.auth.signInAnonymously();
+        if (error) throw /anonymous/i.test(error.message) ? new Error('Selling without an account isn\'t switched on yet. Please try again later.') : error;
+        me = data.user;
+      }
+      // 2. contact details
+      let r = await db.rpc('start_individual_selling', { p_name: v.name, p_phone: v.phone, p_whatsapp: v.whatsapp || null, p_district: v.district, p_area: v.area || null });
+      if (r.error) throw r.error;
+      r = await db.rpc('set_individual_email', { p_email: v.email || null });
+      if (r.error && !(/Could not find the function/i.test(r.error.message) && !v.email)) throw r.error;
+      // 3. the listing
+      const row = { category_id: v.category, title: v.title, price: v.price, price_negotiable: v.negotiable, listing_type: condition,
+        description: v.desc || null, stock: 1, manage_stock: true, ships_to: 'all_bangladesh' };
+      const res = pendingProductId ? await db.from('products').update(row).eq('id', pendingProductId).select().single()
+                                   : await db.from('products').insert(row).select().single();
+      if (res.error) throw res.error;
+      const id = res.data.id; pendingProductId = id;
+      // 4. photos
+      await db.from('product_images').delete().eq('product_id', id);
+      for (let i = 0; i < photos.length; i++) {
+        const p = photos[i];
+        const path = `${me.id}/${id}/${Date.now()}-${i}.${p.blob.type === 'image/webp' ? 'webp' : 'jpg'}`;
+        const up = await db.storage.from(BUCKET).upload(path, p.blob, { contentType: p.blob.type, cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        r = await db.from('product_images').insert({ product_id: id, storage_path: path, sort_order: i * 10 });
+        if (r.error) throw r.error;
+      }
+      // 5. send for approval
+      r = await db.rpc('submit_product', { p_product: id });
+      if (r.error) throw r.error;
+      pendingProductId = null;
+      // 6. Featured request (paid after approval)
+      let featOk = false;
+      if (listing === 'featured' && plan) {
+        const fq = await db.from('featured_requests').insert({ product_id: id, plan_id: plan.id });
+        featOk = !fq.error;
+      }
+      $('doneText').textContent = listing === 'featured'
+        ? (featOk ? `We'll check it soon. After approval, our team will contact you on ${v.phone} to collect ${money(plan.price)} for Featured. Until payment is confirmed, it shows as a free listing (buyers message you on RGBKart).`
+                  : `Your listing was sent, but Featured couldn't be requested. Tap "Make Featured" under Your listings to try again.`)
+        : 'We\'ll check it soon. Once approved, buyers can message you on RGBKart. Check Messages on this phone or browser.';
+      delete areaCache[v.district];
+      $('sellForm').hidden = true; $('doneCard').hidden = false;
+      window.scrollTo(0, 0);
+      await loadMe(me);
+    } catch (err) {
+      setMsg(friendly(err));
+    } finally {
+      $('submitBtn').disabled = false; $('submitBtn').textContent = 'Submit for approval';
+    }
+  };
+
+  $('againBtn').onclick = () => {
+    photos = []; drawPhotos();
+    ['title', 'price', 'desc'].forEach(id => $(id).value = ''); $('negotiable').checked = false; $('category').value = ''; setListing('free');
+    $('doneCard').hidden = true; $('sellForm').hidden = false; $('title').focus();
+  };
+
+  // ---------- helpers ----------
+  function setMsg(t) { $('msg').textContent = t; $('msg').hidden = !t; if (t) $('msg').scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  let tt; function toast(t) { $('toast').textContent = t; $('toast').hidden = false; clearTimeout(tt); tt = setTimeout(() => $('toast').hidden = true, 3000); }
+  function confirmBtn(label, confirmLabel, onConfirm) {
+    const b = h('button', { type: 'button', class: 'bad', text: label }); let armed = false, timer;
+    b.onclick = async () => {
+      if (!armed) { armed = true; b.textContent = confirmLabel; timer = setTimeout(() => { armed = false; b.textContent = label; }, 4000); return; }
+      clearTimeout(timer); b.disabled = true; try { await onConfirm(); } finally { b.disabled = false; armed = false; b.textContent = label; }
+    };
+    return b;
+  }
+  function friendly(err) {
+    const m = (err && err.message) || 'Something went wrong. Please try again.';
+    if (/Failed to fetch|NetworkError/i.test(m)) return 'No internet connection. Check your connection and try again.';
+    if (/set_individual_email|my_unread_count/i.test(m)) return 'This page needs a database update (contact_messages.sql). Please try again later.';
+    if (/start_individual_selling|Could not find the function/i.test(m)) return 'This page needs a database update (quick_sell.sql). Please try again later.';
+    if (/featured_one_open|duplicate key/i.test(m)) return 'Featured is already requested for this listing.';
+    if (/row-level security|permission denied/i.test(m)) return 'This listing couldn\'t be saved. Please reload the page and try again.';
+    if (/Payload too large|maximum allowed size/i.test(m)) return 'A photo is too large. Use smaller photos.';
+    return m;
+  }
+
+  start();
+</script>
+</body>
+</html>

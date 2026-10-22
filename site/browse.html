@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RGBKart Products</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="shop.css?v=2">
+<style>
+  /* Layout: left sidebar (categories that expand + filters) beside a product grid; sidebar becomes a drawer on phones */
+  main { padding-block: 20px 40px; }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 1150px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 22px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Sidebar */
+  .side { position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow-y: auto; display: grid; gap: 14px; padding-right: 2px; }
+  .side-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 4px; }
+  .side h2 { font: 600 1.05rem var(--display); margin: 2px 6px 6px; }
+  .tree { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+  .tree ul { list-style: none; margin: 2px 0 6px 18px; padding: 0 0 0 10px; border-left: 2px solid var(--line); display: grid; gap: 1px; }
+  .node { display: flex; align-items: center; border-radius: 8px; }
+  .node:hover { background: var(--bg); }
+  .node a { flex: 1; min-width: 0; display: flex; gap: 8px; align-items: center; padding: 7px 8px; text-decoration: none; color: var(--fg); font-size: .92rem; overflow-wrap: anywhere; }
+  .node a .ic { width: 22px; text-align: center; flex: none; }
+  .node a[aria-current="page"] { color: var(--accent); font-weight: 700; }
+  .node.active { background: var(--accent-soft); }
+  .tw { width: 32px; height: 32px; flex: none; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: 6px; font-size: .8rem; transition: transform .15s; }
+  .tw:hover { background: var(--line); color: var(--fg); }
+  .tw[aria-expanded="true"] { transform: rotate(90deg); }
+  .flt { display: grid; gap: 8px; padding: 4px 6px; }
+  .flt + .flt { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
+  .flt-t { font-size: .78rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .radio, .chk { display: flex; gap: 8px; align-items: center; font-size: .92rem; cursor: pointer; }
+  .radio input, .chk input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+  .price-in { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; }
+  .price-in input, .flt select { width: 100%; min-width: 0; font: inherit; font-size: .9rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); }
+  .apply { border: 0; background: var(--accent); color: var(--accent-fg); font: 700 .88rem var(--body); padding: 8px; border-radius: 8px; cursor: pointer; }
+  .apply:hover { background: var(--accent-hover); }
+  .clear { background: none; border: 0; color: var(--accent); font: 600 .88rem var(--body); cursor: pointer; padding: 4px 6px; justify-self: start; }
+
+  /* Results */
+  .res-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .res-head h1 { font: 600 1.6rem/1.15 var(--display); margin: 0; overflow-wrap: anywhere; }
+  .res-head .count { color: var(--muted); font-size: .9rem; }
+  .crumbs { font-size: .86rem; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .crumbs a { text-decoration: none; }
+  .sortbar { display: flex; gap: 8px; align-items: center; }
+  .sortbar select { font: inherit; font-size: .92rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .fchip { display: inline-flex; gap: 6px; align-items: center; background: var(--accent-soft); color: var(--accent); border: 0; border-radius: 999px; padding: 5px 10px; font: 600 .82rem var(--body); cursor: pointer; }
+  .fchip:hover { filter: brightness(.95); }
+  .subcats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; }
+  .subcats a { flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; text-decoration: none; color: var(--fg); font-size: .88rem; font-weight: 600; }
+  .subcats a:hover { border-color: var(--accent); color: var(--accent); }
+  .more { display: flex; justify-content: center; margin-top: 18px; }
+  .more button { border: 1.5px solid var(--accent); background: var(--surface); color: var(--accent); font: 700 .95rem var(--body); padding: 10px 22px; border-radius: 10px; cursor: pointer; }
+  .more button:hover { background: var(--accent); color: var(--accent-fg); }
+  .filter-btn { display: none; }
+  @media (max-width: 900px) {
+    .side { position: fixed; inset: 0 auto 0 0; width: min(320px, 88vw); max-height: none; z-index: 60; background: var(--bg); padding: 16px; padding-top: max(16px, env(safe-area-inset-top, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px));
+      transform: translateX(-105%); transition: transform .2s ease; box-shadow: 8px 0 30px rgb(0 0 0 / .2); align-content: start; }
+    .side.open { transform: none; }
+    .scrim.open { display: block; position: fixed; inset: 0; background: rgb(0 0 0 / .45); z-index: 55; }
+    .filter-btn { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 600 .92rem var(--body); padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    .side-close { display: block !important; }
+  }
+  .scrim { display: none; }
+  .side-close { display: none; justify-self: end; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 12px; font: 600 .9rem var(--body); color: var(--fg); cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) { .side, .tw { transition: none; } }
+</style>
+</head>
+<body>
+
+
+<main class="wrap">
+  <div class="layout">
+    <aside class="side" id="side" aria-label="Categories and filters">
+      <button type="button" class="side-close" id="sideClose">Close ✕</button>
+      <nav class="side-card" aria-labelledby="catHead">
+        <h2 id="catHead">Categories</h2>
+        <ul class="tree" id="tree"></ul>
+      </nav>
+      <form class="side-card" id="filters">
+        <h2>Filters</h2>
+        <div class="flt">
+          <span class="flt-t">Condition</span>
+          <label class="radio"><input type="radio" name="condition" value="" checked> Any</label>
+          <label class="radio"><input type="radio" name="condition" value="new"> New</label>
+          <label class="radio"><input type="radio" name="condition" value="pre_owned"> Used</label>
+        </div>
+        <div class="flt">
+          <span class="flt-t">Price (৳)</span>
+          <div class="price-in"><input id="min" type="number" min="0" inputmode="numeric" placeholder="Min" aria-label="Minimum price"><span>–</span><input id="max" type="number" min="0" inputmode="numeric" placeholder="Max" aria-label="Maximum price"></div>
+          <button type="submit" class="apply">Apply price</button>
+        </div>
+        <div class="flt">
+          <span class="flt-t">Seller's district</span>
+          <select id="district" aria-label="District"></select>
+        </div>
+        <div class="flt">
+          <label class="chk"><input type="checkbox" id="featuredOnly"> ★ Featured only</label>
+          <label class="chk"><input type="checkbox" id="freeDel"> Free delivery</label>
+          <label class="chk"><input type="checkbox" id="dealsOnly"> On sale</label>
+        </div>
+        <button type="button" class="clear" id="clearAll">Clear all filters</button>
+      </form>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <section aria-live="polite">
+      <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+      <div class="res-head">
+        <div><h1 id="heading">All products</h1><span class="count" id="count"></span></div>
+        <div class="sortbar">
+          <button type="button" class="filter-btn" id="filterBtn">☰ Categories &amp; filters</button>
+          <select id="sort" aria-label="Sort by">
+            <option value="best">Best match</option>
+            <option value="newest">Newest first</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+          </select>
+        </div>
+      </div>
+      <div class="subcats" id="subcats" hidden></div>
+      <div class="chips" id="chips"></div>
+      <div class="grid" id="grid"></div>
+      <div class="more"><button type="button" id="moreBtn" hidden>Show more</button></div>
+    </section>
+  </div>
+</main>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="shop.js?v=2"></script>
+<script>
+  const PAGE = 24;
+  const DISTRICTS = ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail',
+    'Chattogram', 'Bandarban', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Cumilla', 'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati',
+    'Rajshahi', 'Bogura', 'Chapai Nawabganj', 'Joypurhat', 'Naogaon', 'Natore', 'Pabna', 'Sirajganj',
+    'Khulna', 'Bagerhat', 'Chuadanga', 'Jashore', 'Jhenaidah', 'Kushtia', 'Magura', 'Meherpur', 'Narail', 'Satkhira',
+    'Barishal', 'Barguna', 'Bhola', 'Jhalokathi', 'Patuakhali', 'Pirojpur', 'Sylhet', 'Habiganj', 'Moulvibazar', 'Sunamganj',
+    'Rangpur', 'Dinajpur', 'Gaibandha', 'Kurigram', 'Lalmonirhat', 'Nilphamari', 'Panchagarh', 'Thakurgaon', 'Mymensingh', 'Jamalpur', 'Netrokona', 'Sherpur'].sort();
+
+  let cats = [], offset = 0, total = 0, sellerIds = null;
+  const params = new URLSearchParams(location.search);
+  const state = {
+    c: params.get('c') || '', q: (params.get('q') || '').trim(), condition: params.get('condition') || '', sort: params.get('sort') || 'best',
+    min: params.get('min') || '', max: params.get('max') || '', district: params.get('district') || '', featured: params.get('featured') === '1', free: params.get('free') === '1', deals: params.get('deals') === '1', wishlist: params.get('wishlist') === '1',
+  };
+  const expanded = new Set();
+  const kids = id => cats.filter(c => (c.parent_id ?? null) === id).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+  const bySlug = s => cats.find(c => c.slug === s);
+  function chain(c) { const out = []; while (c) { out.unshift(c); c = cats.find(x => x.id === c.parent_id); } return out; }
+  function descendants(id) { const out = [id]; kids(id).forEach(k => out.push(...descendants(k.id))); return out; }
+
+  // ---------- URL ----------
+  function urlFor(changes) {
+    const s = { ...state, ...changes };
+    const p = new URLSearchParams();
+    if (s.c) p.set('c', s.c); if (s.q) p.set('q', s.q); if (s.condition) p.set('condition', s.condition);
+    if (s.sort && s.sort !== 'best') p.set('sort', s.sort); if (s.min) p.set('min', s.min); if (s.max) p.set('max', s.max);
+    if (s.district) p.set('district', s.district); if (s.featured) p.set('featured', '1'); if (s.free) p.set('free', '1'); if (s.deals) p.set('deals', '1'); if (s.wishlist) p.set('wishlist', '1');
+    const qs = p.toString(); return 'browse.html' + (qs ? '?' + qs : '');
+  }
+  function apply(changes) { Object.assign(state, changes); history.replaceState(null, '', urlFor({})); drawTree(); drawHead(); load(true); }
+
+  // ---------- sidebar tree: click a category to open it and show its sub-categories ----------
+  function drawTree() {
+    const tree = $('tree'); tree.innerHTML = '';
+    const active = bySlug(state.c);
+    tree.append(h('li', {}, h('div', { class: 'node' + (!active ? ' active' : '') },
+      h('a', { href: urlFor({ c: '' }), 'aria-current': !active ? 'page' : null, onclick: e => { e.preventDefault(); apply({ c: '' }); closeSide(); } }, h('span', { class: 'ic', text: '🛍️' }), 'All products'))));
+    const build = (parentId, depth) => kids(parentId).map(c => {
+      const sub = kids(c.id);
+      const isOpen = expanded.has(c.id);
+      const isActive = active && active.id === c.id;
+      const li = h('li', {});
+      const link = h('a', { href: urlFor({ c: c.slug }), 'aria-current': isActive ? 'page' : null,
+        onclick: e => { e.preventDefault(); if (sub.length) expanded.add(c.id); apply({ c: c.slug }); if (!sub.length) closeSide(); } },
+        depth === 0 && h('span', { class: 'ic', 'aria-hidden': 'true', text: /^https?:/.test(c.icon || '') ? '•' : (c.icon || '•') }), c.name);
+      li.append(h('div', { class: 'node' + (isActive ? ' active' : '') }, link,
+        sub.length ? h('button', { type: 'button', class: 'tw', 'aria-expanded': String(isOpen), 'aria-label': (isOpen ? 'Hide ' : 'Show ') + c.name + ' sub-categories', text: '▶',
+          onclick: () => { isOpen ? expanded.delete(c.id) : expanded.add(c.id); drawTree(); } }) : null));
+      if (sub.length && isOpen) li.append(h('ul', {}, build(c.id, depth + 1)));
+      return li;
+    });
+    tree.append(...build(null, 0));
+  }
+
+  // ---------- heading, breadcrumb, sub-category chips, active filters ----------
+  function drawHead() {
+    const active = bySlug(state.c);
+    const cr = $('crumbs'); cr.innerHTML = '';
+    cr.append(h('a', { href: 'index.html', text: 'Home' }));
+    if (active) chain(active).forEach((c, i, arr) => cr.append(h('span', { text: '›' }), i < arr.length - 1 ? h('a', { href: urlFor({ c: c.slug }), text: c.name }) : h('span', { text: c.name })));
+    const title = state.wishlist ? '♥ Saved items' : state.q ? `Results for “${state.q}”` + (active ? ` in ${active.name}` : '') : active ? active.name : state.deals ? 'Deals of the Day' : state.featured ? '★ Featured products' : state.condition === 'pre_owned' ? 'Pre-owned deals' : 'All products';
+    $('heading').textContent = title;
+    document.title = `${title} | RGBKart`;
+    const sc = $('subcats'); sc.innerHTML = '';
+    const subs = active ? kids(active.id) : (state.q ? cats.filter(c => c.name.toLowerCase().includes(state.q.toLowerCase())).slice(0, 8) : []);
+    sc.hidden = !subs.length;
+    subs.forEach(c => sc.append(h('a', { href: urlFor({ c: c.slug, q: active ? state.q : '' }), onclick: e => { e.preventDefault(); expandTo(c); apply({ c: c.slug, q: active ? state.q : '' }); }, text: c.name })));
+    // filter chips
+    const ch = $('chips'); ch.innerHTML = '';
+    const chip = (text, change) => ch.append(h('button', { type: 'button', class: 'fchip', onclick: () => { syncForm(change); apply(change); } }, text, h('span', { 'aria-hidden': 'true', text: '✕' })));
+    if (state.q) chip(`Search: ${state.q}`, { q: '' });
+    if (state.condition) chip(state.condition === 'new' ? 'New' : 'Used', { condition: '' });
+    if (state.min || state.max) chip(`৳${state.min || 0} – ${state.max ? '৳' + state.max : 'any'}`, { min: '', max: '' });
+    if (state.district) chip(state.district, { district: '' });
+    if (state.featured) chip('Featured only', { featured: false });
+    if (state.free) chip('Free delivery', { free: false });
+    if (state.deals) chip('On sale', { deals: false });
+    if (state.wishlist) chip('Saved items', { wishlist: false });
+    const si = document.querySelector('.search input'); if (si) si.value = state.q;
+  }
+  function expandTo(c) { chain(c).forEach(x => expanded.add(x.id)); }
+
+  // ---------- filters form ----------
+  function syncForm(change = {}) {
+    const s = { ...state, ...change };
+    document.querySelectorAll('input[name=condition]').forEach(r => r.checked = r.value === s.condition);
+    $('min').value = s.min; $('max').value = s.max; $('district').value = s.district;
+    $('featuredOnly').checked = s.featured; $('freeDel').checked = s.free; $('dealsOnly').checked = s.deals; $('sort').value = s.sort;
+  }
+  document.querySelectorAll('input[name=condition]').forEach(r => r.onchange = () => apply({ condition: r.value }));
+  $('filters').onsubmit = e => { e.preventDefault(); const mn = $('min').value, mx = $('max').value; apply({ min: mn, max: mx }); closeSide(); };
+  $('district').onchange = () => apply({ district: $('district').value });
+  $('featuredOnly').onchange = () => apply({ featured: $('featuredOnly').checked });
+  $('freeDel').onchange = () => apply({ free: $('freeDel').checked });
+  $('dealsOnly').onchange = () => apply({ deals: $('dealsOnly').checked });
+  $('sort').onchange = () => apply({ sort: $('sort').value });
+  $('clearAll').onclick = () => { const c = { condition: '', min: '', max: '', district: '', featured: false, free: false, deals: false }; syncForm(c); apply(c); };
+  $('moreBtn').onclick = () => load(false);
+
+  // phone drawer
+  function openSide() { $('side').classList.add('open'); $('scrim').classList.add('open'); }
+  function closeSide() { $('side').classList.remove('open'); $('scrim').classList.remove('open'); }
+  $('filterBtn').onclick = openSide; $('scrim').onclick = closeSide; $('sideClose').onclick = closeSide;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSide(); });
+
+  // ---------- results ----------
+  let loadToken = 0;
+  async function load(reset) {
+    const token = ++loadToken;
+    const grid = $('grid');
+    if (reset) { offset = 0; skeletons(grid, 8); $('moreBtn').hidden = true; $('count').textContent = ''; }
+    // district → seller ids (district belongs to the seller)
+    if (reset) {
+      sellerIds = null;
+      if (state.district) { const r = await db.from('shops').select('user_id').eq('city', state.district); sellerIds = (r.data || []).map(x => x.user_id); }
+    }
+    if (sellerIds && !sellerIds.length) return show([], 0, reset, token);
+    let q = db.from('products').select(CARD_FIELDS, { count: 'exact' }).eq('status', 'approved');
+    const active = bySlug(state.c);
+    if (active) q = q.in('category_id', descendants(active.id));
+    if (state.q) {
+      const t = state.q.replace(/[%,()*]/g, ' ').replace(/\s+/g, ' ').trim();
+      const ors = [`title.ilike.%${t}%`, `description.ilike.%${t}%`, `short_description.ilike.%${t}%`];
+      if (/^[\w-]+$/.test(t)) ors.push(`tags.cs.{${t.toLowerCase()}}`);
+      q = q.or(ors.join(','));
+    }
+    if (state.condition) q = q.eq('listing_type', state.condition);
+    if (state.featured) q = q.eq('is_featured', true);
+    if (state.free) q = q.eq('free_delivery', true);
+    if (state.deals) q = q.not('sale_price', 'is', null);
+    if (state.wishlist) { const ids = store.get(WISH_KEY); if (!ids.length) return show([], 0, reset, token); q = q.in('id', ids); }
+    if (state.min) q = q.gte('price', Number(state.min));
+    if (state.max) q = q.lte('price', Number(state.max));
+    if (sellerIds) q = q.in('seller_id', sellerIds);
+    if (state.sort === 'newest') q = q.order('published_at', { ascending: false, nullsFirst: false });
+    else if (state.sort === 'price_asc') q = q.order('price', { ascending: true });
+    else if (state.sort === 'price_desc') q = q.order('price', { ascending: false });
+    else q = q.order('is_featured', { ascending: false }).order('published_at', { ascending: false, nullsFirst: false });
+    const r = await q.range(offset, offset + PAGE - 1);
+    show(r.data || [], r.count || 0, reset, token, r.error);
+  }
+  async function show(list, count, reset, token, error) {
+    const shops = await shopsFor(list);
+    if (token !== loadToken) return;
+    const grid = $('grid');
+    if (reset) grid.innerHTML = '';
+    if (error) { grid.append(h('div', { class: 'empty', style: 'grid-column:1/-1', text: 'Products couldn\'t load. Check your connection and try again.' })); return; }
+    total = count; offset += list.length;
+    $('count').textContent = total ? `${total.toLocaleString('en-IN')} product${total === 1 ? '' : 's'}` : '';
+    if (reset && !list.length) {
+      grid.append(h('div', { class: 'empty', style: 'grid-column:1/-1;display:grid;gap:10px;justify-items:center' },
+        h('b', { text: 'Nothing here yet', style: 'color:var(--fg)' }),
+        h('span', { text: state.wishlist ? 'Tap the ♡ on any product to save it here.' : state.q || state.condition || state.min || state.max || state.district || state.featured || state.free || state.deals ? 'Try removing a filter or searching for something else.' : 'Be the first to list something in this category.' }),
+        h('a', { href: 'sell.html', text: '+ Sell an item' })));
+    }
+    list.forEach(p => grid.append(card(p, shops)));
+    $('moreBtn').hidden = offset >= total;
+    $('moreBtn').textContent = `Show more (${(total - offset).toLocaleString('en-IN')} left)`;
+  }
+
+  // ---------- start ----------
+  async function start() {
+    await initShell();
+    const d = $('district'); d.append(h('option', { value: '', text: 'Anywhere in Bangladesh' }), ...DISTRICTS.map(x => h('option', { value: x, text: x })));
+    const r = await db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true);
+    cats = r.data || [];
+    const active = bySlug(state.c);
+    if (active) expandTo(active);
+    syncForm(); drawTree(); drawHead(); load(true);
+  }
+  start();
+</script>
+</body>
+</html>

@@ -12,7 +12,7 @@ Owner and master administrator: hkmanik@gmail.com. Not a developer: explain step
 - VAT on invoices: admin toggles and sets rate. Card payments postponed until after soft launch.
 - Customer: Google & Facebook sign-in, wishlist, chat with seller (Messages page), report a seller to admin.
 - Contact rules (owner's decision, 22 Oct 2026): shops show phone/WhatsApp to everyone. One-time sellers (sell.html, no account) choose Free or Featured: a FREE listing hides the seller's phone and buyers can only message on RGBKart; a FEATURED listing (after payment) shows call, WhatsApp, email and message. Enforced in the database (`listing_contact()`, `shops` view), not only on the page.
-- Brand: Poppins headings, Roboto body, Hind Siliguri for Bangla. Colours from the logo: green #00802B, red #E30613, yellow #F5C400. Header and footer share the green band with a yellow rule.
+- Brand: Poppins headings, Roboto body, Hind Siliguri for Bangla. Colours from the logo: green #00802B, red #E30613, yellow #F5C400. Header and footer share the green band with a yellow rule. Header logo (owner's request, 22 Oct 2026): the basket cut from the round logo (`site/assets/logo/rgb-basket-96/192.png`) plus the wordmark "Red & Green Basket" in the logo's colours (Red red, & dark, Green green, Basket yellow) and the tagline "Your Online Marketplace", on a white pill inside the green band. Originals in `brand/`.
 
 ## Technical rules
 - Plain HTML/CSS/JS in `site/`, no build step (the session cannot reach npm). Libraries only from cdn.jsdelivr.net with exact pinned versions.

@@ -280,6 +280,10 @@
   .toast { position: fixed; left: 50%; bottom: max(84px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 60; box-shadow: 0 6px 20px rgb(0 0 0 / .2); max-width: calc(100vw - 32px); }
   .gate { min-height: 100%; display: grid; place-content: center; padding: 40px 16px; }
   .gate .card { width: min(440px, calc(100vw - 32px)); }
+  .side-logo { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 6px 8px; margin: 0 6px 10px; text-decoration: none; }
+  .side-logo img { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; flex: none; }
+  .side-logo b { display: block; font: 800 .9rem/1.1 var(--display); letter-spacing: -.015em; white-space: nowrap; }
+  .side-logo small { display: block; font: 700 .62rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: #00802B; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -301,7 +305,7 @@
   <div class="scrim" id="scrim"></div>
 
   <nav class="side" id="side" aria-label="Seller menu">
-    <div class="side-brand"><img src="assets/logo/rgb-badge-112.png" alt="" width="34" height="34" onerror="this.remove()" style="align-self:center">RGB<i style="font-style:normal;color:#FFD21F;margin-left:-8px">Kart</i> <span>Seller</span></div>
+    <a class="side-logo" href="index.html" aria-label="Red &amp; Green Basket home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="40" height="40"><span><b><span style="color:#E30613">Red</span> <span style="color:#14211C">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Seller</small></span></a>
     <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="shop-name" id="shopName"></div>
 

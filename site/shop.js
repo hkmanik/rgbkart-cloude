@@ -24,17 +24,18 @@ const store = {
 // ---------- header ----------
 const CART_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2.5 3h2.6l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.7a1.5 1.5 0 0 0 1.5-1.1L21 7H6"/></svg>';
 const HEART_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+const USER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
 const CHAT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>';
 let hasSession = false;
 function headerHTML() {
   return `<header class="top"><div class="wrap top-in">
-    <a class="brand" href="index.html" aria-label="RGBKart home"><img src="assets/logo/rgb-badge-112.png" alt="" width="40" height="40" onerror="this.remove()"><span>RGB<i>Kart</i></span></a>
+    <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
     <form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search phones, fashion, groceries…" aria-label="Search products" autocomplete="off"><button type="submit">Search</button></form>
     <nav class="nav" aria-label="Account">
       <a class="sell hide-sm" href="sell.html">+ Sell</a>
       <a class="icon-link" href="messages.html" id="msgLink" aria-label="Messages" hidden>${CHAT_SVG}<span class="badge" id="msgCount" hidden></span></a>
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
-      <a href="login.html" id="acctLink">Sign in</a>
+      <a class="icon-link acct" href="login.html" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;
 }
@@ -62,7 +63,7 @@ async function initShell() {
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();
-    if (session && !session.user.is_anonymous) $('acctLink').textContent = 'My account';
+    if (session && !session.user.is_anonymous) $('acctLbl').textContent = 'My account';
     if (session) { hasSession = true; $('msgLink').hidden = false; updateBadges(); }
   } catch (_) {}
 }

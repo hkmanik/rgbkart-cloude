@@ -97,13 +97,17 @@
   .del:hover { color: var(--danger); }
   .empty { color: var(--muted); text-align: center; padding: 12px 0; }
   .count { color: var(--muted); font-size: .85rem; }
+  .lbrand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+  .lbrand img { width: 64px; height: 64px; border-radius: 50%; box-shadow: 0 0 0 3px #F5C400; background: #fff; }
+  .lbrand b { display: block; font: 800 clamp(1.35rem, 5vw, 1.8rem)/1.1 var(--display); letter-spacing: -.01em; }
+  .lbrand small { display: block; font: 600 .7rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-top: 4px; }
 </style>
 </head>
 <body>
 <a class="sell-fab" href="sell.html" aria-label="Sell an item">+ Sell</a>
 <main>
   <header>
-    <h1><a href="index.html" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:10px"><img src="assets/logo/rgb-badge-112.png" alt="" width="48" height="48" onerror="this.remove()"><span>RGB<i style="font-style:normal;color:#E30613">Kart</i></span></a></h1>
+    <h1 style="margin:0"><a href="index.html" class="lbrand" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="64" height="64"><span><b><span style="color:#E30613">Red</span> <span style="color:var(--fg)">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Your Online Marketplace</small></span></a></h1>
     <p class="sub" id="tagline">Sign in, or create an account to shop or sell.</p>
   </header>
 

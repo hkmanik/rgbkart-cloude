@@ -29,9 +29,15 @@
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
   .top { background: #00802B; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .top-in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .brand { font: 700 1.25rem var(--display); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
-  .brand img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .25)); }
-  .brand i { font-style: normal; color: #FFD21F; }
+  .brand { display: inline-flex; align-items: center; gap: 9px; background: #fff; border-radius: 999px; padding: 3px 16px 3px 3px; text-decoration: none; box-shadow: 0 1px 4px rgb(0 0 0 / .22); flex: none; transition: box-shadow .15s, transform .15s; }
+  .brand:hover { box-shadow: 0 3px 10px rgb(0 0 0 / .28); transform: translateY(-1px); }
+  .brand img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; background: #fff; flex: none; }
+  .brand .wm { display: grid; line-height: 1.05; min-width: 0; }
+  .brand b { font: 800 1.12rem/1.1 var(--display); letter-spacing: -.01em; white-space: nowrap; }
+  .brand .nw { white-space: nowrap; } .brand .r { color: #E30613; } .brand .a { color: #14211C; } .brand .g { color: #00802B; }
+  .brand .y { color: #F5C400; text-shadow: 0 1px 0 #A87400, 0 0 1px #A87400; }
+  .brand small { font: 600 .6rem/1.2 var(--body); letter-spacing: .09em; text-transform: uppercase; color: #00802B; margin-top: 3px; white-space: nowrap; }
+  @media (max-width: 560px) { .brand { padding-right: 12px; gap: 7px; } .brand img { width: 36px; height: 36px; } .brand b { font-size: .95rem; } .brand small { display: none; } }
   .top a.small { color: #FFE066; font-size: .9rem; }
   .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: #F5C400; } .rgb i:nth-child(2) { background: #F5C400; } .rgb i:nth-child(3) { background: #F5C400; }
   main { max-width: 640px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
@@ -124,7 +130,7 @@
 </head>
 <body>
 <header>
-  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="RGBKart home"><img src="assets/logo/rgb-badge-112.png" alt="" width="40" height="40" onerror="this.remove()"><span>RGB<i>Kart</i></span></a><span style="display:flex;gap:14px;align-items:center"><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
+  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a><span style="display:flex;gap:14px;align-items:center"><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
   <div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div>
 </header>
 

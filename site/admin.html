@@ -846,6 +846,9 @@
         <option value="newest">New arrivals</option>
         <option value="pre_owned">Pre-owned products</option>
         <option value="free_delivery">Free delivery products</option>
+        <option value="variable">Products with options (size, colour…)</option>
+        <option value="brand_new">Brand-new products only</option>
+        <option value="negotiable">Price negotiable products</option>
         <option value="category">Products from one category</option>
       </select></label>
     <label id="sxCatWrap" hidden>Category <select id="sxCat"></select></label>
@@ -1616,9 +1619,9 @@
   };
 
   // ===================== Home page sections =====================
-  const SX_TYPES = { featured: 'Featured products', deals: 'Deals of the Day', newest: 'New arrivals', pre_owned: 'Pre-owned', free_delivery: 'Free delivery', category: 'Category' };
-  const SX_DEFAULT_TITLE = { featured: 'Featured Products', deals: 'Deals of the Day', newest: 'New Arrivals', pre_owned: 'Pre-owned Deals', free_delivery: 'Free Delivery Picks' };
-  const SX_DEFAULT_TITLE_BN = { featured: 'ফিচার্ড পণ্য', deals: 'আজকের ডিল', newest: 'নতুন পণ্য', pre_owned: 'ব্যবহৃত পণ্য', free_delivery: 'ফ্রি ডেলিভারি' };
+  const SX_TYPES = { featured: 'Featured products', deals: 'Deals of the Day', newest: 'New arrivals', pre_owned: 'Pre-owned', free_delivery: 'Free delivery', variable: 'With options', brand_new: 'Brand new', negotiable: 'Negotiable', category: 'Category' };
+  const SX_DEFAULT_TITLE = { featured: 'Featured Products', deals: 'Deals of the Day', newest: 'New Arrivals', pre_owned: 'Pre-owned Deals', free_delivery: 'Free Delivery Picks', variable: 'Choose Your Size & Colour', brand_new: 'Brand New', negotiable: 'Price Negotiable' };
+  const SX_DEFAULT_TITLE_BN = { featured: 'ফিচার্ড পণ্য', deals: 'আজকের ডিল', newest: 'নতুন পণ্য', pre_owned: 'ব্যবহৃত পণ্য', free_delivery: 'ফ্রি ডেলিভারি' , variable: 'সাইজ ও রং বেছে নিন', brand_new: 'একদম নতুন', negotiable: 'দরদাম করা যাবে' };
   let homeSections = [], editingSec = null;
 
   async function loadSections() {

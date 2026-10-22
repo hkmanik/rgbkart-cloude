@@ -13,7 +13,7 @@ const CartLib = {
     if (!cart.length) return { groups: [], methods: [], cart };
     const ids = [...new Set(cart.map(i => i.product_id))];
     const [p, m] = await Promise.all([
-      db.from('products').select('id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, status, seller_id, product_type, manage_stock, stock, backorders, stock_status, free_delivery, ships_to, contact_only, cod_allowed, is_downloadable, sold_individually, product_images(storage_path, sort_order), product_variations(id, price, sale_price, stock, is_active)').in('id', ids),
+      db.from('products').select('id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, status, seller_id, product_type, manage_stock, stock, backorders, stock_status, free_delivery, ships_to, contact_only, cod_allowed, is_downloadable, sold_individually, product_images(storage_path, sort_order), product_price_tiers(min_qty, unit_price), product_variations(id, price, sale_price, stock, is_active)').in('id', ids),
       db.from('shipping_methods').select('*').eq('is_active', true).order('sort_order'),
     ]);
     const prods = new Map((p.data || []).map(x => [x.id, x]));
@@ -39,6 +39,9 @@ const CartLib = {
         if (pr.backorders === 'no') it.max = Math.min(99, v.stock);
       } else {
         it.unit = Number(saleActive(pr) ? pr.sale_price : pr.price);
+        // bulk price for the quantity in the cart (the database uses the same rule)
+        const tier = (pr.product_price_tiers || []).filter(t => t.min_qty <= c.qty).map(t => Number(t.unit_price));
+        if (tier.length) it.unit = Math.min(it.unit, ...tier);
         if (pr.manage_stock && pr.backorders === 'no') it.max = Math.min(99, pr.stock);
         if (!pr.manage_stock && pr.stock_status === 'out_of_stock') it.max = 0;
       }

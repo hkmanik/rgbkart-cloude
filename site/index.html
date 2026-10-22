@@ -92,7 +92,7 @@
   function seeAllLink(s) {
     const cat = cats.find(c => c.id === s.category_id);
     return { featured: 'browse.html?featured=1', deals: 'browse.html?deals=1', newest: 'browse.html?sort=newest', pre_owned: 'browse.html?condition=pre_owned',
-      free_delivery: 'browse.html?free=1', category: cat ? `browse.html?c=${encodeURIComponent(cat.slug)}` : 'browse.html' }[s.section_type];
+      free_delivery: 'browse.html?free=1', variable: 'browse.html', brand_new: 'browse.html?condition=new', negotiable: 'browse.html', category: cat ? `browse.html?c=${encodeURIComponent(cat.slug)}` : 'browse.html' }[s.section_type];
   }
 
   async function renderSection(s, holder) {
@@ -106,6 +106,9 @@
     if (s.section_type === 'deals') q = q.not('sale_price', 'is', null);
     if (s.section_type === 'pre_owned') q = q.eq('listing_type', 'pre_owned');
     if (s.section_type === 'free_delivery') q = q.eq('free_delivery', true);
+    if (s.section_type === 'variable') q = q.eq('product_type', 'variable');
+    if (s.section_type === 'brand_new') q = q.eq('listing_type', 'new');
+    if (s.section_type === 'negotiable') q = q.eq('price_negotiable', true);
     if (s.section_type === 'category') { if (!cats.some(c => c.id === s.category_id)) { sec.remove(); return; } q = q.in('category_id', descendants(s.category_id)); }
     const r = await q.order('published_at', { ascending: false, nullsFirst: false }).limit(s.section_type === 'deals' ? n * 2 : n);
     let list = r.data || [];

@@ -3,79 +3,88 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RGBKart Cart</title>
+<title>Your cart | RGBKart</title>
 <link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=8">
-<style>
-  /* Layout: cart list with summary column (stacks on phones) */
-  main { padding-block: 20px 40px; }
-  h1 { font: 600 1.7rem var(--display); margin: 0 0 14px; }
-  .cart { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
-  @media (max-width: 860px) { .cart { grid-template-columns: minmax(0, 1fr); } }
-  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
-  .item { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
-  .item:first-child { border-top: 0; padding-top: 0; }
-  .item img, .item .noimg { width: 76px; height: 76px; border-radius: 10px; object-fit: cover; background: var(--bg); }
-  .item a.t { font-weight: 600; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; }
-  .item .m { color: var(--muted); font-size: .88rem; }
-  .qty { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; margin-top: 6px; }
-  .qty button { width: 32px; height: 32px; border: 0; background: var(--bg); color: var(--fg); cursor: pointer; font-size: 1.05rem; }
-  .qty span { min-width: 36px; text-align: center; font-weight: 600; }
-  .line { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
-  .rm { background: none; border: 0; color: var(--danger); font: 600 .85rem var(--body); cursor: pointer; padding: 4px 0; }
-  .sum { display: grid; gap: 12px; position: sticky; top: 84px; }
-  .row { display: flex; justify-content: space-between; }
-  .total { font-size: 1.2rem; font-weight: 700; border-top: 1px solid var(--line); padding-top: 12px; }
-  .soon { background: #fbefd5; color: #8a5a00; border-radius: 10px; padding: 10px 12px; font-size: .88rem; }
-  .checkout { border: 0; background: var(--buy); color: #fff; font: 700 1rem var(--body); padding: 13px; border-radius: 10px; opacity: .55; cursor: not-allowed; }
-  .empty-cart { text-align: center; padding: 50px 16px; display: grid; gap: 10px; justify-items: center; }
-  .btn-acc { background: var(--accent); color: var(--accent-fg); text-decoration: none; font-weight: 700; padding: 11px 18px; border-radius: 10px; }
-</style>
+<link rel="stylesheet" href="shop.css?v=9">
+<link rel="stylesheet" href="order.css?v=1">
 </head>
 <body>
 
-<main class="wrap">
+<main class="wrap ord-main">
+  <div class="steps" aria-label="Checkout steps"><span class="on">1 Cart</span><span>2 Delivery &amp; payment</span><span>3 Done</span></div>
   <h1>Your cart</h1>
-  <div id="content"></div>
+  <p class="lead">Each shop packs and sends its own items, so you get one order per shop. You pay the shop in cash when it arrives.</p>
+  <div id="content"><div class="box">Loading your cart…</div></div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=8"></script>
+<script src="shop.js?v=9"></script>
 <script src="menu.js?v=2"></script>
+<script src="cartlib.js?v=1"></script>
 <script>
-  const KEY = 'rgbkart-cart';
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (_) { return []; } };
-  const write = c => { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (_) {} updateBadges(); draw(); };
-  function draw() {
-    const cart = read(), box = $('content'); box.innerHTML = '';
-    const n = cart.reduce((s, i) => s + i.qty, 0);
-    if (!cart.length) {
-      box.append(h('div', { class: 'box empty-cart' }, h('b', { text: 'Your cart is empty', style: 'font-size:1.1rem' }), h('span', { style: 'color:var(--muted)', text: 'Find something you like and tap "Add to cart".' }), h('a', { class: 'btn-acc', href: 'browse.html', text: 'Start shopping' })));
+  let data = null;
+  function setQty(idx, q) {
+    const cart = CartLib.read(); if (!cart[idx]) return;
+    cart[idx].qty = q; CartLib.write(cart); draw();
+  }
+  function remove(idx) { const cart = CartLib.read(); cart.splice(idx, 1); CartLib.write(cart); draw(); }
+
+  function itemRow(i) {
+    return h('div', { class: 'citem' + (i.problem ? ' off' : '') },
+      i.image ? h('img', { src: i.image, alt: '' }) : h('div', { class: 'noimg' }),
+      h('div', { style: 'min-width:0;display:grid;gap:2px' },
+        h('a', { class: 't', href: `product.html?id=${i.product_id}`, text: i.title }),
+        i.variant && h('div', { class: 'm', text: i.variant }),
+        i.problem ? h('div', { class: 'm bad', text: i.problem }) : h('div', { class: 'm', text: money(i.unit) + ' each' }),
+        i.note && h('div', { class: 'm warn', text: i.note }),
+        !i.problem && h('div', { class: 'qty' },
+          h('button', { type: 'button', 'aria-label': 'Less', text: '−', disabled: i.qty <= 1, onclick: () => setQty(i.idx, i.qty - 1) }),
+          h('span', { text: i.qty, 'aria-live': 'polite' }),
+          h('button', { type: 'button', 'aria-label': 'More', text: '+', disabled: i.qty >= i.max, onclick: () => setQty(i.idx, i.qty + 1) }))),
+      h('div', { style: 'display:grid;justify-items:end;gap:6px' },
+        !i.problem && h('span', { class: 'line', text: money(i.qty * i.unit) }),
+        h('button', { type: 'button', class: 'rm', text: 'Remove', onclick: () => remove(i.idx) })));
+  }
+
+  async function draw() {
+    data = await CartLib.load();
+    // keep capped quantities
+    const cart = CartLib.read(); let changed = false;
+    (data.items || []).forEach(i => { if (i.note && cart[i.idx] && cart[i.idx].qty !== i.qty) { cart[i.idx].qty = i.qty; changed = true; } });
+    if (changed) CartLib.write(cart);
+    const box = $('content'); box.innerHTML = '';
+    if (!CartLib.read().length) {
+      box.append(h('div', { class: 'box empty-cart' }, h('b', { text: 'Your cart is empty' }), h('span', { text: 'Find something you like and tap "Add to cart".' }),
+        h('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center' }, h('a', { class: 'btn-acc', href: 'browse.html', text: 'Start shopping' }), h('a', { class: 'btn-line', href: 'orders.html', text: 'My orders' }))));
       return;
     }
-    const list = h('div', { class: 'box' });
-    cart.forEach((i, k) => list.append(h('div', { class: 'item' },
-      i.image ? h('img', { src: i.image, alt: '' }) : h('div', { class: 'noimg' }),
-      h('div', { style: 'min-width:0' }, h('a', { class: 't', href: `product.html?id=${i.product_id}`, text: i.title }),
-        i.variant && h('div', { class: 'm', text: i.variant }), h('div', { class: 'm', text: money(i.unit_price) + ' each' }),
-        h('div', { class: 'qty' },
-          h('button', { type: 'button', 'aria-label': 'Less', text: '−', onclick: () => { if (i.qty > 1) { i.qty--; write(cart); } } }),
-          h('span', { text: i.qty }),
-          h('button', { type: 'button', 'aria-label': 'More', text: '+', onclick: () => { i.qty++; write(cart); } }))),
-      h('div', { style: 'display:grid;justify-items:end;gap:6px' }, h('span', { class: 'line', text: money(i.qty * i.unit_price) }),
-        h('button', { type: 'button', class: 'rm', text: 'Remove', onclick: () => { cart.splice(k, 1); write(cart); } })))));
-    const total = cart.reduce((s, i) => s + i.qty * i.unit_price, 0);
-    const sum = h('div', { class: 'box sum' },
-      h('div', { class: 'row' }, h('span', { text: `Items (${n})` }), h('span', { text: money(total) })),
-      h('div', { class: 'row' }, h('span', { text: 'Delivery' }), h('span', { style: 'color:var(--muted)', text: 'At checkout' })),
-      h('div', { class: 'row total' }, h('span', { text: 'Total' }), h('span', { text: money(total) })),
-      h('div', { class: 'soon', text: 'Checkout with bKash, Nagad, card and cash on delivery is coming soon. Your cart is saved on this device.' }),
-      h('button', { type: 'button', class: 'checkout', disabled: true, text: 'Checkout (coming soon)' }));
-    box.append(h('div', { class: 'cart' }, list, sum));
+    const left = h('div', { class: 'groups' });
+    for (const g of data.groups) {
+      const opts = h('div', { class: 'ship', role: 'radiogroup', 'aria-label': `Delivery from ${g.shop.shop_name}` });
+      g.options.forEach(o => opts.append(h('label', { class: 'ship-o' },
+        h('input', { type: 'radio', name: 'ship_' + g.seller, value: o.id, checked: g.method && g.method.id === o.id, onchange: () => { CartLib.setShip(g.seller, o.id); draw(); } }),
+        h('span', { class: 'grow' }, h('b', { text: o.name }), h('small', { text: o.id === 'pickup' ? (g.shop.pickup_address || 'From the shop') : (o.eta || '') })),
+        h('b', { class: 'fee', text: o.id === 'negotiated' ? 'Agree with shop' : g.feeOf(o) ? money(g.feeOf(o)) : 'Free' }))));
+      left.append(h('section', { class: 'box group' },
+        h('div', { class: 'ghead' }, h('span', { class: 'shopic', 'aria-hidden': 'true', text: (g.shop.shop_name || '?').charAt(0).toUpperCase() }), h('b', { text: 'From ' + g.shop.shop_name }), h('span', { class: 'sub', text: money(g.subtotal) })),
+        g.items.map(itemRow),
+        h('div', { class: 'gfoot' }, h('b', { class: 'small', text: 'Delivery' }), opts, g.allFree && h('p', { class: 'm good', text: '✓ Free delivery from this shop' }))));
+    }
+    if (data.problems.length) left.append(h('section', { class: 'box group' }, h('div', { class: 'ghead' }, h('b', { text: 'Can\'t be ordered' })), data.problems.map(itemRow)));
+    const total = data.groups.reduce((a, g) => a + g.total, 0);
+    const sum = h('aside', { class: 'box sum' }, h('h2', { text: 'Order summary' }),
+      data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: g.shop.shop_name }),
+        h('div', { class: 'srow' }, h('span', { text: `Items (${g.items.reduce((a, i) => a + i.qty, 0)})` }), h('span', { text: money(g.subtotal) })),
+        h('div', { class: 'srow' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })))),
+      h('div', { class: 'srow total' }, h('span', { text: 'Total' }), h('span', { text: money(total) })),
+      h('p', { class: 'm', text: 'Pay in cash when your order arrives (Cash on Delivery).' }),
+      data.groups.length ? h('a', { class: 'go', href: 'checkout.html', text: 'Checkout →' }) : h('span', { class: 'm bad', text: 'Remove the items that can\'t be ordered to continue.' }),
+      h('a', { class: 'more', href: 'browse.html', text: '← Continue shopping' }));
+    box.append(h('div', { class: 'cartgrid' }, left, sum));
   }
   (async () => { await initShell(); draw(); })();
 </script>

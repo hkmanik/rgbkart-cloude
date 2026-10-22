@@ -378,6 +378,7 @@
     <button class="nav tone-blue" data-view="categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7M3 12h7M14 6h7M14 12h7M3 18h18"/></svg>Categories</button>
     <button class="nav tone-blue" data-view="attributes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>Attributes</button>
     <button class="nav tone-blue" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Products<span class="count" id="navProducts" hidden></span></button>
+    <button class="nav tone-green" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders</button>
 
     <div class="nav-group tone-green">People</div>
     <button class="nav tone-green" data-view="sellers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Sellers<span class="count" id="navPending" hidden></span></button>
@@ -579,6 +580,25 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="filters" id="adFilter"><button type="button" data-s="running" aria-pressed="true">Running &amp; upcoming</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
           <button class="primary" type="button" id="addAd">+ New ad</button></div></div>
         <div id="adList"></div>
+      </div>
+    </section>
+
+    <!-- Orders -->
+    <section data-page="orders">
+      <div class="page-head"><div><h1>Orders</h1><p>All orders on RGBKart. Each shop confirms, packs and delivers its own orders and collects the cash. You can step in and cancel an order if needed.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar"><div class="filters" id="aoFilter">
+          <button type="button" data-s="open" aria-pressed="true">Open</button><button type="button" data-s="delivered" aria-pressed="false">Delivered</button>
+          <button type="button" data-s="cancelled" aria-pressed="false">Cancelled</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
+          <input type="search" id="aoSearch" placeholder="Search order no., customer, phone or shop" aria-label="Search orders" style="flex:1;min-width:220px"></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Order</th><th>Shop</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
+          <tbody id="aoRows"></tbody></table></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h2>Delivery charges</h2>
+        <p class="msg muted" style="margin:4px 0 10px">What customers pay for delivery, per shop in their order. Products marked "Free delivery" by the seller deliver free. Store pickup only shows for shops that offer it.</p>
+        <div id="shipList"></div>
       </div>
     </section>
 
@@ -1050,8 +1070,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1067,6 +1087,7 @@
     if (view === 'mainmenu') loadMenu();
     if (view === 'reports') loadReport();
     if (view === 'payments') loadPayments();
+    if (view === 'orders') loadAdminOrders();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));
@@ -2105,8 +2126,75 @@
     }
   }
 
+  // ===================== Orders (all shops) =====================
+  let aOrders = [], aoFilter = 'open', aoShops = new Map(), shipMethods = [];
+  const AO_LABEL = { pending: 'New', confirmed: 'Confirmed', packed: 'Packed', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled' };
+  async function loadAdminOrders() {
+    const [o, m] = await Promise.all([
+      db.from('orders').select('*, order_items(title, qty, variant_label)').order('created_at', { ascending: false }).limit(500),
+      db.from('shipping_methods').select('*').order('sort_order'),
+    ]);
+    if (o.error || m.error) {
+      const e = o.error || m.error; $('aoRows').innerHTML = ''; $('shipList').innerHTML = '';
+      $('aoRows').append(h('tr', {}, h('td', { colspan: 7, class: 'empty', text: /does not exist|Could not find/i.test(e.message) ? 'Run 0020_orders.sql in Supabase to turn on orders.' : friendly(e) })));
+      return;
+    }
+    aOrders = o.data; shipMethods = m.data;
+    const ids = [...new Set(aOrders.map(x => x.seller_id))];
+    aoShops = new Map();
+    if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public').in('user_id', ids); (sd.data || []).forEach(x => aoShops.set(x.user_id, x)); }
+    drawAdminOrders(); drawShip();
+  }
+  $('aoFilter').querySelectorAll('button').forEach(b => b.onclick = () => { aoFilter = b.dataset.s; $('aoFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAdminOrders(); });
+  $('aoSearch').oninput = () => drawAdminOrders();
+  function drawAdminOrders() {
+    const q = $('aoSearch').value.trim().toLowerCase();
+    const rows = aOrders.filter(o => (aoFilter === 'all' || (aoFilter === 'open' ? !['delivered', 'cancelled'].includes(o.status) : o.status === aoFilter))
+      && (!q || [o.order_no, o.customer_name, o.phone, (aoShops.get(o.seller_id) || {}).shop_name].some(v => (v || '').toLowerCase().includes(q))));
+    const body = $('aoRows'); body.innerHTML = '';
+    if (!rows.length) { body.append(h('tr', {}, h('td', { colspan: 7, class: 'empty', text: aOrders.length ? 'No orders match.' : 'No orders yet.' }))); return; }
+    for (const o of rows) {
+      const sh = aoShops.get(o.seller_id) || {};
+      const cls = { pending: 'pending', delivered: 'approved', cancelled: 'rejected' }[o.status] || 'plain';
+      body.append(h('tr', {},
+        h('td', {}, h('b', { text: o.order_no, style: 'font-family:ui-monospace,monospace' }), h('div', { class: 'date', text: fmtDate(o.created_at) })),
+        h('td', {}, h('div', { text: sh.shop_name || '—' }), sh.phone_public && h('div', { class: 'date', text: sh.phone_public })),
+        h('td', {}, h('div', { text: o.customer_name }), h('div', { class: 'date', text: `${o.phone} · ${o.district}` })),
+        h('td', { class: 'date', text: (o.order_items || []).map(i => `${i.qty} × ${i.title}`).join(', ') }),
+        h('td', { text: taka(o.total) }),
+        h('td', {}, h('span', { class: 'chip ' + cls, text: AO_LABEL[o.status] }), o.cancel_reason && h('div', { class: 'date', text: o.cancel_reason })),
+        h('td', {}, !['delivered', 'cancelled'].includes(o.status) && canApprove() ? (() => {
+          const btn = h('button', { type: 'button', class: 'bad', text: 'Cancel' });
+          btn.onclick = async () => {
+            const reason = window.prompt(`Cancel ${o.order_no}? Write the reason the customer and shop will see:`);
+            if (!reason || !reason.trim()) return;
+            const { error } = await db.rpc('update_order', { p_order: o.id, p_status: 'cancelled', p_note: reason.trim() });
+            if (error) return toast(friendly(error)); toast('Order cancelled'); loadAdminOrders();
+          };
+          return btn;
+        })() : h('span'))));
+    }
+  }
+  function drawShip() {
+    const box = $('shipList'); box.innerHTML = ''; const edit = canApprove();
+    for (const m of shipMethods) {
+      const name = h('input', { type: 'text', maxlength: 40, value: m.name, 'aria-label': 'Name', disabled: !edit });
+      const fee = h('input', { type: 'number', min: 0, step: 1, value: Number(m.fee), 'aria-label': `${m.name} fee`, disabled: !edit || ['pickup', 'negotiated'].includes(m.id) });
+      const eta = h('input', { type: 'text', maxlength: 40, value: m.eta || '', 'aria-label': `${m.name} delivery time`, disabled: !edit });
+      const on = h('input', { type: 'checkbox', checked: m.is_active, disabled: !edit });
+      box.append(h('div', { class: 'rate-row' },
+        h('div', {}, h('label', {}, 'Name', name)), h('label', {}, 'Fee (৳)', fee), h('label', {}, 'Delivery time', eta), h('label', { class: 'check' }, on, 'On'),
+        edit ? actionBtn('Save', 'good', async () => {
+          if (name.value.trim().length < 2) return toast('Give it a name.');
+          if (!(Number(fee.value) >= 0)) return toast('Enter a fee (0 or more).');
+          const { error } = await db.from('shipping_methods').update({ name: name.value.trim(), fee: Number(fee.value) || 0, eta: eta.value.trim() || null, is_active: on.checked, updated_at: new Date().toISOString() }).eq('id', m.id);
+          if (error) return toast(friendly(error)); toast(`Saved ${name.value.trim()}`); loadAdminOrders();
+        }) : h('span')));
+    }
+  }
+
   // ===================== Reports =====================
-  let repPeriod = 'day', repAnchor = null, repData = null, repRange = null;
+  let repPeriod = 'day', repAnchor = null, repData = null, repRange = null, repOrders = null;
   const dhakaToday = () => new Date(Date.now() + 6 * 3600e3).toISOString().slice(0, 10);
   const iso = d => d.toISOString().slice(0, 10);
   function periodRange(p, anchor) {
@@ -2147,7 +2235,8 @@
     if (repPeriod === 'custom') { f = $('repFrom').value; t = $('repTo').value; if (!f || !t || t < f) return setMsg('repMsg', 'Choose a From date and a To date (To can\'t be before From).', true); }
     else { [f, t] = periodRange(repPeriod, repAnchor); $('repLabel').textContent = rangeLabel(f, t); $('repNext').disabled = f > dhakaToday() || t >= dhakaToday(); }
     setMsg('repMsg', 'Loading…'); repRange = [f, t];
-    const { data, error } = await db.rpc('admin_report', { p_from: f, p_to: t });
+    const [{ data, error }, ord] = await Promise.all([db.rpc('admin_report', { p_from: f, p_to: t }), db.rpc('admin_order_report', { p_from: f, p_to: t }).then(x => x, () => ({}))]);
+    repOrders = ord && !ord.error ? ord.data : null;
     if (error) { setMsg('repMsg', /Could not find the function/i.test(error.message) ? 'Run 0018_admin_tools.sql in Supabase to turn on reports.' : friendly(error), true); $('repBody').innerHTML = ''; return; }
     setMsg('repMsg', ''); repData = data; drawReport(f, t);
   }
@@ -2177,6 +2266,9 @@
         kpi(taka(0), 'From free listings', 'Free listings don\'t pay'),
         kpi(taka(d.ads_unpaid), 'Ads not paid yet', 'Running ads waiting for payment (today)'),
         kpi(num(d.featured_waiting), 'Featured waiting for payment', 'Today'))),
+      repOrders && h('div', { class: 'rep-group' }, h('h2', { text: 'Orders (paid to shops, not to RGBKart)' }), h('div', { class: 'kpis' },
+        kpi(num(repOrders.orders), 'Orders placed', `${num(repOrders.buyers)} different customers`), kpi(taka(repOrders.orders_value), 'Value of orders', 'Not cancelled · cash goes to the shops'),
+        kpi(num(repOrders.delivered), 'Delivered'), kpi(num(repOrders.cancelled), 'Cancelled'), kpi(num(repOrders.open_now), 'Open orders now', 'Not yet delivered'))),
       h('div', { class: 'rep-group' }, h('h2', { text: 'Visitors' }), h('div', { class: 'kpis' },
         kpi(num(d.visitors), 'Visitors', 'Different phones / computers'), kpi(num(d.page_views), 'Page visits', 'Each page counted once a day per visitor'), kpi(num(d.messages), 'Messages sent', 'Between buyers and sellers'))),
       h('div', { class: 'rep-group' }, h('h2', { text: 'Sellers & customers' }), h('div', { class: 'kpis' },
@@ -2202,6 +2294,7 @@
     const d = repData, rows = [['RGBKart report', `${repRange[0]} to ${repRange[1]}`], [],
       ['Total income (BDT)', Number(d.featured_income) + Number(d.ad_income)], ['Featured income (BDT)', d.featured_income], ['Ad income (BDT)', d.ad_income], ['Free listings income (BDT)', 0],
       ['Featured paid', d.featured_paid], ['Featured free from admin', d.featured_free], ['Ads started', d.ads_started], ['Ads not paid yet (BDT, today)', d.ads_unpaid],
+      ...(repOrders ? [['Orders placed', repOrders.orders], ['Value of orders (BDT, paid to shops)', repOrders.orders_value], ['Orders delivered', repOrders.delivered], ['Orders cancelled', repOrders.cancelled]] : []),
       ['Visitors', d.visitors], ['Page visits', d.page_views], ['Messages', d.messages], ['New customers', d.new_customers], ['New shops', d.new_shops], ['New one-time sellers', d.new_one_time],
       ['New listings', d.new_listings], ['Listings that went live', d.approved_listings], ['Live products now', d.live_products], [],
       ['Period from', 'Period to', 'Visitors', 'New sign-ups', 'New listings', 'Income (BDT)'], ...(d.series || []).map(s => [s.from, s.to, s.visitors, s.signups, s.listings, s.income])];

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checkout | RGBKart</title>
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
+<link rel="stylesheet" href="shop.css?v=9">
+<link rel="stylesheet" href="order.css?v=1">
+</head>
+<body>
+
+<main class="wrap ord-main">
+  <div class="steps" aria-label="Checkout steps"><span class="done">1 Cart</span><span class="on">2 Delivery &amp; payment</span><span>3 Done</span></div>
+  <div id="content"><div class="box">Loading…</div></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="shop.js?v=9"></script>
+<script src="menu.js?v=2"></script>
+<script src="cartlib.js?v=1"></script>
+<script>
+  const ADDR_KEY = 'rgbkart-address';
+  let data = null, session = null, isGuest = true;
+  const saved = () => { try { return JSON.parse(localStorage.getItem(ADDR_KEY) || '{}'); } catch (_) { return {}; } };
+
+  async function start() {
+    await initShell();
+    ({ data: { session } } = await db.auth.getSession());
+    isGuest = !session || session.user.is_anonymous;
+    data = await CartLib.load();
+    if (!data.groups.length) { location.replace('cart.html'); return; }
+    let prof = {};
+    if (session && !isGuest) {
+      const r = await db.from('profiles').select('full_name, phone, customer_details(address, city)').eq('id', session.user.id).maybeSingle();
+      if (r.data) { const cd = Array.isArray(r.data.customer_details) ? r.data.customer_details[0] : r.data.customer_details; prof = { name: r.data.full_name, phone: r.data.phone, address: cd && cd.address, district: cd && cd.city, email: session.user.email }; }
+    }
+    draw({ ...prof, ...Object.fromEntries(Object.entries(saved()).filter(([, v]) => v)) });
+  }
+
+  function draw(pre) {
+    const box = $('content'); box.innerHTML = '';
+    const dist = h('select', { id: 'coDist', required: true }, h('option', { value: '', text: 'Choose your district' }), DISTRICTS_BD.map(d => h('option', { value: d, text: d, selected: pre.district === d })));
+    const f = h('form', { class: 'box form', id: 'coForm', novalidate: true },
+      h('h1', { text: 'Delivery details', style: 'font-size:1.4rem' }),
+      isGuest && h('p', { class: 'note' }, 'Have an account? ', h('a', { href: 'login.html', text: 'Sign in' }), ' to keep your orders in it. You can also order without signing in: your orders are kept on this phone or computer.'),
+      h('div', { class: 'two' },
+        h('label', {}, h('span', { class: 'req', text: 'Full name' }), h('input', { id: 'coName', type: 'text', maxlength: 80, autocomplete: 'name', value: pre.name || '' })),
+        h('label', {}, h('span', { class: 'req', text: 'Mobile number' }), h('input', { id: 'coPhone', type: 'tel', inputmode: 'tel', maxlength: 16, placeholder: '01XXXXXXXXX', autocomplete: 'tel', value: pre.phone || '' }))),
+      h('label', {}, h('span', { class: 'req', text: 'Address (house, road, area)' }), h('input', { id: 'coAddr', type: 'text', maxlength: 300, autocomplete: 'street-address', placeholder: 'e.g. House 12, Road 5, Block C, Mirpur 10', value: pre.address || '' })),
+      h('div', { class: 'two' }, h('label', {}, h('span', { class: 'req', text: 'District' }), dist),
+        h('label', {}, 'Area / thana (optional)', h('input', { id: 'coArea', type: 'text', maxlength: 60, value: pre.area || '' }))),
+      h('label', {}, 'Email (optional)', h('input', { id: 'coEmail', type: 'email', maxlength: 120, autocomplete: 'email', value: pre.email || '' })),
+      h('label', {}, 'Note for the shop (optional)', h('textarea', { id: 'coNote', maxlength: 500, placeholder: 'e.g. Call before delivery, gate code…' })),
+      h('h2', { text: 'Payment' }),
+      h('div', { class: 'pay-o' }, h('span', { style: 'font-size:1.6rem', 'aria-hidden': 'true', text: '💵' }), h('span', {}, h('b', { text: 'Cash on Delivery' }), h('small', { text: 'Pay the shop in cash when your order arrives. RGBKart never takes your money.' }))));
+    dist.onchange = () => {
+      // pick Inside / Outside Dhaka automatically for each shop
+      data.groups.forEach(g => { const d = CartLib.defaultFor(g, dist.value); if (d && (!g.method || g.method.id === 'dhaka' || g.method.id === 'outside')) CartLib.setShip(g.seller, d.id); });
+      CartLib.load().then(x => { data = x; drawSum(); });
+    };
+    box.append(h('div', { class: 'cartgrid' }, f, h('div', { id: 'sumBox' })));
+    drawSum();
+    if (pre.district) dist.onchange();
+  }
+
+  function drawSum() {
+    const total = data.groups.reduce((a, g) => a + g.total, 0);
+    const holder = $('sumBox'); holder.innerHTML = '';
+    const err = h('p', { class: 'err', role: 'alert', hidden: true });
+    const btn = h('button', { type: 'button', class: 'go', text: `Place order · ${money(total)}` });
+    btn.onclick = () => place(btn, err);
+    holder.append(h('aside', { class: 'box sum' }, h('h2', { text: 'Your order' }),
+      data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: g.shop.shop_name }),
+        g.items.map(i => h('div', { class: 'srow small' }, h('span', { style: 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: `${i.qty} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}` }), h('span', { text: money(i.unit * i.qty) }))),
+        h('div', { class: 'srow small' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })))),
+      h('div', { class: 'srow total' }, h('span', { text: 'Total to pay on delivery' }), h('span', { text: money(total) })),
+      data.groups.length > 1 && h('p', { class: 'm', text: `This makes ${data.groups.length} orders, one for each shop. Each shop delivers and collects its own amount.` }),
+      err, btn, h('a', { class: 'more', href: 'cart.html', text: '← Back to cart (change delivery)' })));
+  }
+
+  async function place(btn, err) {
+    const show = t => { err.textContent = t; err.hidden = !t; if (t) err.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    show('');
+    const v = { name: $('coName').value.trim(), phone: $('coPhone').value.replace(/[^0-9+]/g, ''), address: $('coAddr').value.trim(), district: $('coDist').value,
+      area: $('coArea').value.trim(), email: $('coEmail').value.trim(), note: $('coNote').value.trim() };
+    const bad = [];
+    if (v.name.length < 2) bad.push('your name');
+    if (!/^(\+?880)?01[3-9][0-9]{8}$/.test(v.phone)) bad.push('a valid mobile number like 01711000000');
+    if (v.address.length < 5) bad.push('your full address');
+    if (!v.district) bad.push('your district');
+    if (v.email && !/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v.email)) bad.push('a valid email (or leave it empty)');
+    if (bad.length) return show('Please enter ' + bad.join(', ') + '.');
+    btn.disabled = true; btn.textContent = 'Placing your order…';
+    try {
+      if (!session) {
+        const { data: d, error } = await db.auth.signInAnonymously();
+        if (error) throw /anonymous/i.test(error.message) ? new Error('Ordering without an account isn\'t switched on yet. Please sign in first.') : error;
+        session = d.session;
+      }
+      try { localStorage.setItem(ADDR_KEY, JSON.stringify({ name: v.name, phone: v.phone, address: v.address, district: v.district, area: v.area, email: v.email })); } catch (_) {}
+      const items = data.groups.flatMap(g => g.items.map(i => ({ product_id: i.product_id, variation_id: i.variation_id || null, qty: i.qty })));
+      const ship = Object.fromEntries(data.groups.map(g => [g.seller, g.method ? g.method.id : 'negotiated']));
+      const r = await db.rpc('place_order', { p_items: items, p_ship: ship, p_customer: v });
+      if (r.error) throw r.error;
+      // remove ordered items from the cart
+      const done = new Set(data.groups.flatMap(g => g.items.map(i => i.idx)));
+      CartLib.write(CartLib.read().filter((_, k) => !done.has(k)));
+      showDone(r.data, v);
+    } catch (e) {
+      const m = (e && e.message) || '';
+      show(/Failed to fetch/i.test(m) ? 'No internet connection. Please try again.' : /Could not find the function/i.test(m) ? 'Ordering isn\'t switched on yet. Please try again later.' : m || 'Something went wrong. Please try again.');
+      btn.disabled = false; drawSum();
+    }
+  }
+
+  function showDone(orders, v) {
+    document.querySelector('.steps').innerHTML = '<span class="done">1 Cart</span><span class="done">2 Delivery &amp; payment</span><span class="on">3 Done</span>';
+    const box = $('content'); box.innerHTML = '';
+    const total = orders.reduce((a, o) => a + Number(o.total), 0);
+    box.append(h('div', { class: 'box done-box' },
+      h('div', { class: 'tick', 'aria-hidden': 'true', text: '✓' }),
+      h('h1', { text: 'Thank you! Your order is placed.' }),
+      h('p', { class: 'm', text: `The shop${orders.length > 1 ? 's' : ''} will call you on ${v.phone} to confirm. Pay ${money(total)} in cash when it arrives.` }),
+      h('div', { style: 'display:grid;gap:10px;width:100%;text-align:left' }, orders.map(o => h('div', { class: 'box', style: 'display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center' },
+        h('div', {}, h('div', { class: 'ono', text: o.order_no }), h('div', { class: 'm', text: `${o.shop}${o.phone ? ' · ' + o.phone : ''} · ${o.ship}` })),
+        h('b', { text: money(o.total) })))),
+      h('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center' }, h('a', { class: 'btn-acc', href: 'orders.html', text: 'Track my orders' }), h('a', { class: 'btn-line', href: 'index.html', text: 'Continue shopping' })),
+      isGuest && h('p', { class: 'm', text: 'You ordered without an account, so your orders are saved on this phone or computer. Keep using it to track them.' })));
+    window.scrollTo(0, 0);
+  }
+  start();
+</script>
+</body>
+</html>

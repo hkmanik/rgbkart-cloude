@@ -41,7 +41,7 @@ function headerHTML() {
 }
 function footerHTML() {
   return `<footer><div class="wrap"><div><b>RGBKart</b><div>Buy and sell across all 64 districts.</div></div>
-    <div><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
+    <div><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
     <a class="fab" href="sell.html">+ Sell</a>`;
 }
 function updateBadges() {

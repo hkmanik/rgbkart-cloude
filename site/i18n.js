@@ -303,17 +303,23 @@
     .langbtn { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid #00802B; color: #00802B; background: transparent; border-radius: 999px;
       padding: 5px 12px; font: 600 .86rem "Hind Siliguri", "Roboto", system-ui, sans-serif; cursor: pointer; white-space: nowrap; text-decoration: none; }
     .langbtn:hover { background: #00802B; color: #fff; }
-    .langbtn svg { width: 16px; height: 16px; }
+    .langbtn .flag { width: 22px; height: 14px; flex: none; border-radius: 2px; box-shadow: 0 0 0 1px rgb(0 0 0 / .15); display: block; }
+    .langbtn.on-dark .flag, footer .langbtn .flag { box-shadow: 0 0 0 1.5px rgb(255 255 255 / .85); }
     footer .langbtn, .on-dark .langbtn, .langbtn.on-dark { border-color: rgba(255,255,255,.6); color: #fff; }
     footer .langbtn:hover, .langbtn.on-dark:hover { background: #fff; color: #00802B; }
     @media (prefers-color-scheme: dark) { .langbtn { border-color: #49CC73; color: #49CC73; } }`;
-  const GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>';
+  // Small flag pictures (drawn here, so they look the same on every phone and computer)
+  let flagN = 0;
+  const FLAG_BD = () => '<svg class="flag" viewBox="0 0 20 12" aria-hidden="true"><rect width="20" height="12" fill="#006A4E"/><circle cx="9" cy="6" r="4" fill="#F42A41"/></svg>';
+  const FLAG_UK = () => { const k = 'uk' + (++flagN); return `<svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="${k}t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>`
+    + '<rect width="60" height="30" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>'
+    + `<path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#${k}t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></svg>`; };
   function set(l) { try { localStorage.setItem(KEY, l); } catch (_) {} const u = new URL(location.href); u.searchParams.delete('lang'); location.replace(u.toString()); }
   // a button that switches to the other language
   function switcher(extraClass) {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'langbtn' + (extraClass ? ' ' + extraClass : ''); b.setAttribute('translate', 'no');
-    b.innerHTML = GLOBE + (lang === 'bn' ? '<span lang="en">English</span>' : '<span lang="bn">বাংলা</span>');
+    b.innerHTML = lang === 'bn' ? FLAG_UK() + '<span lang="en">English</span>' : FLAG_BD() + '<span lang="bn">বাংলা</span>';
     b.setAttribute('aria-label', lang === 'bn' ? 'Switch to English' : 'বাংলায় দেখুন');
     b.onclick = () => set(lang === 'bn' ? 'en' : 'bn');
     return b;

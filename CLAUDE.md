@@ -27,6 +27,6 @@ Owner and master administrator: hkmanik@gmail.com. Not a developer: explain step
 - Selling: `sell.html` (one-time sellers, invisible anonymous sign-in, max 5 listings), `seller.html` (Seller Center for shops), `login.html` (customer/seller sign-up and sign-in).
 - Admin: `admin.html` (staff roles, sellers, catalog, products review, Home page sections, Featured plans and requests).
 - Pages currently put the Supabase URL and publishable key at the top of their script (safe to publish), not `config.js`.
-- Database: `supabase/migrations/0002`–`0015` were run in order on the live project (22 Oct 2026); `0016_main_menu.sql` was added after that (check with the owner whether it has been run). Every file is safe to run again. New changes go in the next number.
+- Database: `supabase/migrations/0002`–`0015` were run in order on the live project (22 Oct 2026); `0016_main_menu.sql` and `0017_menu_groups.sql` were added after that (check with the owner whether they have been run). Every file is safe to run again. New changes go in the next number.
 - Testing locally: in the folder with the files, open a terminal and run `python -m http.server 5500`, then open `localhost:5500/index.html?v=N`.
 - Project plan spreadsheet: `docs/RGBKart_Project_Plan.xlsx`.

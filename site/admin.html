@@ -607,10 +607,15 @@
         <option value="pre_owned">Pre-owned products</option>
         <option value="free_delivery">Free delivery products</option>
         <option value="category">One category</option>
+        <option value="categories">Several categories together (e.g. Fashion)</option>
         <option value="sell">Sell an item page</option>
         <option value="url">Another address</option>
       </select></label>
     <label id="mnCatWrap" hidden>Category <select id="mnCat"></select></label>
+    <fieldset id="mnCatsWrap" hidden style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0">
+      <legend style="font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:0 4px">Categories in this link</legend>
+      <div id="mnCats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px"></div>
+    </fieldset>
     <label id="mnUrlWrap" hidden>Address <input id="mnUrl" type="text" maxlength="300" placeholder="https://… or a page like sell.html">
       <span class="attr-meta" style="text-transform:none;letter-spacing:0;font-weight:400">Starts with https://, or a page on this site such as categories.html</span></label>
     <label>Label <input id="mnLabel" type="text" maxlength="40" required></label>
@@ -1470,8 +1475,8 @@
   };
 
   // ===================== Main menu =====================
-  const MN_TYPES = { home: 'Home page', shop: 'All products', deals: 'Deals of the Day', featured: 'Featured', newest: 'New arrivals', pre_owned: 'Pre-owned', free_delivery: 'Free delivery', category: 'Category', sell: 'Sell an item', url: 'Address' };
-  const MN_DEFAULT = { home: 'Home', shop: 'Shop', deals: 'Deals of the Day', featured: 'Featured', newest: 'New Arrivals', pre_owned: 'Pre-Owned', free_delivery: 'Free Delivery', sell: 'Sell an Item', url: '' };
+  const MN_TYPES = { home: 'Home page', shop: 'All products', deals: 'Deals of the Day', featured: 'Featured', newest: 'New arrivals', pre_owned: 'Pre-owned', free_delivery: 'Free delivery', category: 'Category', categories: 'Categories', sell: 'Sell an item', url: 'Address' };
+  const MN_DEFAULT = { categories: '', home: 'Home', shop: 'Shop', deals: 'Deals of the Day', featured: 'Featured', newest: 'New Arrivals', pre_owned: 'Pre-Owned', free_delivery: 'Free Delivery', sell: 'Sell an Item', url: '' };
   let menuItems = [], editingMn = null;
   async function loadMenu() {
     const r = await db.from('menu_items').select('*').order('sort_order').order('id');
@@ -1485,7 +1490,7 @@
         h('span', { class: 'hs-n', text: i + 1 }),
         h('div', { style: 'min-width:0' }, h('div', { class: 'attr-title' },
             h('b', { text: m.label, style: m.is_hot ? 'color:#E30613' : null }),
-            h('span', { class: 'chip plain', text: MN_TYPES[m.link_type] + (cat ? ': ' + cat.name : m.link_type === 'url' ? ': ' + m.url : '') }),
+            h('span', { class: 'chip plain', text: MN_TYPES[m.link_type] + (cat ? ': ' + cat.name : m.link_type === 'url' ? ': ' + m.url : m.link_type === 'categories' ? ': ' + (m.category_ids || []).map(id => (catById(id) || {}).name).filter(Boolean).join(', ') : '') }),
             m.is_hot && h('span', { class: 'chip', style: 'background:#FDE7E8;color:#B8000C', text: 'Red' }),
             !m.is_active && h('span', { class: 'chip off', text: 'Hidden' })),
           m.label_bn && h('div', { class: 'attr-meta', lang: 'bn', text: m.label_bn })),
@@ -1509,7 +1514,7 @@
     const bad = res.find(r => r && r.error); if (bad) toast(friendly(bad.error));
     loadMenu();
   }
-  function mnShow() { const t = $('mnType').value; $('mnCatWrap').hidden = t !== 'category'; $('mnUrlWrap').hidden = t !== 'url'; }
+  function mnShow() { const t = $('mnType').value; $('mnCatWrap').hidden = t !== 'category'; $('mnCatsWrap').hidden = t !== 'categories'; $('mnUrlWrap').hidden = t !== 'url'; }
   function openMn(m) {
     editingMn = m;
     $('mnDrawerTitle').textContent = m ? 'Edit link' : 'Add link';
@@ -1517,6 +1522,8 @@
     const walk = (pid, d) => childrenOf(pid).forEach(c => { sel.append(h('option', { value: c.id, text: '  '.repeat(d) + (d ? '└ ' : '') + c.name })); walk(c.id, d + 1); });
     walk(null, 0);
     $('mnType').value = m ? m.link_type : 'category';
+    const picked = new Set(m && m.category_ids || []); const box = $('mnCats'); box.innerHTML = '';
+    childrenOf(null).forEach(c => box.append(h('label', { class: 'check', style: 'text-transform:none;letter-spacing:0;font-weight:500;font-size:.9rem' }, h('input', { type: 'checkbox', value: c.id, checked: picked.has(c.id) }), (c.icon && !/^https?:/.test(c.icon) ? c.icon + ' ' : '') + c.name)));
     const firstTop = cats.find(c => !c.parent_id);
     $('mnCat').value = m && m.category_id ? m.category_id : (firstTop ? firstTop.id : '');
     $('mnUrl').value = m ? (m.url || '') : '';
@@ -1540,10 +1547,13 @@
   $('mnDrawer').onsubmit = async e => {
     e.preventDefault(); setMsg('mnMsg', '');
     const t = $('mnType').value, url = $('mnUrl').value.trim();
-    const row = { link_type: t, category_id: t === 'category' ? Number($('mnCat').value) || null : null, url: t === 'url' ? url : null,
+    const ids = [...$('mnCats').querySelectorAll('input:checked')].map(x => Number(x.value));
+    const row = { link_type: t, category_id: t === 'category' ? Number($('mnCat').value) || null : null, category_ids: t === 'categories' ? ids : null, url: t === 'url' ? url : null,
       label: $('mnLabel').value.trim(), label_bn: $('mnLabelBn').value.trim() || null, is_hot: $('mnHot').checked, is_active: $('mnActive').checked, updated_at: new Date().toISOString() };
+    if (t !== 'categories') delete row.category_ids;   // works even before 0017_menu_groups.sql is run
     if (row.label.length < 2) return setMsg('mnMsg', 'Give the link a label (at least 2 letters).', true);
     if (t === 'category' && !row.category_id) return setMsg('mnMsg', 'Choose a category.', true);
+    if (t === 'categories' && !ids.length) return setMsg('mnMsg', 'Tick at least one category.', true);
     if (t === 'url' && !/^(https:\/\/\S+|[a-z0-9_-]+\.html([?#]\S*)?)$/.test(url)) return setMsg('mnMsg', 'Enter an address that starts with https://, or a page on this site like categories.html.', true);
     if (!editingMn) row.sort_order = menuItems.reduce((mx, m) => Math.max(mx, m.sort_order), 0) + 10;
     $('mnSave').disabled = true;

@@ -58,6 +58,12 @@
       case 'pre_owned': return 'browse.html?condition=pre_owned';
       case 'free_delivery': return 'browse.html?free=1';
       case 'sell': return 'sell.html';
+      case 'categories': {
+        const slugs = (it.category_ids || []).map(id => (cats.find(x => x.id === id) || {}).slug).filter(Boolean);
+        if (!slugs.length) return null;
+        if (slugs.length === 1) return 'browse.html?c=' + encodeURIComponent(slugs[0]);
+        return 'browse.html?' + new URLSearchParams({ c: slugs.join(','), t: it.label }).toString();
+      }
       case 'category': { const c = cats.find(x => x.id === it.category_id); return c ? 'browse.html?c=' + encodeURIComponent(c.slug) : null; }
       case 'url': return /^(https:\/\/|[a-z0-9_-]+\.html)/i.test(it.url || '') ? it.url : null;
     }
@@ -103,7 +109,7 @@
     let items = DEFAULT, cats = [];
     try {
       const [m, c] = await Promise.all([
-        db.from('menu_items').select('label, link_type, category_id, url, is_hot, sort_order').eq('is_active', true).order('sort_order').order('id'),
+        db.from('menu_items').select('*').eq('is_active', true).order('sort_order').order('id'),
         db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name'),
       ]);
       if (!m.error && m.data) items = m.data;

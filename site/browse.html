@@ -141,7 +141,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="shop.js?v=7"></script>
-<script src="menu.js?v=1"></script>
+<script src="menu.js?v=2"></script>
 <script>
   const PAGE = 24;
   const DISTRICTS = ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail',
@@ -154,12 +154,15 @@
   let cats = [], offset = 0, total = 0, sellerIds = null;
   const params = new URLSearchParams(location.search);
   const state = {
-    c: params.get('c') || '', q: (params.get('q') || '').trim(), condition: params.get('condition') || '', sort: params.get('sort') || 'best',
+    c: params.get('c') || '', t: (params.get('t') || '').slice(0, 40), q: (params.get('q') || '').trim(), condition: params.get('condition') || '', sort: params.get('sort') || 'best',
     min: params.get('min') || '', max: params.get('max') || '', district: params.get('district') || '', featured: params.get('featured') === '1', free: params.get('free') === '1', deals: params.get('deals') === '1', wishlist: params.get('wishlist') === '1',
   };
   const expanded = new Set();
   const kids = id => cats.filter(c => (c.parent_id ?? null) === id).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
   const bySlug = s => cats.find(c => c.slug === s);
+  // A group of categories, e.g. browse.html?c=men-s-fashion,women-s-fashion&t=Fashion (from the main menu)
+  const groupCats = () => state.c.includes(',') ? state.c.split(',').map(bySlug).filter(Boolean) : null;
+  const groupTitle = g => state.t || g.map(c => c.name).join(' & ');
   function chain(c) { const out = []; while (c) { out.unshift(c); c = cats.find(x => x.id === c.parent_id); } return out; }
   function descendants(id) { const out = [id]; kids(id).forEach(k => out.push(...descendants(k.id))); return out; }
 
@@ -167,7 +170,7 @@
   function urlFor(changes) {
     const s = { ...state, ...changes };
     const p = new URLSearchParams();
-    if (s.c) p.set('c', s.c); if (s.q) p.set('q', s.q); if (s.condition) p.set('condition', s.condition);
+    if (s.c) p.set('c', s.c); if (s.c && s.c.includes(',') && s.t) p.set('t', s.t); if (s.q) p.set('q', s.q); if (s.condition) p.set('condition', s.condition);
     if (s.sort && s.sort !== 'best') p.set('sort', s.sort); if (s.min) p.set('min', s.min); if (s.max) p.set('max', s.max);
     if (s.district) p.set('district', s.district); if (s.featured) p.set('featured', '1'); if (s.free) p.set('free', '1'); if (s.deals) p.set('deals', '1'); if (s.wishlist) p.set('wishlist', '1');
     const qs = p.toString(); return 'browse.html' + (qs ? '?' + qs : '');
@@ -202,12 +205,15 @@
     const active = bySlug(state.c);
     const cr = $('crumbs'); cr.innerHTML = '';
     cr.append(h('a', { href: 'index.html', text: 'Home' }));
+    const group = groupCats();
     if (active) chain(active).forEach((c, i, arr) => cr.append(h('span', { text: '›' }), i < arr.length - 1 ? h('a', { href: urlFor({ c: c.slug }), text: c.name }) : h('span', { text: c.name })));
-    const title = state.wishlist ? '♥ Saved items' : state.q ? `Results for “${state.q}”` + (active ? ` in ${active.name}` : '') : active ? active.name : state.deals ? 'Deals of the Day' : state.featured ? '★ Featured products' : state.condition === 'pre_owned' ? 'Pre-owned deals' : 'All products';
+    else if (group) cr.append(h('span', { text: '›' }), h('span', { text: groupTitle(group) }));
+    const where = active ? active.name : group ? groupTitle(group) : '';
+    const title = state.wishlist ? '♥ Saved items' : state.q ? `Results for “${state.q}”` + (where ? ` in ${where}` : '') : where ? where : state.deals ? 'Deals of the Day' : state.featured ? '★ Featured products' : state.condition === 'pre_owned' ? 'Pre-owned deals' : 'All products';
     $('heading').textContent = title;
     document.title = `${title} | RGBKart`;
     const sc = $('subcats'); sc.innerHTML = '';
-    const subs = active ? kids(active.id) : (state.q ? cats.filter(c => c.name.toLowerCase().includes(state.q.toLowerCase())).slice(0, 8) : []);
+    const subs = active ? kids(active.id) : group ? group : (state.q ? cats.filter(c => c.name.toLowerCase().includes(state.q.toLowerCase())).slice(0, 8) : []);
     sc.hidden = !subs.length;
     subs.forEach(c => sc.append(h('a', { href: urlFor({ c: c.slug, q: active ? state.q : '' }), onclick: e => { e.preventDefault(); expandTo(c); apply({ c: c.slug, q: active ? state.q : '' }); }, text: c.name })));
     // filter chips
@@ -263,6 +269,7 @@
     let q = db.from('products').select(CARD_FIELDS, { count: 'exact' }).eq('status', 'approved');
     const active = bySlug(state.c);
     if (active) q = q.in('category_id', descendants(active.id));
+    else { const g = groupCats(); if (g && g.length) q = q.in('category_id', g.flatMap(c => descendants(c.id))); }
     if (state.q) {
       const t = state.q.replace(/[%,()*]/g, ' ').replace(/\s+/g, ' ').trim();
       const ors = [`title.ilike.%${t}%`, `description.ilike.%${t}%`, `short_description.ilike.%${t}%`];

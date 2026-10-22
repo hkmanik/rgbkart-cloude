@@ -43,7 +43,7 @@
   label { font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: grid; gap: 6px; }
   .check { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 500; color: var(--fg); }
   .check input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
-  input[type=text], input[type=email], input[type=password], input[type=search], input[type=number], select, textarea {
+  input[type=text], input[type=email], input[type=password], input[type=search], input[type=number], input[type=tel], input[type=date], select, textarea {
     font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; width: 100%; text-transform: none; letter-spacing: 0; }
   textarea { min-height: 70px; resize: vertical; }
   input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -254,6 +254,57 @@
   .pw .eye svg { width: 22px; height: 22px; }
   .pw-hint { font-size: .8rem; font-weight: 500; letter-spacing: 0; text-transform: none; margin-top: -2px; }
   .pw-hint.ok { color: var(--good, #1f7a5a); } .pw-hint.bad { color: var(--danger); }
+  /* Admin: add product */
+  .ap-box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 0; display: grid; gap: 10px; }
+  .ap-box legend, .ap-lbl { font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 4px; }
+  .ap-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media (max-width: 480px) { .ap-2 { grid-template-columns: 1fr; } }
+  .ap-photos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .ap-ph { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  .ap-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ap-main { position: absolute; top: 5px; left: 5px; background: var(--accent); color: var(--accent-fg); font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+  .ap-x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 0; background: rgb(0 0 0 / .6); color: #fff; cursor: pointer; }
+  .ap-add { aspect-ratio: 1; border: 2px dashed var(--line); border-radius: 10px; background: var(--bg); color: var(--muted); display: grid; place-content: center; gap: 2px; cursor: pointer; font: inherit; font-size: .82rem; }
+  .ap-add b { font-size: 1.6rem; line-height: 1; color: var(--accent); } .ap-add:hover { border-color: var(--accent); color: var(--accent); }
+  .ap-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ap-seg button { font: 600 .92rem var(--body); padding: 10px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+  .ap-seg button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  #apSeller { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 4px; background: var(--surface); color: var(--fg); font: inherit; }
+  /* Ads */
+  .ad-banner { border-radius: 12px; padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; color: #fff; position: relative; overflow: hidden; min-height: 70px; }
+  .ad-banner.green { background: linear-gradient(135deg, #006622, #00802B); } .ad-banner.red { background: linear-gradient(135deg, #B8000C, #E30613); }
+  .ad-banner.yellow { background: linear-gradient(135deg, #F5C400, #FFD21F); color: #1F2A10; } .ad-banner.dark { background: linear-gradient(135deg, #0B1A10, #14211C); }
+  .ad-banner b { font: 700 1.05rem/1.2 var(--display); display: block; } .ad-banner span { font-size: .86rem; opacity: .92; }
+  .ad-banner .cta { background: #fff; color: #14211C; border-radius: 8px; padding: 7px 12px; font-weight: 700; font-size: .85rem; white-space: nowrap; }
+  .ad-banner.has-img { grid-template-columns: 96px minmax(0, 1fr) auto; } .ad-banner img { width: 96px; height: 64px; object-fit: cover; border-radius: 8px; }
+  .rate-row { display: grid; grid-template-columns: minmax(0, 1.6fr) 130px 110px auto auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .rate-row:first-child { border-top: 0; } .rate-row input[type=number] { width: 100%; }
+  @media (max-width: 760px) { .rate-row { grid-template-columns: 1fr 1fr; } .rate-row > div:first-child { grid-column: 1 / -1; } }
+  .ad-row { display: grid; grid-template-columns: minmax(180px, 280px) minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .ad-row:first-child { border-top: 0; } .ad-row.off { opacity: .55; }
+  @media (max-width: 860px) { .ad-row { grid-template-columns: 1fr; } }
+  /* Reports */
+  .rep-bar { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; justify-content: space-between; }
+  .rep-nav { display: flex; align-items: center; gap: 10px; } .rep-nav b { min-width: 190px; text-align: center; font-weight: 600; }
+  .rep-custom { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; } .rep-custom label { min-width: 150px; }
+  .rep-group { margin-top: 18px; } .rep-group h2 { font-size: 1.05rem; margin: 0 0 10px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+  .kpi b { font: 600 1.7rem/1.15 var(--display); font-variant-numeric: tabular-nums; color: var(--fg); }
+  .kpi span { color: var(--muted); font-size: .88rem; } .kpi small { color: var(--faint); font-size: .78rem; }
+  .kpi.money b { color: var(--accent); }
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-top: 18px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .chart-card h3 { margin: 0 0 2px; font-size: .98rem; } .chart-card p { margin: 0 0 10px; color: var(--muted); font-size: .82rem; }
+  .bars { position: relative; height: 170px; display: flex; align-items: flex-end; gap: 2px; border-bottom: 1px solid var(--line); padding-top: 18px; padding-right: 46px; }
+  .bars .gl { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--line); pointer-events: none; }
+  .bars .gl span { position: absolute; right: 0; top: -8px; font-size: .7rem; color: var(--muted); background: var(--surface); padding-left: 4px; font-variant-numeric: tabular-nums; }
+  .bar { flex: 1 1 0; min-width: 2px; height: 100%; display: flex; align-items: flex-end; position: relative; cursor: default; }
+  .bar i { display: block; width: 100%; border-radius: 4px 4px 0 0; background: var(--bar, var(--accent)); min-height: 0; }
+  .bar:hover i, .bar:focus-visible i { filter: brightness(1.15); }
+  .bar .tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); font-size: .78rem; padding: 4px 8px; border-radius: 6px; white-space: nowrap; z-index: 2; pointer-events: none; }
+  .bar:hover .tip, .bar:focus-visible .tip { display: block; }
+  .bars-x { display: flex; justify-content: space-between; color: var(--faint); font-size: .72rem; margin-top: 4px; padding-right: 46px; }
+  .rep-table { margin-top: 18px; } .rep-table summary { cursor: pointer; font-weight: 600; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -312,6 +363,7 @@
     <a class="side-logo" href="index.html" aria-label="Red &amp; Green Basket home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="40" height="40"><span><b><span style="color:#E30613">Red</span> <span style="color:#14211C">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Admin</small></span></a>
     <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <button class="nav tone-red" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
+    <button class="nav tone-blue" data-view="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Reports</button>
 
     <div class="nav-group tone-blue">Catalog</div>
     <button class="nav tone-blue" data-view="categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7M3 12h7M14 6h7M14 12h7M3 18h18"/></svg>Categories</button>
@@ -340,6 +392,21 @@
 
   <main class="main" id="main">
     <!-- Dashboard -->
+    <section data-page="reports">
+      <div class="page-head"><div><h1>Reports</h1><p>Visitors, new people, listings and income for any period. Income counts paid Featured listings and paid ads; free listings and free Featured count as ৳0.</p></div>
+        <button class="ghost" type="button" id="repCsv">Download (Excel / CSV)</button></div>
+      <div class="card rep-bar" style="margin-top:18px">
+        <div class="filters" id="repTabs" role="group" aria-label="Period">
+          <button type="button" data-p="day" aria-pressed="true">Daily</button><button type="button" data-p="week" aria-pressed="false">Weekly</button>
+          <button type="button" data-p="month" aria-pressed="false">Monthly</button><button type="button" data-p="year" aria-pressed="false">Yearly</button><button type="button" data-p="custom" aria-pressed="false">Custom</button>
+        </div>
+        <div class="rep-nav" id="repNav"><button type="button" class="icon-btn" id="repPrev" aria-label="Previous period">‹</button><b id="repLabel"></b><button type="button" class="icon-btn" id="repNext" aria-label="Next period">›</button></div>
+        <div class="rep-custom" id="repCustom" hidden><label>From <input type="date" id="repFrom"></label><label>To <input type="date" id="repTo"></label><button type="button" class="primary" id="repGo">Show</button></div>
+      </div>
+      <p id="repMsg" class="msg" role="status"></p>
+      <div id="repBody"></div>
+    </section>
+
     <section data-page="dashboard">
       <div class="page-head"><div><h1>Dashboard</h1><p>What needs your attention today.</p></div></div>
       <div class="tiles" style="margin-top:18px">
@@ -442,12 +509,14 @@
 
     <!-- Products review -->
     <section data-page="products">
-      <div class="page-head"><div><h1>Products</h1><p>Check new listings before shoppers see them. Approve, or reject with a reason the seller will see.</p></div></div>
+      <div class="page-head"><div><h1>Products</h1><p>Check new listings before shoppers see them. Approve, or reject with a reason the seller will see. Products you add here go live straight away.</p></div>
+        <button class="primary" type="button" id="addProduct">+ Add product</button></div>
       <div class="card" style="margin-top:18px">
         <div class="toolbar">
           <div class="filters" id="prodFilter">
             <button type="button" data-s="pending" aria-pressed="true">To review</button>
             <button type="button" data-s="approved" aria-pressed="false">Live</button>
+            <button type="button" data-s="featured" aria-pressed="false">★ Featured</button>
             <button type="button" data-s="rejected" aria-pressed="false">Rejected</button>
             <button type="button" data-s="all" aria-pressed="false">All</button>
           </div>
@@ -465,11 +534,12 @@
     <!-- Featured & ads -->
     <section data-page="featured">
       <div class="page-head">
-        <div><h1>Featured &amp; ads</h1><p>Set the price, length and benefits of a Featured listing. Sellers see these when they add a product. Changes apply to new requests only.</p></div>
-        <button class="primary catalog-edit" type="button" id="addPlan">+ Add plan</button>
+        <div><h1>Featured &amp; ads</h1><p>Your rates for Featured listings and advertisements. Sellers see the Featured rates when they list a product. Price changes apply to new requests only.</p></div>
+        <button class="primary catalog-edit" type="button" id="addPlan">+ Add Featured rate</button>
       </div>
       <div class="card" style="margin-top:18px">
-        <h2>Featured plans</h2>
+        <h2>Featured listing rates</h2>
+        <p class="msg muted" style="margin:4px 0 0">Sellers choose one of these durations. Add, change or hide a rate any time. To give Featured for free, go to Products → <b>Make Featured (free)</b>.</p>
         <p class="readonly-note catalog-ro" hidden>You can view plans. Only the Master Admin and Co-admins can change them.</p>
         <div id="planList"></div>
       </div>
@@ -484,6 +554,21 @@
           <thead><tr><th>Product</th><th>Seller</th><th>Plan</th><th>Status</th><th>Requested</th><th>Action</th></tr></thead>
           <tbody id="reqRows"></tbody>
         </table></div>
+      </div>
+    </section>
+
+    <!-- Advertisement (inside the Featured & ads page) -->
+    <section data-page="featured" data-extra="ads" class="ads-sec">
+      <div class="card" style="margin-top:18px">
+        <h2>Advertisement rates</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Price per day for each ad space. The ad price is worked out as price per day × number of days (you can still change it on each ad).</p>
+        <div id="adRateList"></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>Ads</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="filters" id="adFilter"><button type="button" data-s="running" aria-pressed="true">Running &amp; upcoming</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
+          <button class="primary" type="button" id="addAd">+ New ad</button></div></div>
+        <div id="adList"></div>
       </div>
     </section>
 
@@ -593,6 +678,76 @@
 </form>
 
 <!-- ============ Home section editor ============ -->
+<div class="drawer-scrim" id="apScrim" hidden></div>
+<form class="drawer" id="apDrawer" hidden aria-labelledby="apDrawerTitle" novalidate style="width:min(560px,100vw)">
+  <div class="drawer-head"><h2 id="apDrawerTitle">Add product</h2><button type="button" class="icon-btn" id="apClose" aria-label="Close">✕</button></div>
+  <div class="drawer-body">
+    <fieldset class="ap-box"><legend>Sold by</legend>
+      <label class="check"><input type="radio" name="apWho" value="official" id="apWhoOfficial" checked> RGBKart Official (our own product)</label>
+      <label class="check"><input type="radio" name="apWho" value="seller"> A seller (shop or one-time seller)</label>
+      <p class="attr-meta" id="apOfficialInfo" hidden></p>
+      <div id="apOfficialSetup" hidden style="display:grid;gap:10px">
+        <p class="attr-meta" id="apOffSetupNote"></p>
+        <label>Shop name <input id="apOffName" type="text" maxlength="60"></label>
+        <div class="ap-2"><label>Mobile number <input id="apOffPhone" type="tel" maxlength="16" placeholder="01XXXXXXXXX"></label><label>WhatsApp (optional) <input id="apOffWa" type="tel" maxlength="16"></label></div>
+        <div class="ap-2"><label>District <input id="apOffCity" type="text" maxlength="40" list="apDistricts"></label><label>Area (optional) <input id="apOffArea" type="text" maxlength="40"></label></div>
+      </div>
+      <div id="apSellerWrap" hidden style="display:grid;gap:8px">
+        <input id="apSellerSearch" type="search" placeholder="Search shop name, district or phone" aria-label="Search sellers">
+        <select id="apSeller" aria-label="Seller" size="6"></select>
+      </div>
+    </fieldset>
+    <div style="display:grid;gap:6px"><span class="ap-lbl">Photos (up to 8, the first is the main photo)</span><div class="ap-photos" id="apPhotos"></div><input type="file" id="apFile" accept="image/jpeg,image/png,image/webp" multiple hidden></div>
+    <label>Product name <input id="apTitle" type="text" maxlength="120" placeholder="e.g. Redragon K552 RGB Mechanical Keyboard"></label>
+    <label>Category <select id="apCat"></select></label>
+    <div style="display:grid;gap:6px"><span class="ap-lbl">Condition</span><div class="ap-seg" id="apCond" role="group" aria-label="Condition"><button type="button" data-v="new" aria-pressed="true">New</button><button type="button" data-v="pre_owned" aria-pressed="false">Pre-owned</button></div></div>
+    <div class="ap-2"><label>Price (৳) <input id="apPrice" type="number" min="1" step="1" inputmode="numeric"></label><label>Sale price (optional) <input id="apSale" type="number" min="1" step="1" inputmode="numeric"></label></div>
+    <div class="ap-2"><label>Stock <input id="apStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label><div style="display:grid;gap:8px;align-content:end"><label class="check"><input id="apNeg" type="checkbox"> Price is negotiable</label><label class="check"><input id="apFree" type="checkbox"> Free delivery</label></div></div>
+    <label>Description (optional) <textarea id="apDesc" rows="4" maxlength="5000"></textarea></label>
+    <div style="display:grid;gap:6px"><span class="ap-lbl">Listing</span><div class="ap-seg" id="apListing" role="group" aria-label="Listing"><button type="button" data-v="free" aria-pressed="true">Free listing</button><button type="button" data-v="featured" aria-pressed="false">★ Featured (no charge)</button></div>
+      <label id="apFeatDaysWrap" hidden>Featured for <select id="apFeatDays"><option value="7">7 days</option><option value="15">15 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label></div>
+    <p id="apMsg" class="msg error" role="alert"></p>
+  </div>
+  <div class="drawer-foot">
+    <button type="button" class="ghost" id="apCancel">Cancel</button>
+    <button type="submit" class="primary" id="apSave">Add product</button>
+  </div>
+</form>
+<datalist id="apDistricts"></datalist>
+
+<div class="drawer-scrim" id="adScrim" hidden></div>
+<form class="drawer" id="adDrawer" hidden aria-labelledby="adDrawerTitle" novalidate style="width:min(540px,100vw)">
+  <div class="drawer-head"><h2 id="adDrawerTitle">New ad</h2><button type="button" class="icon-btn" id="adClose" aria-label="Close">✕</button></div>
+  <div class="drawer-body">
+    <label>Ad space <select id="adPlace"></select></label>
+    <fieldset class="ap-box"><legend>Advertiser</legend>
+      <label class="check"><input type="radio" name="adWho" value="house" checked> RGBKart (our own promotion)</label>
+      <label class="check"><input type="radio" name="adWho" value="seller"> A seller</label>
+      <select id="adSeller" aria-label="Seller" hidden></select>
+    </fieldset>
+    <label>Headline <input id="adTitle" type="text" maxlength="80" placeholder="e.g. Eid Sale: up to 40% off"></label>
+    <label>Small text (optional) <input id="adSub" type="text" maxlength="140"></label>
+    <div class="ap-2"><label>Button text <input id="adCta" type="text" maxlength="24" value="Shop now"></label>
+      <label>Colour <select id="adColor"><option value="green">Green</option><option value="red">Red</option><option value="yellow">Yellow</option><option value="dark">Dark</option></select></label></div>
+    <label>Opens <select id="adLinkPick"></select></label>
+    <label id="adLinkWrap" hidden>Address <input id="adLink" type="text" maxlength="300" placeholder="https://… or a page like browse.html?c=groceries"></label>
+    <div style="display:grid;gap:6px"><span class="ap-lbl">Picture (optional, wide works best)</span>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="ghost" id="adImgBtn">Choose picture</button><button type="button" class="ghost" id="adImgClear" hidden>Remove picture</button><span class="attr-meta" id="adImgName"></span></div>
+      <input type="file" id="adImg" accept="image/jpeg,image/png,image/webp" hidden></div>
+    <div class="ad-preview" id="adPreview" aria-label="Preview"></div>
+    <div class="ap-2"><label>Starts <input id="adStart" type="date"></label><label>Days <input id="adDays" type="number" min="1" max="365" step="1" value="7"></label></div>
+    <p class="attr-meta" id="adEnds"></p>
+    <div class="ap-2"><label>Price per day (৳) <input id="adPpd" type="number" min="0" step="1"></label><label>Total amount (৳) <input id="adAmount" type="number" min="0" step="1"></label></div>
+    <label>Payment <select id="adPay"><option value="unpaid">Not paid yet</option><option value="paid">Paid</option><option value="complimentary">Free (no charge)</option></select></label>
+    <label class="check"><input id="adActive" type="checkbox" checked> Show this ad</label>
+    <p id="adMsg" class="msg error" role="alert"></p>
+  </div>
+  <div class="drawer-foot">
+    <button type="button" class="ghost" id="adCancel">Cancel</button>
+    <button type="submit" class="primary" id="adSave">Save ad</button>
+  </div>
+</form>
+
 <div class="drawer-scrim" id="mnScrim" hidden></div>
 <form class="drawer" id="mnDrawer" hidden aria-labelledby="mnDrawerTitle">
   <div class="drawer-head"><h2 id="mnDrawerTitle">Add link</h2><button type="button" class="icon-btn" id="mnClose" aria-label="Close">✕</button></div>
@@ -699,7 +854,7 @@
   const TYPE_NAMES = { select: 'One option', multiselect: 'Several options', color: 'Colour', number: 'Number', text: 'Free text', boolean: 'Yes / No' };
   const HAS_OPTIONS = t => t === 'select' || t === 'multiselect' || t === 'color';
 
-  let mode = 'signin', recovering = false, myRole = null;
+  let mode = 'signin', recovering = false, myRole = null, myId = null;
   let sellers = [], customers = [], sellerFilter = 'pending';
   let cats = [], catAttrs = [], attrs = [];
   const collapsed = new Set();
@@ -846,7 +1001,7 @@
         : `${session.user.email} isn't on the RGBKart team. If you were invited, make sure you signed in with the invited email and confirmed it.`;
       showAuth('noAccess'); return;
     }
-    myRole = role;
+    myRole = role; myId = session.user.id;
     $('meEmail').textContent = session.user.email;
     $('meRole').textContent = ROLE_NAMES[role];
     $('navTeam').hidden = $('settingsGroup').hidden = role !== 'master_admin';
@@ -869,8 +1024,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -884,6 +1039,7 @@
     if (view === 'products') loadProducts();
     if (view === 'homepage') loadSections();
     if (view === 'mainmenu') loadMenu();
+    if (view === 'reports') loadReport();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));
@@ -1598,7 +1754,7 @@
     const q = $('prodSearch').value.trim().toLowerCase();
     const rows = prods.filter(p => {
       const s = prodSellers.get(p.seller_id) || {};
-      if (prodFilter !== 'all' && p.status !== prodFilter) return false;
+      if (prodFilter === 'featured') { if (!p.is_featured) return false; } else if (prodFilter !== 'all' && p.status !== prodFilter) return false;
       if (prodWho !== 'all' && s.role !== prodWho) return false;
       return !q || [p.title, s.shop, s.name, s.phone, s.phone_public].some(x => (x || '').toLowerCase().includes(q));
     });
@@ -1620,6 +1776,7 @@
       h('p', { text: p.description || 'No description.' }),
       oneTime && h('div', { class: 'prod-meta', text: `Contact: ${s.phone_public || s.phone || '—'}${s.whatsapp ? ' · WhatsApp ' + s.whatsapp : ''} · ${[s.area, s.city].filter(Boolean).join(', ')}` }));
     const rejectBox = h('div', { class: 'reject-box', hidden: true });
+    const featBox = freeFeatureBox(p);
     const reasonInput = h('textarea', { rows: 2, maxlength: 300, placeholder: 'Tell the seller what to fix', 'aria-label': 'Reason for rejecting' });
     rejectBox.append(h('div', { class: 'reasons' }, REASONS.map(r => h('button', { type: 'button', text: r, onclick: () => { reasonInput.value = r + '.'; reasonInput.focus(); } }))),
       reasonInput,
@@ -1633,19 +1790,438 @@
     return h('div', { class: 'prod' },
       imgs[0] ? h('img', { class: 'prod-img', src: photoUrlAdmin(imgs[0].storage_path), alt: '', loading: 'lazy' }) : h('div', { class: 'prod-img', text: 'No photo' }),
       h('div', { style: 'min-width:0;display:grid;gap:3px' },
-        h('div', { class: 'prod-title' }, p.title, h('span', { class: 'chip ' + ({ pending: 'pending', approved: 'approved', rejected: 'rejected' }[p.status] || 'plain'), text: P_STATUS[p.status] })),
+        h('div', { class: 'prod-title' }, p.title, h('span', { class: 'chip ' + ({ pending: 'pending', approved: 'approved', rejected: 'rejected' }[p.status] || 'plain'), text: P_STATUS[p.status] }),
+          p.is_featured && h('span', { class: 'chip', style: 'background:#FFF4CC;color:#8a5a00', text: '★ Featured' })),
         h('div', { class: 'prod-meta' }, h('span', { class: 'prod-price', text: price }), p.price_negotiable ? ' · negotiable' : '', ' · ', cat ? pathName(cat) : 'No category'),
         h('div', { class: 'prod-meta', text: kinds.join(' · ') }),
         h('div', { class: 'prod-meta' }, oneTime ? h('b', { text: 'One-time seller: ' }) : h('b', { text: 'Shop: ' }), (oneTime ? s.name : s.shop) || '—',
           oneTime ? ` · ${s.phone_public || s.phone || ''}` : '', ` · sent ${fmtDate(p.updated_at)}`),
         p.status === 'rejected' && p.review_note && h('div', { class: 'prod-meta', style: 'color:var(--danger)', text: 'Reason given: ' + p.review_note }),
-        more, rejectBox),
+        more, rejectBox, featBox),
       h('div', { class: 'actions' },
         h('a', { class: 'ghost', href: `product.html?id=${p.id}`, target: '_blank', rel: 'noopener', text: 'View page', style: 'text-decoration:none;font-weight:600;font-size:14px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);color:var(--fg)' }),
         h('button', { type: 'button', class: 'ghost', text: 'Details', onclick: e => { more.hidden = !more.hidden; e.target.textContent = more.hidden ? 'Details' : 'Hide details'; } }),
         p.status !== 'approved' && actionBtn('Approve', 'good', () => review(p, 'approved')),
+        p.status === 'approved' && canApprove() && h('button', { type: 'button', class: 'ghost', style: 'border-color:#d48806;color:#8a5a00', text: p.is_featured ? '★ Add free days' : '★ Make Featured (free)', onclick: () => { featBox.hidden = !featBox.hidden; } }),
         p.status !== 'rejected' && h('button', { type: 'button', class: 'bad', text: p.status === 'approved' ? 'Take down' : 'Reject', onclick: () => { rejectBox.hidden = false; reasonInput.focus(); } })));
   }
+
+  // Free Featured (no payment): pick days, optional note
+  function freeFeatureBox(p) {
+    const box = h('div', { class: 'reject-box', hidden: true, style: 'background:#FFF8E1;border-color:#F5C400' });
+    const days = h('select', { 'aria-label': 'How many days' }, [7, 15, 30, 60, 90, 180, 365].map(d => h('option', { value: d, text: `${d} days`, selected: d === 30 })));
+    const note = h('input', { type: 'text', maxlength: 120, placeholder: 'Note (optional), e.g. launch promotion', 'aria-label': 'Note' });
+    box.append(h('b', { text: p.is_featured ? 'Add free Featured days' : 'Make Featured for free (no payment)' }),
+      h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, days, note,
+        actionBtn(p.is_featured ? 'Add days' : 'Make Featured', 'good', async () => {
+          const { data, error } = await db.rpc('admin_feature_free', { p_product: p.id, p_days: Number(days.value), p_note: note.value.trim() || null });
+          if (error) return toast(/Could not find the function/i.test(error.message) ? 'Run 0018_admin_tools.sql in Supabase first.' : friendly(error));
+          toast(`★ ${p.title} is Featured until ${fmtDate(data)}`); loadProducts();
+        }),
+        h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => box.hidden = true })),
+      h('div', { class: 'prod-meta', text: 'It shows as Featured right away. For one-time sellers, buyers can then call, WhatsApp and email them. It counts as free (৳0) in Reports.' }));
+    return box;
+  }
+
+  // ===================== Advertisement rates & ads =====================
+  let adRates = [], adsAll = [], adFilter = 'running', editingAd = null, adImgBlob = null, adImgPath = null;
+  const AD_COLORS = { green: 'Green', red: 'Red', yellow: 'Yellow', dark: 'Dark' };
+  const AD_PAY = { unpaid: 'Not paid', paid: 'Paid', complimentary: 'Free' };
+  const AD_LINKS = [['browse.html?deals=1', 'Deals of the Day'], ['browse.html?featured=1', 'Featured products'], ['browse.html?sort=newest', 'New arrivals'], ['browse.html?condition=pre_owned', 'Pre-owned'], ['browse.html', 'All products'], ['sell.html', 'Sell an item'], ['categories.html', 'All categories']];
+  const todayStr = () => { const d = new Date(Date.now() + 6 * 3600e3); return d.toISOString().slice(0, 10); };   // Dhaka date
+  const addDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+  const daysBetween = (a, b) => Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400e3);
+  const fmtDay = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  async function loadAds() {
+    const [r, a] = await Promise.all([db.from('ad_rates').select('*').order('sort_order'), db.from('ads').select('*').order('starts_on', { ascending: false }).limit(500)]);
+    if (r.error) {
+      $('adRateList').innerHTML = ''; $('adList').innerHTML = '';
+      $('adRateList').append(h('p', { class: 'empty', text: /does not exist|Could not find the table/i.test(r.error.message) ? 'Run 0018_admin_tools.sql in Supabase to set advertisement rates.' : friendly(r.error) }));
+      $('addAd').disabled = true; return;
+    }
+    $('addAd').disabled = false;
+    adRates = r.data; adsAll = a.error ? [] : a.data;
+    const sellerIds = [...new Set(adsAll.map(x => x.seller_id).filter(Boolean))];
+    if (sellerIds.length) { const sd = await db.from('seller_details').select('user_id, shop_name').in('user_id', sellerIds); (sd.data || []).forEach(x => reqSellers.set(x.user_id, { ...(reqSellers.get(x.user_id) || {}), ...x })); }
+    drawAdRates(); drawAds();
+  }
+  function drawAdRates() {
+    const box = $('adRateList'); box.innerHTML = '';
+    const edit = canApprove();
+    for (const r of adRates) {
+      const price = h('input', { type: 'number', min: 0, step: 1, value: Number(r.price_per_day), 'aria-label': `Price per day for ${r.name}`, disabled: !edit });
+      const min = h('input', { type: 'number', min: 1, max: 365, step: 1, value: r.min_days, 'aria-label': `Minimum days for ${r.name}`, disabled: !edit });
+      const on = h('input', { type: 'checkbox', checked: r.is_active, disabled: !edit });
+      box.append(h('div', { class: 'rate-row' },
+        h('div', {}, h('b', { text: r.name }), h('div', { class: 'attr-meta', text: r.description || '' })),
+        h('label', {}, 'Price per day (৳)', price), h('label', {}, 'Minimum days', min),
+        h('label', { class: 'check' }, on, 'On'),
+        edit ? actionBtn('Save', 'good', async () => {
+          const v = Number(price.value), m = Number(min.value);
+          if (!(v >= 0) || price.value === '') return toast('Enter a price per day (0 or more).');
+          if (!(m >= 1 && m <= 365)) return toast('Minimum days must be 1 to 365.');
+          const { error } = await db.from('ad_rates').update({ price_per_day: v, min_days: m, is_active: on.checked, updated_at: new Date().toISOString() }).eq('placement', r.placement);
+          if (error) return toast(friendly(error)); toast(`Saved: ${r.name} ${taka(v)} per day`); loadAds();
+        }) : h('span')));
+    }
+  }
+  $('adFilter').querySelectorAll('button').forEach(b => b.onclick = () => { adFilter = b.dataset.s; $('adFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAds(); });
+  function adBanner(ad, imgUrl) {
+    const el = h('div', { class: `ad-banner ${ad.color}${imgUrl ? ' has-img' : ''}` });
+    if (imgUrl) el.append(h('img', { src: imgUrl, alt: '' }));
+    el.append(h('div', { style: 'min-width:0' }, h('b', { text: ad.title || 'Your headline' }), ad.subtitle && h('span', { text: ad.subtitle })), h('span', { class: 'cta', text: ad.cta || 'Shop now' }));
+    return el;
+  }
+  function drawAds() {
+    const box = $('adList'); box.innerHTML = '';
+    const today = todayStr();
+    const rows = adsAll.filter(a => adFilter === 'all' || a.ends_on >= today);
+    if (!rows.length) { box.append(h('p', { class: 'empty', text: adsAll.length ? 'No running or upcoming ads. Choose All to see past ads.' : 'No ads yet. Press + New ad to add one.' })); return; }
+    for (const a of rows) {
+      const rate = adRates.find(r => r.placement === a.placement) || {};
+      const state = a.ends_on < today ? 'Ended' : a.starts_on > today ? 'Starts ' + fmtDay(a.starts_on) : a.is_active ? 'Running' : 'Paused';
+      const days = daysBetween(a.starts_on, a.ends_on) + 1;
+      box.append(h('div', { class: 'ad-row' + (a.is_active && a.ends_on >= today ? '' : ' off') },
+        adBanner(a, a.image_path && photoUrlAdmin(a.image_path)),
+        h('div', { style: 'min-width:0;display:grid;gap:3px' },
+          h('div', { class: 'attr-title' }, h('b', { text: rate.name || a.placement }), h('span', { class: 'chip ' + (state === 'Running' ? 'approved' : state === 'Ended' ? 'plain' : 'pending'), text: state })),
+          h('div', { class: 'prod-meta', text: `${a.seller_id ? 'Seller: ' + ((reqSellers.get(a.seller_id) || {}).shop_name || '—') : 'RGBKart (own promotion)'} · ${fmtDay(a.starts_on)} – ${fmtDay(a.ends_on)} (${days} days)` }),
+          h('div', { class: 'prod-meta' }, h('b', { text: taka(a.amount) }), ` · ${AD_PAY[a.payment_status]}`, a.paid_at ? ` on ${fmtDate(a.paid_at)}` : '', ` · opens ${a.link_url}`)),
+        h('div', { class: 'actions' },
+          a.payment_status === 'unpaid' && canApprove() && actionBtn('Mark paid', 'good', async () => {
+            const { error } = await db.from('ads').update({ payment_status: 'paid' }).eq('id', a.id); if (error) return toast(friendly(error)); toast('Marked as paid'); loadAds();
+          }),
+          actionBtn(a.is_active ? 'Pause' : 'Show', 'ghost', async () => {
+            const { error } = await db.from('ads').update({ is_active: !a.is_active }).eq('id', a.id); if (error) return toast(friendly(error)); loadAds();
+          }),
+          h('button', { type: 'button', class: 'ghost', text: 'Edit', onclick: () => openAd(a) }),
+          confirmBtn('Delete', 'Confirm delete', async () => {
+            const { error } = await db.from('ads').delete().eq('id', a.id); if (error) return toast(friendly(error)); toast('Ad deleted'); loadAds();
+          }))));
+    }
+  }
+  function adPreview() {
+    const box = $('adPreview'); box.innerHTML = '';
+    const url = adImgBlob ? URL.createObjectURL(adImgBlob) : adImgPath ? photoUrlAdmin(adImgPath) : null;
+    box.append(adBanner({ title: $('adTitle').value.trim(), subtitle: $('adSub').value.trim(), cta: $('adCta').value.trim(), color: $('adColor').value }, url));
+  }
+  function adCalc(fromRate) {
+    const rate = adRates.find(r => r.placement === $('adPlace').value);
+    if (fromRate && rate) $('adPpd').value = Number(rate.price_per_day);
+    const days = Math.max(1, Number($('adDays').value) || 1);
+    $('adAmount').value = Math.round((Number($('adPpd').value) || 0) * days);
+    const start = $('adStart').value || todayStr();
+    $('adEnds').textContent = `Runs ${fmtDay(start)} to ${fmtDay(addDays(start, days - 1))}` + (rate && days < rate.min_days ? ` · minimum for this space is ${rate.min_days} days` : '');
+  }
+  function openAd(a) {
+    editingAd = a; adImgBlob = null; adImgPath = a ? a.image_path : null;
+    $('adDrawerTitle').textContent = a ? 'Edit ad' : 'New ad';
+    const ps = $('adPlace'); ps.innerHTML = '';
+    adRates.forEach(r => ps.append(h('option', { value: r.placement, text: `${r.name} · ${taka(r.price_per_day)} per day${r.is_active ? '' : ' (off)'}` })));
+    ps.value = a ? a.placement : (adRates.find(r => r.is_active) || adRates[0] || {}).placement;
+    const lp = $('adLinkPick'); lp.innerHTML = '';
+    AD_LINKS.forEach(([v, t]) => lp.append(h('option', { value: v, text: t })));
+    childrenOf(null).forEach(c => lp.append(h('option', { value: 'browse.html?c=' + c.slug, text: 'Category: ' + c.name })));
+    lp.append(h('option', { value: '__custom', text: 'Another address…' }));
+    const link = a ? a.link_url : 'browse.html?deals=1';
+    if ([...lp.options].some(o => o.value === link)) { lp.value = link; $('adLink').value = ''; } else { lp.value = '__custom'; $('adLink').value = link; }
+    $('adLinkWrap').hidden = lp.value !== '__custom';
+    const sel = $('adSeller'); sel.innerHTML = '';
+    db.from('seller_details').select('user_id, shop_name, city, is_official').eq('status', 'approved').order('shop_name').limit(1000).then(r => {
+      (r.data || []).filter(s => !s.is_official).forEach(s => sel.append(h('option', { value: s.user_id, text: `${s.shop_name}${s.city ? ' · ' + s.city : ''}` })));
+      if (a && a.seller_id) sel.value = a.seller_id;
+    });
+    document.querySelector(`input[name=adWho][value=${a && a.seller_id ? 'seller' : 'house'}]`).checked = true; sel.hidden = !(a && a.seller_id);
+    $('adTitle').value = a ? a.title : ''; $('adSub').value = a ? (a.subtitle || '') : ''; $('adCta').value = a ? a.cta : 'Shop now'; $('adColor').value = a ? a.color : 'green';
+    $('adStart').value = a ? a.starts_on : todayStr(); $('adDays').value = a ? daysBetween(a.starts_on, a.ends_on) + 1 : 7;
+    $('adPay').value = a ? a.payment_status : 'unpaid'; $('adActive').checked = a ? a.is_active : true;
+    if (a) { $('adPpd').value = Number(a.price_per_day); $('adAmount').value = Number(a.amount); adCalc(false); $('adAmount').value = Number(a.amount); } else adCalc(true);
+    $('adImgName').textContent = adImgPath ? 'Picture added' : ''; $('adImgClear').hidden = !adImgPath;
+    setMsg('adMsg', ''); adPreview();
+    $('adDrawer').hidden = $('adScrim').hidden = false; $('adTitle').focus();
+  }
+  function closeAd() { $('adDrawer').hidden = $('adScrim').hidden = true; editingAd = null; }
+  document.querySelectorAll('input[name=adWho]').forEach(r => r.onchange = () => { $('adSeller').hidden = r.value !== 'seller' || !r.checked; if (r.checked && r.value === 'house') $('adSeller').hidden = true; });
+  $('adPlace').onchange = () => adCalc(true);
+  $('adDays').oninput = $('adPpd').oninput = $('adStart').oninput = () => adCalc(false);
+  $('adLinkPick').onchange = () => { $('adLinkWrap').hidden = $('adLinkPick').value !== '__custom'; if (!$('adLinkWrap').hidden) $('adLink').focus(); };
+  ['adTitle', 'adSub', 'adCta', 'adColor'].forEach(id => $(id).addEventListener('input', adPreview));
+  $('adColor').onchange = adPreview;
+  $('adImgBtn').onclick = () => $('adImg').click();
+  $('adImgClear').onclick = () => { adImgBlob = null; adImgPath = null; $('adImgName').textContent = ''; $('adImgClear').hidden = true; adPreview(); };
+  $('adImg').onchange = async () => {
+    const f = $('adImg').files[0]; $('adImg').value = ''; if (!f) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return toast('Use a JPG, PNG or WebP picture.');
+    try { adImgBlob = await apShrink(f, 1400); $('adImgName').textContent = f.name; $('adImgClear').hidden = false; adPreview(); } catch (_) { toast('Couldn\'t read that picture.'); }
+  };
+  $('addAd').onclick = () => openAd(null);
+  $('adClose').onclick = $('adCancel').onclick = $('adScrim').onclick = closeAd;
+  $('adDrawer').onsubmit = async e => {
+    e.preventDefault(); setMsg('adMsg', '');
+    const who = document.querySelector('input[name=adWho]:checked').value;
+    const link = $('adLinkPick').value === '__custom' ? $('adLink').value.trim() : $('adLinkPick').value;
+    const days = Math.round(Number($('adDays').value));
+    const start = $('adStart').value;
+    const row = { placement: $('adPlace').value, seller_id: who === 'seller' ? ($('adSeller').value || null) : null, title: $('adTitle').value.trim(), subtitle: $('adSub').value.trim() || null,
+      cta: $('adCta').value.trim() || 'Shop now', color: $('adColor').value, link_url: link, starts_on: start, ends_on: start ? addDays(start, days - 1) : null,
+      price_per_day: Number($('adPpd').value) || 0, amount: Number($('adAmount').value) || 0, payment_status: $('adPay').value, is_active: $('adActive').checked };
+    const errs = [];
+    if (row.title.length < 2) errs.push('Write a headline.');
+    if (who === 'seller' && !row.seller_id) errs.push('Choose the seller.');
+    if (!start) errs.push('Choose the start date.');
+    if (!(days >= 1 && days <= 365)) errs.push('Days must be 1 to 365.');
+    if (!/^(https:\/\/\S+|[a-z0-9_-]+\.html([?#]\S*)?)$/.test(link)) errs.push('The address must start with https://, or be a page on this site like browse.html.');
+    if (row.payment_status === 'complimentary') row.amount = 0;
+    if (errs.length) return setMsg('adMsg', errs.join(' '), true);
+    $('adSave').disabled = true;
+    try {
+      if (adImgBlob) {
+        const path = `admin/ads/${Date.now()}.${adImgBlob.type === 'image/webp' ? 'webp' : 'jpg'}`;
+        const up = await db.storage.from('product-images').upload(path, adImgBlob, { contentType: adImgBlob.type, cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        adImgPath = path;
+      }
+      row.image_path = adImgPath || null;
+      const r = editingAd ? await db.from('ads').update(row).eq('id', editingAd.id) : await db.from('ads').insert(row);
+      if (r.error) throw r.error;
+      toast(editingAd ? 'Ad saved' : 'Ad added'); closeAd(); loadAds();
+    } catch (err) { setMsg('adMsg', friendly(err), true); } finally { $('adSave').disabled = false; }
+  };
+
+  // ===================== Reports =====================
+  let repPeriod = 'day', repAnchor = null, repData = null, repRange = null;
+  const dhakaToday = () => new Date(Date.now() + 6 * 3600e3).toISOString().slice(0, 10);
+  const iso = d => d.toISOString().slice(0, 10);
+  function periodRange(p, anchor) {
+    const a = new Date(anchor + 'T00:00:00Z');
+    if (p === 'day') return [anchor, anchor];
+    if (p === 'week') { const dow = (a.getUTCDay() + 1) % 7; const s = new Date(a); s.setUTCDate(a.getUTCDate() - dow); const e = new Date(s); e.setUTCDate(s.getUTCDate() + 6); return [iso(s), iso(e)]; }   // week starts Saturday
+    if (p === 'month') return [iso(new Date(Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), 1))), iso(new Date(Date.UTC(a.getUTCFullYear(), a.getUTCMonth() + 1, 0)))];
+    if (p === 'year') return [`${a.getUTCFullYear()}-01-01`, `${a.getUTCFullYear()}-12-31`];
+  }
+  function shiftAnchor(dir) {
+    const a = new Date(repAnchor + 'T00:00:00Z');
+    if (repPeriod === 'day') a.setUTCDate(a.getUTCDate() + dir);
+    if (repPeriod === 'week') a.setUTCDate(a.getUTCDate() + 7 * dir);
+    if (repPeriod === 'month') a.setUTCMonth(a.getUTCMonth() + dir, 1);
+    if (repPeriod === 'year') a.setUTCFullYear(a.getUTCFullYear() + dir);
+    repAnchor = iso(a);
+  }
+  const nice = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  function rangeLabel(f, t) {
+    if (repPeriod === 'day') return new Date(f + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + (f === dhakaToday() ? ' (today)' : '');
+    if (repPeriod === 'month') return new Date(f + 'T00:00:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    if (repPeriod === 'year') return f.slice(0, 4);
+    return `${nice(f)} – ${nice(t)}`;
+  }
+  $('repTabs').querySelectorAll('button').forEach(b => b.onclick = () => {
+    repPeriod = b.dataset.p; $('repTabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    $('repNav').hidden = repPeriod === 'custom'; $('repCustom').hidden = repPeriod !== 'custom';
+    if (repPeriod === 'custom') { if (!$('repFrom').value) { const [f, t] = repRange || [dhakaToday(), dhakaToday()]; $('repFrom').value = f; $('repTo').value = t; } return; }
+    repAnchor = dhakaToday(); loadReport();
+  });
+  $('repPrev').onclick = () => { shiftAnchor(-1); loadReport(); };
+  $('repNext').onclick = () => { shiftAnchor(1); loadReport(); };
+  $('repGo').onclick = () => loadReport();
+  async function loadReport() {
+    if (!canApprove()) { $('repBody').innerHTML = ''; $('repBody').append(h('p', { class: 'empty', text: 'Only the Master Admin and Co-admins can see reports.' })); return; }
+    if (!repAnchor) repAnchor = dhakaToday();
+    let f, t;
+    if (repPeriod === 'custom') { f = $('repFrom').value; t = $('repTo').value; if (!f || !t || t < f) return setMsg('repMsg', 'Choose a From date and a To date (To can\'t be before From).', true); }
+    else { [f, t] = periodRange(repPeriod, repAnchor); $('repLabel').textContent = rangeLabel(f, t); $('repNext').disabled = f > dhakaToday() || t >= dhakaToday(); }
+    setMsg('repMsg', 'Loading…'); repRange = [f, t];
+    const { data, error } = await db.rpc('admin_report', { p_from: f, p_to: t });
+    if (error) { setMsg('repMsg', /Could not find the function/i.test(error.message) ? 'Run 0018_admin_tools.sql in Supabase to turn on reports.' : friendly(error), true); $('repBody').innerHTML = ''; return; }
+    setMsg('repMsg', ''); repData = data; drawReport(f, t);
+  }
+  const num = n => Number(n || 0).toLocaleString('en-IN');
+  function kpi(value, label, note, cls) { return h('div', { class: 'kpi' + (cls ? ' ' + cls : '') }, h('b', { text: value }), h('span', { text: label }), note && h('small', { text: note })); }
+  function barChart(series, key, fmt, color, label) {
+    const max = Math.max(1, ...series.map(s => Number(s[key]) || 0));
+    const step = (() => { const raw = max / 3, p = Math.pow(10, Math.floor(Math.log10(raw || 1))); return [1, 2, 5, 10].map(m => m * p).find(v => v >= raw) || raw; })();
+    const top = Math.max(step * 3, max);
+    const wrap = h('div', { class: 'bars', role: 'img', 'aria-label': `${label}: ${series.map(s => `${s.label} ${fmt(s[key])}`).join(', ')}`, style: `--bar:${color}` });
+    for (let g = 1; g <= 3; g++) wrap.append(h('div', { class: 'gl', style: `bottom:${(g * step / top) * 100}%` }, h('span', { text: fmt(g * step) })));
+    series.forEach(s => {
+      const v = Number(s[key]) || 0;
+      wrap.append(h('div', { class: 'bar', tabindex: '0', 'aria-label': `${s.label}: ${fmt(v)}` }, h('i', { style: `height:${v ? Math.max(2, (v / top) * 100) : 0}%` }), h('span', { class: 'tip', text: `${s.label}: ${fmt(v)}` })));
+    });
+    const x = h('div', { class: 'bars-x' }, h('span', { text: series[0] ? series[0].label : '' }), series.length > 2 && h('span', { text: series[Math.floor(series.length / 2)].label }), h('span', { text: series.length > 1 ? series[series.length - 1].label : '' }));
+    return h('div', {}, wrap, x);
+  }
+  function drawReport(f, t) {
+    const d = repData, box = $('repBody'); box.innerHTML = '';
+    const income = Number(d.featured_income) + Number(d.ad_income);
+    box.append(
+      h('div', { class: 'rep-group' }, h('h2', { text: 'Income' }), h('div', { class: 'kpis' },
+        kpi(taka(income), 'Total income', 'Featured + ads, paid', 'money'),
+        kpi(taka(d.featured_income), 'From Featured listings', `${num(d.featured_paid)} paid · ${num(d.featured_free)} free from admin`, 'money'),
+        kpi(taka(d.ad_income), 'From advertisements', `${num(d.ads_started)} ads started in this period`, 'money'),
+        kpi(taka(0), 'From free listings', 'Free listings don\'t pay'),
+        kpi(taka(d.ads_unpaid), 'Ads not paid yet', 'Running ads waiting for payment (today)'),
+        kpi(num(d.featured_waiting), 'Featured waiting for payment', 'Today'))),
+      h('div', { class: 'rep-group' }, h('h2', { text: 'Visitors' }), h('div', { class: 'kpis' },
+        kpi(num(d.visitors), 'Visitors', 'Different phones / computers'), kpi(num(d.page_views), 'Page visits', 'Each page counted once a day per visitor'), kpi(num(d.messages), 'Messages sent', 'Between buyers and sellers'))),
+      h('div', { class: 'rep-group' }, h('h2', { text: 'Sellers & customers' }), h('div', { class: 'kpis' },
+        kpi(num(d.new_customers), 'New customers', `${num(d.total_customers)} in total`), kpi(num(d.new_shops), 'New shops', `${num(d.total_shops)} approved in total`),
+        kpi(num(d.new_one_time), 'New one-time sellers', `${num(d.total_one_time)} in total`))),
+      h('div', { class: 'rep-group' }, h('h2', { text: 'Listings' }), h('div', { class: 'kpis' },
+        kpi(num(d.new_listings), 'New listings sent'), kpi(num(d.approved_listings), 'Listings that went live'), kpi(num(d.featured_paid + d.featured_free), 'Featured started', `${num(d.featured_paid)} paid · ${num(d.featured_free)} free`),
+        kpi(num(d.live_products), 'Live products now', `${num(d.featured_now)} Featured now`))));
+    const byMonth = d.by_month;
+    const series = (d.series || []).map(s => ({ ...s, label: byMonth ? new Date(s.from + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }) : new Date(s.from + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
+    if (series.length > 1) {
+      box.append(h('div', { class: 'charts' },
+        h('div', { class: 'chart-card' }, h('h3', { text: 'Visitors' }), h('p', { text: byMonth ? 'Per month' : 'Per day' }), barChart(series, 'visitors', num, '#00802B', 'Visitors')),
+        h('div', { class: 'chart-card' }, h('h3', { text: 'Income (৳)' }), h('p', { text: (byMonth ? 'Per month' : 'Per day') + ', paid Featured + ads' }), barChart(series, 'income', v => taka(v), '#B8000C', 'Income')),
+        h('div', { class: 'chart-card' }, h('h3', { text: 'New sign-ups' }), h('p', { text: 'Customers, shops and one-time sellers' }), barChart(series, 'signups', num, '#A87400', 'New sign-ups'))));
+      const tbl = h('table', {}, h('thead', {}, h('tr', {}, ['Period', 'Visitors', 'New sign-ups', 'New listings', 'Income'].map(x => h('th', { text: x })))),
+        h('tbody', {}, series.map(s => h('tr', {}, h('td', { text: s.from === s.to ? nice(s.from) : `${nice(s.from)} – ${nice(s.to)}` }), h('td', { text: num(s.visitors) }), h('td', { text: num(s.signups) }), h('td', { text: num(s.listings) }), h('td', { text: taka(s.income) })))));
+      box.append(h('details', { class: 'card rep-table' }, h('summary', { text: 'Show as a table' }), h('div', { class: 'table-wrap' }, tbl)));
+    }
+  }
+  $('repCsv').onclick = () => {
+    if (!repData || !repRange) return toast('Open a report first.');
+    const d = repData, rows = [['RGBKart report', `${repRange[0]} to ${repRange[1]}`], [],
+      ['Total income (BDT)', Number(d.featured_income) + Number(d.ad_income)], ['Featured income (BDT)', d.featured_income], ['Ad income (BDT)', d.ad_income], ['Free listings income (BDT)', 0],
+      ['Featured paid', d.featured_paid], ['Featured free from admin', d.featured_free], ['Ads started', d.ads_started], ['Ads not paid yet (BDT, today)', d.ads_unpaid],
+      ['Visitors', d.visitors], ['Page visits', d.page_views], ['Messages', d.messages], ['New customers', d.new_customers], ['New shops', d.new_shops], ['New one-time sellers', d.new_one_time],
+      ['New listings', d.new_listings], ['Listings that went live', d.approved_listings], ['Live products now', d.live_products], [],
+      ['Period from', 'Period to', 'Visitors', 'New sign-ups', 'New listings', 'Income (BDT)'], ...(d.series || []).map(s => [s.from, s.to, s.visitors, s.signups, s.listings, s.income])];
+    const csv = '﻿' + rows.map(r => r.map(c => /[",\n]/.test(String(c ?? '')) ? `"${String(c).replace(/"/g, '""')}"` : (c ?? '')).join(',')).join('\r\n');
+    const a = h('a', { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })), download: `rgbkart-report-${repRange[0]}-to-${repRange[1]}.csv` });
+    document.body.append(a); a.click(); a.remove();
+  };
+
+  // ===================== Admin adds a product =====================
+  const AP_MAX = 8;
+  ['Dhaka','Faridpur','Gazipur','Gopalganj','Kishoreganj','Madaripur','Manikganj','Munshiganj','Narayanganj','Narsingdi','Rajbari','Shariatpur','Tangail','Chattogram','Bandarban','Brahmanbaria','Chandpur',"Cox's Bazar",'Cumilla','Feni','Khagrachhari','Lakshmipur','Noakhali','Rangamati','Rajshahi','Bogura','Chapai Nawabganj','Joypurhat','Naogaon','Natore','Pabna','Sirajganj','Khulna','Bagerhat','Chuadanga','Jashore','Jhenaidah','Kushtia','Magura','Meherpur','Narail','Satkhira','Barishal','Barguna','Bhola','Jhalokathi','Patuakhali','Pirojpur','Sylhet','Habiganj','Moulvibazar','Sunamganj','Rangpur','Dinajpur','Gaibandha','Kurigram','Lalmonirhat','Nilphamari','Panchagarh','Thakurgaon','Mymensingh','Jamalpur','Netrokona','Sherpur'].forEach(d => $('apDistricts').append(h('option', { value: d })));
+  let apPhotos = [], apSellers = [], apOfficial = null;
+  function apShrink(file, maxDim = 1600) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        c.toBlob(b => b && b.type === 'image/webp' ? resolve(b) : c.toBlob(j => j ? resolve(j) : reject(), 'image/jpeg', .86), 'image/webp', .85);
+      };
+      img.onerror = reject; img.src = URL.createObjectURL(file);
+    });
+  }
+  function apDrawPhotos() {
+    const box = $('apPhotos'); box.innerHTML = '';
+    apPhotos.forEach((p, i) => box.append(h('div', { class: 'ap-ph' }, h('img', { src: p.url, alt: i ? `Photo ${i + 1}` : 'Main photo' }), i === 0 && h('span', { class: 'ap-main', text: 'Main' }),
+      h('button', { type: 'button', class: 'ap-x', text: '✕', 'aria-label': 'Remove photo', onclick: () => { apPhotos.splice(i, 1); apDrawPhotos(); } }))));
+    if (apPhotos.length < AP_MAX) box.append(h('button', { type: 'button', class: 'ap-add', onclick: () => $('apFile').click() }, h('b', { text: '+' }), apPhotos.length ? 'Add more' : 'Add photos'));
+  }
+  $('apFile').onchange = async () => {
+    for (const f of $('apFile').files) {
+      if (apPhotos.length >= AP_MAX) { toast(`Up to ${AP_MAX} photos.`); break; }
+      if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { toast('Use JPG, PNG or WebP photos.'); continue; }
+      try { const blob = await apShrink(f); apPhotos.push({ blob, url: URL.createObjectURL(blob) }); } catch (_) { toast(`Couldn't read ${f.name}.`); }
+    }
+    $('apFile').value = ''; apDrawPhotos();
+  };
+  function apWho() { return document.querySelector('input[name=apWho]:checked').value; }
+  function apShowWho() {
+    const who = apWho();
+    $('apSellerWrap').hidden = who !== 'seller';
+    $('apOfficialSetup').hidden = !(who === 'official' && !apOfficial);
+    $('apOfficialInfo').hidden = !(who === 'official' && apOfficial);
+    if (apOfficial) $('apOfficialInfo').textContent = `Sold by ${apOfficial.shop_name} · ${[apOfficial.area, apOfficial.city].filter(Boolean).join(', ')} · ${apOfficial.phone_public || ''}`;
+  }
+  document.querySelectorAll('input[name=apWho]').forEach(r => r.onchange = apShowWho);
+  $('apListing').querySelectorAll('button').forEach(b => b.onclick = () => {
+    $('apListing').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    $('apFeatDaysWrap').hidden = b.dataset.v !== 'featured';
+  });
+  $('apCond').querySelectorAll('button').forEach(b => b.onclick = () => $('apCond').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))));
+  async function openAddProduct() {
+    apPhotos = []; apDrawPhotos();
+    ['apTitle', 'apPrice', 'apSale', 'apDesc', 'apSellerSearch', 'apOffPhone', 'apOffWa', 'apOffArea'].forEach(id => $(id).value = '');
+    $('apStock').value = 1; $('apNeg').checked = false; $('apFree').checked = false; $('apOffName').value = 'RGBKart Official'; $('apOffCity').value = 'Dhaka';
+    $('apCond').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
+    $('apListing').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); $('apFeatDaysWrap').hidden = true;
+    const sel = $('apCat'); sel.innerHTML = ''; sel.append(h('option', { value: '', text: 'Choose a category' }));
+    childrenOf(null).forEach(top => {
+      const subs = childrenOf(top.id);
+      if (!subs.length) sel.append(h('option', { value: top.id, text: top.name }));
+      else sel.append(h('optgroup', { label: top.name }, subs.map(c => h('option', { value: c.id, text: c.name }))));
+    });
+    setMsg('apMsg', '');
+    $('apDrawer').hidden = $('apScrim').hidden = false;
+    const r = await db.from('seller_details').select('user_id, shop_name, city, area, phone_public, whatsapp, is_official, profiles(role, full_name, phone)').eq('status', 'approved').order('shop_name').limit(1000);
+    const rows = r.data || [];
+    apOfficial = rows.find(x => x.is_official) || null;
+    apSellers = rows.filter(x => !x.is_official);
+    $('apWhoOfficial').checked = true; apShowWho(); apDrawSellers();
+    $('apOffSetupNote').textContent = myRole === 'master_admin' ? 'First time only: set up the RGBKart Official shop. Buyers see these details.' : 'Ask the Master Admin to set up the RGBKart Official shop first, or add the product for a seller.';
+  }
+  function apDrawSellers() {
+    const q = $('apSellerSearch').value.trim().toLowerCase();
+    const sel = $('apSeller'); const keep = sel.value; sel.innerHTML = '';
+    const list = apSellers.filter(s => !q || [s.shop_name, s.city, s.phone_public, s.profiles && s.profiles.phone].some(x => (x || '').toLowerCase().includes(q)));
+    if (!list.length) sel.append(h('option', { value: '', text: apSellers.length ? 'No seller matches' : 'No approved sellers yet' }));
+    for (const kind of [['seller', 'Shops'], ['individual', 'One-time sellers']]) {
+      const g = list.filter(s => (s.profiles && s.profiles.role) === kind[0]);
+      if (g.length) sel.append(h('optgroup', { label: kind[1] }, g.map(s => h('option', { value: s.user_id, text: `${s.shop_name} · ${s.city || ''}${s.phone_public ? ' · ' + s.phone_public : ''}` }))));
+    }
+    if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+  }
+  $('apSellerSearch').oninput = apDrawSellers;
+  function closeAddProduct() { $('apDrawer').hidden = $('apScrim').hidden = true; }
+  $('addProduct').onclick = openAddProduct;
+  $('apClose').onclick = $('apCancel').onclick = $('apScrim').onclick = closeAddProduct;
+  $('apDrawer').onsubmit = async e => {
+    e.preventDefault(); setMsg('apMsg', '');
+    const who = apWho();
+    const v = { title: $('apTitle').value.trim(), cat: Number($('apCat').value) || null, price: Number($('apPrice').value), sale: $('apSale').value ? Number($('apSale').value) : null,
+      stock: Number($('apStock').value || 1), desc: $('apDesc').value.trim(), cond: $('apCond').querySelector('[aria-pressed="true"]').dataset.v,
+      featured: $('apListing').querySelector('[aria-pressed="true"]').dataset.v === 'featured', days: Number($('apFeatDays').value) };
+    const errs = [];
+    if (!apPhotos.length) errs.push('Add at least one photo.');
+    if (v.title.length < 3) errs.push('Write the product name.');
+    if (!v.cat) errs.push('Choose a category.');
+    if (!(v.price > 0)) errs.push('Enter a price.');
+    if (v.sale != null && !(v.sale > 0 && v.sale < v.price)) errs.push('The sale price must be lower than the price.');
+    if (who === 'seller' && !$('apSeller').value) errs.push('Choose the seller.');
+    if (who === 'official' && !apOfficial && myRole !== 'master_admin') errs.push('The RGBKart Official shop isn\'t set up yet.');
+    if (errs.length) return setMsg('apMsg', errs.join(' '), true);
+    $('apSave').disabled = true; $('apSave').textContent = 'Saving…';
+    try {
+      let sellerId = who === 'seller' ? $('apSeller').value : apOfficial && apOfficial.user_id;
+      if (who === 'official' && !apOfficial) {
+        const r = await db.rpc('admin_setup_official_shop', { p_name: $('apOffName').value.trim(), p_phone: $('apOffPhone').value.trim(), p_whatsapp: $('apOffWa').value.trim() || null, p_city: $('apOffCity').value.trim(), p_area: $('apOffArea').value.trim() || null });
+        if (r.error) throw r.error;
+        sellerId = r.data;
+      }
+      const paths = [];
+      for (let i = 0; i < apPhotos.length; i++) {
+        const b = apPhotos[i].blob;
+        const path = `admin/${myId}/${Date.now()}-${i}.${b.type === 'image/webp' ? 'webp' : 'jpg'}`;
+        const up = await db.storage.from('product-images').upload(path, b, { contentType: b.type, cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        paths.push(path);
+      }
+      const r = await db.rpc('admin_create_product', { p: { seller_id: sellerId, title: v.title, category_id: v.cat, price: v.price, sale_price: v.sale, stock: v.stock,
+        description: v.desc, listing_type: v.cond, price_negotiable: $('apNeg').checked, free_delivery: $('apFree').checked }, p_images: paths });
+      if (r.error) throw r.error;
+      if (v.featured) {
+        const f = await db.rpc('admin_feature_free', { p_product: r.data, p_days: v.days, p_note: 'Added by admin' });
+        if (f.error) toast('Product added, but Featured couldn\'t be set: ' + friendly(f.error));
+      }
+      toast(`Added and live: ${v.title}`);
+      closeAddProduct();
+      prodFilter = 'approved'; $('prodFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.s === 'approved')));
+      loadProducts();
+    } catch (err) {
+      const m = (err && err.message) || '';
+      setMsg('apMsg', /Could not find the function|admin_create_product|admin_setup_official_shop/i.test(m) ? 'Run 0018_admin_tools.sql in Supabase first.' : /row-level security|Unauthorized|403/i.test(m) ? 'Photo upload was refused. Run 0018_admin_tools.sql in Supabase first.' : friendly(err), true);
+    } finally { $('apSave').disabled = false; $('apSave').textContent = 'Add product'; }
+  };
 
   async function review(p, status, note) {
     const { error } = await db.rpc('review_product', { p_product: p.id, p_status: status, p_note: note || null });
@@ -1674,7 +2250,7 @@
       const sd = await db.from('seller_details').select('user_id, shop_name, phone_public, whatsapp, profiles(role)').in('user_id', ids);
       (sd.data || []).forEach(x => reqSellers.set(x.user_id, x));
     }
-    drawPlans(); drawRequests();
+    drawPlans(); drawRequests(); loadAds();
   }
 
   function drawPlans() {
@@ -1725,7 +2301,7 @@
         h('td', { text: r.products ? r.products.title : '(deleted product)' }),
         h('td', {}, h('div', { text: sd ? sd.shop_name : '—' }), sd && h('div', { class: 'date', text: [indiv ? 'One-time seller' : 'Shop', phone].filter(Boolean).join(' · ') }),
           r.products && r.products.status !== 'approved' && h('div', { class: 'date', style: 'color:var(--warn, #8a5a00)', text: 'Product not approved yet' })),
-        h('td', { text: `${r.featured_plans ? r.featured_plans.name + ' · ' : ''}${taka(r.price)} · ${r.days} days` }),
+        h('td', { text: r.is_complimentary ? `Free from admin · ${r.days} days` : `${r.featured_plans ? r.featured_plans.name + ' · ' : ''}${taka(r.price)} · ${r.days} days` }),
         h('td', {}, h('span', { class: 'chip ' + cls, text: REQ_STATUS[r.status] || r.status })),
         h('td', { class: 'date', text: fmtDate(r.created_at) }),
         h('td', {}, acts)));
@@ -1795,7 +2371,7 @@
     return m;
   }
   function setMsg(id, value, isError) { $(id).textContent = value; if (id !== 'dashMsg') $(id).classList.toggle('error', !!isError); }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('catDrawer').hidden) closeCat(); if (!$('attrDrawer').hidden) closeAttr(); if (!$('planDrawer').hidden) closePlan(); if (!$('secDrawer').hidden) closeSec(); if (!$('mnDrawer').hidden) closeMn(); setMenu(false); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('catDrawer').hidden) closeCat(); if (!$('attrDrawer').hidden) closeAttr(); if (!$('planDrawer').hidden) closePlan(); if (!$('secDrawer').hidden) closeSec(); if (!$('mnDrawer').hidden) closeMn(); if (!$('apDrawer').hidden) closeAddProduct(); if (!$('adDrawer').hidden) closeAd(); setMenu(false); } });
 
   setMode('signin');
 </script>

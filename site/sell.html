@@ -119,6 +119,11 @@
   .way { font-size: .74rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
   .way.on { background: var(--good-soft); border-color: transparent; color: var(--good); }
   .plan .tagline { font-size: .8rem; color: var(--muted); font-weight: 400; }
+  .durs { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; }
+  .dur { display: grid; gap: 2px; text-align: center; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; }
+  .dur b { font-size: 1rem; } .dur span { color: #b26b00; font-weight: 700; }
+  .dur:hover { border-color: #d48806; }
+  .dur[aria-pressed="true"] { border-color: #d48806; background: var(--gold-soft); box-shadow: inset 0 0 0 1px #d48806; }
   .ribbon { position: absolute; top: -10px; right: 12px; background: var(--amber); color: #2a1a00; font-size: .7rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; letter-spacing: .03em; }
   .paynote { background: var(--gold-soft); color: var(--fg); border-radius: 10px; padding: 10px 12px; font-size: .86rem; }
   .chip.feat { background: var(--amber); color: #2a1a00; }
@@ -194,6 +199,7 @@
           </ul>
         </button>
       </div>
+      <div class="durs" id="featDurs" role="group" aria-label="How long to be Featured" hidden></div>
       <p class="paynote" id="payNote" hidden></p>
     </section>
 
@@ -263,7 +269,7 @@
   let condition = 'pre_owned';
   let me = null, profile = null, myProducts = [];
   let pendingProductId = null;   // product created but not yet sent (retry after an error)
-  let listing = 'free', plan = null, featReqs = [];
+  let listing = 'free', plan = null, plans = [], featReqs = [];
 
   // ---------- setup ----------
   function fillSelects(cats) {
@@ -292,21 +298,32 @@
 
   // ---------- Free vs Featured ----------
   async function loadPlan() {
-    const r = await db.from('featured_plans').select('id, name, price, days, benefits').eq('is_active', true).order('sort_order').order('price').limit(1);
-    plan = (r.data || [])[0] || null;
+    const r = await db.from('featured_plans').select('id, name, price, days, benefits').eq('is_active', true).order('days').order('price');
+    plans = r.data || [];
+    plan = plans.find(p => p.days === 30) || plans[plans.length - 1] || null;
     $('featBtn').hidden = !plan;
     if (!plan) return;
     $('featPrice').innerHTML = '';
-    $('featPrice').append(money(plan.price), h('small', { text: ` / ${plan.days} days` }));
+    const cheapest = plans.reduce((a, b) => (Number(b.price) < Number(a.price) ? b : a), plans[0]);
+    if (plans.length > 1) $('featPrice').append(h('small', { text: 'from ' }), money(cheapest.price));
+    else $('featPrice').append(money(plan.price), h('small', { text: ` / ${plan.days} days` }));
+    const durs = $('featDurs'); durs.innerHTML = '';
+    if (plans.length > 1) plans.forEach(p => durs.append(h('button', { type: 'button', class: 'dur', 'aria-pressed': String(p === plan), onclick: () => { plan = p; drawPlanDetails(); } },
+      h('b', { text: `${p.days} days` }), h('span', { text: money(p.price) }))));
+    drawPlanDetails();
+  }
+  function drawPlanDetails() {
+    $('featDurs').querySelectorAll('.dur').forEach((b, i) => b.setAttribute('aria-pressed', String(plans[i] === plan)));
     const ul = $('featBenefits'); ul.innerHTML = '';
     ul.append(h('li', { text: 'Buyers can call, WhatsApp, email or message you' }));
     (plan.benefits || []).forEach(b => ul.append(h('li', { text: b })));
-    $('payNote').textContent = `Pay ${money(plan.price)} after we approve your listing. Our team will contact you on your mobile number with payment details. Featured starts as soon as your payment is confirmed. Until then it shows as a free listing.`;
+    $('payNote').textContent = `${plans.length > 1 ? `${plan.days} days Featured: ` : ''}Pay ${money(plan.price)} after we approve your listing. Our team will contact you on your mobile number with payment details. Featured starts as soon as your payment is confirmed. Until then it shows as a free listing.`;
   }
   function setListing(v) {
     listing = v;
     $('plans').querySelectorAll('.plan').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
     $('payNote').hidden = v !== 'featured';
+    $('featDurs').hidden = v !== 'featured' || plans.length < 2;
     $('emailHint').textContent = v === 'featured' ? '(optional, shown to buyers)' : '(optional, kept private)';
     $('contactHint').textContent = v === 'featured'
       ? 'Once Featured starts, buyers see your mobile, WhatsApp and email on this listing.'
@@ -375,8 +392,12 @@
           p.status === 'rejected' && p.review_note && h('div', { class: 'm', style: 'color:var(--danger)', text: 'Reason: ' + p.review_note }),
           h('div', { class: 'acts' },
             h('a', { class: 'ghost', href: `product.html?id=${p.id}`, style: 'padding:7px 12px;font-size:.88rem;border-radius:10px;text-decoration:none;font-weight:600;border:1px solid var(--line);color:var(--fg)', text: p.status === 'approved' ? 'View' : 'Preview' }),
-            canFeature && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem;border-color:#d48806', text: `★ Make Featured (${money(plan.price)})`,
-              onclick: async () => { const { error } = await db.from('featured_requests').insert({ product_id: p.id, plan_id: plan.id }); if (error) return toast(friendly(error)); toast('Featured requested. Our team will contact you about payment.'); loadMine(); } }),
+            canFeature && (() => {
+              const pick = h('select', { 'aria-label': 'Featured duration', style: 'padding:6px 8px;font-size:.88rem;width:auto' }, plans.map(x => h('option', { value: x.id, text: `${x.days} days · ${money(x.price)}`, selected: x === plan })));
+              return h('span', { style: 'display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap' }, pick,
+                h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem;border-color:#d48806', text: '★ Make Featured',
+                  onclick: async () => { const { error } = await db.from('featured_requests').insert({ product_id: p.id, plan_id: Number(pick.value) }); if (error) return toast(friendly(error)); toast('Featured requested. Our team will contact you about payment.'); loadMine(); } }));
+            })(),
             fr && fr.status === 'awaiting_payment' && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Keep it free',
               onclick: async () => { const { error } = await db.from('featured_requests').delete().eq('id', fr.id); if (error) return toast(friendly(error)); toast('Featured request cancelled'); loadMine(); } }),
             ['approved', 'pending'].includes(p.status) && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Mark as sold',
@@ -559,6 +580,7 @@
   }
 
   start();
+  try { let vid = localStorage.getItem('rgbkart-visitor'); if (!vid) { vid = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(36).padStart(2, '0')).join('').slice(0, 20); localStorage.setItem('rgbkart-visitor', vid); } db.rpc('track_visit', { p_visitor: vid, p_path: 'sell.html' }).then(() => {}, () => {}); } catch (_) {}
 </script>
 </body>
 </html>

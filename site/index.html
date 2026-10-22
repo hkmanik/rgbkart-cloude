@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=7">
+<link rel="stylesheet" href="shop.css?v=8">
 <style>
   /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
   main { padding-block: 20px 60px; display: grid; gap: 36px; }
@@ -50,6 +50,8 @@
     </div>
   </section>
 
+  <div id="adTop" hidden></div>
+
   <section aria-labelledby="catTitle">
     <div class="sec-head"><div><h2 id="catTitle">Shop by category</h2></div><a href="categories.html">View all</a></div>
     <div class="grid6" id="cats"></div>
@@ -64,7 +66,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=7"></script>
+<script src="shop.js?v=8"></script>
 <script src="menu.js?v=2"></script>
 <script>
   // Used when the home_sections table hasn't been set up yet
@@ -119,11 +121,12 @@
     const holder = $('sections');
     // keep the page order stable while sections load in parallel
     const slots = list.map(() => { const d = h('div'); holder.append(d); return d; });
+    const mid = h('div', { id: 'adMid', hidden: true }); holder.insertBefore(mid, slots[Math.min(2, slots.length)] || null); adSlot('home_mid', mid);
     await Promise.all(list.map((s, i) => renderSection(s, slots[i])));
     if (!holder.querySelector('section')) holder.append(h('div', { class: 'empty', text: 'No products yet. Be the first to sell something!' }));
   }
 
-  (async () => { try { db.rpc('expire_featured').then(() => {}, () => {}); } catch (_) {} await initShell(); await loadCats(); loadSections(); })();
+  (async () => { adSlot('home_top', $('adTop')); try { db.rpc('expire_featured').then(() => {}, () => {}); } catch (_) {} await initShell(); await loadCats(); loadSections(); })();
 </script>
 </body>
 </html>

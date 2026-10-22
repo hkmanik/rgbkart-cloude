@@ -692,6 +692,7 @@
     } catch (_) {}
     load();
     if (window.RGBMenu) RGBMenu.mount();
+    try { let vid = localStorage.getItem('rgbkart-visitor'); if (!vid) { vid = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(36).padStart(2, '0')).join('').slice(0, 20); localStorage.setItem('rgbkart-visitor', vid); } db.rpc('track_visit', { p_visitor: vid, p_path: 'product.html' }).then(() => {}, () => {}); } catch (_) {}
   })();
 </script>
 </body>

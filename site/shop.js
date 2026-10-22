@@ -60,6 +60,7 @@ async function initShell() {
   document.body.insertAdjacentHTML('afterbegin', headerHTML());
   document.body.insertAdjacentHTML('beforeend', footerHTML());
   if (window.RGBMenu) RGBMenu.mount();
+  trackVisit();
   updateBadges();
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
@@ -127,6 +128,30 @@ function categoryCard(c, i, extra) {
   const el = h('a', { class: 'ccard', href: `browse.html?c=${encodeURIComponent(c.slug)}`, style: `--hue:${Math.round(catHue(c, i))}` }, img, h('div', { class: 'cname', text: c.name }));
   if (extra) el.append(extra);
   return el;
+}
+
+// ---------- ads (Admin → Featured & ads) and visitor counting ----------
+async function adSlot(placement, holder) {
+  if (!holder) return;
+  try {
+    const r = await db.from('live_ads').select('*').eq('placement', placement);
+    const list = r.data || []; if (!list.length) { holder.hidden = true; return; }
+    const ad = list[Math.floor(Math.random() * list.length)];
+    const ext = /^https:\/\//i.test(ad.link_url);
+    const a = h('a', { class: `adb ${ad.color}${ad.image_path ? ' has-img' : ''} ${placement}`, href: ad.link_url, target: ext ? '_blank' : null, rel: ext ? 'noopener sponsored' : 'sponsored' },
+      ad.image_path && h('img', { src: imgUrl(ad.image_path), alt: '', loading: 'lazy' }),
+      h('div', { class: 'adb-t' }, h('b', { text: ad.title }), ad.subtitle && h('span', { text: ad.subtitle })),
+      h('span', { class: 'adb-cta', text: ad.cta }), h('small', { class: 'adb-tag', text: 'Ad' }));
+    holder.innerHTML = ''; holder.append(a); holder.hidden = false;
+  } catch (_) { holder.hidden = true; }
+}
+function trackVisit() {
+  try {
+    let id = localStorage.getItem('rgbkart-visitor');
+    if (!id) { id = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(36).padStart(2, '0')).join('').slice(0, 20); localStorage.setItem('rgbkart-visitor', id); }
+    const path = (location.pathname.split('/').pop() || 'index.html');
+    db.rpc('track_visit', { p_visitor: id, p_path: path }).then(() => {}, () => {});
+  } catch (_) {}
 }
 
 let toastTimer;

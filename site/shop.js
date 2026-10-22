@@ -59,6 +59,7 @@ function updateBadges() {
 async function initShell() {
   document.body.insertAdjacentHTML('afterbegin', headerHTML());
   document.body.insertAdjacentHTML('beforeend', footerHTML());
+  if (window.RGBMenu) RGBMenu.mount();
   updateBadges();
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {

@@ -297,6 +297,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="menu.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -690,6 +691,7 @@
       }
     } catch (_) {}
     load();
+    if (window.RGBMenu) RGBMenu.mount();
   })();
 </script>
 </body>

@@ -324,6 +324,7 @@
 
     <div class="nav-group tone-amber">Storefront &amp; money</div>
     <button class="nav tone-amber" data-view="homepage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 9v12h14V9"/></svg>Home page</button>
+    <button class="nav tone-amber" data-view="mainmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Main menu</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured &amp; ads<span class="count" id="navFeatured" hidden></span></button>
     <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments<span class="soon">5.7</span></button>
 
@@ -423,6 +424,19 @@
         <div class="hs-fixed"><span class="hs-n">·</span><div><b>Banner</b><div class="attr-meta">Top of the page. Editable banners come later.</div></div></div>
         <div class="hs-fixed"><span class="hs-n">·</span><div><b>Shop by category</b><div class="attr-meta">12 categories in your Categories order. Change the order on the Categories page.</div></div></div>
         <div id="sectionList"></div>
+      </div>
+    </section>
+
+    <!-- Main menu -->
+    <section data-page="mainmenu">
+      <div class="page-head">
+        <div><h1>Main menu</h1><p>The links under the header on every shop page, left to right in this order. "All categories" always comes first. Red items stand out, like Deals of the Day.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="ghost" href="index.html" target="_blank" rel="noopener" style="text-decoration:none;padding:9px 14px;border-radius:8px;border:1px solid var(--line);color:var(--fg);font-weight:600;font-size:14px">View the shop</a>
+        <button class="primary" type="button" id="addMenuItem">+ Add link</button></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="hs-fixed"><span class="hs-n">·</span><div><b>All categories</b><div class="attr-meta">Always first. Opens every category with its sub-categories, from your Categories page.</div></div></div>
+        <div id="menuList"></div>
       </div>
     </section>
 
@@ -579,6 +593,38 @@
 </form>
 
 <!-- ============ Home section editor ============ -->
+<div class="drawer-scrim" id="mnScrim" hidden></div>
+<form class="drawer" id="mnDrawer" hidden aria-labelledby="mnDrawerTitle">
+  <div class="drawer-head"><h2 id="mnDrawerTitle">Add link</h2><button type="button" class="icon-btn" id="mnClose" aria-label="Close">✕</button></div>
+  <div class="drawer-body">
+    <label>Opens
+      <select id="mnType">
+        <option value="home">Home page</option>
+        <option value="shop">All products</option>
+        <option value="deals">Deals of the Day (products on sale)</option>
+        <option value="featured">Featured products</option>
+        <option value="newest">New arrivals</option>
+        <option value="pre_owned">Pre-owned products</option>
+        <option value="free_delivery">Free delivery products</option>
+        <option value="category">One category</option>
+        <option value="sell">Sell an item page</option>
+        <option value="url">Another address</option>
+      </select></label>
+    <label id="mnCatWrap" hidden>Category <select id="mnCat"></select></label>
+    <label id="mnUrlWrap" hidden>Address <input id="mnUrl" type="text" maxlength="300" placeholder="https://… or a page like sell.html">
+      <span class="attr-meta" style="text-transform:none;letter-spacing:0;font-weight:400">Starts with https://, or a page on this site such as categories.html</span></label>
+    <label>Label <input id="mnLabel" type="text" maxlength="40" required></label>
+    <label>Label in Bangla (optional) <input id="mnLabelBn" type="text" maxlength="40" lang="bn"></label>
+    <label class="check"><input id="mnHot" type="checkbox"> Show in red (to stand out)</label>
+    <label class="check"><input id="mnActive" type="checkbox" checked> Show in the menu</label>
+    <p id="mnMsg" class="msg error" role="alert"></p>
+  </div>
+  <div class="drawer-foot">
+    <button type="button" class="ghost" id="mnCancel">Cancel</button>
+    <button type="submit" class="primary" id="mnSave">Save link</button>
+  </div>
+</form>
+
 <div class="drawer-scrim" id="secScrim" hidden></div>
 <form class="drawer" id="secDrawer" hidden aria-labelledby="secDrawerTitle">
   <div class="drawer-head"><h2 id="secDrawerTitle">Add section</h2><button type="button" class="icon-btn" id="secClose" aria-label="Close">✕</button></div>
@@ -818,8 +864,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', team: 'Team' };
+  const VIEWS = ['dashboard', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -832,6 +878,7 @@
     if (view === 'featured') loadFeatured();
     if (view === 'products') loadProducts();
     if (view === 'homepage') loadSections();
+    if (view === 'mainmenu') loadMenu();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));
@@ -1422,6 +1469,91 @@
     closeSec(); loadSections();
   };
 
+  // ===================== Main menu =====================
+  const MN_TYPES = { home: 'Home page', shop: 'All products', deals: 'Deals of the Day', featured: 'Featured', newest: 'New arrivals', pre_owned: 'Pre-owned', free_delivery: 'Free delivery', category: 'Category', sell: 'Sell an item', url: 'Address' };
+  const MN_DEFAULT = { home: 'Home', shop: 'Shop', deals: 'Deals of the Day', featured: 'Featured', newest: 'New Arrivals', pre_owned: 'Pre-Owned', free_delivery: 'Free Delivery', sell: 'Sell an Item', url: '' };
+  let menuItems = [], editingMn = null;
+  async function loadMenu() {
+    const r = await db.from('menu_items').select('*').order('sort_order').order('id');
+    const box = $('menuList'); box.innerHTML = '';
+    if (r.error) { box.append(h('p', { class: 'empty', text: /does not exist|Could not find the table/i.test(r.error.message) ? 'Run 0016_main_menu.sql in Supabase to manage the main menu.' : friendly(r.error) })); return; }
+    menuItems = r.data;
+    if (!menuItems.length) box.append(h('p', { class: 'empty', text: 'No links yet. Shoppers see only "All categories". Add a link to start.' }));
+    menuItems.forEach((m, i) => {
+      const cat = m.category_id && catById(m.category_id);
+      box.append(h('div', { class: 'hs' + (m.is_active ? '' : ' off') },
+        h('span', { class: 'hs-n', text: i + 1 }),
+        h('div', { style: 'min-width:0' }, h('div', { class: 'attr-title' },
+            h('b', { text: m.label, style: m.is_hot ? 'color:#E30613' : null }),
+            h('span', { class: 'chip plain', text: MN_TYPES[m.link_type] + (cat ? ': ' + cat.name : m.link_type === 'url' ? ': ' + m.url : '') }),
+            m.is_hot && h('span', { class: 'chip', style: 'background:#FDE7E8;color:#B8000C', text: 'Red' }),
+            !m.is_active && h('span', { class: 'chip off', text: 'Hidden' })),
+          m.label_bn && h('div', { class: 'attr-meta', lang: 'bn', text: m.label_bn })),
+        h('div', { class: 'actions' },
+          h('button', { type: 'button', class: 'icon-btn', text: '↑', 'aria-label': 'Move left', disabled: i === 0, onclick: () => moveMn(i, -1) }),
+          h('button', { type: 'button', class: 'icon-btn', text: '↓', 'aria-label': 'Move right', disabled: i === menuItems.length - 1, onclick: () => moveMn(i, 1) }),
+          actionBtn(m.is_active ? 'Hide' : 'Show', 'ghost', async () => {
+            const { error } = await db.from('menu_items').update({ is_active: !m.is_active, updated_at: new Date().toISOString() }).eq('id', m.id);
+            if (error) return toast(friendly(error)); loadMenu();
+          }),
+          h('button', { type: 'button', class: 'ghost', text: 'Edit', onclick: () => openMn(m) }),
+          confirmBtn('Delete', 'Confirm delete', async () => {
+            const { error } = await db.from('menu_items').delete().eq('id', m.id);
+            if (error) return toast(friendly(error)); toast(`Deleted ${m.label}`); loadMenu();
+          }))));
+    });
+  }
+  async function moveMn(i, dir) {
+    const list = [...menuItems]; [list[i], list[i + dir]] = [list[i + dir], list[i]];
+    const res = await Promise.all(list.map((m, k) => m.sort_order === (k + 1) * 10 ? null : db.from('menu_items').update({ sort_order: (k + 1) * 10 }).eq('id', m.id)));
+    const bad = res.find(r => r && r.error); if (bad) toast(friendly(bad.error));
+    loadMenu();
+  }
+  function mnShow() { const t = $('mnType').value; $('mnCatWrap').hidden = t !== 'category'; $('mnUrlWrap').hidden = t !== 'url'; }
+  function openMn(m) {
+    editingMn = m;
+    $('mnDrawerTitle').textContent = m ? 'Edit link' : 'Add link';
+    const sel = $('mnCat'); sel.innerHTML = '';
+    const walk = (pid, d) => childrenOf(pid).forEach(c => { sel.append(h('option', { value: c.id, text: '  '.repeat(d) + (d ? '└ ' : '') + c.name })); walk(c.id, d + 1); });
+    walk(null, 0);
+    $('mnType').value = m ? m.link_type : 'category';
+    const firstTop = cats.find(c => !c.parent_id);
+    $('mnCat').value = m && m.category_id ? m.category_id : (firstTop ? firstTop.id : '');
+    $('mnUrl').value = m ? (m.url || '') : '';
+    $('mnLabel').value = m ? m.label : (firstTop ? firstTop.name : '');
+    $('mnLabelBn').value = m ? (m.label_bn || '') : '';
+    $('mnHot').checked = m ? m.is_hot : false;
+    $('mnActive').checked = m ? m.is_active : true;
+    mnShow(); setMsg('mnMsg', '');
+    $('mnDrawer').hidden = $('mnScrim').hidden = false;
+    $('mnLabel').focus();
+  }
+  const mnAutoLabel = () => { const v = $('mnLabel').value; return !v || Object.values(MN_DEFAULT).includes(v) || cats.some(c => c.name === v); };
+  $('mnType').onchange = () => {
+    mnShow(); const t = $('mnType').value;
+    if (mnAutoLabel()) $('mnLabel').value = t === 'category' ? (catById(Number($('mnCat').value)) || {}).name || '' : MN_DEFAULT[t];
+  };
+  $('mnCat').onchange = () => { if (mnAutoLabel()) $('mnLabel').value = (catById(Number($('mnCat').value)) || {}).name || ''; };
+  function closeMn() { $('mnDrawer').hidden = $('mnScrim').hidden = true; editingMn = null; }
+  $('mnClose').onclick = $('mnCancel').onclick = $('mnScrim').onclick = closeMn;
+  $('addMenuItem').onclick = () => openMn(null);
+  $('mnDrawer').onsubmit = async e => {
+    e.preventDefault(); setMsg('mnMsg', '');
+    const t = $('mnType').value, url = $('mnUrl').value.trim();
+    const row = { link_type: t, category_id: t === 'category' ? Number($('mnCat').value) || null : null, url: t === 'url' ? url : null,
+      label: $('mnLabel').value.trim(), label_bn: $('mnLabelBn').value.trim() || null, is_hot: $('mnHot').checked, is_active: $('mnActive').checked, updated_at: new Date().toISOString() };
+    if (row.label.length < 2) return setMsg('mnMsg', 'Give the link a label (at least 2 letters).', true);
+    if (t === 'category' && !row.category_id) return setMsg('mnMsg', 'Choose a category.', true);
+    if (t === 'url' && !/^(https:\/\/\S+|[a-z0-9_-]+\.html([?#]\S*)?)$/.test(url)) return setMsg('mnMsg', 'Enter an address that starts with https://, or a page on this site like categories.html.', true);
+    if (!editingMn) row.sort_order = menuItems.reduce((mx, m) => Math.max(mx, m.sort_order), 0) + 10;
+    $('mnSave').disabled = true;
+    const r = editingMn ? await db.from('menu_items').update(row).eq('id', editingMn.id) : await db.from('menu_items').insert(row);
+    $('mnSave').disabled = false;
+    if (r.error) return setMsg('mnMsg', friendly(r.error), true);
+    toast(editingMn ? `Saved ${row.label}` : `Added ${row.label}`);
+    closeMn(); loadMenu();
+  };
+
   // ===================== Products review =====================
   let prods = [], prodSellers = new Map(), prodFilter = 'pending', prodWho = 'all';
   const P_STATUS = { draft: 'Draft', pending: 'To review', approved: 'Live', rejected: 'Rejected', archived: 'Hidden / sold' };
@@ -1653,7 +1785,7 @@
     return m;
   }
   function setMsg(id, value, isError) { $(id).textContent = value; if (id !== 'dashMsg') $(id).classList.toggle('error', !!isError); }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('catDrawer').hidden) closeCat(); if (!$('attrDrawer').hidden) closeAttr(); if (!$('planDrawer').hidden) closePlan(); if (!$('secDrawer').hidden) closeSec(); setMenu(false); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('catDrawer').hidden) closeCat(); if (!$('attrDrawer').hidden) closeAttr(); if (!$('planDrawer').hidden) closePlan(); if (!$('secDrawer').hidden) closeSec(); if (!$('mnDrawer').hidden) closeMn(); setMenu(false); } });
 
   setMode('signin');
 </script>

@@ -427,6 +427,7 @@
         <button class="tile tone-amber" data-go="products" id="tileProducts"><b id="dProducts">–</b><span>Products waiting for review</span></button>
         <button class="tile tone-green" data-go="payments" id="tilePayments"><b id="dPayments">–</b><span>Payments to check</span></button>
       </div>
+      <p id="alertStatus" class="muted" style="margin:14px 2px 0;font-size:.88rem" hidden></p>
     </section>
 
     <!-- Categories -->
@@ -1107,6 +1108,13 @@
     $('dCustomers').textContent = customers.length;
     $('dCategories').textContent = cats.length;
     $('dAttributes').textContent = attrs.length;
+    db.rpc('admin_alert_stats').then(({ data: a, error }) => {
+      const el = $('alertStatus'); if (error || !a) return;
+      const ago = a.last_sent ? new Date(a.last_sent).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'never';
+      el.hidden = false;
+      el.textContent = `Email alerts: ${a.sent_24h} sent in the last 24 hours · ${a.pending} waiting · last sent ${ago}` + (a.failed ? ` · ${a.failed} could not be sent (last problem: ${a.last_error || 'unknown'})` : '');
+      el.style.color = a.failed || (a.pending > 0 && !a.last_sent) ? '#b45309' : '';
+    });
     $('navPending').hidden = !pending; $('navPending').textContent = pending;
   }
 

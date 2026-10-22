@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alerts | RGBKart</title>
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
+<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="order.css?v=1">
+<style>
+  .alist { display: grid; gap: 0; padding: 0; overflow: hidden; }
+  .al { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; padding: 14px 16px; border-top: 1px solid var(--line); text-decoration: none; color: var(--fg); }
+  .al:first-child { border-top: 0; }
+  .al:hover { background: var(--bg); }
+  .al.new { background: var(--accent-soft); }
+  .al .ic { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 1.2rem; background: var(--bg); }
+  .al b { display: block; overflow-wrap: anywhere; }
+  .al p { margin: 3px 0 0; color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+  .al time { font-size: .78rem; color: var(--faint); }
+  .emailbox { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 14px; }
+  .emailbox span { min-width: 0; flex: 1 1 260px; }
+  .sw { position: relative; width: 48px; height: 28px; flex: none; }
+  .sw input { opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; position: relative; z-index: 1; }
+  .sw i { position: absolute; inset: 0; border-radius: 999px; background: var(--line); transition: background .15s; }
+  .sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .sw input:checked + i { background: var(--accent); } .sw input:checked + i::after { transform: translateX(20px); }
+  .sw input:focus-visible + i { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<main class="wrap ord-main" style="max-width:760px">
+  <h1>Alerts</h1>
+  <p class="lead">News about your orders, payments, listings and messages. We also email them to you.</p>
+  <div id="content"><div class="box">Loading…</div></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="shop.js?v=10"></script>
+<script src="menu.js?v=2"></script>
+<script>
+  const ICON = { order: '📦', payment_ok: '✅', payment_rejected: '⚠️', listing_approved: '✅', listing_rejected: '⚠️', message: '💬', featured_ending: '⭐', ad_ending: '📣', shop_approved: '🏪', shop_rejected: '⚠️' };
+  const ago = t => {
+    const s = (Date.now() - new Date(t)) / 1000;
+    if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + ' min ago'; if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+    return new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  };
+
+  async function load() {
+    const box = $('content');
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      box.innerHTML = '';
+      box.append(h('div', { class: 'box empty-cart' }, h('b', { text: 'Sign in to see your alerts' }), h('a', { class: 'btn-acc', href: 'login.html', text: 'Sign in' })));
+      return;
+    }
+    const [r, p] = await Promise.all([
+      db.from('notifications').select('id, kind, title, body, link, created_at, read_at').order('created_at', { ascending: false }).limit(100),
+      db.from('profiles').select('email_alerts').eq('id', session.user.id).maybeSingle()]);
+    box.innerHTML = '';
+    if (r.error) { box.append(h('div', { class: 'box', text: /does not exist|Could not find/i.test(r.error.message) ? 'Alerts aren\'t switched on yet.' : r.error.message })); return; }
+
+    // email on/off
+    const on = !p.data || p.data.email_alerts !== false;
+    const anon = session.user.is_anonymous;
+    const cb = h('input', { type: 'checkbox', role: 'switch', 'aria-label': 'Email me my alerts', checked: on });
+    const note = h('small', { class: 'm', style: 'display:block', text: anon ? 'Emails go to the address you gave us when ordering or listing.' : 'Emails go to ' + session.user.email + '.' });
+    cb.onchange = async () => {
+      cb.disabled = true;
+      const { error } = await db.rpc('set_email_alerts', { p_on: cb.checked });
+      cb.disabled = false;
+      if (error) { cb.checked = !cb.checked; return toast(error.message); }
+      toast(cb.checked ? 'Alert emails are on' : 'Alert emails are off. You can still see alerts here.');
+    };
+    box.append(h('div', { class: 'box emailbox' }, h('span', {}, h('b', { text: 'Email me my alerts' }), note), h('label', { class: 'sw' }, cb, h('i'))));
+
+    if (!r.data.length) {
+      box.append(h('div', { class: 'box empty-cart' }, h('b', { text: 'No alerts yet' }), h('span', { text: 'When something happens with your orders, listings or messages, you\'ll see it here.' })));
+      return;
+    }
+    box.append(h('div', { class: 'box alist' }, r.data.map(a => h(a.link ? 'a' : 'div', { class: 'al' + (a.read_at ? '' : ' new'), href: a.link || undefined },
+      h('span', { class: 'ic', 'aria-hidden': 'true', text: ICON[a.kind] || (a.kind.startsWith('order') ? ICON.order : '🔔') }),
+      h('span', { style: 'min-width:0' }, h('b', { text: a.title }), a.body && h('p', { text: a.body }), h('time', { datetime: a.created_at, text: ago(a.created_at) }))))));
+    if (r.data.some(a => !a.read_at)) db.rpc('mark_alerts_read').then(() => window.updateBadges && updateBadges());
+  }
+  (async () => { await initShell(); load(); })();
+</script>
+</body>
+</html>

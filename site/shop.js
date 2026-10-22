@@ -26,6 +26,7 @@ const CART_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const HEART_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
 const USER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
 const CHAT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>';
+const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
 let hasSession = false;
 function headerHTML() {
   return `<header class="top"><div class="wrap top-in">
@@ -34,6 +35,7 @@ function headerHTML() {
     <nav class="nav" aria-label="Account">
       <a class="sell hide-sm" href="sell.html">+ Sell</a>
       <a class="icon-link" href="messages.html" id="msgLink" aria-label="Messages" hidden>${CHAT_SVG}<span class="badge" id="msgCount" hidden></span></a>
+      <a class="icon-link" href="alerts.html" id="bellLink" aria-label="Alerts" hidden>${BELL_SVG}<span class="badge" id="bellCount"></span></a>
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
       <a class="icon-link acct" href="login.html" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
@@ -41,7 +43,7 @@ function headerHTML() {
 }
 function footerHTML() {
   return `<footer><div class="wrap"><div><b>RGBKart</b><div>Buy and sell across all 64 districts.</div></div>
-    <div><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
+    <div><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
     <a class="fab" href="sell.html">+ Sell</a>`;
 }
 function updateBadges() {
@@ -54,6 +56,12 @@ function updateBadges() {
     const m = r.error ? 0 : r.data, el = $('msgCount');
     el.hidden = !m; el.textContent = m > 99 ? '99+' : m;
     $('msgLink').setAttribute('aria-label', m ? `Messages, ${m} new` : 'Messages');
+  });
+  // the bell shows only while there are new alerts
+  if (hasSession && $('bellLink')) db.rpc('my_alert_count').then(r => {
+    const a = r.error ? 0 : r.data, el = $('bellLink');
+    el.hidden = !a; $('bellCount').textContent = a > 99 ? '99+' : a;
+    el.setAttribute('aria-label', `Alerts, ${a} new`);
   });
 }
 async function initShell() {

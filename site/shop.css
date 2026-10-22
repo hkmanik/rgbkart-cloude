@@ -63,6 +63,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .brand b { white-space: normal; font-size: .9rem; line-height: 1.08; }
   .nav { gap: 4px; }
   .nav .icon-link { padding: 6px 7px; }
+  #bellLink:not([hidden]) ~ #wishLink { display: none; }
 }
 @media (max-width: 345px) {
   .brand { gap: 5px; padding-right: 9px; }
@@ -71,6 +72,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .nav .icon-link { padding: 5px 6px; }
   .brand { flex: none; }
   #msgLink:not([hidden]) ~ #wishLink { display: none; }
+  #msgLink:not([hidden]):has(~ #bellLink:not([hidden])) { display: none; }
 }
 
 /* ---------- Sections ---------- */

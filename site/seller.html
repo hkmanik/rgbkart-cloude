@@ -5,24 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>RGBKart Seller Center</title>
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
   /* Layout: fixed left sidebar (teal, to tell it apart from the indigo admin) + main area; editor is one long form with a sticky action bar */
   :root {
-    --bg: #f1f5f4; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896;
-    --line: #d7e0de; --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
-    --side: #0e2f2c; --side-2: #08201e; --side-fg: #d3e8e4; --side-muted: #7fa29d; --side-line: #1d4541;
-    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --t-amber: #f5a524; --t-teal: #2dd4bf;
+    --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92;
+    --line: #D9E2DC; --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
+    --side: #0B3D1E; --side-2: #072A14; --side-fg: #DDEFE3; --side-muted: #8FBFA0; --side-line: #1C5A33;
+    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --t-amber: #F5C400; --t-teal: #F5C400;
     --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5;
     --danger: #b3392f; --danger-soft: #f8e3e0; --info: #3f51b5; --info-soft: #e7e9fb;
-    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    --display: "Poppins", "Hind Siliguri", system-ui, sans-serif; --body: "Roboto", "Hind Siliguri", system-ui, sans-serif;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e;
-      --line: #263634; --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36;
-      --side: #0b2422; --side-2: #061614; --side-fg: #d3e8e4; --side-muted: #6f9590; --side-line: #18403b;
+    :root { --bg: #0D1411; --surface: #141E1A; --fg: #E6EEEA; --muted: #9CACA4; --faint: #6E8078;
+      --line: #2A3832; --accent: #2EBB5C; --accent-hover: #49CC73; --accent-fg: #03150A; --accent-soft: #14301E;
+      --side: #0A2E17; --side-2: #061F0F; --side-fg: #DDEFE3; --side-muted: #7FAF90; --side-line: #1A4A2C;
       --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17;
       --danger: #ec7d72; --danger-soft: #3d201d; --info: #9aa8ff; --info-soft: #222746; color-scheme: dark; }
   }
@@ -52,8 +55,8 @@
     transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s, transform .05s; }
   button:active:not(:disabled) { transform: translateY(1px); }
   button:disabled { opacity: .55; cursor: not-allowed; }
-  .primary { background: var(--accent); color: var(--accent-fg); box-shadow: 0 1px 2px rgb(15 118 110 / .25); }
-  .primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgb(15 118 110 / .3); }
+  .primary { background: var(--accent); color: var(--accent-fg); box-shadow: 0 1px 2px rgb(0 128 43 / .25); }
+  .primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgb(0 128 43 / .3); }
   .ghost { background: var(--surface); color: var(--fg); border-color: var(--line); }
   .ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
   .bad { background: transparent; color: var(--danger); border-color: var(--danger); }
@@ -81,7 +84,7 @@
   .side-brand { font: 600 1.35rem var(--display); color: #fff; padding: 0 10px 6px; display: flex; align-items: baseline; gap: 8px; }
   .side-brand span { font: 600 .66rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--t-teal); }
   .rgb-bar { display: flex; height: 3px; margin: 0 10px 10px; border-radius: 2px; overflow: hidden; }
-  .rgb-bar i { flex: 1; } .rgb-bar i:nth-child(1) { background: var(--t-red); } .rgb-bar i:nth-child(2) { background: var(--t-green); } .rgb-bar i:nth-child(3) { background: var(--t-blue); }
+  .rgb-bar i { flex: 1; } .rgb-bar i:nth-child(1) { background: #F5C400; } .rgb-bar i:nth-child(2) { background: #F5C400; } .rgb-bar i:nth-child(3) { background: #F5C400; }
   .shop-name { padding: 2px 10px 10px; font-size: .88rem; color: #fff; font-weight: 600; overflow-wrap: anywhere; }
   .shop-name small { display: block; font-weight: 500; color: var(--side-muted); }
   .nav-group { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--side-muted); padding: 14px 10px 4px; }
@@ -260,7 +263,7 @@
 
   /* Shop settings */
   .shop-preview { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
-  .shop-banner { aspect-ratio: 4 / 1; max-width: 100%; background: linear-gradient(120deg, #0f766e, #4f8cff 55%, #ff5c7a); background-size: cover; background-position: center; position: relative; }
+  .shop-banner { aspect-ratio: 4 / 1; max-width: 100%; background: linear-gradient(120deg, #00802B, #4f8cff 55%, #ff5c7a); background-size: cover; background-position: center; position: relative; }
   .shop-head { display: flex; gap: 14px; align-items: end; padding: 0 18px 16px; margin-top: -36px; position: relative; flex-wrap: wrap; }
   .shop-logo { width: 84px; height: 84px; border-radius: 16px; border: 4px solid var(--surface); background: var(--accent-soft); display: grid; place-items: center; font: 600 1.8rem var(--display); color: var(--accent); overflow: hidden; flex: none; box-shadow: 0 2px 8px rgb(0 0 0 / .12); }
   .shop-logo img { width: 100%; height: 100%; object-fit: cover; }
@@ -298,7 +301,7 @@
   <div class="scrim" id="scrim"></div>
 
   <nav class="side" id="side" aria-label="Seller menu">
-    <div class="side-brand">RGBKart <span>Seller</span></div>
+    <div class="side-brand"><img src="assets/logo/rgb-badge-112.png" alt="" width="34" height="34" onerror="this.remove()" style="align-self:center">RGB<i style="font-style:normal;color:#FFD21F;margin-left:-8px">Kart</i> <span>Seller</span></div>
     <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="shop-name" id="shopName"></div>
 
@@ -308,7 +311,7 @@
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured requests</button>
 
     <div class="nav-group">Selling</div>
-    <a class="nav tone-blue" href="messages.html" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>Messages<span id="navMsg" hidden style="margin-left:auto;background:#e8590c;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></a>
+    <a class="nav tone-blue" href="messages.html" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>Messages<span id="navMsg" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></a>
     <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders<span class="soon">4.2</span></button>
     <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Shop page<span class="soon">1.8</span></button>
     <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payouts<span class="soon">5.3</span></button>

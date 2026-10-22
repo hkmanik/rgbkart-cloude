@@ -28,7 +28,7 @@ const CHAT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 let hasSession = false;
 function headerHTML() {
   return `<header class="top"><div class="wrap top-in">
-    <a class="brand" href="index.html">RGBKart</a>
+    <a class="brand" href="index.html" aria-label="RGBKart home"><img src="assets/logo/rgb-badge-112.png" alt="" width="40" height="40" onerror="this.remove()"><span>RGB<i>Kart</i></span></a>
     <form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search phones, fashion, groceries…" aria-label="Search products" autocomplete="off"><button type="submit">Search</button></form>
     <nav class="nav" aria-label="Account">
       <a class="sell hide-sm" href="sell.html">+ Sell</a>

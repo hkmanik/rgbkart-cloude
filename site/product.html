@@ -4,42 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RGBKart Product</title>
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
   /* Layout: gallery left, buying panel right (stacked on phones, with a sticky action bar at the bottom) */
   :root {
-    --bg: #f4f6f5; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896; --line: #dfe6e4;
-    --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
-    --buy: #e8590c; --buy-hover: #c94b08; --wa: #128c4b;
-    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #f5a524;
+    --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92; --line: #D9E2DC;
+    --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
+    --buy: #E30613; --buy-hover: #B8000C; --wa: #128c4b;
+    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #F5C400;
     --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5; --danger: #b3392f; --danger-soft: #f8e3e0;
-    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    --display: "Poppins", "Hind Siliguri", system-ui, sans-serif; --body: "Roboto", "Hind Siliguri", system-ui, sans-serif;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e; --line: #263634;
-      --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36; --buy: #ff7a33; --buy-hover: #ff9257; --wa: #25d366;
+    :root { --bg: #0D1411; --surface: #141E1A; --fg: #E6EEEA; --muted: #9CACA4; --faint: #6E8078; --line: #2A3832;
+      --accent: #2EBB5C; --accent-hover: #49CC73; --accent-fg: #03150A; --accent-soft: #14301E; --buy: #FF4D55; --buy-hover: #FF6B72; --wa: #25d366;
       --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17; --danger: #ec7d72; --danger-soft: #3d201d; color-scheme: dark; }
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
   a { color: var(--accent); }
-  .top { background: #0e2f2c; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .top { background: #00802B; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .top-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .brand { font: 600 1.3rem var(--display); color: #fff; text-decoration: none; }
+  .brand { font: 700 1.25rem var(--display); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
+  .brand img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .25)); }
+  .brand i { font-style: normal; color: #FFD21F; }
   .top-actions { display: flex; gap: 8px; align-items: center; }
   .psearch { flex: 1; max-width: 520px; display: flex; background: #fff; border-radius: 10px; overflow: hidden; min-width: 0; }
-  .psearch input { flex: 1; min-width: 0; border: 0; padding: 9px 12px; font: inherit; font-size: 15px; color: #17201e; background: #fff; }
+  .psearch input { flex: 1; min-width: 0; border: 0; padding: 9px 12px; font: inherit; font-size: 15px; color: #14211C; background: #fff; }
   .psearch button { border: 0; background: var(--amber); padding: 0 14px; cursor: pointer; }
   @media (max-width: 760px) { .top-in { flex-wrap: wrap; } .psearch { order: 3; flex-basis: 100%; max-width: none; } #acctLink, .top-actions .sell { display: none; } }
-  .top-actions a, .top-actions button { color: #fff; text-decoration: none; font-size: .92rem; background: none; border: 1px solid #2c5a55; border-radius: 999px; padding: 6px 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .top-actions a, .top-actions button { color: #fff; text-decoration: none; font-size: .92rem; background: none; border: 1px solid #3D9A5C; border-radius: 999px; padding: 6px 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .top-actions .sell { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
   .cart-ic { position: relative; display: inline-flex !important; align-items: center; gap: 6px; }
-  .cart-count { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--buy); color: #fff; font: 700 .72rem/20px var(--body); text-align: center; border: 2px solid #0e2f2c; }
+  .cart-count { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--buy); color: #fff; font: 700 .72rem/20px var(--body); text-align: center; border: 2px solid #00802B; }
   @media (max-width: 760px) { .cart-lbl { display: none; } }
-  .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: var(--t-red); } .rgb i:nth-child(2) { background: var(--t-green); } .rgb i:nth-child(3) { background: var(--t-blue); }
+  .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: #F5C400; } .rgb i:nth-child(2) { background: #F5C400; } .rgb i:nth-child(3) { background: #F5C400; }
 
   main { max-width: 1180px; margin: 0 auto; padding-block: 18px 110px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
   .crumbs { font-size: .88rem; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; }
@@ -168,7 +173,7 @@
 <body>
 <header>
   <div class="top"><div class="top-in">
-    <a class="brand" href="index.html">RGBKart</a>
+    <a class="brand" href="index.html" aria-label="RGBKart home"><img src="assets/logo/rgb-badge-112.png" alt="" width="40" height="40" onerror="this.remove()"><span>RGB<i>Kart</i></span></a>
     <form class="psearch" action="browse.html" role="search"><input name="q" type="search" placeholder="Search RGBKart" aria-label="Search products"><button type="submit" aria-label="Search">🔍</button></form>
     <div class="top-actions">
       <a class="sell" href="sell.html">+ Sell</a>

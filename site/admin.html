@@ -5,26 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>RGBKart Admin</title>
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
   /* Layout: fixed left sidebar + scrolling main area; sidebar slides in from the left on phones */
   :root {
-    --bg: #f1f2f8; --surface: #ffffff; --fg: #1b1d2e; --muted: #5d6178; --faint: #8b8fa6;
-    --line: #d9dde8; --accent: #4338ca; --accent-hover: #3730a3; --accent-fg: #ffffff; --accent-soft: #e8e7fb;
-    --side: #1a1840; --side-2: #121030; --side-fg: #d5d6f2; --side-muted: #8b8dc0; --side-line: #2c2a5c;
-    --t-red: #ff5c7a; --t-blue: #4f8cff; --t-green: #2fbf71; --t-amber: #f5a524; --t-violet: #a77bff;
-    --filter: #0f766e; --filter-soft: #dcf3ef;
+    --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92;
+    --line: #D9E2DC; --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
+    --side: #0B3D1E; --side-2: #072A14; --side-fg: #DDEFE3; --side-muted: #8FBFA0; --side-line: #1C5A33;
+    --t-red: #ff5c7a; --t-blue: #4f8cff; --t-green: #2fbf71; --t-amber: #F5C400; --t-violet: #a77bff;
+    --filter: #00802B; --filter-soft: #E5F4EA;
     --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5;
     --danger: #b3392f; --danger-soft: #f8e3e0;
-    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    --display: "Poppins", "Hind Siliguri", system-ui, sans-serif; --body: "Roboto", "Hind Siliguri", system-ui, sans-serif;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #101120; --surface: #181a2c; --fg: #e6e7f2; --muted: #9a9db8; --faint: #6d7090;
-      --line: #2a2f45; --accent: #8f95ff; --accent-hover: #a9adff; --accent-fg: #0f0f24; --accent-soft: #24234a;
-      --side: #13122e; --side-2: #0b0a1f; --side-fg: #d5d6f2; --side-muted: #7b7db0; --side-line: #262451;
-      --filter: #5fd4c4; --filter-soft: #143430;
+    :root { --bg: #0D1411; --surface: #141E1A; --fg: #E6EEEA; --muted: #9CACA4; --faint: #6E8078;
+      --line: #2A3832; --accent: #2EBB5C; --accent-hover: #49CC73; --accent-fg: #03150A; --accent-soft: #14301E;
+      --side: #0A2E17; --side-2: #061F0F; --side-fg: #DDEFE3; --side-muted: #7FAF90; --side-line: #1A4A2C;
+      --filter: #2EBB5C; --filter-soft: #14301E;
       --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17;
       --danger: #ec7d72; --danger-soft: #3d201d; color-scheme: dark; }
   }
@@ -82,7 +85,7 @@
   .side { background: linear-gradient(180deg, var(--side) 0%, var(--side-2) 100%); color: var(--side-fg); display: flex; flex-direction: column; gap: 4px; padding: 20px 12px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
   .side-brand { font: 600 1.35rem var(--display); color: #fff; padding: 0 10px 6px; display: flex; align-items: baseline; gap: 8px; }
   .rgb-bar { display: flex; height: 3px; margin: 0 10px 12px; border-radius: 2px; overflow: hidden; }
-  .rgb-bar i { flex: 1; } .rgb-bar i:nth-child(1) { background: var(--t-red); } .rgb-bar i:nth-child(2) { background: var(--t-green); } .rgb-bar i:nth-child(3) { background: var(--t-blue); }
+  .rgb-bar i { flex: 1; } .rgb-bar i:nth-child(1) { background: #F5C400; } .rgb-bar i:nth-child(2) { background: #F5C400; } .rgb-bar i:nth-child(3) { background: #F5C400; }
   .side-brand span { font: 600 .68rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--side-muted); }
   .nav-group { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--side-muted); padding: 14px 10px 4px; }
   .nav { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: var(--side-fg); padding: 8px 10px; border-radius: 7px; font-weight: 500; }
@@ -291,7 +294,7 @@
   <div class="scrim" id="scrim"></div>
 
   <nav class="side" id="side" aria-label="Admin menu">
-    <div class="side-brand">RGBKart <span>Admin</span></div>
+    <div class="side-brand"><img src="assets/logo/rgb-badge-112.png" alt="" width="34" height="34" onerror="this.remove()" style="align-self:center">RGB<i style="font-style:normal;color:#FFD21F;margin-left:-8px">Kart</i> <span>Admin</span></div>
     <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <button class="nav tone-red" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
 

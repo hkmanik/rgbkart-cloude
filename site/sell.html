@@ -4,31 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sell on RGBKart</title>
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
   /* Layout: one friendly mobile-first column; three numbered steps (they are done in order) */
   :root {
-    --bg: #f1f5f4; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896; --line: #d7e0de;
-    --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
-    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #f5a524;
+    --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92; --line: #D9E2DC;
+    --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
+    --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #F5C400;
     --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5; --gold-soft: #fff4dc; --danger: #b3392f; --danger-soft: #f8e3e0;
-    --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+    --display: "Poppins", "Hind Siliguri", system-ui, sans-serif; --body: "Roboto", "Hind Siliguri", system-ui, sans-serif;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e; --line: #263634;
-      --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36;
+    :root { --bg: #0D1411; --surface: #141E1A; --fg: #E6EEEA; --muted: #9CACA4; --faint: #6E8078; --line: #2A3832;
+      --accent: #2EBB5C; --accent-hover: #49CC73; --accent-fg: #03150A; --accent-soft: #14301E;
       --good: #4fbf93; --good-soft: #1d3329; --warn: #f0c060; --warn-soft: #3a2f17; --gold-soft: #3a2f17; --danger: #ec7d72; --danger-soft: #3d201d; color-scheme: dark; }
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
-  .top { background: #0e2f2c; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .top { background: #00802B; color: #fff; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .top-in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .brand { font: 600 1.3rem var(--display); color: #fff; text-decoration: none; }
-  .top a.small { color: #9fe3d8; font-size: .9rem; }
-  .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: var(--t-red); } .rgb i:nth-child(2) { background: var(--t-green); } .rgb i:nth-child(3) { background: var(--t-blue); }
+  .brand { font: 700 1.25rem var(--display); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
+  .brand img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .25)); }
+  .brand i { font-style: normal; color: #FFD21F; }
+  .top a.small { color: #FFE066; font-size: .9rem; }
+  .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: #F5C400; } .rgb i:nth-child(2) { background: #F5C400; } .rgb i:nth-child(3) { background: #F5C400; }
   main { max-width: 640px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
   h1 { font: 600 1.8rem/1.15 var(--display); margin: 0; text-wrap: balance; }
   h2 { font: 600 1.15rem/1.2 var(--display); margin: 0; display: flex; align-items: center; gap: 10px; }
@@ -52,7 +57,7 @@
   button { font: 600 15px var(--body); border-radius: 10px; padding: 11px 16px; cursor: pointer; border: 1px solid transparent; color: inherit; transition: background-color .15s, border-color .15s, box-shadow .15s; }
   button:disabled { opacity: .6; cursor: wait; }
   .primary { background: var(--accent); color: var(--accent-fg); }
-  .primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgb(15 118 110 / .3); }
+  .primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 4px 12px rgb(0 128 43 / .3); }
   .big { width: 100%; padding: 14px; font-size: 1.05rem; }
   .ghost { background: var(--surface); border-color: var(--line); color: var(--fg); }
   .ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
@@ -113,13 +118,13 @@
   .chip.feat { background: var(--amber); color: #2a1a00; }
   .chip.wait { background: var(--gold-soft); color: #8a5a00; }
   .msglink { display: inline-flex; gap: 6px; align-items: center; }
-  .msglink b { background: #e8590c; color: #fff; border-radius: 999px; font-size: .72rem; padding: 0 7px; }
+  .msglink b { background: #E30613; color: #fff; border-radius: 999px; font-size: .72rem; padding: 0 7px; }
   .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 60; max-width: calc(100vw - 32px); }
 </style>
 </head>
 <body>
 <header>
-  <div class="top"><div class="top-in"><a class="brand" href="index.html">RGBKart</a><span style="display:flex;gap:14px;align-items:center"><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
+  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="RGBKart home"><img src="assets/logo/rgb-badge-112.png" alt="" width="40" height="40" onerror="this.remove()"><span>RGB<i>Kart</i></span></a><span style="display:flex;gap:14px;align-items:center"><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
   <div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div>
 </header>
 

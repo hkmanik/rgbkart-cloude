@@ -1,16 +1,16 @@
 /* RGBKart shop pages — shared look: header, footer, category cards, product cards (6 per row on desktop) */
 :root {
-  --bg: #f4f6f5; --surface: #ffffff; --fg: #17201e; --muted: #5a6866; --faint: #8b9896; --line: #dfe6e4;
-  --accent: #0f766e; --accent-hover: #0b5d57; --accent-fg: #ffffff; --accent-soft: #dff2ef;
-  --head: #0e2f2c; --head-line: #2c5a55; --buy: #e8590c; --amber: #f5a524;
+  --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92; --line: #D9E2DC;
+  --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
+  --head: #00802B; --head-line: #3D9A5C; --buy: #E30613; --amber: #F5C400;
   --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff;
   --good: #1f7a5a; --good-soft: #e2f1ea; --danger: #b3392f; --danger-soft: #f8e3e0; --used: #3f51b5; --used-soft: #eef0ff; --heart: #e11d48;
-  --display: "Fraunces", Georgia, serif; --body: "Figtree", system-ui, sans-serif;
+  --display: "Poppins", "Hind Siliguri", system-ui, sans-serif; --body: "Roboto", "Hind Siliguri", system-ui, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #0f1514; --surface: #172120; --fg: #e3eeec; --muted: #9ab0ac; --faint: #6c827e; --line: #263634;
-    --accent: #3ec7b4; --accent-hover: #63d8c8; --accent-fg: #062220; --accent-soft: #163a36; --head: #0a2220; --head-line: #1f4541;
+  :root { --bg: #0D1411; --surface: #141E1A; --fg: #E6EEEA; --muted: #9CACA4; --faint: #6E8078; --line: #2A3832;
+    --accent: #2EBB5C; --accent-hover: #49CC73; --accent-fg: #03150A; --accent-soft: #14301E; --head: #0E5A28; --head-line: #2F7A48;
     --good: #4fbf93; --good-soft: #1d3329; --danger: #ec7d72; --danger-soft: #3d201d; --used: #9aa8ff; --used-soft: #222746; --heart: #fb7185; color-scheme: dark; }
 }
 * { box-sizing: border-box; }
@@ -24,11 +24,13 @@ a { color: var(--accent); }
 .top { background: var(--head); color: #fff; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--head); z-index: 31; }
 .top-in { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding-block: 12px; }
-.brand { font: 600 1.45rem var(--display); color: #fff; text-decoration: none; }
+.brand { font: 700 1.4rem var(--display); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
+.brand img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .25)); }
+.brand i { font-style: normal; color: #FFD21F; }
 .search { display: flex; background: #fff; border-radius: 10px; overflow: hidden; min-width: 0; }
-.search input { flex: 1; min-width: 0; border: 0; padding: 11px 14px; font: inherit; font-size: 15px; color: #17201e; background: #fff; }
+.search input { flex: 1; min-width: 0; border: 0; padding: 11px 14px; font: inherit; font-size: 15px; color: #14211C; background: #fff; }
 .search input:focus-visible { outline: none; }
-.search:focus-within { box-shadow: 0 0 0 3px rgb(62 199 180 / .5); }
+.search:focus-within { box-shadow: 0 0 0 3px rgb(245 196 0 / .5); }
 .search button { border: 0; background: var(--amber); color: #2a1a00; font: 700 .95rem var(--body); padding: 0 18px; cursor: pointer; }
 .nav { display: flex; gap: 8px; align-items: center; }
 .nav a { color: #fff; text-decoration: none; font: 600 .92rem var(--body); border: 1px solid var(--head-line); border-radius: 999px; padding: 7px 13px; white-space: nowrap; transition: background-color .15s; }
@@ -37,7 +39,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav .icon-link { position: relative; padding: 7px 10px; display: inline-flex; align-items: center; gap: 6px; }
 .nav .icon-link svg { width: 22px; height: 22px; }
 .badge { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--buy); color: #fff; font: 700 .72rem/20px var(--body); text-align: center; border: 2px solid var(--head); }
-.rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: var(--t-red); } .rgb i:nth-child(2) { background: var(--t-green); } .rgb i:nth-child(3) { background: var(--t-blue); }
+.rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: #F5C400; } .rgb i:nth-child(2) { background: #F5C400; } .rgb i:nth-child(3) { background: #F5C400; }
 @media (max-width: 760px) {
   .top-in { grid-template-columns: auto auto; }
   .search { grid-column: 1 / -1; grid-row: 2; }
@@ -107,7 +109,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 /* ---------- Footer & phone sell button ---------- */
 footer { background: var(--head); color: #c9dcd8; padding-block: 28px max(28px, env(safe-area-inset-bottom, 0px)); font-size: .9rem; margin-top: 30px; }
 footer .wrap { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
-footer a { color: #9fe3d8; text-decoration: none; margin-right: 14px; }
+footer a { color: #FFE066; text-decoration: none; margin-right: 14px; }
 footer b { font: 600 1.2rem var(--display); color: #fff; }
 .fab { display: none; }
 @media (max-width: 760px) {

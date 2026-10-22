@@ -12,9 +12,9 @@ function h(tag, props, ...kids) {
   for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
   return el;
 }
-const money = n => '৳' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+const money = n => '৳' + N(Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 }));
 const imgUrl = path => db.storage.from('product-images').getPublicUrl(path).data.publicUrl;
-const CARD_FIELDS = 'id, title, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, product_images(storage_path, sort_order), product_variations(price, sale_price, is_active)';
+const CARD_FIELDS = 'id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, product_images(storage_path, sort_order), product_variations(price, sale_price, is_active)';
 const CART_KEY = 'rgbkart-cart', WISH_KEY = 'rgbkart-wishlist';
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (_) { return []; } },
@@ -30,7 +30,7 @@ const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 let hasSession = false;
 function headerHTML() {
   return `<header class="top"><div class="wrap top-in">
-    <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
+    <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b translate="no"><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
     <form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search phones, fashion, groceries…" aria-label="Search products" autocomplete="off"><button type="submit">Search</button></form>
     <nav class="nav" aria-label="Account">
       <a class="sell hide-sm" href="sell.html">+ Sell</a>
@@ -43,7 +43,7 @@ function headerHTML() {
 }
 function footerHTML() {
   return `<footer><div class="wrap"><div><b>RGBKart</b><div>Buy and sell across all 64 districts.</div></div>
-    <div><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
+    <div><span data-lang-switch="on-dark"></span><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
     <a class="fab" href="sell.html">+ Sell</a>`;
 }
 function updateBadges() {
@@ -67,13 +67,14 @@ function updateBadges() {
 async function initShell() {
   document.body.insertAdjacentHTML('afterbegin', headerHTML());
   document.body.insertAdjacentHTML('beforeend', footerHTML());
+  if (window.RGBLang) RGBLang.mountSwitches();
   if (window.RGBMenu) RGBMenu.mount();
   trackVisit();
   updateBadges();
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();
-    if (session && !session.user.is_anonymous) $('acctLbl').textContent = 'My account';
+    if (session && !session.user.is_anonymous) $('acctLbl').textContent = T('My account');
     if (session) { hasSession = true; $('msgLink').hidden = false; updateBadges(); }
   } catch (_) {}
 }
@@ -98,31 +99,32 @@ function card(p, shops) {
   if (p.product_type === 'variable') {
     const vs = (p.product_variations || []).filter(v => v.is_active);
     const now = vs.map(v => v.sale_price || v.price);
-    price = now.length ? (new Set(now).size > 1 ? 'from ' : '') + money(Math.min(...now)) : money(p.price);
+    price = now.length ? (new Set(now).size > 1 ? T('from {p}', { p: money(Math.min(...now)) }) : money(Math.min(...now))) : money(p.price);
     const best = vs.filter(v => v.sale_price).map(v => Math.round((1 - v.sale_price / v.price) * 100));
     if (best.length) off = Math.max(...best);
   } else if (saleActive(p)) { price = money(p.sale_price); was = money(p.price); off = Math.round((1 - p.sale_price / p.price) * 100); }
   else price = money(p.price);
   const saved = store.get(WISH_KEY).includes(p.id);
-  const heart = h('button', { type: 'button', class: 'heart', 'aria-pressed': String(saved), 'aria-label': (saved ? 'Remove from saved: ' : 'Save: ') + p.title });
+  const title = L(p, 'title');
+  const heart = h('button', { type: 'button', class: 'heart', 'aria-pressed': String(saved), 'aria-label': T(saved ? 'Remove from saved: {t}' : 'Save: {t}', { t: title }) });
   heart.innerHTML = HEART_SVG;
-  heart.onclick = e => { e.preventDefault(); e.stopPropagation(); const on = toggleWish(p.id); heart.setAttribute('aria-pressed', String(on)); heart.setAttribute('aria-label', (on ? 'Remove from saved: ' : 'Save: ') + p.title); toast(on ? 'Saved ♥' : 'Removed from saved'); };
+  heart.onclick = e => { e.preventDefault(); e.stopPropagation(); const on = toggleWish(p.id); heart.setAttribute('aria-pressed', String(on)); heart.setAttribute('aria-label', T(on ? 'Remove from saved: {t}' : 'Save: {t}', { t: title })); toast(on ? 'Saved ♥' : 'Removed from saved'); };
   return h('a', { class: 'card', href: `product.html?id=${p.id}` },
     h('div', { class: 'img' }, im ? h('img', { src: imgUrl(im.storage_path), alt: '', loading: 'lazy' }) : 'No photo',
       h('div', { class: 'labels' },
         p.is_featured && h('span', { class: 'lab feat', text: '★ Featured' }),
         p.listing_type === 'pre_owned' ? h('span', { class: 'lab used', text: 'Pre-owned' }) : h('span', { class: 'lab new', text: 'New' }),
-        off && h('span', { class: 'lab sale', text: `Sale -${off}%` })),
+        off && h('span', { class: 'lab sale', text: T('Sale -{n}%', { n: off }) })),
       heart),
     h('div', { class: 'body' },
-      h('div', { class: 't', text: p.title }),
+      h('div', { class: 't', text: title, translate: 'no' }),
       h('div', { class: 'p' }, price, was && h('s', { text: was })),
-      h('div', { class: 'm', text: [s && [s.area, s.city].filter(Boolean).join(', '), p.price_negotiable ? 'Negotiable' : p.free_delivery ? 'Free delivery' : null].filter(Boolean).join(' · ') || ' ' })));
+      h('div', { class: 'm', text: [s && [s.area, s.city && RGBLang.tr(s.city)].filter(Boolean).join(', '), p.price_negotiable ? T('Negotiable') : p.free_delivery ? T('Free delivery') : null].filter(Boolean).join(' · ') || ' ' })));
 }
 async function shopsFor(list) {
   const ids = [...new Set(list.map(p => p.seller_id))];
   if (!ids.length) return new Map();
-  const r = await db.from('shops').select('user_id, shop_name, city, area').in('user_id', ids);
+  const r = await db.from('shops').select('user_id, shop_name, shop_name_bn, city, area').in('user_id', ids);
   return new Map((r.data || []).map(s => [s.user_id, s]));
 }
 function skeletons(box, n) { box.innerHTML = ''; for (let i = 0; i < n; i++) box.append(h('div', { class: 'skel' })); }
@@ -133,7 +135,7 @@ function categoryCard(c, i, extra) {
   const img = h('div', { class: 'cimg', 'aria-hidden': 'true' });
   if (/^https?:\/\//.test(c.icon || '')) img.append(h('img', { src: c.icon, alt: '', loading: 'lazy' }));
   else img.append(h('span', { text: c.icon || '🛍️' }));
-  const el = h('a', { class: 'ccard', href: `browse.html?c=${encodeURIComponent(c.slug)}`, style: `--hue:${Math.round(catHue(c, i))}` }, img, h('div', { class: 'cname', text: c.name }));
+  const el = h('a', { class: 'ccard', href: `browse.html?c=${encodeURIComponent(c.slug)}`, style: `--hue:${Math.round(catHue(c, i))}` }, img, h('div', { class: 'cname', text: L(c, 'name') }));
   if (extra) el.append(extra);
   return el;
 }

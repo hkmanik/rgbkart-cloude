@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <link rel="stylesheet" href="order.css?v=1">
 <style>
   .alist { display: grid; gap: 0; padding: 0; overflow: hidden; }
@@ -40,14 +40,15 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script>
   const ICON = { order: '📦', payment_ok: '✅', payment_rejected: '⚠️', listing_approved: '✅', listing_rejected: '⚠️', message: '💬', featured_ending: '⭐', ad_ending: '📣', shop_approved: '🏪', shop_rejected: '⚠️' };
   const ago = t => {
     const s = (Date.now() - new Date(t)) / 1000;
     if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s / 60) + ' min ago'; if (s < 86400) return Math.floor(s / 3600) + ' h ago';
-    return new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return new Date(t).toLocaleString((LANG === 'bn' ? 'bn-BD' : 'en-GB'), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   };
 
   async function load() {
@@ -68,7 +69,7 @@
     const on = !p.data || p.data.email_alerts !== false;
     const anon = session.user.is_anonymous;
     const cb = h('input', { type: 'checkbox', role: 'switch', 'aria-label': 'Email me my alerts', checked: on });
-    const note = h('small', { class: 'm', style: 'display:block', text: anon ? 'Emails go to the address you gave us when ordering or listing.' : 'Emails go to ' + session.user.email + '.' });
+    const note = h('small', { class: 'm', style: 'display:block', text: anon ? T('Emails go to the address you gave us when ordering or listing.') : T('Emails go to ') + session.user.email + '.' });
     cb.onchange = async () => {
       cb.disabled = true;
       const { error } = await db.rpc('set_email_alerts', { p_on: cb.checked });

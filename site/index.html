@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <style>
   /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
   main { padding-block: 20px 60px; display: grid; gap: 36px; }
@@ -66,8 +66,9 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script>
   // Used when the home_sections table hasn't been set up yet
   const DEFAULT_SECTIONS = [
@@ -82,7 +83,7 @@
 
   async function loadCats() {
     const box = $('cats'); skeletons(box, 12);
-    const r = await db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
     cats = r.data || [];
     box.innerHTML = '';
     cats.filter(c => !c.parent_id).slice(0, 12).forEach((c, i) => box.append(categoryCard(c, i)));
@@ -96,7 +97,7 @@
 
   async function renderSection(s, holder) {
     const grid = h('div', { class: 'grid6' });
-    const sec = h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: s.title }), s.subtitle && h('p', { text: s.subtitle })), h('a', { href: seeAllLink(s), text: 'View all' })), grid);
+    const sec = h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), h('a', { href: seeAllLink(s), text: 'View all' })), grid);
     holder.append(sec);
     skeletons(grid, Math.min(s.item_count, 6));
     let q = db.from('products').select(CARD_FIELDS).eq('status', 'approved');

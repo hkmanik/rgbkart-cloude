@@ -135,7 +135,7 @@
 </head>
 <body>
 <header>
-  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a><span style="display:flex;gap:14px;align-items:center"><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
+  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b translate="no"><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a><span style="display:flex;gap:14px;align-items:center"><span data-lang-switch="on-dark"></span><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
   <div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div>
 </header>
 
@@ -164,6 +164,7 @@
     <section class="card">
       <h2><span class="step">2</span>About the item</h2>
       <label><span class="req">What are you selling?</span><input id="title" type="text" maxlength="120" placeholder="e.g. iPhone 12, 128GB, Blue"></label>
+      <label>Name in Bangla (optional)<input id="titleBn" type="text" maxlength="120" lang="bn" placeholder="যেমন: আইফোন ১২, ১২৮ জিবি, নীল"></label>
       <label><span class="req">Category</span><select id="category"></select></label>
       <div style="display:grid;gap:6px"><span class="req" style="font-size:.85rem;font-weight:600;color:var(--muted)">Condition</span>
         <div class="seg" id="condition" role="group" aria-label="Condition">
@@ -237,6 +238,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="i18n.js?v=1"></script>
 <script src="pay.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -279,8 +281,8 @@
     const kids = id => cats.filter(c => c.parent_id === id).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
     for (const top of kids(null)) {
       const subs = kids(top.id);
-      if (!subs.length) { sel.append(h('option', { value: top.id, text: top.name })); continue; }
-      sel.append(h('optgroup', { label: top.name }, subs.map(c => h('option', { value: c.id, text: c.name }))));
+      if (!subs.length) { sel.append(h('option', { value: top.id, text: L(top, 'name') })); continue; }
+      sel.append(h('optgroup', { label: L(top, 'name') }, subs.map(c => h('option', { value: c.id, text: L(c, 'name') }))));
     }
     const d = $('district'); d.innerHTML = '';
     d.append(h('option', { value: '', text: 'Choose your district' }));
@@ -288,7 +290,7 @@
   }
 
   async function start() {
-    const c = await db.from('categories').select('id, parent_id, name, sort_order, is_active').eq('is_active', true);
+    const c = await db.from('categories').select('id, parent_id, name, name_bn, sort_order, is_active').eq('is_active', true);
     fillSelects(c.data || []);
     drawPhotos();
     await loadPlan();
@@ -306,11 +308,11 @@
     if (!plan) return;
     $('featPrice').innerHTML = '';
     const cheapest = plans.reduce((a, b) => (Number(b.price) < Number(a.price) ? b : a), plans[0]);
-    if (plans.length > 1) $('featPrice').append(h('small', { text: 'from ' }), money(cheapest.price));
-    else $('featPrice').append(money(plan.price), h('small', { text: ` / ${plan.days} days` }));
+    if (plans.length > 1) $('featPrice').append(h('small', { text: T('from {p}', { p: '' }).trim() + ' ' }), money(cheapest.price));
+    else $('featPrice').append(money(plan.price), h('small', { text: ' / ' + T('{n} days', { n: plan.days }) }));
     const durs = $('featDurs'); durs.innerHTML = '';
     if (plans.length > 1) plans.forEach(p => durs.append(h('button', { type: 'button', class: 'dur', 'aria-pressed': String(p === plan), onclick: () => { plan = p; drawPlanDetails(); } },
-      h('b', { text: `${p.days} days` }), h('span', { text: money(p.price) }))));
+      h('b', { text: T('{n} days', { n: p.days }) }), h('span', { text: money(p.price) }))));
     drawPlanDetails();
   }
   function drawPlanDetails() {
@@ -318,7 +320,7 @@
     const ul = $('featBenefits'); ul.innerHTML = '';
     ul.append(h('li', { text: 'Buyers can call, WhatsApp, email or message you' }));
     (plan.benefits || []).forEach(b => ul.append(h('li', { text: b })));
-    $('payNote').textContent = `${plans.length > 1 ? `${plan.days} days Featured: ` : ''}Price ${money(plan.price)}. After you send the listing, pay by bKash, Nagad, Upay or Rocket from Your listings (Pay button) and enter the Transaction ID. Featured starts as soon as we confirm your payment (and approve the listing). Until then it shows as a free listing.`;
+    $('payNote').textContent = (plans.length > 1 ? T('{n} days Featured: ', { n: plan.days }) : '') + T('Price {p}. After you send the listing, pay by bKash, Nagad, Upay or Rocket from Your listings (Pay button) and enter the Transaction ID. Featured starts as soon as we confirm your payment (and approve the listing). Until then it shows as a free listing.', { p: money(plan.price) });
   }
   function setListing(v) {
     listing = v;
@@ -366,7 +368,7 @@
   }
 
   async function loadMine() {
-    const r = await db.from('products').select('id, title, price, price_negotiable, status, review_note, product_images(storage_path, sort_order)').eq('seller_id', me.id).order('created_at', { ascending: false });
+    const r = await db.from('products').select('id, title, title_bn, price, price_negotiable, status, review_note, product_images(storage_path, sort_order)').eq('seller_id', me.id).order('created_at', { ascending: false });
     myProducts = r.data || [];
     const [f, pr] = await Promise.all([
       db.from('featured_requests').select('id, product_id, status, ends_at, price, days').eq('seller_id', me.id),
@@ -376,7 +378,7 @@
     drawMine();
   }
   const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-  const money = n => '৳' + Number(n || 0).toLocaleString('en-IN');
+  const money = n => '৳' + N(Number(n || 0).toLocaleString('en-IN'));
 
   function drawMine() {
     const box = $('mine'); box.innerHTML = '';
@@ -385,7 +387,7 @@
       const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0];
       const fr = featReqs.find(x => x.product_id === p.id && ['awaiting_payment', 'payment_submitted', 'active'].includes(x.status));
       const featChip = fr && (fr.status === 'active'
-        ? h('span', { class: 'chip feat', text: '★ Featured until ' + new Date(fr.ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) })
+        ? h('span', { class: 'chip feat', text: T('★ Featured until ') + RGBLang.date(fr.ends_at, { day: 'numeric', month: 'short' }) })
         : fr.status === 'payment_submitted' ? h('span', { class: 'chip wait', text: '★ Payment sent: checking' })
         : h('span', { class: 'chip wait', text: '★ Featured: waiting for payment' }));
       const lastPay = fr && myPays.find(x => x.featured_request_id === fr.id);
@@ -394,19 +396,19 @@
       box.append(h('div', { class: 'listing' },
         im ? h('img', { src: photoUrl(im.storage_path), alt: '' }) : h('div', { class: 'noimg' }),
         h('div', { style: 'min-width:0' },
-          h('div', { class: 't' }, p.title, h('span', { class: 'chip ' + p.status, text: STATUS[p.status] }), featChip),
-          h('div', { class: 'm', text: money(p.price) + (p.price_negotiable ? ' · negotiable' : '') }),
-          p.status === 'rejected' && p.review_note && h('div', { class: 'm', style: 'color:var(--danger)', text: 'Reason: ' + p.review_note }),
-          fr && fr.status === 'awaiting_payment' && lastPay && lastPay.status === 'rejected' && h('div', { class: 'm', style: 'color:var(--danger)', text: 'Payment not accepted: ' + (lastPay.reject_reason || '') + ' Please check and pay again.' }),
+          h('div', { class: 't' }, h('span', { translate: 'no', text: L(p, 'title') }), ' ', h('span', { class: 'chip ' + p.status, text: STATUS[p.status] }), featChip),
+          h('div', { class: 'm', text: money(p.price) + (p.price_negotiable ? ' · ' + T('negotiable') : '') }),
+          p.status === 'rejected' && p.review_note && h('div', { class: 'm', style: 'color:var(--danger)', text: T('Reason: ') + p.review_note }),
+          fr && fr.status === 'awaiting_payment' && lastPay && lastPay.status === 'rejected' && h('div', { class: 'm', style: 'color:var(--danger)', text: T('Payment not accepted: ') + (lastPay.reject_reason || '') + T(' Please check and pay again.') }),
           h('div', { class: 'acts' },
             h('a', { class: 'ghost', href: `product.html?id=${p.id}`, style: 'padding:7px 12px;font-size:.88rem;border-radius:10px;text-decoration:none;font-weight:600;border:1px solid var(--line);color:var(--fg)', text: p.status === 'approved' ? 'View' : 'Preview' }),
             canFeature && (() => {
-              const pick = h('select', { 'aria-label': 'Featured duration', style: 'padding:6px 8px;font-size:.88rem;width:auto' }, plans.map(x => h('option', { value: x.id, text: `${x.days} days · ${money(x.price)}`, selected: x === plan })));
+              const pick = h('select', { 'aria-label': 'Featured duration', style: 'padding:6px 8px;font-size:.88rem;width:auto' }, plans.map(x => h('option', { value: x.id, text: T('{n} days', { n: x.days }) + ' · ' + money(x.price), selected: x === plan })));
               return h('span', { style: 'display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap' }, pick,
                 h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem;border-color:#d48806', text: '★ Make Featured',
                   onclick: async () => { const { error } = await db.from('featured_requests').insert({ product_id: p.id, plan_id: Number(pick.value) }); if (error) return toast(friendly(error)); toast('Featured requested. Our team will contact you about payment.'); loadMine(); } }));
             })(),
-            fr && fr.status === 'awaiting_payment' && window.RGBPay && h('button', { type: 'button', class: 'primary', style: 'padding:7px 14px;font-size:.88rem', text: `Pay ${money(fr.price)}`,
+            fr && fr.status === 'awaiting_payment' && window.RGBPay && h('button', { type: 'button', class: 'primary', style: 'padding:7px 14px;font-size:.88rem', text: T('Pay {p}', { p: money(fr.price) }),
               onclick: () => { payBox.hidden = !payBox.hidden; if (!payBox.firstChild) payBox.append(RGBPay.form({ kind: 'featured', ref: fr.id, amount: fr.price, title: p.title, onDone: () => setTimeout(loadMine, 2500) })); } }),
             fr && fr.status === 'awaiting_payment' && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Keep it free',
               onclick: async () => { const { error } = await db.from('featured_requests').delete().eq('id', fr.id); if (error) return toast(friendly(error)); toast('Featured request cancelled'); loadMine(); } }),
@@ -489,7 +491,7 @@
     e.preventDefault(); setMsg('');
     if ($('website').value) return;   // a bot filled the hidden field
     const v = {
-      title: $('title').value.trim(), category: Number($('category').value) || null, price: Number($('price').value),
+      title: $('title').value.trim(), titleBn: $('titleBn').value.trim(), category: Number($('category').value) || null, price: Number($('price').value),
       negotiable: $('negotiable').checked, desc: $('desc').value.trim(),
       name: $('name').value.trim(), phone: cleanPhone($('phone').value), whatsapp: cleanPhone($('whatsapp').value),
       district: $('district').value, area: $('area').value.trim(), email: $('email').value.trim(),
@@ -521,7 +523,7 @@
       r = await db.rpc('set_individual_email', { p_email: v.email || null });
       if (r.error && !(/Could not find the function/i.test(r.error.message) && !v.email)) throw r.error;
       // 3. the listing
-      const row = { category_id: v.category, title: v.title, price: v.price, price_negotiable: v.negotiable, listing_type: condition,
+      const row = { category_id: v.category, title: v.title, title_bn: v.titleBn || null, price: v.price, price_negotiable: v.negotiable, listing_type: condition,
         description: v.desc || null, stock: 1, manage_stock: true, ships_to: 'all_bangladesh' };
       const res = pendingProductId ? await db.from('products').update(row).eq('id', pendingProductId).select().single()
                                    : await db.from('products').insert(row).select().single();

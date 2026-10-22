@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <style>
   /* Layout: left sidebar (categories that expand + filters) beside a product grid; sidebar becomes a drawer on phones */
   main { padding-block: 20px 40px; }
@@ -141,8 +141,9 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script>
   const PAGE = 24;
   const DISTRICTS = ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail',
@@ -163,7 +164,7 @@
   const bySlug = s => cats.find(c => c.slug === s);
   // A group of categories, e.g. browse.html?c=men-s-fashion,women-s-fashion&t=Fashion (from the main menu)
   const groupCats = () => state.c.includes(',') ? state.c.split(',').map(bySlug).filter(Boolean) : null;
-  const groupTitle = g => state.t || g.map(c => c.name).join(' & ');
+  const groupTitle = g => state.t || g.map(c => L(c, 'name')).join(' & ');
   function chain(c) { const out = []; while (c) { out.unshift(c); c = cats.find(x => x.id === c.parent_id); } return out; }
   function descendants(id) { const out = [id]; kids(id).forEach(k => out.push(...descendants(k.id))); return out; }
 
@@ -191,9 +192,9 @@
       const li = h('li', {});
       const link = h('a', { href: urlFor({ c: c.slug }), 'aria-current': isActive ? 'page' : null,
         onclick: e => { e.preventDefault(); if (sub.length) expanded.add(c.id); apply({ c: c.slug }); if (!sub.length) closeSide(); } },
-        depth === 0 && h('span', { class: 'ic', 'aria-hidden': 'true', text: /^https?:/.test(c.icon || '') ? '•' : (c.icon || '•') }), c.name);
+        depth === 0 && h('span', { class: 'ic', 'aria-hidden': 'true', text: /^https?:/.test(c.icon || '') ? '•' : (c.icon || '•') }), L(c, 'name'));
       li.append(h('div', { class: 'node' + (isActive ? ' active' : '') }, link,
-        sub.length ? h('button', { type: 'button', class: 'tw', 'aria-expanded': String(isOpen), 'aria-label': (isOpen ? 'Hide ' : 'Show ') + c.name + ' sub-categories', text: '▶',
+        sub.length ? h('button', { type: 'button', class: 'tw', 'aria-expanded': String(isOpen), 'aria-label': T(isOpen ? 'Hide {c} sub-categories' : 'Show {c} sub-categories', { c: L(c, 'name') }), text: '▶',
           onclick: () => { isOpen ? expanded.delete(c.id) : expanded.add(c.id); drawTree(); } }) : null));
       if (sub.length && isOpen) li.append(h('ul', {}, build(c.id, depth + 1)));
       return li;
@@ -207,22 +208,22 @@
     const cr = $('crumbs'); cr.innerHTML = '';
     cr.append(h('a', { href: 'index.html', text: 'Home' }));
     const group = groupCats();
-    if (active) chain(active).forEach((c, i, arr) => cr.append(h('span', { text: '›' }), i < arr.length - 1 ? h('a', { href: urlFor({ c: c.slug }), text: c.name }) : h('span', { text: c.name })));
+    if (active) chain(active).forEach((c, i, arr) => cr.append(h('span', { text: '›' }), i < arr.length - 1 ? h('a', { href: urlFor({ c: c.slug }), text: L(c, 'name') }) : h('span', { text: L(c, 'name') })));
     else if (group) cr.append(h('span', { text: '›' }), h('span', { text: groupTitle(group) }));
-    const where = active ? active.name : group ? groupTitle(group) : '';
-    const title = state.wishlist ? '♥ Saved items' : state.q ? `Results for “${state.q}”` + (where ? ` in ${where}` : '') : where ? where : state.deals ? 'Deals of the Day' : state.featured ? '★ Featured products' : state.condition === 'pre_owned' ? 'Pre-owned deals' : 'All products';
+    const where = active ? L(active, 'name') : group ? groupTitle(group) : '';
+    const title = state.wishlist ? T('♥ Saved items') : state.q ? T(where ? 'Results for “{q}” in {w}' : 'Results for “{q}”', { q: state.q, w: where }) : where ? where : T(state.deals ? 'Deals of the Day' : state.featured ? '★ Featured products' : state.condition === 'pre_owned' ? 'Pre-owned deals' : 'All products');
     $('heading').textContent = title;
     document.title = `${title} | RGBKart`;
     const sc = $('subcats'); sc.innerHTML = '';
-    const subs = active ? kids(active.id) : group ? group : (state.q ? cats.filter(c => c.name.toLowerCase().includes(state.q.toLowerCase())).slice(0, 8) : []);
+    const subs = active ? kids(active.id) : group ? group : (state.q ? cats.filter(c => (c.name + ' ' + (c.name_bn || '')).toLowerCase().includes(state.q.toLowerCase())).slice(0, 8) : []);
     sc.hidden = !subs.length;
-    subs.forEach(c => sc.append(h('a', { href: urlFor({ c: c.slug, q: active ? state.q : '' }), onclick: e => { e.preventDefault(); expandTo(c); apply({ c: c.slug, q: active ? state.q : '' }); }, text: c.name })));
+    subs.forEach(c => sc.append(h('a', { href: urlFor({ c: c.slug, q: active ? state.q : '' }), onclick: e => { e.preventDefault(); expandTo(c); apply({ c: c.slug, q: active ? state.q : '' }); }, text: L(c, 'name') })));
     // filter chips
     const ch = $('chips'); ch.innerHTML = '';
     const chip = (text, change) => ch.append(h('button', { type: 'button', class: 'fchip', onclick: () => { syncForm(change); apply(change); } }, text, h('span', { 'aria-hidden': 'true', text: '✕' })));
-    if (state.q) chip(`Search: ${state.q}`, { q: '' });
+    if (state.q) chip(T('Search: {q}', { q: state.q }), { q: '' });
     if (state.condition) chip(state.condition === 'new' ? 'New' : 'Used', { condition: '' });
-    if (state.min || state.max) chip(`৳${state.min || 0} – ${state.max ? '৳' + state.max : 'any'}`, { min: '', max: '' });
+    if (state.min || state.max) chip(`৳${N(state.min || 0)} – ${state.max ? '৳' + N(state.max) : T('any')}`, { min: '', max: '' });
     if (state.district) chip(state.district, { district: '' });
     if (state.featured) chip('Featured only', { featured: false });
     if (state.free) chip('Free delivery', { free: false });
@@ -273,7 +274,7 @@
     else { const g = groupCats(); if (g && g.length) q = q.in('category_id', g.flatMap(c => descendants(c.id))); }
     if (state.q) {
       const t = state.q.replace(/[%,()*]/g, ' ').replace(/\s+/g, ' ').trim();
-      const ors = [`title.ilike.%${t}%`, `description.ilike.%${t}%`, `short_description.ilike.%${t}%`];
+      const ors = [`title.ilike.%${t}%`, `title_bn.ilike.%${t}%`, `description.ilike.%${t}%`, `description_bn.ilike.%${t}%`, `short_description.ilike.%${t}%`];
       if (/^[\w-]+$/.test(t)) ors.push(`tags.cs.{${t.toLowerCase()}}`);
       q = q.or(ors.join(','));
     }
@@ -299,7 +300,7 @@
     if (reset) grid.innerHTML = '';
     if (error) { grid.append(h('div', { class: 'empty', style: 'grid-column:1/-1', text: 'Products couldn\'t load. Check your connection and try again.' })); return; }
     total = count; offset += list.length;
-    $('count').textContent = total ? `${total.toLocaleString('en-IN')} product${total === 1 ? '' : 's'}` : '';
+    $('count').textContent = total ? T(total === 1 ? '{n} product' : '{n} products', { n: total.toLocaleString('en-IN') }) : '';
     if (reset && !list.length) {
       grid.append(h('div', { class: 'empty', style: 'grid-column:1/-1;display:grid;gap:10px;justify-items:center' },
         h('b', { text: 'Nothing here yet', style: 'color:var(--fg)' }),
@@ -308,14 +309,14 @@
     }
     list.forEach(p => grid.append(card(p, shops)));
     $('moreBtn').hidden = offset >= total;
-    $('moreBtn').textContent = `Show more (${(total - offset).toLocaleString('en-IN')} left)`;
+    $('moreBtn').textContent = T('Show more ({n} left)', { n: (total - offset).toLocaleString('en-IN') });
   }
 
   // ---------- start ----------
   async function start() {
     await initShell();
     const d = $('district'); d.append(h('option', { value: '', text: 'Anywhere in Bangladesh' }), ...DISTRICTS.map(x => h('option', { value: x, text: x })));
-    const r = await db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true);
+    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true);
     cats = r.data || [];
     const active = bySlug(state.c);
     if (active) expandTo(active);

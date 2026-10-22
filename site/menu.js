@@ -1,6 +1,7 @@
 // RGBKart main menu: "All categories" button with a category panel, then the admin-managed links (Admin → Main menu).
 // Works on any page that has a <header> and a Supabase client named `db`. Call RGBMenu.mount() once the header exists.
 (function () {
+  const L = window.L || ((r, f) => r ? r[f] : ''), T = window.T || ((s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]));
   const CSS = `
   .mmenu { background: var(--surface, #fff); border-bottom: 1px solid var(--line, #D9E2DC); position: relative; z-index: 25; }
   .mmenu .mrow { display: flex; gap: 6px; align-items: center; padding-block: 6px; max-width: 1280px; margin: 0 auto;
@@ -62,7 +63,7 @@
         const slugs = (it.category_ids || []).map(id => (cats.find(x => x.id === id) || {}).slug).filter(Boolean);
         if (!slugs.length) return null;
         if (slugs.length === 1) return 'browse.html?c=' + encodeURIComponent(slugs[0]);
-        return 'browse.html?' + new URLSearchParams({ c: slugs.join(','), t: it.label }).toString();
+        return 'browse.html?' + new URLSearchParams({ c: slugs.join(','), t: L(it, 'label') }).toString();
       }
       case 'category': { const c = cats.find(x => x.id === it.category_id); return c ? 'browse.html?c=' + encodeURIComponent(c.slug) : null; }
       case 'url': return /^(https:\/\/|[a-z0-9_-]+\.html)/i.test(it.url || '') ? it.url : null;
@@ -98,7 +99,7 @@
     btn.setAttribute('aria-label', 'All categories');
     const links = el('div', { class: 'mlinks' });
     const panel = el('div', { class: 'mpanel', id: 'mPanel', hidden: true });
-    const nav = el('nav', { class: 'mmenu', id: 'mainMenu', 'aria-label': 'Main menu' }, el('div', { class: 'mrow' }, btn, links), panel);
+    const nav = el('nav', { class: 'mmenu', id: 'mainMenu', 'aria-label': 'Main menu' }, el('div', { class: 'mrow' }, btn, links, window.RGBLang ? RGBLang.switcher() : null), panel);
     header.after(nav);
 
     const open = on => { panel.hidden = !on; btn.setAttribute('aria-expanded', String(on)); };
@@ -110,7 +111,7 @@
     try {
       const [m, c] = await Promise.all([
         db.from('menu_items').select('*').eq('is_active', true).order('sort_order').order('id'),
-        db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name'),
+        db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name'),
       ]);
       if (!m.error && m.data) items = m.data;
       cats = c.data || [];
@@ -120,7 +121,7 @@
     for (const it of items) {
       const href = hrefFor(it, cats); if (!href) continue;
       const ext = /^https:\/\//i.test(href);
-      links.append(el('a', { href, class: it.is_hot ? 'hot' : null, 'aria-current': !ext && isCurrent(href) ? 'page' : null, target: ext ? '_blank' : null, rel: ext ? 'noopener' : null, text: it.label }));
+      links.append(el('a', { href, class: it.is_hot ? 'hot' : null, 'aria-current': !ext && isCurrent(href) ? 'page' : null, target: ext ? '_blank' : null, rel: ext ? 'noopener' : null, text: L(it, 'label') }));
     }
     const cur = links.querySelector('[aria-current="page"]'); if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
 
@@ -131,9 +132,9 @@
       const subs = kids(top.id);
       const icon = top.icon && !/^https?:/.test(top.icon) ? top.icon : '🛍️';
       inner.append(el('div', { class: 'mgroup' },
-        el('a', { class: 'mhead', href: 'browse.html?c=' + encodeURIComponent(top.slug) }, el('span', { text: icon, 'aria-hidden': 'true' }), el('span', { text: top.name })),
-        subs.slice(0, 6).map(s => el('a', { class: 'msub', href: 'browse.html?c=' + encodeURIComponent(s.slug), text: s.name })),
-        subs.length > 6 && el('a', { class: 'msub mmore', href: 'browse.html?c=' + encodeURIComponent(top.slug), text: `All ${subs.length} →` })));
+        el('a', { class: 'mhead', href: 'browse.html?c=' + encodeURIComponent(top.slug) }, el('span', { text: icon, 'aria-hidden': 'true' }), el('span', { text: L(top, 'name') })),
+        subs.slice(0, 6).map(s => el('a', { class: 'msub', href: 'browse.html?c=' + encodeURIComponent(s.slug), text: L(s, 'name') })),
+        subs.length > 6 && el('a', { class: 'msub mmore', href: 'browse.html?c=' + encodeURIComponent(top.slug), text: T('All {n} →', { n: subs.length }) })));
     }
     if (!cats.length) inner.append(el('p', { text: 'Categories are loading. Try again in a moment.' }));
     inner.append(el('div', { class: 'mfoot' }, el('a', { href: 'categories.html', text: 'See all categories →' })));

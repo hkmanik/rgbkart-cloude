@@ -18,10 +18,10 @@ A Bangladesh multi-vendor marketplace in English and Bangla. Zero sales commissi
 
 | Path | Contents |
 | --- | --- |
-| `site/` | Everything that is published: the shop (`index.html`, `browse.html`, `product.html` …), `sell.html`, `seller.html` (Seller Center), `admin.html`, `messages.html`, `cart.html` / `checkout.html` / `orders.html`, `alerts.html`, shared `shop.css` / `shop.js`. |
+| `site/` | Everything that is published: the shop (`index.html`, `browse.html`, `product.html` …), `sell.html`, `seller.html` (Seller Center), `admin.html`, `messages.html`, `cart.html` / `checkout.html` / `orders.html`, `alerts.html`, shared `i18n.js` (English / Bangla), `shop.css` / `shop.js`. |
 | `site/prototype/` | The clickable prototype, published at `/prototype/`. |
 | `prototype-src/` | The prototype's source split into five parts. After editing, run `python prototype-src/build.py`. |
-| `supabase/migrations/` | Database changes, numbered in order (0001–0021 so far). Run each new file once in Supabase → SQL Editor. |
+| `supabase/migrations/` | Database changes, numbered in order (0001–0022 so far). Run each new file once in Supabase → SQL Editor. |
 | `supabase/functions/send-alerts/` | The small program on Supabase that emails alerts through Resend every 5 minutes. |
 | `docs/` | Project plan spreadsheet (phases, sub-phases, status). |
 | `.github/workflows/deploy.yml` | Publishes `site/` to Hostinger by FTP on every push to `main`. |

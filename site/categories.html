@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <style>
   /* Layout: every category as a card (picture, name, its sub-categories as links) — 4 per row on desktop */
   main { padding-block: 20px 60px; display: grid; gap: 18px; }
@@ -49,27 +49,28 @@
   <div class="catgrid" id="grid"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script>
   (async () => {
     await initShell();
     const box = $('grid'); skeletons(box, 8);
-    const r = await db.from('categories').select('id, parent_id, name, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
     const cats = r.data || [];
     const kids = id => cats.filter(c => c.parent_id === id);
     box.innerHTML = '';
     const tops = cats.filter(c => !c.parent_id);
-    $('lead').textContent = `${tops.length} categories and ${cats.length - tops.length} sub-categories. Pick one to start browsing.`;
+    $('lead').textContent = T('{a} categories and {b} sub-categories. Pick one to start browsing.', { a: tops.length, b: cats.length - tops.length });
     tops.forEach((c, i) => {
       const img = h('div', { class: 'cimg', 'aria-hidden': 'true' });
       if (/^https?:\/\//.test(c.icon || '')) img.append(h('img', { src: c.icon, alt: '', loading: 'lazy' })); else img.append(h('span', { text: c.icon || '🛍️' }));
       const subs = kids(c.id);
       box.append(h('article', { class: 'catbox', style: `--hue:${Math.round(catHue(c, i))}` },
-        h('a', { class: 'top-link', href: `browse.html?c=${encodeURIComponent(c.slug)}` }, img, h('span', { class: 'cname', text: c.name })),
-        h('ul', { class: 'subs', 'aria-label': c.name + ' sub-categories' },
-          subs.map(s => h('li', {}, h('a', { href: `browse.html?c=${encodeURIComponent(s.slug)}`, text: s.name }))),
-          h('li', { class: 'all' }, h('a', { href: `browse.html?c=${encodeURIComponent(c.slug)}`, text: subs.length ? 'See all →' : 'Browse →' })))));
+        h('a', { class: 'top-link', href: `browse.html?c=${encodeURIComponent(c.slug)}` }, img, h('span', { class: 'cname', text: L(c, 'name') })),
+        h('ul', { class: 'subs', 'aria-label': L(c, 'name') },
+          subs.map(s => h('li', {}, h('a', { href: `browse.html?c=${encodeURIComponent(s.slug)}`, text: L(s, 'name') }))),
+          h('li', { class: 'all' }, h('a', { href: `browse.html?c=${encodeURIComponent(c.slug)}`, text: T(subs.length ? 'See all →' : 'Browse →') })))));
     });
   })();
 </script>

@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <style>
   /* Layout: conversation list (left) + open chat (right); on phones one at a time */
   main { padding-block: 20px 40px; }
@@ -89,8 +89,9 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script>
   let me = null, convs = [], names = new Map(), openId = null, filter = 'all', lastStamp = '';
   const COLORS = ['#00802B', '#4f46e5', '#c2410c', '#be185d', '#15803d', '#7c3aed', '#0369a1', '#b45309'];
@@ -98,7 +99,7 @@
   const isSeller = c => c.seller_id === me;
   const otherName = c => isSeller(c) ? c.buyer_name : (names.get(c.seller_id) || 'Seller');
   const unread = c => c.last_sender_id && c.last_sender_id !== me && (isSeller(c) ? (!c.seller_read_at || c.last_message_at > c.seller_read_at) : c.last_message_at > c.buyer_read_at);
-  const when = t => { const d = new Date(t), now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); };
+  const when = t => { const d = new Date(t), now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString((LANG === 'bn' ? 'bn-BD' : 'en-GB'), { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString((LANG === 'bn' ? 'bn-BD' : 'en-GB'), { day: 'numeric', month: 'short' }); };
 
   async function start() {
     await initShell();
@@ -123,8 +124,8 @@
     convs = r.data;
     const sellers = [...new Set(convs.filter(c => !isSeller(c)).map(c => c.seller_id))].filter(id => !names.has(id));
     if (sellers.length) {
-      const s = await db.from('shops').select('user_id, shop_name').in('user_id', sellers);
-      (s.data || []).forEach(x => names.set(x.user_id, x.shop_name));
+      const s = await db.from('shops').select('user_id, shop_name, shop_name_bn').in('user_id', sellers);
+      (s.data || []).forEach(x => names.set(x.user_id, L(x, 'shop_name')));
     }
     lastStamp = convs.map(c => c.id + c.last_message_at).join();
     drawList();
@@ -145,8 +146,8 @@
         h('span', { class: 'av', style: `background:${colorOf(nm)}`, text: nm.charAt(0).toUpperCase(), 'aria-hidden': 'true' }),
         h('span', { style: 'min-width:0;display:grid;gap:1px' },
           h('span', { class: 'nm' }, nm, ' ', h('span', { class: 'role' + (isSeller(c) ? ' sell' : ''), text: isSeller(c) ? 'Buyer' : 'Seller' })),
-          h('span', { class: 'pt', text: c.product_title }),
-          h('span', { class: 'lm', text: (c.last_sender_id === me ? 'You: ' : '') + (c.last_message || '') })),
+          h('span', { class: 'pt', text: c.product_title, translate: 'no' }),
+          h('span', { class: 'lm', translate: 'no', text: (c.last_sender_id === me ? T('You: ') : '') + (c.last_message || '') })),
         h('span', { class: 'side' }, h('span', { text: when(c.last_message_at) }), u && h('span', { class: 'dot', 'aria-label': 'New message' }))));
     }
   }
@@ -167,7 +168,7 @@
         h('button', { type: 'button', class: 'back', 'aria-label': 'Back to all messages', text: '←', onclick: () => { $('inbox').classList.remove('open'); document.body.classList.remove('chatting'); openId = null; drawList(); } }),
         h('span', { class: 'av', style: `background:${colorOf(nm)};width:38px;height:38px;font-size:.95rem`, text: nm.charAt(0).toUpperCase(), 'aria-hidden': 'true' }),
         h('div', { class: 'who' }, h('b', { text: nm + (isSeller(c) ? ' (buyer)' : '') }),
-          c.product_id ? h('a', { href: `product.html?id=${c.product_id}`, text: c.product_title }) : h('span', { class: 'pt', text: c.product_title + ' (removed)' }))),
+          c.product_id ? h('a', { href: `product.html?id=${c.product_id}`, text: c.product_title, translate: 'no' }) : h('span', { class: 'pt', text: c.product_title + T(' (removed)') }))),
       thread, h('div', {}, err, form));
     ta.oninput = () => { ta.style.height = '46px'; ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'; };
     ta.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && window.matchMedia('(min-width: 761px)').matches) { e.preventDefault(); form.requestSubmit(); } };
@@ -194,10 +195,10 @@
     box.innerHTML = '';
     let day = '';
     for (const m of r.data || []) {
-      const d = new Date(m.created_at).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      const d = new Date(m.created_at).toLocaleDateString((LANG === 'bn' ? 'bn-BD' : 'en-GB'), { weekday: 'short', day: 'numeric', month: 'short' });
       if (d !== day) { day = d; box.append(h('div', { class: 'day', text: d })); }
-      box.append(h('div', { class: 'bub ' + (m.sender_id === me ? 'me' : 'them') }, m.body,
-        h('time', { datetime: m.created_at, text: new Date(m.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) })));
+      box.append(h('div', { class: 'bub ' + (m.sender_id === me ? 'me' : 'them') }, h('span', { translate: 'no', text: m.body }),
+        h('time', { datetime: m.created_at, text: new Date(m.created_at).toLocaleTimeString((LANG === 'bn' ? 'bn-BD' : 'en-GB'), { hour: '2-digit', minute: '2-digit' }) })));
     }
     if (atBottom || box.dataset.first !== '1') { box.scrollTop = box.scrollHeight; box.dataset.first = '1'; }
   }

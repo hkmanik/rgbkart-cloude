@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <link rel="stylesheet" href="order.css?v=1">
 </head>
 <body>
@@ -21,12 +21,13 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script>
   const STEPS = [['pending', 'Placed'], ['confirmed', 'Confirmed'], ['packed', 'Packed'], ['shipped', 'On the way'], ['delivered', 'Delivered']];
   const LABEL = { pending: 'Waiting for shop', confirmed: 'Confirmed', packed: 'Packed', shipped: 'On the way', delivered: 'Delivered', cancelled: 'Cancelled' };
-  const fmt = t => new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const fmt = t => RGBLang.date(t, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   async function load() {
     const box = $('content');
@@ -41,7 +42,7 @@
     if (r.error) { box.innerHTML = ''; box.append(h('div', { class: 'box', text: /does not exist|Could not find/i.test(r.error.message) ? 'Orders aren\'t switched on yet.' : r.error.message })); return; }
     const orders = r.data;
     const sids = [...new Set(orders.map(o => o.seller_id))];
-    const s = sids.length ? await db.from('shops').select('user_id, shop_name, phone_public, whatsapp, pickup_address').in('user_id', sids) : { data: [] };
+    const s = sids.length ? await db.from('shops').select('user_id, shop_name, shop_name_bn, phone_public, whatsapp, pickup_address').in('user_id', sids) : { data: [] };
     const shops = new Map((s.data || []).map(x => [x.user_id, x]));
     box.innerHTML = '';
     if (!orders.length) {
@@ -62,21 +63,21 @@
         } }),
         h('button', { type: 'button', text: 'Keep order', onclick: () => cancelRow.hidden = true }));
       list.append(h('article', { class: 'box ocard' },
-        h('div', { class: 'ohead' }, h('div', {}, h('b', { text: shop.shop_name || 'Shop' }), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), ' · ' + fmt(o.created_at))),
+        h('div', { class: 'ohead' }, h('div', {}, h('b', { text: L(shop, 'shop_name') || T('Shop'), translate: 'no' }), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), ' · ' + fmt(o.created_at))),
           h('span', { class: 'ost ' + o.status, text: LABEL[o.status] })),
         o.status !== 'cancelled' && h('div', { class: 'track', 'aria-label': 'Order progress' }, STEPS.map(([k, t], i) => h('span', { class: i <= at ? 'on' : '', text: t }))),
-        o.status === 'cancelled' && h('p', { class: 'm bad', text: `Cancelled${o.cancelled_by === 'customer' ? ' by you' : o.cancelled_by === 'seller' ? ' by the shop' : ''}${o.cancel_reason ? ': ' + o.cancel_reason : ''}` }),
-        o.tracking_note && o.status !== 'cancelled' && h('p', { class: 'm', text: 'Delivery info from the shop: ' + o.tracking_note }),
+        o.status === 'cancelled' && h('p', { class: 'm bad', text: T(o.cancelled_by === 'customer' ? 'Cancelled by you' : o.cancelled_by === 'seller' ? 'Cancelled by the shop' : 'Cancelled') + (o.cancel_reason ? ': ' + o.cancel_reason : '') }),
+        o.tracking_note && o.status !== 'cancelled' && h('p', { class: 'm', text: T('Delivery info from the shop: ') + o.tracking_note }),
         h('div', { class: 'oitems' }, (o.order_items || []).map(i => h('div', { class: 'oitem' },
           i.image_path ? h('img', { src: imgUrl(i.image_path), alt: '', loading: 'lazy' }) : h('div', { class: 'noimg' }),
           h('div', { style: 'min-width:0' }, i.product_id ? h('a', { href: `product.html?id=${i.product_id}`, text: i.title, style: 'color:var(--fg);font-weight:600;text-decoration:none' }) : h('b', { text: i.title }),
-            h('div', { class: 'm', text: `${i.qty} × ${money(i.unit_price)}${i.variant_label ? ' · ' + i.variant_label : ''}` })),
+            h('div', { class: 'm', text: `${N(i.qty)} × ${money(i.unit_price)}${i.variant_label ? ' · ' + i.variant_label : ''}` })),
           h('b', { text: money(i.line_total) })))),
-        h('div', { class: 'srow' }, h('span', { class: 'm', text: `Delivery: ${({ dhaka: 'Inside Dhaka', outside: 'Outside Dhaka', pickup: 'Store pickup', negotiated: 'Agree with shop' })[o.ship_method] || o.ship_method}${o.ship_fee > 0 ? ' · ' + money(o.ship_fee) : ''} · to ${o.address}, ${o.district}` }), h('b', { text: 'Total ' + money(o.total) })),
-        o.ship_method === 'pickup' && shop.pickup_address && h('p', { class: 'm', text: 'Pick up from: ' + shop.pickup_address }),
+        h('div', { class: 'srow' }, h('span', { class: 'm', text: T('Delivery: {d} · to {w}', { d: T(({ dhaka: 'Inside Dhaka', outside: 'Outside Dhaka', pickup: 'Store pickup', negotiated: 'Agree with shop' })[o.ship_method] || o.ship_method) + (o.ship_fee > 0 ? ' · ' + money(o.ship_fee) : ''), w: `${o.address}, ${RGBLang.tr(o.district)}` }) }), h('b', { text: T('Total {p}', { p: money(o.total) }) })),
+        o.ship_method === 'pickup' && shop.pickup_address && h('p', { class: 'm', text: T('Pick up from: ') + shop.pickup_address }),
         h('div', { class: 'oact' },
           shop.phone_public && h('a', { href: 'tel:' + shop.phone_public, text: '📞 Call shop' }),
-          (shop.whatsapp || shop.phone_public) && h('a', { href: `https://wa.me/${((shop.whatsapp || shop.phone_public).replace(/[^0-9]/g, '').replace(/^0/, '880'))}?text=${encodeURIComponent('Hi, about my RGBKart order ' + o.order_no)}`, target: '_blank', rel: 'noopener', text: 'WhatsApp' }),
+          (shop.whatsapp || shop.phone_public) && h('a', { href: `https://wa.me/${((shop.whatsapp || shop.phone_public).replace(/[^0-9]/g, '').replace(/^0/, '880'))}?text=${encodeURIComponent(T('Hi, about my RGBKart order {o}', { o: o.order_no }))}`, target: '_blank', rel: 'noopener', text: T('WhatsApp') }),
           ['pending', 'confirmed'].includes(o.status) && h('button', { type: 'button', class: 'bad', text: 'Cancel order', onclick: () => { cancelRow.hidden = false; reason.focus(); } })),
         cancelRow));
     }

@@ -661,6 +661,7 @@
   <div class="drawer-head"><h2 id="catDrawerTitle">Add category</h2><button type="button" class="icon-btn" id="catClose" aria-label="Close">✕</button></div>
   <div class="drawer-body">
     <label>Name <input id="cName" type="text" maxlength="80" required placeholder="e.g. Smartphones"></label>
+    <label>Name in Bangla (shown on the Bangla site) <input id="cNameBn" type="text" maxlength="80" lang="bn" placeholder="যেমন: স্মার্টফোন"></label>
     <label>Web address
       <input id="cSlug" type="text" class="slug-input" maxlength="80" required pattern="[a-z0-9]+(-[a-z0-9]+)*">
       <span class="hint">Used in links: rgbkart.com/c/<b id="cSlugPreview">…</b>. Lowercase letters, numbers and dashes.</span>
@@ -746,11 +747,13 @@
     </fieldset>
     <div style="display:grid;gap:6px"><span class="ap-lbl">Photos (up to 8, the first is the main photo)</span><div class="ap-photos" id="apPhotos"></div><input type="file" id="apFile" accept="image/jpeg,image/png,image/webp" multiple hidden></div>
     <label>Product name <input id="apTitle" type="text" maxlength="120" placeholder="e.g. Redragon K552 RGB Mechanical Keyboard"></label>
+    <label>Product name in Bangla (optional) <input id="apTitleBn" type="text" maxlength="120" lang="bn"></label>
     <label>Category <select id="apCat"></select></label>
     <div style="display:grid;gap:6px"><span class="ap-lbl">Condition</span><div class="ap-seg" id="apCond" role="group" aria-label="Condition"><button type="button" data-v="new" aria-pressed="true">New</button><button type="button" data-v="pre_owned" aria-pressed="false">Pre-owned</button></div></div>
     <div class="ap-2"><label>Price (৳) <input id="apPrice" type="number" min="1" step="1" inputmode="numeric"></label><label>Sale price (optional) <input id="apSale" type="number" min="1" step="1" inputmode="numeric"></label></div>
     <div class="ap-2"><label>Stock <input id="apStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label><div style="display:grid;gap:8px;align-content:end"><label class="check"><input id="apNeg" type="checkbox"> Price is negotiable</label><label class="check"><input id="apFree" type="checkbox"> Free delivery</label></div></div>
     <label>Description (optional) <textarea id="apDesc" rows="4" maxlength="5000"></textarea></label>
+    <label>Description in Bangla (optional) <textarea id="apDescBn" rows="3" maxlength="5000" lang="bn"></textarea></label>
     <div style="display:grid;gap:6px"><span class="ap-lbl">Listing</span><div class="ap-seg" id="apListing" role="group" aria-label="Listing"><button type="button" data-v="free" aria-pressed="true">Free listing</button><button type="button" data-v="featured" aria-pressed="false">★ Featured (no charge)</button></div>
       <label id="apFeatDaysWrap" hidden>Featured for <select id="apFeatDays"><option value="7">7 days</option><option value="15">15 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label></div>
     <p id="apMsg" class="msg error" role="alert"></p>
@@ -847,7 +850,9 @@
       </select></label>
     <label id="sxCatWrap" hidden>Category <select id="sxCat"></select></label>
     <label>Title <input id="sxTitle" type="text" maxlength="60" required></label>
+    <label>Title in Bangla (optional) <input id="sxTitleBn" type="text" maxlength="60" lang="bn"></label>
     <label>Subtitle (optional) <input id="sxSub" type="text" maxlength="120"></label>
+    <label>Subtitle in Bangla (optional) <input id="sxSubBn" type="text" maxlength="120" lang="bn"></label>
     <label>How many products
       <select id="sxCount"><option value="6">6 (one row)</option><option value="12" selected>12 (two rows)</option><option value="18">18 (three rows)</option><option value="24">24 (four rows)</option></select></label>
     <label class="check"><input id="sxActive" type="checkbox" checked> Show on the home page</label>
@@ -1189,6 +1194,7 @@
       h('div', { class: 'node-main' },
         iconEl,
         h('span', { class: 'node-name', text: c.name }),
+        c.name_bn && h('span', { class: 'node-slug', lang: 'bn', text: c.name_bn }),
         h('span', { class: 'node-slug', text: '/' + c.slug }),
         !c.is_active && h('span', { class: 'chip off', text: 'Hidden' }),
         kids.length > 0 && h('span', { class: 'chip plain', text: kids.length + (kids.length === 1 ? ' sub-category' : ' sub-categories') }),
@@ -1241,6 +1247,7 @@
     slugTouched = !!cat;
     $('catDrawerTitle').textContent = cat ? 'Edit category' : parentId ? 'Add sub-category' : 'Add category';
     $('cName').value = cat ? cat.name : '';
+    $('cNameBn').value = cat ? (cat.name_bn || '') : '';
     $('cSlug').value = cat ? cat.slug : '';
     $('cSlugPreview').textContent = $('cSlug').value || '…';
     $('cIcon').value = cat ? (cat.icon || '') : '';
@@ -1321,7 +1328,7 @@
       return setMsg('catMsg', `The web address "${slug}" is already used by another category. Change it slightly.`, true);
     }
     const parentId = Number($('cParent').value) || null;
-    const row = { name, slug, parent_id: parentId, icon: $('cIcon').value.trim() || null,
+    const row = { name, name_bn: $('cNameBn').value.trim() || null, slug, parent_id: parentId, icon: $('cIcon').value.trim() || null,
       description: $('cDesc').value.trim() || null, is_active: $('cActive').checked };
     if (!editingCat) row.sort_order = (childrenOf(parentId).reduce((m, c) => Math.max(m, c.sort_order), -10)) + 10;
 
@@ -1611,6 +1618,7 @@
   // ===================== Home page sections =====================
   const SX_TYPES = { featured: 'Featured products', deals: 'Deals of the Day', newest: 'New arrivals', pre_owned: 'Pre-owned', free_delivery: 'Free delivery', category: 'Category' };
   const SX_DEFAULT_TITLE = { featured: 'Featured Products', deals: 'Deals of the Day', newest: 'New Arrivals', pre_owned: 'Pre-owned Deals', free_delivery: 'Free Delivery Picks' };
+  const SX_DEFAULT_TITLE_BN = { featured: 'ফিচার্ড পণ্য', deals: 'আজকের ডিল', newest: 'নতুন পণ্য', pre_owned: 'ব্যবহৃত পণ্য', free_delivery: 'ফ্রি ডেলিভারি' };
   let homeSections = [], editingSec = null;
 
   async function loadSections() {
@@ -1656,6 +1664,8 @@
     $('sxCat').value = s && s.category_id ? s.category_id : (cats[0] ? cats.find(c => !c.parent_id).id : '');
     $('sxTitle').value = s ? s.title : SX_DEFAULT_TITLE.featured;
     $('sxSub').value = s ? (s.subtitle || '') : '';
+    $('sxTitleBn').value = s ? (s.title_bn || '') : SX_DEFAULT_TITLE_BN.featured;
+    $('sxSubBn').value = s ? (s.subtitle_bn || '') : '';
     $('sxCount').value = String(s ? s.item_count : 12);
     $('sxActive').checked = s ? s.is_active : true;
     $('sxCatWrap').hidden = $('sxType').value !== 'category';
@@ -1665,16 +1675,16 @@
   $('sxType').onchange = () => {
     const t = $('sxType').value; $('sxCatWrap').hidden = t !== 'category';
     const known = Object.values(SX_DEFAULT_TITLE).includes($('sxTitle').value) || !$('sxTitle').value || cats.some(c => c.name === $('sxTitle').value);
-    if (known) $('sxTitle').value = t === 'category' ? (catById(Number($('sxCat').value)) || {}).name || '' : SX_DEFAULT_TITLE[t];
+    if (known) { $('sxTitle').value = t === 'category' ? (catById(Number($('sxCat').value)) || {}).name || '' : SX_DEFAULT_TITLE[t]; $('sxTitleBn').value = t === 'category' ? (catById(Number($('sxCat').value)) || {}).name_bn || '' : SX_DEFAULT_TITLE_BN[t]; }
   };
-  $('sxCat').onchange = () => { if (!$('sxTitle').value || cats.some(c => c.name === $('sxTitle').value)) $('sxTitle').value = (catById(Number($('sxCat').value)) || {}).name || ''; };
+  $('sxCat').onchange = () => { if (!$('sxTitle').value || cats.some(c => c.name === $('sxTitle').value)) { $('sxTitle').value = (catById(Number($('sxCat').value)) || {}).name || ''; $('sxTitleBn').value = (catById(Number($('sxCat').value)) || {}).name_bn || ''; } };
   function closeSec() { $('secDrawer').hidden = $('secScrim').hidden = true; editingSec = null; }
   $('secClose').onclick = $('secCancel').onclick = $('secScrim').onclick = closeSec;
   $('addSection').onclick = () => openSec(null);
   $('secDrawer').onsubmit = async e => {
     e.preventDefault(); setMsg('secMsg', '');
     const t = $('sxType').value;
-    const row = { section_type: t, category_id: t === 'category' ? Number($('sxCat').value) : null, title: $('sxTitle').value.trim(), subtitle: $('sxSub').value.trim() || null,
+    const row = { section_type: t, category_id: t === 'category' ? Number($('sxCat').value) : null, title: $('sxTitle').value.trim(), subtitle: $('sxSub').value.trim() || null, title_bn: $('sxTitleBn').value.trim() || null, subtitle_bn: $('sxSubBn').value.trim() || null,
       item_count: Number($('sxCount').value), is_active: $('sxActive').checked, updated_at: new Date().toISOString() };
     if (row.title.length < 2) return setMsg('secMsg', 'Give the section a title.', true);
     if (!editingSec) row.sort_order = (homeSections.reduce((m, s) => Math.max(m, s.sort_order), 0)) + 10;
@@ -2358,7 +2368,7 @@
   $('apCond').querySelectorAll('button').forEach(b => b.onclick = () => $('apCond').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))));
   async function openAddProduct() {
     apPhotos = []; apDrawPhotos();
-    ['apTitle', 'apPrice', 'apSale', 'apDesc', 'apSellerSearch', 'apOffPhone', 'apOffWa', 'apOffArea'].forEach(id => $(id).value = '');
+    ['apTitle', 'apTitleBn', 'apDescBn', 'apPrice', 'apSale', 'apDesc', 'apSellerSearch', 'apOffPhone', 'apOffWa', 'apOffArea'].forEach(id => $(id).value = '');
     $('apStock').value = 1; $('apNeg').checked = false; $('apFree').checked = false; $('apOffName').value = 'RGBKart Official'; $('apOffCity').value = 'Dhaka';
     $('apCond').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
     $('apListing').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); $('apFeatDaysWrap').hidden = true;
@@ -2426,6 +2436,8 @@
       const r = await db.rpc('admin_create_product', { p: { seller_id: sellerId, title: v.title, category_id: v.cat, price: v.price, sale_price: v.sale, stock: v.stock,
         description: v.desc, listing_type: v.cond, price_negotiable: $('apNeg').checked, free_delivery: $('apFree').checked }, p_images: paths });
       if (r.error) throw r.error;
+      const tBn = $('apTitleBn').value.trim(), dBn = $('apDescBn').value.trim();
+      if (tBn || dBn) { const b = await db.rpc('admin_set_product_bangla', { p_product: r.data, p_title_bn: tBn || null, p_description_bn: dBn || null }); if (b.error) toast('Product added, but the Bangla name couldn\'t be saved: ' + friendly(b.error)); }
       if (v.featured) {
         const f = await db.rpc('admin_feature_free', { p_product: r.data, p_days: v.days, p_note: 'Added by admin' });
         if (f.error) toast('Product added, but Featured couldn\'t be set: ' + friendly(f.error));

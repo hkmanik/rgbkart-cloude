@@ -467,6 +467,7 @@
             <input type="file" id="bannerFile" accept="image/jpeg,image/png,image/webp" hidden>
             <div class="grid2">
               <label><span class="req">Shop name</span><input id="sName" type="text" maxlength="80"></label>
+              <label id="sNameBnWrap">Shop name in Bangla <span class="from">(optional)</span><input id="sNameBn" type="text" maxlength="80" lang="bn"></label>
               <label>Tagline<input id="sTagline" type="text" maxlength="120" placeholder="e.g. Original gadgets with warranty"></label>
             </div>
             <label><span class="req">Shop web address</span>
@@ -582,6 +583,9 @@
             <label><span class="req">Product name</span>
               <input id="fTitle" type="text" maxlength="200" placeholder="e.g. Samsung Galaxy A55 5G, 8GB/256GB">
             </label>
+            <label>Product name in Bangla <span class="from">(optional, shown on the Bangla site)</span>
+              <input id="fTitleBn" type="text" maxlength="200" lang="bn" placeholder="যেমন: স্যামসাং গ্যালাক্সি A55 5G, 8GB/256GB">
+            </label>
             <div class="grid2">
               <label id="basicPriceWrap"><span class="req">Price</span><span class="taka"><input id="fPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
               <label id="basicStockWrap"><span class="req">Quantity in stock</span><input id="fStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label>
@@ -590,6 +594,9 @@
             <label>Description <span class="from">(optional)</span>
               <textarea id="fDesc" maxlength="5000" style="min-height:140px" placeholder="Features, what's in the box, size guide, condition notes…"></textarea>
               <span class="hint" id="descCount">0 / 5000</span>
+            </label>
+            <label>Description in Bangla <span class="from">(optional)</span>
+              <textarea id="fDescBn" maxlength="5000" lang="bn" style="min-height:90px"></textarea>
             </label>
           </div>
 
@@ -1294,7 +1301,7 @@
   const DL_BUCKET = 'product-downloads';
   const MAX_FILES = 5;
 
-  const FIELDS = ['fTitle', 'fShort', 'fDesc', 'fTags', 'fVideo', 'fPrice', 'fSale', 'fSaleFrom', 'fSaleTo', 'fSku', 'fStock', 'fLow', 'fBackorders', 'fStockStatus',
+  const FIELDS = ['fTitle', 'fTitleBn', 'fDescBn', 'fShort', 'fDesc', 'fTags', 'fVideo', 'fPrice', 'fSale', 'fSaleFrom', 'fSaleTo', 'fSku', 'fStock', 'fLow', 'fBackorders', 'fStockStatus',
     'fWeight', 'fLen', 'fWid', 'fHei', 'fShipClass', 'fDelivery', 'fShipsTo', 'fReturn', 'fNote'];
 
   function blank() {
@@ -1374,7 +1381,7 @@
     }
     sel.value = p.category_id || '';
 
-    $('fTitle').value = p.title; $('fShort').value = p.short_description || ''; $('fDesc').value = p.description || '';
+    $('fTitle').value = p.title; $('fTitleBn').value = p.title_bn || ''; $('fDescBn').value = p.description_bn || ''; $('fShort').value = p.short_description || ''; $('fDesc').value = p.description || '';
     $('fTags').value = (p.tags || []).join(', '); $('fVideo').value = p.video_url || '';
     $('fPrice').value = p.listing_type === 'free' ? '' : (p.price || ''); $('fSale').value = p.sale_price || '';
     $('fSaleFrom').value = toDateInput(p.sale_starts_at); $('fSaleTo').value = toDateInput(p.sale_ends_at);
@@ -1832,7 +1839,7 @@
     const free = editing.listing_type === 'free', variable = isVariable();
     const num = id => $(id).value === '' ? null : Number($(id).value);
     const row = {
-      category_id: editing.category_id, title: $('fTitle').value.trim(), listing_type: editing.listing_type, product_type: variable ? 'variable' : 'simple',
+      category_id: editing.category_id, title: $('fTitle').value.trim(), title_bn: $('fTitleBn').value.trim() || null, description_bn: $('fDescBn').value.trim() || null, listing_type: editing.listing_type, product_type: variable ? 'variable' : 'simple',
       short_description: $('fShort').value.trim() || null, description: $('fDesc').value.trim() || null,
       tags: $('fTags').value.split(',').map(t => t.trim()).filter(Boolean).slice(0, 20), video_url: $('fVideo').value.trim() || null,
       sku: $('fSku').value.trim() || null, sold_individually: $('fSoldInd').checked,
@@ -2048,7 +2055,7 @@
     shopImg = { logo: shop.logo_path ? { path: shop.logo_path, url: shopUrl(shop.logo_path) } : null, banner: shop.banner_path ? { path: shop.banner_path, url: shopUrl(shop.banner_path) } : null };
     shopImgRemoved = { logo: null, banner: null };
     const v = (id, x) => $(id).value = x || '';
-    v('sName', shop.shop_name); v('sTagline', shop.tagline); v('sSlug', shop.shop_slug); v('sAbout', shop.shop_description);
+    v('sName', shop.shop_name); $('sNameBnWrap').hidden = !('shop_name_bn' in shop); $('sNameBn').value = shop.shop_name_bn || ''; v('sTagline', shop.tagline); v('sSlug', shop.shop_slug); v('sAbout', shop.shop_description);
     v('sPhone', shop.phone_public); v('sWhatsapp', shop.whatsapp); v('sEmail', shop.email_public); v('sAddress', shop.business_address); v('sLicence', shop.trade_license);
     v('sFacebook', shop.facebook_url); v('sInstagram', shop.instagram_url); v('sYoutube', shop.youtube_url); v('sTiktok', shop.tiktok_url); v('sWebsite', shop.website_url);
     $('sVacation').checked = !!shop.vacation_mode; v('sVacMsg', shop.vacation_message);
@@ -2140,6 +2147,7 @@
         logo_path: paths.logo, banner_path: paths.banner,
       };
       if ('allow_pickup' in shop) row.allow_pickup = $('sPickup').checked;
+      if ('shop_name_bn' in shop) row.shop_name_bn = $('sNameBn').value.trim() || null;
       const res = await db.from('seller_details').update(row).eq('user_id', me.id).select().single();
       if (res.error) throw res.error;
       shop = res.data;

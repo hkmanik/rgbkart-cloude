@@ -13,7 +13,7 @@ const CartLib = {
     if (!cart.length) return { groups: [], methods: [], cart };
     const ids = [...new Set(cart.map(i => i.product_id))];
     const [p, m] = await Promise.all([
-      db.from('products').select('id, title, price, sale_price, sale_starts_at, sale_ends_at, status, seller_id, product_type, manage_stock, stock, backorders, stock_status, free_delivery, ships_to, contact_only, cod_allowed, is_downloadable, sold_individually, product_images(storage_path, sort_order), product_variations(id, price, sale_price, stock, is_active)').in('id', ids),
+      db.from('products').select('id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, status, seller_id, product_type, manage_stock, stock, backorders, stock_status, free_delivery, ships_to, contact_only, cod_allowed, is_downloadable, sold_individually, product_images(storage_path, sort_order), product_variations(id, price, sale_price, stock, is_active)').in('id', ids),
       db.from('shipping_methods').select('*').eq('is_active', true).order('sort_order'),
     ]);
     const prods = new Map((p.data || []).map(x => [x.id, x]));
@@ -25,6 +25,7 @@ const CartLib = {
     const items = cart.map((c, idx) => {
       const pr = prods.get(c.product_id);
       const it = { ...c, idx, pr, problem: null, max: 99 };
+      if (pr && window.L) it.title = L(pr, 'title');
       if (!pr || pr.status !== 'approved') { it.problem = 'No longer available'; return it; }
       if (pr.contact_only) { it.problem = 'Contact the seller to buy this'; return it; }
       if (pr.is_downloadable) { it.problem = 'Digital products can\'t be ordered yet'; return it; }
@@ -43,7 +44,7 @@ const CartLib = {
       }
       if (pr.sold_individually) it.max = Math.min(it.max, 1);
       if (it.max <= 0) { it.problem = 'Out of stock'; return it; }
-      if (c.qty > it.max) { it.qty = it.max; it.note = `Only ${it.max} available`; }
+      if (c.qty > it.max) { it.qty = it.max; it.note = window.T ? T('Only {n} available', { n: it.max }) : `Only ${it.max} available`; }
       if (!c.image) { const im = [...(pr.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0]; if (im) it.image = imgUrl(im.storage_path); }
       return it;
     });

@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=10">
+<link rel="stylesheet" href="shop.css?v=11">
 <link rel="stylesheet" href="order.css?v=1">
 </head>
 <body>
@@ -20,8 +20,9 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="shop.js?v=10"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="shop.js?v=11"></script>
+<script src="menu.js?v=3"></script>
 <script src="cartlib.js?v=1"></script>
 <script>
   const ADDR_KEY = 'rgbkart-address';
@@ -75,8 +76,8 @@
     const btn = h('button', { type: 'button', class: 'go', text: `Place order · ${money(total)}` });
     btn.onclick = () => place(btn, err);
     holder.append(h('aside', { class: 'box sum' }, h('h2', { text: 'Your order' }),
-      data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: g.shop.shop_name }),
-        g.items.map(i => h('div', { class: 'srow small' }, h('span', { style: 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: `${i.qty} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}` }), h('span', { text: money(i.unit * i.qty) }))),
+      data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: L(g.shop, 'shop_name'), translate: 'no' }),
+        g.items.map(i => h('div', { class: 'srow small' }, h('span', { style: 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: `${N(i.qty)} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}`, translate: 'no' }), h('span', { text: money(i.unit * i.qty) }))),
         h('div', { class: 'srow small' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })))),
       h('div', { class: 'srow total' }, h('span', { text: 'Total to pay on delivery' }), h('span', { text: money(total) })),
       data.groups.length > 1 && h('p', { class: 'm', text: `This makes ${data.groups.length} orders, one for each shop. Each shop delivers and collects its own amount.` }),
@@ -94,7 +95,7 @@
     if (v.address.length < 5) bad.push('your full address');
     if (!v.district) bad.push('your district');
     if (v.email && !/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v.email)) bad.push('a valid email (or leave it empty)');
-    if (bad.length) return show('Please enter ' + bad.join(', ') + '.');
+    if (bad.length) return show(T('Please enter {x}.', { x: bad.map(b => T(b)).join(', ') }));
     btn.disabled = true; btn.textContent = 'Placing your order…';
     try {
       if (!session) {
@@ -127,7 +128,7 @@
       h('h1', { text: 'Thank you! Your order is placed.' }),
       h('p', { class: 'm', text: `The shop${orders.length > 1 ? 's' : ''} will call you on ${v.phone} to confirm. Pay ${money(total)} in cash when it arrives.` }),
       h('div', { style: 'display:grid;gap:10px;width:100%;text-align:left' }, orders.map(o => h('div', { class: 'box', style: 'display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center' },
-        h('div', {}, h('div', { class: 'ono', text: o.order_no }), h('div', { class: 'm', text: `${o.shop}${o.phone ? ' · ' + o.phone : ''} · ${o.ship}` })),
+        h('div', {}, h('div', { class: 'ono', text: o.order_no }), h('div', { class: 'm', text: `${o.shop}${o.phone ? ' · ' + o.phone : ''} · ${RGBLang.tr(o.ship)}` })),
         h('b', { text: money(o.total) })))),
       h('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center' }, h('a', { class: 'btn-acc', href: 'orders.html', text: 'Track my orders' }), h('a', { class: 'btn-line', href: 'index.html', text: 'Continue shopping' })),
       isGuest && h('p', { class: 'm', text: 'You ordered without an account, so your orders are saved on this phone or computer. Keep using it to track them.' })));

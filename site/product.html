@@ -179,7 +179,7 @@
 <body>
 <header>
   <div class="top"><div class="top-in">
-    <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
+    <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b translate="no"><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
     <form class="psearch" action="browse.html" role="search"><input name="q" type="search" placeholder="Search RGBKart" aria-label="Search products"><button type="submit" aria-label="Search">🔍</button></form>
     <div class="top-actions">
       <a class="sell" href="sell.html">+ Sell</a>
@@ -297,7 +297,8 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="menu.js?v=2"></script>
+<script src="i18n.js?v=1"></script>
+<script src="menu.js?v=3"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -312,7 +313,7 @@
     for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
     return el;
   }
-  const money = n => '৳' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  const money = n => '৳' + N(Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 }));
   const imgUrl = (bucket, path) => db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   const LABELS = {
     delivery: { same_day: 'Ships today', '1_2_days': 'Ships in 1–2 days', '3_5_days': 'Ships in 3–5 days', '6_10_days': 'Ships in 6–10 days' },
@@ -339,7 +340,7 @@
     const [s, a, c] = await Promise.all([
       db.from('shops').select('*').eq('user_id', P.seller_id).maybeSingle(),
       attrIds.size ? db.from('attributes').select('id, name, unit, input_type, attribute_options(id, value, color_hex, sort_order)').in('id', [...attrIds]) : Promise.resolve({ data: [] }),
-      db.from('categories').select('id, parent_id, name, slug'),
+      db.from('categories').select('id, parent_id, name, name_bn, slug'),
     ]);
     shop = s.data;
     (a.data || []).forEach(x => attrs.set(x.id, x));
@@ -349,11 +350,11 @@
 
   function render(cats) {
     $('page').hidden = false;
-    document.title = `${P.title} | RGBKart`;
+    document.title = `${L(P, 'title')} | RGBKart`;
     // breadcrumb
     const chain = []; let cur = cats.find(c => c.id === P.category_id);
     while (cur) { chain.unshift(cur); cur = cats.find(c => c.id === cur.parent_id); }
-    $('crumbs').append(h('a', { href: 'index.html', text: 'Home' }), ...chain.flatMap(c => [h('span', { text: '›' }), h('a', { href: 'browse.html?c=' + encodeURIComponent(c.slug), text: c.name })]));
+    $('crumbs').append(h('a', { href: 'index.html', text: 'Home' }), ...chain.flatMap(c => [h('span', { text: '›' }), h('a', { href: 'browse.html?c=' + encodeURIComponent(c.slug), text: L(c, 'name') })]));
     if (P.status !== 'approved') {
       $('preview').hidden = false;
       $('preview').textContent = `Preview only: this product is "${{ draft: 'draft', pending: 'waiting for review', rejected: 'rejected', archived: 'hidden' }[P.status]}". Shoppers can't see it yet.`;
@@ -367,14 +368,14 @@
     // chips
     const chips = $('chips');
     chips.append(h('span', { class: 'chip' + (P.listing_type === 'pre_owned' ? ' used' : ''), text: P.listing_type === 'pre_owned' ? 'Pre-owned' : 'New' }));
-    if (P.is_preorder) chips.append(h('span', { class: 'chip warn', text: 'Pre-order · ships ' + new Date(P.preorder_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
+    if (P.is_preorder) chips.append(h('span', { class: 'chip warn', text: T('Pre-order · ships {d}', { d: RGBLang.date(P.preorder_date, { day: 'numeric', month: 'short' }) }) }));
     if (P.is_downloadable) chips.append(h('span', { class: 'chip', text: 'Digital download' }));
     if (P.is_service) chips.append(h('span', { class: 'chip', text: 'Service' }));
     if (P.is_gift_card) chips.append(h('span', { class: 'chip', text: 'Gift card' }));
     if (P.free_delivery && !P.contact_only) chips.append(h('span', { class: 'chip', text: 'Free delivery' }));
-    $('title').textContent = P.title;
+    $('title').textContent = L(P, 'title'); $('title').setAttribute('translate', 'no');
     if (P.short_description) { $('short').hidden = false; $('short').textContent = P.short_description; }
-    $('desc').textContent = P.description || 'The seller hasn\'t added a description.';
+    $('desc').textContent = L(P, 'description') || T('The seller hasn\'t added a description.'); $('desc').setAttribute('translate', L(P, 'description') ? 'no' : 'yes'); $('short').setAttribute('translate', 'no');
     if ((P.product_downloads || []).length) { $('filesWrap').hidden = false; P.product_downloads.forEach(f => $('files').append(h('li', { text: f.file_name }))); }
 
     drawVariants();
@@ -394,7 +395,7 @@
     else main.append(h('span', { class: 'short', text: 'No photo' }));
     if (P.is_featured) main.append(h('span', { class: 'badge-feat', text: '★ Featured' }));
     const t = $('thumbs'); t.innerHTML = '';
-    if (images.length > 1) images.forEach((im, i) => t.append(h('button', { type: 'button', 'aria-label': `Photo ${i + 1}`, 'aria-current': String(act && im.id === act.id), onclick: () => drawGallery(im.id) }, h('img', { src: im.url, alt: '' }))));
+    if (images.length > 1) images.forEach((im, i) => t.append(h('button', { type: 'button', 'aria-label': T('Photo {n}', { n: i + 1 }), 'aria-current': String(act && im.id === act.id), onclick: () => drawGallery(im.id) }, h('img', { src: im.url, alt: '' }))));
   }
 
   // ---------- variations ----------
@@ -442,7 +443,7 @@
       row.append(h('span', { class: 'price', text: ps.length ? `${money(Math.min(...ps))} – ${money(Math.max(...ps))}` : '—' }));
     } else {
       row.append(h('span', { class: 'price', text: money(price) }));
-      if (sale) row.append(h('span', { class: 'was', text: money(base.price) }), h('span', { class: 'off', text: `-${Math.round((1 - base.sale_price / base.price) * 100)}%` }));
+      if (sale) row.append(h('span', { class: 'was', text: money(base.price) }), h('span', { class: 'off', text: `-${N(Math.round((1 - base.sale_price / base.price) * 100))}%` }));
       if (P.price_negotiable) row.append(h('span', { class: 'nego', text: 'Price negotiable' }));
     }
     if (current && current.image_id) drawGallery(current.image_id);
@@ -455,7 +456,7 @@
     else if (P.manage_stock) { max = P.stock; setStock(st, P.stock, P.low_stock_threshold); }
     else { st.textContent = { in_stock: 'In stock', out_of_stock: 'Out of stock', on_backorder: 'Available to order' }[P.stock_status]; st.classList.add(P.stock_status === 'out_of_stock' ? 'out' : 'in'); if (P.stock_status === 'out_of_stock') max = 0; }
     if (P.backorders !== 'no' && max === 0) { max = 99; st.textContent = 'Available to order'; st.className = 'stock low'; }
-    if (P.is_preorder) { max = 99; st.textContent = `Pre-order · expected ${new Date(P.preorder_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`; st.className = 'stock low'; }
+    if (P.is_preorder) { max = 99; st.textContent = T('Pre-order · expected {d}', { d: RGBLang.date(P.preorder_date, { day: 'numeric', month: 'long' }) }); st.className = 'stock low'; }
     if (P.sold_individually) max = Math.min(max, 1);
     $('qty').max = Math.max(1, max);
     if (Number($('qty').value) > max) $('qty').value = Math.max(1, max);
@@ -465,7 +466,7 @@
   }
   function setStock(el, n, low) {
     if (n <= 0) { el.textContent = 'Out of stock'; el.classList.add('out'); }
-    else if (low != null && n <= low) { el.textContent = `Only ${n} left`; el.classList.add('low'); }
+    else if (low != null && n <= low) { el.textContent = T('Only {n} left', { n }); el.classList.add('low'); }
     else { el.textContent = 'In stock'; el.classList.add('in'); }
   }
   $('qMinus').onclick = () => { $('qty').value = Math.max(1, Number($('qty').value) - 1); };
@@ -476,7 +477,7 @@
     if (!tiers.length || P.contact_only) return;
     const t = $('tiers'); t.hidden = false;
     t.append(h('caption', { class: 'lbl', style: 'text-align:left;padding-bottom:6px', text: 'Buy more, pay less' }));
-    tiers.forEach(x => t.append(h('tr', {}, h('td', { text: `${x.min_qty}+ pieces` }), h('td', { text: money(x.unit_price) + ' each' }))));
+    tiers.forEach(x => t.append(h('tr', {}, h('td', { text: T('{n}+ pieces', { n: x.min_qty }) }), h('td', { text: T('{p} each', { p: money(x.unit_price) }) }))));
   }
 
   // ---------- facts ----------
@@ -484,15 +485,15 @@
     const f = $('facts'); const add = (ic, text) => f.append(h('div', { class: 'fact' }, h('span', { class: 'ic', 'aria-hidden': 'true', text: ic }), h('span', { text })));
     if (P.contact_only) {
       add('🤝', 'Deal directly with the seller. RGBKart does not handle payment or delivery for this listing.');
-      if (shop && shop.city) add('📍', 'Seller is in ' + [shop.area, shop.city].filter(Boolean).join(', '));
+      if (shop && shop.city) add('📍', T('Seller is in {w}', { w: [shop.area, shop.city].filter(Boolean).map(x => RGBLang.tr(x)).join(', ') }));
     } else if (P.is_service) {
       add('🛠️', LABELS.svcMode[P.service_mode] || 'Service');
       if (P.service_duration) add('⏱️', LABELS.svcDur[P.service_duration]);
       add('📍', LABELS.svcArea[P.ships_to] || '');
     } else if (P.is_downloadable) {
-      add('⬇️', 'Download link after payment' + (P.download_limit ? ` · ${P.download_limit} downloads` : '') + (P.download_expiry_days ? ` · link works ${P.download_expiry_days} days` : ''));
+      add('⬇️', T('Download link after payment') + (P.download_limit ? T(' · {n} downloads', { n: P.download_limit }) : '') + (P.download_expiry_days ? T(' · link works {n} days', { n: P.download_expiry_days }) : ''));
     } else if (P.is_gift_card) {
-      add('🎁', `Gift card code sent after payment · valid ${Math.round((P.gift_card_validity_days || 365) / 30)} months · use in ${shop ? shop.shop_name : 'this shop'}`);
+      add('🎁', T('Gift card code sent after payment · valid {n} months · use in {s}', { n: Math.round((P.gift_card_validity_days || 365) / 30), s: shop ? L(shop, 'shop_name') : T('this shop') }));
     } else {
       add('🚚', (P.free_delivery ? 'Free delivery · ' : '') + (LABELS.area[P.ships_to] || ''));
       if (!P.is_preorder) add('📦', LABELS.delivery[P.delivery_time] || '');
@@ -500,7 +501,7 @@
     if (!P.contact_only) {
       add('💵', P.cod_allowed ? 'Cash on delivery available' : 'Pay online (no cash on delivery)');
       add('↩️', LABELS.returns[P.return_policy] || '');
-      if (P.is_preorder && P.preorder_advance_percent) add('💳', `${P.preorder_advance_percent === 100 ? 'Full' : P.preorder_advance_percent + '%'} payment when ordering`);
+      if (P.is_preorder && P.preorder_advance_percent) add('💳', P.preorder_advance_percent === 100 ? T('Full payment when ordering') : T('{n}% payment when ordering', { n: P.preorder_advance_percent }));
     }
   }
 
@@ -528,9 +529,9 @@
     if (!shop) { box.append(h('span', { text: 'Seller details unavailable' })); return; }
     const logo = h('div', { class: 'logo' });
     if (shop.logo_path) logo.append(h('img', { src: imgUrl('shop-assets', shop.logo_path), alt: '' })); else logo.textContent = (shop.shop_name || '?').charAt(0).toUpperCase();
-    box.append(logo, h('div', { style: 'min-width:0' }, h('b', { text: shop.shop_name }),
-      h('span', { text: [oneTime ? 'Individual seller' : 'Shop on RGBKart', [shop.area, shop.city].filter(Boolean).join(', '), 'since ' + new Date(shop.created_at).getFullYear()].filter(Boolean).join(' · ') }),
-      shop.vacation_mode && h('span', { style: 'display:block;color:var(--warn)', text: 'On holiday: ' + (shop.vacation_message || 'not taking orders right now') })));
+    box.append(logo, h('div', { style: 'min-width:0' }, h('b', { text: L(shop, 'shop_name'), translate: 'no' }),
+      h('span', { text: [T(oneTime ? 'Individual seller' : 'Shop on RGBKart'), [shop.area, shop.city].filter(Boolean).map(x => RGBLang.tr(x)).join(', '), T('since {n}', { n: new Date(shop.created_at).getFullYear() })].filter(Boolean).join(' · ') }),
+      shop.vacation_mode && h('span', { style: 'display:block;color:var(--warn)', text: T('On holiday: ') + (shop.vacation_message || T('not taking orders right now')) })));
   }
 
   // What a buyer may see: shops → phone/WhatsApp; one-time sellers → only when Featured (checked by the database)
@@ -567,13 +568,13 @@
     if (!hasDirect()) return;
     const phone = phoneOf();
     $('contactBox').hidden = false;
-    $('contactName').textContent = shop ? shop.shop_name : 'Seller';
+    $('contactName').textContent = shop ? L(shop, 'shop_name') : T('Seller');
     $('phoneNum').textContent = phone || '';
     $('phoneNum').hidden = !phone;
     $('callBtn').hidden = !contact.phone && !contact.whatsapp;
     $('callBtn').href = 'tel:+' + toIntl(contact.phone || contact.whatsapp);
     const wa = contact.whatsapp || contact.phone;
-    const text = `Hi, I'm interested in "${P.title}" on RGBKart: ${location.href}`;
+    const text = T('Hi, I\'m interested in "{t}" on RGBKart: {u}', { t: L(P, 'title'), u: location.href });
     $('waBtn').hidden = !wa;
     if (wa) $('waBtn').href = `https://wa.me/${toIntl(wa)}?text=${encodeURIComponent(text)}`;
     $('mailBtn').hidden = !contact.email;
@@ -588,10 +589,10 @@
   function openMsg() {
     if (!canMessage()) return;
     $('msgBox').hidden = false; $('msgBtn').hidden = true; $('msgDone').hidden = true;
-    $('msgTo').textContent = shop ? shop.shop_name : 'the seller';
+    $('msgTo').textContent = shop ? L(shop, 'shop_name') : T('the seller');
     $('nameRow').hidden = !myIsGuest;
     try { $('buyerName').value = $('buyerName').value || localStorage.getItem('rgbkart-name') || ''; } catch (_) {}
-    if (!$('msgText').value) $('msgText').value = `Hi, is "${P.title}" still available?`;
+    if (!$('msgText').value) $('msgText').value = T('Hi, is "{t}" still available?', { t: L(P, 'title') });
     $('msgBox').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     ($('nameRow').hidden || $('buyerName').value ? $('msgText') : $('buyerName')).focus();
   }
@@ -653,7 +654,7 @@
     const key = `${P.id}-${current ? current.id : 0}`;
     const ex = cart.find(i => i.key === key);
     if (ex) ex.qty = P.sold_individually ? 1 : ex.qty + qty;
-    else cart.push({ key, product_id: P.id, variation_id: current ? current.id : null, title: P.title, variant: label, qty, unit_price: Number(unit), image: (images.find(i => current && i.id === current.image_id) || images[0] || {}).url || null });
+    else cart.push({ key, product_id: P.id, variation_id: current ? current.id : null, title: L(P, 'title'), variant: label, qty, unit_price: Number(unit), image: (images.find(i => current && i.id === current.image_id) || images[0] || {}).url || null });
     writeCart(cart);
     toast('Added to cart');
     if (openNow) openCart();
@@ -669,7 +670,7 @@
     cart.forEach((i, k) => box.append(h('div', { class: 'cart-item' },
       i.image ? h('img', { src: i.image, alt: '' }) : h('div', { class: 'noimg' }),
       h('div', { style: 'min-width:0' }, h('div', { class: 't', text: i.title }), h('div', { class: 'm', text: [i.variant, `${i.qty} × ${money(i.unit_price)}`].filter(Boolean).join(' · ') })),
-      h('button', { type: 'button', class: 'x', text: '✕', 'aria-label': 'Remove ' + i.title, onclick: () => { cart.splice(k, 1); writeCart(cart); openCart(); } }))));
+      h('button', { type: 'button', class: 'x', text: '✕', 'aria-label': T('Remove {t}', { t: i.title }), onclick: () => { cart.splice(k, 1); writeCart(cart); openCart(); } }))));
     $('cartTotal').textContent = money(cart.reduce((s, i) => s + i.qty * i.unit_price, 0));
     $('drawer').hidden = $('scrim').hidden = false;
   }

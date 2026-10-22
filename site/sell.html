@@ -237,6 +237,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="pay.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -269,7 +270,7 @@
   let condition = 'pre_owned';
   let me = null, profile = null, myProducts = [];
   let pendingProductId = null;   // product created but not yet sent (retry after an error)
-  let listing = 'free', plan = null, plans = [], featReqs = [];
+  let listing = 'free', plan = null, plans = [], featReqs = [], myPays = [];
 
   // ---------- setup ----------
   function fillSelects(cats) {
@@ -317,7 +318,7 @@
     const ul = $('featBenefits'); ul.innerHTML = '';
     ul.append(h('li', { text: 'Buyers can call, WhatsApp, email or message you' }));
     (plan.benefits || []).forEach(b => ul.append(h('li', { text: b })));
-    $('payNote').textContent = `${plans.length > 1 ? `${plan.days} days Featured: ` : ''}Pay ${money(plan.price)} after we approve your listing. Our team will contact you on your mobile number with payment details. Featured starts as soon as your payment is confirmed. Until then it shows as a free listing.`;
+    $('payNote').textContent = `${plans.length > 1 ? `${plan.days} days Featured: ` : ''}Price ${money(plan.price)}. After you send the listing, pay by bKash, Nagad, Upay or Rocket from Your listings (Pay button) and enter the Transaction ID. Featured starts as soon as we confirm your payment (and approve the listing). Until then it shows as a free listing.`;
   }
   function setListing(v) {
     listing = v;
@@ -367,8 +368,11 @@
   async function loadMine() {
     const r = await db.from('products').select('id, title, price, price_negotiable, status, review_note, product_images(storage_path, sort_order)').eq('seller_id', me.id).order('created_at', { ascending: false });
     myProducts = r.data || [];
-    const f = await db.from('featured_requests').select('id, product_id, status, ends_at').eq('seller_id', me.id);
-    featReqs = f.error ? [] : f.data;
+    const [f, pr] = await Promise.all([
+      db.from('featured_requests').select('id, product_id, status, ends_at, price, days').eq('seller_id', me.id),
+      db.from('payments').select('featured_request_id, status, reject_reason, created_at').eq('seller_id', me.id).order('created_at', { ascending: false }),
+    ]);
+    featReqs = f.error ? [] : f.data; myPays = pr.error ? [] : pr.data;
     drawMine();
   }
   const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
@@ -382,7 +386,10 @@
       const fr = featReqs.find(x => x.product_id === p.id && ['awaiting_payment', 'payment_submitted', 'active'].includes(x.status));
       const featChip = fr && (fr.status === 'active'
         ? h('span', { class: 'chip feat', text: '★ Featured until ' + new Date(fr.ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) })
+        : fr.status === 'payment_submitted' ? h('span', { class: 'chip wait', text: '★ Payment sent: checking' })
         : h('span', { class: 'chip wait', text: '★ Featured: waiting for payment' }));
+      const lastPay = fr && myPays.find(x => x.featured_request_id === fr.id);
+      const payBox = h('div', { hidden: true });
       const canFeature = plan && !fr && ['approved', 'pending'].includes(p.status);
       box.append(h('div', { class: 'listing' },
         im ? h('img', { src: photoUrl(im.storage_path), alt: '' }) : h('div', { class: 'noimg' }),
@@ -390,6 +397,7 @@
           h('div', { class: 't' }, p.title, h('span', { class: 'chip ' + p.status, text: STATUS[p.status] }), featChip),
           h('div', { class: 'm', text: money(p.price) + (p.price_negotiable ? ' · negotiable' : '') }),
           p.status === 'rejected' && p.review_note && h('div', { class: 'm', style: 'color:var(--danger)', text: 'Reason: ' + p.review_note }),
+          fr && fr.status === 'awaiting_payment' && lastPay && lastPay.status === 'rejected' && h('div', { class: 'm', style: 'color:var(--danger)', text: 'Payment not accepted: ' + (lastPay.reject_reason || '') + ' Please check and pay again.' }),
           h('div', { class: 'acts' },
             h('a', { class: 'ghost', href: `product.html?id=${p.id}`, style: 'padding:7px 12px;font-size:.88rem;border-radius:10px;text-decoration:none;font-weight:600;border:1px solid var(--line);color:var(--fg)', text: p.status === 'approved' ? 'View' : 'Preview' }),
             canFeature && (() => {
@@ -398,6 +406,8 @@
                 h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem;border-color:#d48806', text: '★ Make Featured',
                   onclick: async () => { const { error } = await db.from('featured_requests').insert({ product_id: p.id, plan_id: Number(pick.value) }); if (error) return toast(friendly(error)); toast('Featured requested. Our team will contact you about payment.'); loadMine(); } }));
             })(),
+            fr && fr.status === 'awaiting_payment' && window.RGBPay && h('button', { type: 'button', class: 'primary', style: 'padding:7px 14px;font-size:.88rem', text: `Pay ${money(fr.price)}`,
+              onclick: () => { payBox.hidden = !payBox.hidden; if (!payBox.firstChild) payBox.append(RGBPay.form({ kind: 'featured', ref: fr.id, amount: fr.price, title: p.title, onDone: () => setTimeout(loadMine, 2500) })); } }),
             fr && fr.status === 'awaiting_payment' && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Keep it free',
               onclick: async () => { const { error } = await db.from('featured_requests').delete().eq('id', fr.id); if (error) return toast(friendly(error)); toast('Featured request cancelled'); loadMine(); } }),
             ['approved', 'pending'].includes(p.status) && h('button', { type: 'button', class: 'ghost', style: 'padding:7px 12px;font-size:.88rem', text: 'Mark as sold',
@@ -408,7 +418,8 @@
               if (error) return toast(friendly(error));
               if (paths.length) await db.storage.from(BUCKET).remove(paths);
               toast('Deleted'); loadMine();
-            })))));
+            })),
+          payBox)));
     }
   }
 
@@ -537,7 +548,7 @@
         featOk = !fq.error;
       }
       $('doneText').textContent = listing === 'featured'
-        ? (featOk ? `We'll check it soon. After approval, our team will contact you on ${v.phone} to collect ${money(plan.price)} for Featured. Until payment is confirmed, it shows as a free listing (buyers message you on RGBKart).`
+        ? (featOk ? `We'll check it soon. You can pay ${money(plan.price)} for Featured now or later under Your listings (Pay button), or our team will contact you on ${v.phone}. Until payment is confirmed, it shows as a free listing (buyers message you on RGBKart).`
                   : `Your listing was sent, but Featured couldn't be requested. Tap "Make Featured" under Your listings to try again.`)
         : 'We\'ll check it soon. Once approved, buyers can message you on RGBKart. Check Messages on this phone or browser.';
       delete areaCache[v.district];

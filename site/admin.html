@@ -305,6 +305,15 @@
   .bar:hover .tip, .bar:focus-visible .tip { display: block; }
   .bars-x { display: flex; justify-content: space-between; color: var(--faint); font-size: .72rem; margin-top: 4px; padding-right: 46px; }
   .rep-table { margin-top: 18px; } .rep-table summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+  /* Payments */
+  .pay-row { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 14px 0; border-top: 1px solid var(--line); }
+  .pay-row:first-of-type { border-top: 0; }
+  .pay-amt { display: grid; gap: 6px; } .pay-amt b { font: 700 1.3rem var(--display); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .pay-m { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: .85rem; } .pay-m i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .pay-trx { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; color: var(--fg); }
+  .meth-row { display: grid; grid-template-columns: 110px 170px 190px minmax(0, 1fr) auto auto; gap: 10px; align-items: end; padding: 12px 0; border-top: 1px solid var(--line); }
+  .meth-row:first-child { border-top: 0; } .meth-row .pay-m { align-self: center; }
+  @media (max-width: 1000px) { .meth-row { grid-template-columns: 1fr 1fr; } .meth-row > :first-child { grid-column: 1 / -1; } .pay-row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -378,7 +387,7 @@
     <button class="nav tone-amber" data-view="homepage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 9v12h14V9"/></svg>Home page</button>
     <button class="nav tone-amber" data-view="mainmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Main menu</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured &amp; ads<span class="count" id="navFeatured" hidden></span></button>
-    <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments<span class="soon">5.7</span></button>
+    <button class="nav tone-green" data-view="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments<span class="count" id="navPayments" hidden></span></button>
 
     <div class="nav-group tone-violet" id="settingsGroup">Settings</div>
     <button class="nav tone-violet" data-view="team" id="navTeam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>Team</button>
@@ -415,6 +424,7 @@
         <button class="tile tone-blue" data-go="categories"><b id="dCategories">–</b><span>Categories &amp; sub-categories</span></button>
         <button class="tile tone-violet" data-go="attributes"><b id="dAttributes">–</b><span>Attributes</span></button>
         <button class="tile tone-amber" data-go="products" id="tileProducts"><b id="dProducts">–</b><span>Products waiting for review</span></button>
+        <button class="tile tone-green" data-go="payments" id="tilePayments"><b id="dPayments">–</b><span>Payments to check</span></button>
       </div>
     </section>
 
@@ -569,6 +579,22 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="filters" id="adFilter"><button type="button" data-s="running" aria-pressed="true">Running &amp; upcoming</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
           <button class="primary" type="button" id="addAd">+ New ad</button></div></div>
         <div id="adList"></div>
+      </div>
+    </section>
+
+    <!-- Payments -->
+    <section data-page="payments">
+      <div class="page-head"><div><h1>Payments</h1><p>Sellers pay Featured and ad fees to your numbers below, then send the Transaction ID (TrxID). Check your bKash / Nagad / Upay / Rocket app: if the money arrived, press <b>Verify</b> and it starts at once. Each TrxID can be used only once.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>Payments</h2>
+          <div class="filters" id="payFilter"><button type="button" data-s="review" aria-pressed="true">To check</button><button type="button" data-s="verified" aria-pressed="false">Verified</button><button type="button" data-s="rejected" aria-pressed="false">Rejected</button><button type="button" data-s="all" aria-pressed="false">All</button></div></div>
+        <input type="search" id="paySearch" placeholder="Search TrxID, number, seller or item" aria-label="Search payments" style="margin:6px 0 4px">
+        <div id="payList"></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h2>Where sellers send money</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Your RGBKart account numbers. Only methods that are switched on (with a number) are shown to sellers.</p>
+        <div id="methodList"></div>
       </div>
     </section>
 
@@ -1019,13 +1045,13 @@
   const canCatalog = canApprove;
 
   async function loadAll() {
-    await Promise.all([loadCatalog(), loadSellers(), loadCustomers(), loadFeatured(), loadProducts()]);
+    await Promise.all([loadCatalog(), loadSellers(), loadCustomers(), loadFeatured(), loadProducts(), loadPayments()]);
     drawDashboard();
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1040,6 +1066,7 @@
     if (view === 'homepage') loadSections();
     if (view === 'mainmenu') loadMenu();
     if (view === 'reports') loadReport();
+    if (view === 'payments') loadPayments();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));
@@ -1880,7 +1907,8 @@
     if (!rows.length) { box.append(h('p', { class: 'empty', text: adsAll.length ? 'No running or upcoming ads. Choose All to see past ads.' : 'No ads yet. Press + New ad to add one.' })); return; }
     for (const a of rows) {
       const rate = adRates.find(r => r.placement === a.placement) || {};
-      const state = a.ends_on < today ? 'Ended' : a.starts_on > today ? 'Starts ' + fmtDay(a.starts_on) : a.is_active ? 'Running' : 'Paused';
+      const waitPay = a.payment_status === 'unpaid' && !a.is_active && a.seller_id;
+      const state = waitPay ? (pays.some(x => x.ad_id === a.id && x.status === 'review') ? 'Payment to check' : 'Waiting for seller payment') : a.ends_on < today ? 'Ended' : a.starts_on > today ? 'Starts ' + fmtDay(a.starts_on) : a.is_active ? 'Running' : 'Paused';
       const days = daysBetween(a.starts_on, a.ends_on) + 1;
       box.append(h('div', { class: 'ad-row' + (a.is_active && a.ends_on >= today ? '' : ' off') },
         adBanner(a, a.image_path && photoUrlAdmin(a.image_path)),
@@ -1988,6 +2016,94 @@
       toast(editingAd ? 'Ad saved' : 'Ad added'); closeAd(); loadAds();
     } catch (err) { setMsg('adMsg', friendly(err), true); } finally { $('adSave').disabled = false; }
   };
+
+  // ===================== Payments =====================
+  let pays = [], payFilter = 'review', payMethods = [], paySellers = new Map();
+  const PAY_STATUS = { review: 'To check', verified: 'Verified', rejected: 'Rejected' };
+  const PAY_REASONS = ['Money not received', 'Amount is less than the fee', 'Transaction ID not found', 'Sent to the wrong number'];
+  async function loadPayments() {
+    const [p, m] = await Promise.all([
+      db.from('payments').select('*').order('created_at', { ascending: false }).limit(500),
+      db.from('payment_methods').select('*').order('sort_order'),
+    ]);
+    if (p.error || m.error) {
+      const e = p.error || m.error;
+      $('payList').innerHTML = ''; $('methodList').innerHTML = '';
+      $('payList').append(h('p', { class: 'empty', text: /does not exist|Could not find the table/i.test(e.message) ? 'Run 0019_payments.sql in Supabase to turn on payments.' : friendly(e) }));
+      return;
+    }
+    pays = p.data; payMethods = m.data;
+    const ids = [...new Set(pays.map(x => x.seller_id))];
+    paySellers = new Map();
+    if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public, profiles(role)').in('user_id', ids); (sd.data || []).forEach(x => paySellers.set(x.user_id, x)); }
+    drawPayCount(); drawPayments(); drawMethods();
+  }
+  function drawPayCount() {
+    const n = pays.filter(x => x.status === 'review').length;
+    $('navPayments').hidden = !n; $('navPayments').textContent = n;
+    $('dPayments').textContent = n; $('tilePayments').classList.toggle('alert', n > 0);
+  }
+  $('payFilter').querySelectorAll('button').forEach(b => b.onclick = () => { payFilter = b.dataset.s; $('payFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawPayments(); });
+  $('paySearch').oninput = () => drawPayments();
+  function drawPayments() {
+    const q = $('paySearch').value.trim().toLowerCase();
+    const rows = pays.filter(x => (payFilter === 'all' || x.status === payFilter) &&
+      (!q || [x.trx_id, x.sender_no, x.item_title, (paySellers.get(x.seller_id) || {}).shop_name].some(v => (v || '').toLowerCase().includes(q))));
+    const box = $('payList'); box.innerHTML = '';
+    if (!rows.length) { box.append(h('p', { class: 'empty', text: payFilter === 'review' ? 'Nothing to check. New payments appear here.' : 'No payments match.' })); return; }
+    for (const x of rows) {
+      const sd = paySellers.get(x.seller_id) || {};
+      const m = payMethods.find(k => k.id === x.method_id) || { name: x.method_id, color: '#888' };
+      const reason = h('input', { type: 'text', maxlength: 200, placeholder: 'Reason the seller will see', 'aria-label': 'Reason for rejecting' });
+      const rej = h('div', { class: 'reject-box', hidden: true },
+        h('div', { class: 'reasons' }, PAY_REASONS.map(r => h('button', { type: 'button', text: r, onclick: () => { reason.value = r + '.'; reason.focus(); } }))), reason,
+        h('div', { class: 'actions', style: 'justify-content:start' },
+          actionBtn('Reject payment', 'bad', async () => {
+            if (!reason.value.trim()) { reason.focus(); return toast('Write a reason the seller will see.'); }
+            const { error } = await db.rpc('admin_verify_payment', { p_payment: x.id, p_ok: false, p_reason: reason.value.trim() });
+            if (error) return toast(friendly(error)); toast('Payment rejected. The seller can pay again.'); loadPayments(); loadFeatured();
+          }),
+          h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => rej.hidden = true })));
+      box.append(h('div', { class: 'pay-row' },
+        h('div', { class: 'pay-amt' }, h('b', { text: taka(x.amount) }), h('span', { class: 'pay-m' }, h('i', { style: `background:${m.color}` }), m.name)),
+        h('div', { style: 'min-width:0;display:grid;gap:3px' },
+          h('div', { class: 'attr-title' }, h('b', { text: x.kind === 'ad' ? 'Ad: ' + (x.item_title || '') : 'Featured: ' + (x.item_title || '') }),
+            h('span', { class: 'chip ' + ({ review: 'pending', verified: 'approved', rejected: 'rejected' }[x.status]), text: PAY_STATUS[x.status] })),
+          h('div', { class: 'prod-meta' }, 'TrxID ', h('b', { class: 'pay-trx', text: x.trx_id }), ` · from ${x.sender_no}`, x.paid_to ? ` · to ${x.paid_to}` : ''),
+          h('div', { class: 'prod-meta', text: `${sd.shop_name || 'Seller'}${sd.profiles && sd.profiles.role === 'individual' ? ' (one-time seller)' : ''}${sd.phone_public ? ' · ' + sd.phone_public : ''} · sent ${fmtDate(x.created_at)} · ref ${x.kind === 'ad' ? 'AD' + x.ad_id : 'F' + x.featured_request_id}` }),
+          x.status === 'rejected' && x.reject_reason && h('div', { class: 'prod-meta', style: 'color:var(--danger)', text: 'Reason: ' + x.reject_reason }),
+          x.status !== 'review' && x.reviewed_at && h('div', { class: 'prod-meta', text: `${PAY_STATUS[x.status]} ${fmtDate(x.reviewed_at)}` }),
+          rej),
+        h('div', { class: 'actions' },
+          x.status === 'review' && canApprove() && actionBtn('Verify & start', 'good', async () => {
+            const { error } = await db.rpc('admin_verify_payment', { p_payment: x.id, p_ok: true });
+            if (error) return toast(friendly(error));
+            toast(x.kind === 'ad' ? 'Verified. The ad is live on its dates.' : 'Verified. Featured has started.'); loadPayments(); loadFeatured(); loadProducts();
+          }),
+          x.status === 'review' && canApprove() && h('button', { type: 'button', class: 'bad', text: 'Reject', onclick: () => { rej.hidden = false; reason.focus(); } }))));
+    }
+  }
+  function drawMethods() {
+    const box = $('methodList'); box.innerHTML = '';
+    const edit = canApprove();
+    for (const m of payMethods) {
+      const no = h('input', { type: 'tel', maxlength: 16, value: m.account_no || '', placeholder: '01XXXXXXXXX', 'aria-label': `${m.name} number`, disabled: !edit });
+      const type = h('select', { 'aria-label': `${m.name} account type`, disabled: !edit }, [['personal', 'Personal (Send Money)'], ['merchant', 'Merchant (Payment)'], ['agent', 'Agent']].map(([v, t]) => h('option', { value: v, text: t, selected: m.account_type === v })));
+      const ins = h('input', { type: 'text', maxlength: 300, value: m.instructions || '', placeholder: 'Extra note for sellers (optional)', 'aria-label': `${m.name} note`, disabled: !edit });
+      const on = h('input', { type: 'checkbox', checked: m.is_active, disabled: !edit });
+      box.append(h('div', { class: 'meth-row' },
+        h('div', { class: 'pay-m', style: 'font-size:1rem' }, h('i', { style: `background:${m.color}` }), h('b', { text: m.name })),
+        h('label', {}, 'Number', no), h('label', {}, 'Type', type), h('label', {}, 'Note', ins),
+        h('label', { class: 'check' }, on, 'Show to sellers'),
+        edit ? actionBtn('Save', 'good', async () => {
+          const n = no.value.replace(/[^0-9+]/g, '');
+          if (on.checked && !/^(\+?880)?01[3-9][0-9]{8}$/.test(n)) return toast(`Enter a valid ${m.name} number before switching it on.`);
+          if (n && !/^(\+?880)?01[3-9][0-9]{8}$/.test(n)) return toast(`Check the ${m.name} number.`);
+          const { error } = await db.from('payment_methods').update({ account_no: n || null, account_type: type.value, instructions: ins.value.trim() || null, is_active: on.checked, updated_at: new Date().toISOString() }).eq('id', m.id);
+          if (error) return toast(friendly(error)); toast(`Saved ${m.name}`); loadPayments();
+        }) : h('span')));
+    }
+  }
 
   // ===================== Reports =====================
   let repPeriod = 'day', repAnchor = null, repData = null, repRange = null;
@@ -2292,7 +2408,8 @@
       };
       const open = ['awaiting_payment', 'payment_submitted'].includes(r.status);
       const acts = h('div', { class: 'actions', style: 'justify-content:flex-start;flex-wrap:wrap' },
-        open && canApprove() && actionBtn('Payment received: start', 'good', () => setStatus('active', `Featured started: ${r.products ? r.products.title : ''}`)),
+        r.status === 'payment_submitted' && h('button', { type: 'button', class: 'good', text: 'Check payment →', onclick: () => go('payments') }),
+        open && canApprove() && actionBtn(r.status === 'payment_submitted' ? 'Start without checking' : 'Payment received: start', r.status === 'payment_submitted' ? 'ghost' : 'good', () => setStatus('active', `Featured started: ${r.products ? r.products.title : ''}`)),
         open && canApprove() && confirmBtn('Reject', 'Confirm reject', () => setStatus('rejected', 'Request rejected')),
         r.status === 'active' && canApprove() && confirmBtn('End now', 'Confirm end', () => setStatus('expired', 'Featured ended')),
         r.status === 'active' && r.ends_at && h('span', { class: 'date', text: 'Ends ' + fmtDate(r.ends_at) }));

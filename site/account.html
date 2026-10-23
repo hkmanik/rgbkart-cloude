@@ -57,7 +57,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=21"></script>
+<script src="i18n.js?v=22"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
@@ -95,6 +95,9 @@
       db.from('customer_addresses').select('*').order('is_default', { ascending: false }).order('updated_at', { ascending: false })]);
     tableReady = !ad.error; addrs = ad.data || [];
 
+    // RGBKart staff see a shortcut to the admin dashboard (shown only when the account is on the team)
+    const staffLink = h('a', { class: 'btn-sm solid', href: 'admin.html', text: '⚙ Admin dashboard', hidden: true, translate: 'no', style: 'text-decoration:none' });
+    db.rpc('my_staff_role').then(r => { if (!r.error && r.data) staffLink.hidden = false; }, () => {});
     // profile
     const edit = h('form', { class: 'form', hidden: true, style: 'margin-top:12px', onsubmit: saveProfile },
       h('div', { class: 'two' },
@@ -107,6 +110,8 @@
         h('div', { class: 'who' }, h('b', { text: name, translate: 'no' }), h('span', { text: me.email, translate: 'no' }), prof.phone && h('span', { text: prof.phone, translate: 'no' }),
           h('span', { text: T('Customer since {d}', { d: RGBLang.date(me.created_at, { month: 'long', year: 'numeric' }) }) })),
         h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' },
+          staffLink,
+          prof.role === 'seller' && h('a', { class: 'btn-sm', href: 'seller.html', text: T('Seller Center'), style: 'text-decoration:none' }),
           h('button', { type: 'button', class: 'btn-sm', text: 'Edit profile', onclick: () => { edit.hidden = !edit.hidden; } }),
           h('button', { type: 'button', class: 'btn-sm bad', text: 'Sign out', onclick: async () => { await db.auth.signOut(); location.href = 'index.html'; } }))),
       edit));

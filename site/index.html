@@ -139,23 +139,45 @@
           h('div', { class: 'sbadges' }, sh.featured_count > 0 && h('span', { text: T('★ {n} Featured', { n: sh.featured_count }) }), h('span', { text: T(sh.product_count === 1 ? '{n} product' : '{n} products', { n: sh.product_count }) })),
           h('span', { class: 'go', text: T('Visit shop →') }))));
     });
-    const step = dir => { const card = row.firstElementChild; const w = card ? card.getBoundingClientRect().width + 14 : 200;
+    // How it moves comes from Admin → Home page (settings): continuous glide, a step every few seconds, or only the arrows
+    const cfg = { motion: 'continuous', speed: 'normal', direction: 'left', ...(s.settings || {}) };
+    const PX = { slow: 22, normal: 40, fast: 75 }[cfg.speed] || 40;          // pixels per second
+    const dirSign = cfg.direction === 'right' ? -1 : 1;
+    const cardW = () => { const c = row.firstElementChild; return c ? c.getBoundingClientRect().width + parseFloat(getComputedStyle(row).columnGap || 14) : 200; };
+    let loopW = 0;                                                            // width of one full set of shops (continuous mode repeats the set)
+    const wrap = () => { if (loopW) { if (row.scrollLeft >= loopW) row.scrollLeft -= loopW; else if (row.scrollLeft <= 0) row.scrollLeft += loopW; } };
+    const step = dir => {
+      if (loopW) { row.style.scrollBehavior = 'auto'; wrap(); row.scrollBy({ left: dir * cardW(), behavior: 'smooth' }); return; }
       const end = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
-      row.scrollTo({ left: dir > 0 && end ? 0 : dir < 0 && row.scrollLeft <= 4 ? row.scrollWidth : row.scrollLeft + dir * w }); };
+      row.scrollTo({ left: dir > 0 && end ? 0 : dir < 0 && row.scrollLeft <= 4 ? row.scrollWidth : row.scrollLeft + dir * cardW(), behavior: 'smooth' });
+    };
     const arrows = h('div', { class: 'arrows' },
       h('button', { type: 'button', 'aria-label': T('Previous shops'), text: '‹', onclick: () => step(-1) }),
       h('button', { type: 'button', 'aria-label': T('Next shops'), text: '›', onclick: () => step(1) }));
     holder.append(h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), arrows), row));
-    // slide by itself only when there are more shops than fit, and not for people who asked for less motion
     requestAnimationFrame(() => {
       const more = row.scrollWidth > row.clientWidth + 4;
       arrows.hidden = !more;
-      if (!more || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      let paused = false;
-      ['mouseenter', 'focusin', 'touchstart'].forEach(ev => row.addEventListener(ev, () => paused = true, { passive: true }));
+      if (!more || cfg.motion === 'off' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let paused = false, resume;
+      ['mouseenter', 'focusin', 'touchstart'].forEach(ev => row.addEventListener(ev, () => { paused = true; clearTimeout(resume); }, { passive: true }));
       ['mouseleave', 'focusout'].forEach(ev => row.addEventListener(ev, () => paused = false));
-      row.addEventListener('touchend', () => setTimeout(() => paused = false, 6000), { passive: true });
-      setInterval(() => { if (!paused && !document.hidden) step(1); }, 3500);
+      row.addEventListener('touchend', () => { resume = setTimeout(() => paused = false, 4000); }, { passive: true });
+      if (cfg.motion === 'step') { setInterval(() => { if (!paused && !document.hidden) step(dirSign); }, 3500); return; }
+      // continuous: add a copy of the shops after the originals so the row can glide round without a jump
+      const originals = [...row.children];
+      const copies = originals.map(c => { const k = c.cloneNode(true); k.setAttribute('aria-hidden', 'true'); k.tabIndex = -1; row.append(k); return k; });
+      loopW = copies[0].offsetLeft - originals[0].offsetLeft;
+      row.style.scrollSnapType = 'none'; row.style.scrollBehavior = 'auto';
+      if (dirSign < 0) row.scrollLeft = loopW;
+      let last = performance.now(), pos = row.scrollLeft;
+      const tick = now => {
+        const dt = Math.min(0.1, (now - last) / 1000); last = now;
+        if (paused || document.hidden) pos = row.scrollLeft;
+        else { pos += dirSign * PX * dt; row.scrollLeft = pos; wrap(); if (Math.abs(row.scrollLeft - pos) > 2) pos = row.scrollLeft; }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
     });
   }
 

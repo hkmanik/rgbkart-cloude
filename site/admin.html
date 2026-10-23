@@ -865,6 +865,13 @@
     <label>Subtitle in Bangla (optional) <input id="sxSubBn" type="text" maxlength="120" lang="bn"></label>
     <label>How many products
       <select id="sxCount"><option value="6">6 (one row)</option><option value="12" selected>12 (two rows)</option><option value="18">18 (three rows)</option><option value="24">24 (four rows)</option></select></label>
+    <fieldset id="sxMotionWrap" hidden style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:10px">
+      <legend style="font-weight:700;padding:0 6px">How the shop row moves</legend>
+      <label>Movement <select id="sxMotion"><option value="continuous">Glides all the time (continuous)</option><option value="step">Moves one shop every few seconds</option><option value="off">Doesn't move (arrows only)</option></select></label>
+      <label>Speed <select id="sxSpeed"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option></select></label>
+      <label>Direction <select id="sxDir"><option value="left">Right to left</option><option value="right">Left to right</option></select></label>
+      <span class="muted" style="font-size:.82rem">It always stops while a visitor points at it or touches it, and for visitors whose phone or computer is set to reduce motion.</span>
+    </fieldset>
     <label class="check"><input id="sxActive" type="checkbox" checked> Show on the home page</label>
     <p id="secMsg" class="msg error" role="alert"></p>
   </div>
@@ -1699,15 +1706,19 @@
     $('sxCount').value = String(s ? s.item_count : 12);
     $('sxActive').checked = s ? s.is_active : true;
     $('sxCatWrap').hidden = $('sxType').value !== 'category';
+    const st = (s && s.settings) || {}; $('sxMotion').value = st.motion || 'continuous'; $('sxSpeed').value = st.speed || 'normal'; $('sxDir').value = st.direction || 'left';
+    $('sxMotionWrap').hidden = $('sxType').value !== 'top_shops'; $('sxMotion').onchange();
     setMsg('secMsg', '');
     $('secDrawer').hidden = $('secScrim').hidden = false;
   }
   $('sxType').onchange = () => {
-    const t = $('sxType').value; $('sxCatWrap').hidden = t !== 'category';
+    const t = $('sxType').value; $('sxCatWrap').hidden = t !== 'category'; $('sxMotionWrap').hidden = t !== 'top_shops';
     const known = Object.values(SX_DEFAULT_TITLE).includes($('sxTitle').value) || !$('sxTitle').value || cats.some(c => c.name === $('sxTitle').value);
     if (known) { $('sxTitle').value = t === 'category' ? (catById(Number($('sxCat').value)) || {}).name || '' : SX_DEFAULT_TITLE[t]; $('sxTitleBn').value = t === 'category' ? (catById(Number($('sxCat').value)) || {}).name_bn || '' : SX_DEFAULT_TITLE_BN[t]; }
   };
   $('sxCat').onchange = () => { if (!$('sxTitle').value || cats.some(c => c.name === $('sxTitle').value)) { $('sxTitle').value = (catById(Number($('sxCat').value)) || {}).name || ''; $('sxTitleBn').value = (catById(Number($('sxCat').value)) || {}).name_bn || ''; } };
+  // speed only matters for the continuous glide; direction for continuous and step
+  $('sxMotion').onchange = () => { const m = $('sxMotion').value; $('sxSpeed').closest('label').hidden = m !== 'continuous'; $('sxDir').closest('label').hidden = m === 'off'; };
   function closeSec() { $('secDrawer').hidden = $('secScrim').hidden = true; editingSec = null; }
   $('secClose').onclick = $('secCancel').onclick = $('secScrim').onclick = closeSec;
   $('addSection').onclick = () => openSec(null);
@@ -1715,7 +1726,8 @@
     e.preventDefault(); setMsg('secMsg', '');
     const t = $('sxType').value;
     const row = { section_type: t, category_id: t === 'category' ? Number($('sxCat').value) : null, title: $('sxTitle').value.trim(), subtitle: $('sxSub').value.trim() || null, title_bn: $('sxTitleBn').value.trim() || null, subtitle_bn: $('sxSubBn').value.trim() || null,
-      item_count: Number($('sxCount').value), is_active: $('sxActive').checked, updated_at: new Date().toISOString() };
+      item_count: Number($('sxCount').value), is_active: $('sxActive').checked, updated_at: new Date().toISOString(),
+      ...('settings' in (editingSec || homeSections[0] || {}) && t === 'top_shops' ? { settings: { motion: $('sxMotion').value, speed: $('sxSpeed').value, direction: $('sxDir').value } } : {}) };
     if (row.title.length < 2) return setMsg('secMsg', 'Give the section a title.', true);
     if (!editingSec) row.sort_order = (homeSections.reduce((m, s) => Math.max(m, s.sort_order), 0)) + 10;
     $('secSave').disabled = true;

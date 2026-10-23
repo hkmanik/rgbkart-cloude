@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <link rel="stylesheet" href="shop.css?v=13">
-<link rel="stylesheet" href="order.css?v=2">
+<link rel="stylesheet" href="order.css?v=3">
 </head>
 <body>
 
@@ -20,13 +20,14 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=6"></script>
-<script src="shop.js?v=13"></script>
+<script src="i18n.js?v=7"></script>
+<script src="shop.js?v=14"></script>
 <script src="menu.js?v=5"></script>
 <script src="cartlib.js?v=2"></script>
 <script>
   const ADDR_KEY = 'rgbkart-address';
-  let data = null, session = null, isGuest = true;
+  let data = null, session = null, isGuest = true, savedAddrs = [];
+  const fromAddr = a => ({ name: a.full_name, phone: a.phone || '', address: a.address, district: a.district, area: a.area || '' });
   const saved = () => { try { return JSON.parse(localStorage.getItem(ADDR_KEY) || '{}'); } catch (_) { return {}; } };
 
   async function start() {
@@ -40,7 +41,13 @@
       const r = await db.from('profiles').select('full_name, phone, customer_details(address, city)').eq('id', session.user.id).maybeSingle();
       if (r.data) { const cd = Array.isArray(r.data.customer_details) ? r.data.customer_details[0] : r.data.customer_details; prof = { name: r.data.full_name, phone: r.data.phone, address: cd && cd.address, district: cd && cd.city, email: session.user.email }; }
     }
-    draw({ ...prof, ...Object.fromEntries(Object.entries(saved()).filter(([, v]) => v)) });
+    // signed-in customers: their saved addresses (default one first) — see My account
+    if (session && !isGuest) {
+      const a = await db.from('customer_addresses').select('*').order('is_default', { ascending: false }).order('updated_at', { ascending: false });
+      savedAddrs = a.error ? [] : a.data;
+    }
+    const def = savedAddrs[0] ? fromAddr(savedAddrs[0]) : {};
+    draw({ ...prof, ...Object.fromEntries(Object.entries(saved()).filter(([, v]) => v)), ...Object.fromEntries(Object.entries(def).filter(([, v]) => v)) });
   }
 
   function draw(pre) {
@@ -48,7 +55,10 @@
     const dist = h('select', { id: 'coDist', required: true }, h('option', { value: '', text: 'Choose your district' }), DISTRICTS_BD.map(d => h('option', { value: d, text: d, selected: pre.district === d })));
     const f = h('form', { class: 'box form', id: 'coForm', novalidate: true },
       h('h1', { text: 'Delivery details', style: 'font-size:1.4rem' }),
-      isGuest && h('p', { class: 'note' }, 'Have an account? ', h('a', { href: 'login.html', text: 'Sign in' }), ' to keep your orders in it. You can also order without signing in: your orders are kept on this phone or computer.'),
+      isGuest && h('p', { class: 'note' }, 'Have an account? ', h('a', { href: 'login.html?next=checkout.html', text: 'Sign in' }), ' to keep your orders in it. You can also order without signing in: your orders are kept on this phone or computer.'),
+      savedAddrs.length > 0 && h('div', { class: 'addr-pick', role: 'group', 'aria-label': T('Saved addresses') }, h('span', { class: 'm', text: T('Deliver to:') }),
+        savedAddrs.map((a, i) => h('button', { type: 'button', class: 'chipbtn', 'aria-pressed': String(i === 0), text: (a.label || T('Address')) + (a.is_default ? ' ★' : ''), onclick: e => pickAddr(a, e.target) })),
+        h('button', { type: 'button', class: 'chipbtn', 'aria-pressed': 'false', text: T('+ New address'), onclick: e => pickAddr(null, e.target) })),
       h('div', { class: 'two' },
         h('label', {}, h('span', { class: 'req', text: 'Full name' }), h('input', { id: 'coName', type: 'text', maxlength: 80, autocomplete: 'name', value: pre.name || '' })),
         h('label', {}, h('span', { class: 'req', text: 'Mobile number' }), h('input', { id: 'coPhone', type: 'tel', inputmode: 'tel', maxlength: 16, placeholder: '01XXXXXXXXX', autocomplete: 'tel', value: pre.phone || '' }))),
@@ -57,6 +67,7 @@
         h('label', {}, 'Area / thana (optional)', h('input', { id: 'coArea', type: 'text', maxlength: 60, value: pre.area || '' }))),
       h('label', {}, 'Email (optional)', h('input', { id: 'coEmail', type: 'email', maxlength: 120, autocomplete: 'email', value: pre.email || '' })),
       h('label', {}, 'Note for the shop (optional)', h('textarea', { id: 'coNote', maxlength: 500, placeholder: 'e.g. Call before delivery, gate code…' })),
+      !isGuest && h('label', { class: 'save-addr' }, h('input', { type: 'checkbox', id: 'coSave', checked: !savedAddrs.length }), T('Save this address to my account')),
       h('h2', { text: 'Payment' }),
       h('div', { class: 'pay-o' }, h('span', { style: 'font-size:1.6rem', 'aria-hidden': 'true', text: '💵' }), h('span', {}, h('b', { text: 'Cash on Delivery' }), h('small', { text: 'Pay the shop in cash when your order arrives. RGBKart never takes your money.' }))));
     dist.onchange = () => {
@@ -65,6 +76,15 @@
       CartLib.load().then(x => { data = x; drawSum(); });
     };
     box.append(h('div', { class: 'cartgrid' }, f, h('div', { id: 'sumBox' })));
+    // choose a saved address, or start a new one
+    window.pickAddr = (a, btn) => {
+      f.querySelectorAll('.chipbtn').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      const v = a ? fromAddr(a) : { name: $('coName').value, phone: $('coPhone').value, address: '', district: '', area: '' };
+      $('coName').value = v.name || ''; $('coPhone').value = v.phone || ''; $('coAddr').value = v.address || ''; $('coArea').value = v.area || ''; dist.value = v.district || '';
+      if ($('coSave')) $('coSave').checked = !a;
+      if (!a) $('coAddr').focus();
+      dist.onchange();
+    };
     drawSum();
     if (pre.district) dist.onchange();
   }
@@ -108,6 +128,10 @@
       const ship = Object.fromEntries(data.groups.map(g => [g.seller, g.method ? g.method.id : 'negotiated']));
       const r = await db.rpc('place_order', { p_items: items, p_ship: ship, p_customer: v });
       if (r.error) throw r.error;
+      // keep the address in My account when asked (skip if it's already saved)
+      if ($('coSave') && $('coSave').checked && !savedAddrs.some(a => a.address.trim().toLowerCase() === v.address.toLowerCase() && a.district === v.district)) {
+        db.from('customer_addresses').insert({ label: savedAddrs.length ? null : 'Home', full_name: v.name, phone: v.phone, address: v.address, district: v.district, area: v.area || null }).then(() => {}, () => {});
+      }
       // remove ordered items from the cart
       const done = new Set(data.groups.flatMap(g => g.items.map(i => i.idx)));
       CartLib.write(CartLib.read().filter((_, k) => !done.has(k)));

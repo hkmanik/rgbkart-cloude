@@ -74,7 +74,7 @@ async function initShell() {
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();
-    if (session && !session.user.is_anonymous) $('acctLbl').textContent = T('My account');
+    if (session && !session.user.is_anonymous) { $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; }
     if (session) { hasSession = true; $('msgLink').hidden = false; updateBadges(); }
   } catch (_) {}
 }

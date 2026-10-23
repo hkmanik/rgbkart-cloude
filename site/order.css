@@ -83,3 +83,10 @@
 .oact a, .oact button { font: 600 .88rem var(--body); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-decoration: none; cursor: pointer; }
 .oact .bad { color: var(--danger); border-color: var(--danger); }
 .oact .bad:hover { background: var(--danger); color: #fff; }
+/* checkout: saved address chooser */
+.addr-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chipbtn { border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 6px 14px; font: 600 .88rem var(--body); cursor: pointer; }
+.chipbtn:hover { border-color: var(--accent); color: var(--accent); }
+.chipbtn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.form label.save-addr { display: flex; flex-direction: row; gap: 8px; align-items: center; color: var(--fg); font-weight: 600; }
+.save-addr input { width: 18px !important; height: 18px; accent-color: var(--accent); margin: 0; }

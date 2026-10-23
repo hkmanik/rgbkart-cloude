@@ -302,6 +302,10 @@
   .sad-row:first-child { border-top: 0; } @media (max-width: 760px) { .sad-row { grid-template-columns: 1fr; } }
   /* Orders */
   .ord-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pr-bulk { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 8px 10px; border: 1px dashed var(--line); border-radius: 10px; margin-bottom: 6px; }
+  .pr-bulk button:disabled { opacity: .45; cursor: default; }
+  .ord-sel { width: 18px; height: 18px; accent-color: var(--accent); margin: 0 8px 0 0; vertical-align: middle; }
+  .pr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
   .ord-tabs button { font: 600 .88rem var(--body); padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
   .ord-tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
   .ord-tabs .n { font-size: .75rem; opacity: .8; }
@@ -410,8 +414,20 @@
     <section data-page="orders">
       <div class="page-head"><div><h1>Orders</h1><p>Orders from customers, paid in cash on delivery. Call the customer, confirm, pack and send it, then mark each step so the customer can follow along.</p></div></div>
       <div class="card" style="margin-top:16px">
-        <div class="ord-tabs" id="ordTabs" role="group" aria-label="Show orders"></div>
+        <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap">
+          <div class="ord-tabs" id="ordTabs" role="group" aria-label="Show orders"></div>
+          <button type="button" class="ghost" id="prSetupBtn">🖨 Printer setup</button>
+        </div>
+        <div class="card" id="prSetup" hidden style="margin-top:12px;background:var(--bg)"></div>
         <input type="search" id="ordSearch" placeholder="Search order number, name or phone" aria-label="Search orders" style="margin:10px 0">
+        <div class="pr-bulk" id="prBulk">
+          <label class="check" style="margin:0"><input type="checkbox" id="ordAll"> Select all</label>
+          <span class="pmeta" id="prCount">Tick orders to print several at once</span>
+          <span style="flex:1"></span>
+          <button type="button" class="ghost" data-print="invoice" disabled>🧾 Invoices</button>
+          <button type="button" class="ghost" data-print="packing" disabled>📦 Packing lists</button>
+          <button type="button" class="ghost" data-print="label" disabled>🏷 Shipping labels</button>
+        </div>
         <div id="ordList"></div>
       </div>
     </section>
@@ -839,6 +855,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="pay.js?v=1"></script>
+<script src="printdocs.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -1116,8 +1133,9 @@
     const rows = orders.filter(o => (ordTab === 'all' || (ordTab === 'open' ? inProg(o) : o.status === ordTab))
       && (!q || [o.order_no, o.customer_name, o.phone].some(v => (v || '').toLowerCase().includes(q))));
     const box = $('ordList'); box.innerHTML = '';
-    if (!rows.length) { box.append(h('div', { class: 'empty' }, h('span', { text: ordTab === 'pending' ? 'No new orders. New orders appear here.' : 'No orders here.' }))); return; }
+    if (!rows.length) { box.append(h('div', { class: 'empty' }, h('span', { text: ordTab === 'pending' ? 'No new orders. New orders appear here.' : 'No orders here.' }))); drawPrBulk(); return; }
     for (const o of rows) box.append(orderCard(o));
+    drawPrBulk();
   }
   function orderCard(o) {
     const next = O_NEXT[o.status];
@@ -1129,7 +1147,7 @@
     const at = O_STEPS.indexOf(o.status);
     return h('div', { class: 'ord' },
       h('div', { class: 'ord-head' },
-        h('div', {}, h('b', { class: 'ord-no', text: o.order_no }), h('span', { class: 'pmeta', text: ' · ' + ofmt(o.created_at) })),
+        h('div', {}, h('input', { type: 'checkbox', class: 'ord-sel', 'aria-label': 'Select ' + o.order_no, checked: ordSel.has(o.id), onchange: e => { e.target.checked ? ordSel.add(o.id) : ordSel.delete(o.id); drawPrBulk(); } }), h('b', { class: 'ord-no', text: o.order_no }), h('span', { class: 'pmeta', text: ' · ' + ofmt(o.created_at) })),
         h('span', { class: 'chip ' + ({ pending: 'awaiting_payment', delivered: 'active', cancelled: 'rejected' }[o.status] || 'info'), text: O_LABEL[o.status] })),
       o.status !== 'cancelled' && h('div', { class: 'ord-track' }, O_STEPS.map((k, i) => h('span', { class: i <= at ? 'on' : '', text: k === 'pending' ? 'Placed' : O_LABEL[k] }))),
       h('div', { class: 'ord-grid' },
@@ -1146,8 +1164,9 @@
       next && next[0] === 'shipped' && note,
       h('div', { class: 'actions', style: 'justify-content:flex-start' },
         next && actionBtn(next[1], 'primary', () => setOrderStatus(o, next[0], next[0] === 'shipped' ? note.value.trim() : null)),
-        h('button', { type: 'button', class: 'ghost', text: 'Print invoice', onclick: () => printOrder(o, 'invoice') }),
-        h('button', { type: 'button', class: 'ghost', text: 'Packing slip', onclick: () => printOrder(o, 'packing') }),
+        h('button', { type: 'button', class: 'ghost', text: '🧾 Invoice', onclick: () => printOrder([o], 'invoice') }),
+        h('button', { type: 'button', class: 'ghost', text: '📦 Packing list', onclick: () => printOrder([o], 'packing') }),
+        h('button', { type: 'button', class: 'ghost', text: '🏷 Shipping label', onclick: () => printOrder([o], 'label') }),
         !['delivered', 'cancelled'].includes(o.status) && h('button', { type: 'button', class: 'ghost', style: 'color:var(--danger)', text: 'Cancel…', onclick: () => { cancelBox.hidden = false; reason.focus(); } })),
       cancelBox);
   }
@@ -1157,20 +1176,49 @@
     toast(st === 'cancelled' ? 'Order cancelled. Stock was put back.' : `Order ${o.order_no}: ${O_LABEL[st]}`);
     loadOrders();
   }
-  function printOrder(o, kind) {
-    const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    const shopName = (shop && shop.shop_name) || 'RGBKart seller';
-    const rows = (o.order_items || []).map(i => `<tr><td>${esc(i.title)}${i.variant_label ? '<br><small>' + esc(i.variant_label) + '</small>' : ''}</td><td class="n">${i.qty}</td>${kind === 'invoice' ? `<td class="n">${money(i.unit_price)}</td><td class="n">${money(i.line_total)}</td>` : '<td class="n">☐</td>'}</tr>`).join('');
-    const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + (kind === 'invoice' ? 'Invoice' : 'Packing slip') + ' ' + esc(o.order_no) + '</title>'
-      + '<style>body{font:14px/1.45 system-ui,sans-serif;color:#111;margin:28px;max-width:720px}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{border-bottom:1px solid #ccc;padding:7px 4px;text-align:left;vertical-align:top}.n{text-align:right;white-space:nowrap}.top{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.box{border:1px solid #ccc;border-radius:6px;padding:10px 12px;margin-top:10px}.tot td{font-weight:700;font-size:16px;border:0}small{color:#555}@media print{button{display:none}}<' + '/style></head><body>'
-      + `<div class="top"><div><h1>${kind === 'invoice' ? 'Invoice' : 'Packing slip'}</h1><div>${esc(shopName)}${shop && shop.phone_public ? ' · ' + esc(shop.phone_public) : ''}</div><small>Sold on RGBKart · Red &amp; Green Basket</small></div>`
-      + `<div><b>${esc(o.order_no)}</b><br>${new Date(o.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Cash on Delivery</div></div>`
-      + `<div class="box"><b>Deliver to:</b> ${esc(o.customer_name)} · ${esc(o.phone)}<br>${esc([o.address, o.area, o.district].filter(Boolean).join(', '))}${o.note ? '<br><small>Note: ' + esc(o.note) + '</small>' : ''}</div>`
-      + `<table><thead><tr><th>Item</th><th class="n">Qty</th>${kind === 'invoice' ? '<th class="n">Price</th><th class="n">Amount</th>' : '<th class="n">Packed</th>'}</tr></thead><tbody>${rows}</tbody>`
-      + (kind === 'invoice' ? `<tfoot><tr><td colspan="3">Subtotal</td><td class="n">${money(o.subtotal)}</td></tr><tr><td colspan="3">Delivery (${esc(SHIPN[o.ship_method] || o.ship_method)})</td><td class="n">${money(o.ship_fee)}</td></tr><tr class="tot"><td colspan="3">Total to collect</td><td class="n">${money(o.total)}</td></tr></tfoot>` : '')
-      + '</table><button onclick="print()">Print</button></body></html>';
-    const w = window.open('', '_blank'); if (!w) return toast('Allow pop-ups to print.');
-    w.document.write(html); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch (_) {} }, 300);
+  // ---------- printing (printdocs.js): one order or the ticked ones; settings in Printer setup ----------
+  const ordSel = new Set();
+  const logoUrl = () => shop && shop.logo_path ? db.storage.from('shop-assets').getPublicUrl(shop.logo_path).data.publicUrl : null;
+  function printOrder(list, kind) {
+    if (!window.RGBPrint) return toast('Printing isn\'t ready. Reload the page.');
+    const r = RGBPrint.open(kind, list, shop || {}, logoUrl());
+    if (r === null) toast('Your browser blocked the print window. Allow pop-ups for this site and try again.');
+  }
+  function shownOrders() { return [...$('ordList').querySelectorAll('.ord-sel')].map(c => orders.find(o => 'Select ' + o.order_no === c.getAttribute('aria-label'))).filter(Boolean); }
+  function drawPrBulk() {
+    const shown = shownOrders(), n = shown.filter(o => ordSel.has(o.id)).length;
+    $('prCount').textContent = n ? `${n} order${n === 1 ? '' : 's'} ticked` : 'Tick orders to print several at once';
+    $('prBulk').querySelectorAll('[data-print]').forEach(b => b.disabled = !n);
+    $('ordAll').checked = n > 0 && n === shown.length; $('ordAll').indeterminate = n > 0 && n < shown.length;
+  }
+  $('ordAll').onchange = () => { const shown = shownOrders(); shown.forEach(o => $('ordAll').checked ? ordSel.add(o.id) : ordSel.delete(o.id)); drawOrders(); };
+  $('prBulk').querySelectorAll('[data-print]').forEach(b => b.onclick = () => printOrder(shownOrders().filter(o => ordSel.has(o.id)), b.dataset.print));
+  $('prSetupBtn').onclick = () => { const box = $('prSetup'); box.hidden = !box.hidden; if (!box.hidden) drawPrSetup(); };
+  function drawPrSetup() {
+    const s = RGBPrint.settings(), box = $('prSetup'); box.innerHTML = '';
+    const sel = (id, opts, val) => h('select', { id }, Object.entries(opts).map(([k, v]) => h('option', { value: k, text: v[0], selected: k === val })));
+    const chk = (id, label, on) => h('label', { class: 'check' }, h('input', { type: 'checkbox', id, checked: on }), label);
+    const sample = { id: 0, order_no: 'RGB-SAMPLE-0001', created_at: new Date().toISOString(), customer_name: 'Sample Customer', phone: '01711000000', email: 'customer@example.com',
+      address: 'House 12, Road 5, Block C', area: 'Mirpur 10', district: 'Dhaka', note: 'Please call before delivery', ship_method: 'dhaka', ship_fee: 70, subtotal: 2990, total: 3060,
+      order_items: [{ title: 'Sample product', variant_label: 'Black / M', qty: 1, unit_price: 2490, line_total: 2490 }, { title: 'Another product', qty: 2, unit_price: 250, line_total: 500 }] };
+    const read = () => ({ docSize: $('prDoc').value, labelSize: $('prLabel').value, copies: Number($('prCopies').value) || 1, showLogo: $('prLogo').checked, barcode: $('prBarcode').checked,
+      packPrices: $('prPackPrices').checked, autoPrint: $('prAuto').checked, footer: $('prFooter').value.trim() });
+    box.append(h('h2', { text: 'Printer setup', style: 'margin:0 0 4px' }),
+      h('p', { class: 'pmeta', style: 'margin:0 0 12px', text: 'Saved on this computer, so each computer or phone can match its own printer. In the print window, also pick your printer and turn off "Headers and footers".' }),
+      h('div', { class: 'pr-grid' },
+        h('label', {}, 'Invoice & packing list paper', sel('prDoc', RGBPrint.SIZES.doc, s.docSize)),
+        h('label', {}, 'Shipping label size', sel('prLabel', RGBPrint.SIZES.label, s.labelSize)),
+        h('label', {}, 'Copies of each', h('select', { id: 'prCopies' }, [1, 2, 3].map(n => h('option', { value: n, text: n, selected: n === Number(s.copies) }))))),
+      h('div', { class: 'pr-grid', style: 'margin-top:10px' },
+        chk('prLogo', 'Show my shop logo', s.showLogo), chk('prBarcode', 'Print a barcode of the order number', s.barcode),
+        chk('prPackPrices', 'Show prices on the packing list', s.packPrices), chk('prAuto', 'Open the print window straight away', s.autoPrint)),
+      h('label', { style: 'margin-top:10px;display:grid;gap:4px' }, 'Note at the bottom of the invoice', h('textarea', { id: 'prFooter', maxlength: 300, rows: 2, text: s.footer })),
+      h('div', { class: 'actions', style: 'justify-content:flex-start;margin-top:10px' },
+        h('button', { type: 'button', class: 'primary', text: 'Save setup', onclick: () => { RGBPrint.save(read()); toast('Printer setup saved on this computer'); } }),
+        h('button', { type: 'button', class: 'ghost', text: 'Sample invoice', onclick: () => { RGBPrint.save(read()); printOrder([sample], 'invoice'); } }),
+        h('button', { type: 'button', class: 'ghost', text: 'Sample packing list', onclick: () => { RGBPrint.save(read()); printOrder([sample], 'packing'); } }),
+        h('button', { type: 'button', class: 'ghost', text: 'Sample label', onclick: () => { RGBPrint.save(read()); printOrder([sample], 'label'); } }),
+        h('button', { type: 'button', class: 'ghost', text: 'Close', onclick: () => box.hidden = true })));
   }
 
   // ===================== Advertise =====================

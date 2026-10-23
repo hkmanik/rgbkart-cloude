@@ -3,8 +3,10 @@
 (function () {
   const css = `
     .sh-wrap { position: relative; display: inline-block; }
-    .sh-btn { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; }
-    .sh-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sh-btn { display: inline-flex; align-items: center; gap: 6px; border: 0; background: #F5C400; color: #2a1f00; border-radius: 999px; padding: 7px 16px; font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgb(245 196 0 / .45); transition: background .15s, color .15s, transform .1s; }
+    .sh-btn:hover { background: #00802B; color: #fff; box-shadow: 0 2px 8px rgb(0 128 43 / .35); }
+    .sh-btn:active { transform: translateY(1px); }
+    .sh-btn:focus-visible { outline: 2px solid #00802B; outline-offset: 2px; }
     .sh-menu { position: absolute; z-index: 50; top: calc(100% + 6px); left: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgb(0 0 0 / .15); padding: 6px; display: grid; min-width: 190px; }
     .sh-menu a, .sh-menu button { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: var(--fg); text-decoration: none; background: none; border: 0; font: inherit; text-align: left; cursor: pointer; }
     .sh-menu a:hover, .sh-menu button:hover { background: var(--bg); }`;

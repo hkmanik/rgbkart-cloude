@@ -183,7 +183,7 @@
     'Store pickup available': 'দোকান থেকে সংগ্রহ করা যায়', 'This shop is on holiday and not taking orders right now.': 'এই দোকান এখন ছুটিতে, অর্ডার নিচ্ছে না।',
     'About the shop': 'দোকান সম্পর্কে', 'Search this shop': 'এই দোকানে খুঁজুন', 'Featured first': 'ফিচার্ড আগে', 'This shop has no products yet.': 'এই দোকানে এখনো কোনো পণ্য নেই।',
     "This shop isn't available": 'এই দোকানটি পাওয়া যাচ্ছে না', 'It may be closed or still waiting for approval.': 'হয়তো বন্ধ আছে বা এখনো অনুমোদনের অপেক্ষায়।',
-    'Browse all products': 'সব পণ্য দেখুন', 'Visit shop →': 'দোকানে যান →', 'See all products from this seller →': 'এই বিক্রেতার সব পণ্য দেখুন →', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
+    'Browse all products': 'সব পণ্য দেখুন', 'Visit shop →': 'দোকানে যান →', '🏪 Visit shop →': '🏪 দোকানে যান →', 'See all products from this seller →': 'এই বিক্রেতার সব পণ্য দেখুন →', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
     'RGBKart Categories': 'ক্যাটাগরি | RGBKart', 'RGBKart Sign In': 'সাইন ইন | RGBKart', 'RGBKart Products': 'পণ্য | RGBKart', 'RGBKart Product': 'পণ্য | RGBKart',
   };
   // 64 districts

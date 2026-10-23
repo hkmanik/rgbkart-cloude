@@ -412,6 +412,7 @@
 
     <div class="nav-group tone-green">People</div>
     <button class="nav tone-green" data-view="sellers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Sellers<span class="count" id="navPending" hidden></span></button>
+    <button class="nav tone-blue" data-view="users" id="navUsers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 6.5M18 14a6.5 6.5 0 0 1 3.5 6"/></svg>Users</button>
     <button class="nav tone-green" data-view="customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6M22 21a6 6 0 0 0-4-5.6"/></svg>Customers</button>
     <button class="nav tone-green" data-view="verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Verification<span class="count" id="navVerify" hidden></span></button>
 
@@ -519,10 +520,25 @@
         <div class="toolbar"><input id="customerSearch" type="search" placeholder="Search name, phone, email, city"></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Joined</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Joined</th><th></th></tr></thead>
             <tbody id="customerRows"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- All users (0047_admin_users.sql) -->
+    <section data-page="users">
+      <div class="page-head"><div><h1>Users</h1><p>Every account: RGBKart team, shops, one-time sellers, customers and guests. <b>Block</b> stops someone signing in and hides their shop and products (nothing is deleted; Unblock puts it all back). <b>Delete</b> (Master Admin only) removes the account and everything linked to it, including their orders, payments and reviews. It can't be undone. For anyone with orders or payments, Block is usually better.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar"><div class="filters" id="uFilter">
+          <button type="button" data-k="all" aria-pressed="true">All</button><button type="button" data-k="staff" aria-pressed="false">RGBKart team</button>
+          <button type="button" data-k="shop" aria-pressed="false">Shops</button><button type="button" data-k="one_time" aria-pressed="false">One-time sellers</button>
+          <button type="button" data-k="customer" aria-pressed="false">Customers</button><button type="button" data-k="guest" aria-pressed="false">Guests</button><button type="button" data-k="blocked" aria-pressed="false">Blocked</button></div>
+          <input type="search" id="uSearch" placeholder="Search name, email, phone or shop" aria-label="Search users" style="flex:1;min-width:220px"></div>
+        <p id="uMsg" class="msg" role="status"></p>
+        <div id="uList"></div>
+        <nav class="pager" id="uPager" style="display:flex;gap:8px;justify-content:center;margin-top:12px"></nav>
       </div>
     </section>
 
@@ -1211,6 +1227,7 @@
     $('meRole').textContent = ROLE_NAMES[role];
     $('navTeam').hidden = role !== 'master_admin';
     $('navLog').hidden = !['master_admin', 'co_admin'].includes(role);
+    $('navUsers').hidden = !['master_admin', 'co_admin'].includes(role);
     $('settingsGroup').hidden = $('navTeam').hidden && $('navLog').hidden;
     document.querySelectorAll('.catalog-edit').forEach(el => el.hidden = !canCatalog());
     document.querySelectorAll('.catalog-ro').forEach(el => el.hidden = canCatalog());
@@ -1218,7 +1235,7 @@
     $('authWrap').hidden = true; $('shell').hidden = false;
     document.body.classList.add('signed-in');
     const start = location.hash.slice(1);
-    go(VIEWS.includes(start) && (start !== 'team' || role === 'master_admin') && (start !== 'activity' || ['master_admin', 'co_admin'].includes(role)) ? start : 'dashboard');
+    go(VIEWS.includes(start) && (start !== 'team' || role === 'master_admin') && (!['activity', 'users'].includes(start) || ['master_admin', 'co_admin'].includes(role)) ? start : 'dashboard');
     loadAll();
   }
 
@@ -1596,8 +1613,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify', 'pages'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify', 'pages', 'users'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', users: 'Users', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1607,6 +1624,7 @@
     setMenu(false);
     setMsg('dashMsg', '');
     if (view === 'team') loadTeam();
+    if (view === 'users') loadUsers();
     if (view === 'activity') loadLog(true);
     if (view === 'verify') loadVerifications();
     if (view === 'pages') loadPages();
@@ -2097,7 +2115,8 @@
         canApprove() ? h('div', { class: 'actions' },
           s.seller_status !== 'approved' && actionBtn('Approve', 'good', () => setStatus(s, 'approved')),
           s.seller_status !== 'rejected' && actionBtn('Reject', 'bad', () => setStatus(s, 'rejected')),
-          s.seller_status !== 'pending' && actionBtn('Move to pending', 'ghost', () => setStatus(s, 'pending'))) : h('span')));
+          s.seller_status !== 'pending' && actionBtn('Move to pending', 'ghost', () => setStatus(s, 'pending')),
+          h('button', { type: 'button', class: 'ghost', text: 'Block / delete…', onclick: () => openUser(s.email || s.shop_name) })) : h('span')));
     }
   }
   async function setStatus(s, status) {
@@ -2118,10 +2137,81 @@
     const q = $('customerSearch').value.trim().toLowerCase();
     const rows = customers.filter(c => matches(c, q, ['full_name', 'phone', 'email', 'city', 'address']));
     const body = $('customerRows'); body.innerHTML = '';
-    if (!rows.length) { body.append(h('tr', {}, h('td', { colspan: 5, class: 'empty', text: q ? 'No customers match your search.' : 'No customers yet.' }))); return; }
+    if (!rows.length) { body.append(h('tr', {}, h('td', { colspan: 6, class: 'empty', text: q ? 'No customers match your search.' : 'No customers yet.' }))); return; }
     for (const c of rows) body.append(h('tr', {},
       h('td', { text: c.full_name || '—' }), h('td', { text: c.email }), h('td', { text: c.phone || '—' }),
-      h('td', { text: [c.address, c.city, c.postal_code].filter(Boolean).join(', ') || '—' }), h('td', { class: 'date', text: fmtDate(c.created_at) })));
+      h('td', { text: [c.address, c.city, c.postal_code].filter(Boolean).join(', ') || '—' }), h('td', { class: 'date', text: fmtDate(c.created_at) }),
+      h('td', {}, canApprove() && h('button', { type: 'button', class: 'ghost', text: 'Block / delete…', onclick: () => openUser(c.email) }))));
+  }
+
+  // ===================== Users (0047_admin_users.sql) =====================
+  const U_KIND = { staff: 'RGBKart team', shop: 'Shop', one_time: 'One-time seller', customer: 'Customer', guest: 'Guest' };
+  const U_PAGE = 50;
+  let uKind = 'all', uPage = 0, uTimer = null;
+  function openUser(q) { $('uSearch').value = q || ''; uKind = 'all'; $('uFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.k === 'all'))); uPage = 0; go('users'); }
+  $('uFilter').querySelectorAll('button').forEach(b => b.onclick = () => { uKind = b.dataset.k; uPage = 0; $('uFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); loadUsers(); });
+  $('uSearch').oninput = () => { clearTimeout(uTimer); uTimer = setTimeout(() => { uPage = 0; loadUsers(); }, 300); };
+  async function loadUsers() {
+    const box = $('uList'); setMsg('uMsg', 'Loading…');
+    const { data, error } = await db.rpc('admin_users', { p_kind: uKind, p_search: $('uSearch').value.trim() || null, p_limit: U_PAGE, p_offset: uPage * U_PAGE });
+    box.innerHTML = ''; $('uPager').innerHTML = '';
+    if (error) return setMsg('uMsg', /Could not find the function/i.test(error.message) ? 'Run 0047_admin_users.sql in Supabase to turn on this page.' : friendly(error), true);
+    const total = data[0] ? Number(data[0].total) : 0;
+    setMsg('uMsg', total ? `${total} account${total === 1 ? '' : 's'}` : '');
+    if (!data.length) { box.append(h('p', { class: 'empty', text: 'No accounts match.' })); return; }
+    data.forEach(u => box.append(userCard(u)));
+    const pages = Math.ceil(total / U_PAGE);
+    if (pages > 1) $('uPager').append(
+      h('button', { type: 'button', class: 'ghost', text: '‹ Previous', disabled: uPage === 0, onclick: () => { uPage--; loadUsers(); } }),
+      h('span', { style: 'align-self:center', text: `Page ${uPage + 1} of ${pages}` }),
+      h('button', { type: 'button', class: 'ghost', text: 'Next ›', disabled: uPage >= pages - 1, onclick: () => { uPage++; loadUsers(); } }));
+  }
+  function userCard(u) {
+    const name = u.shop_name || u.full_name || (u.kind === 'guest' ? 'Guest (no account details)' : u.email || '—');
+    const facts = [u.kind === 'staff' && ROLE_NAMES[u.staff_role], u.products && `${u.products} product${u.products === 1 ? '' : 's'}`, u.shop_orders && `${u.shop_orders} order${u.shop_orders === 1 ? '' : 's'} received`,
+      u.buyer_orders && `${u.buyer_orders} order${u.buyer_orders === 1 ? '' : 's'} placed`, u.payments && `${u.payments} payment${u.payments === 1 ? '' : 's'} to RGBKart`].filter(Boolean);
+    const box = h('div', { class: 'reject-box', hidden: true, style: 'background:var(--surface)' });
+    const mine = u.id === myId, isMaster = u.staff_role === 'master_admin';
+    const blockBtn = !mine && !isMaster && (u.kind !== 'staff' || myRole === 'master_admin') && (u.blocked_at
+      ? actionBtn('Unblock', 'good', async () => { const { error } = await db.rpc('admin_block_user', { p_user: u.id, p_block: false }); if (error) return toast(friendly(error)); toast('Unblocked: they can sign in again'); loadUsers(); })
+      : h('button', { type: 'button', class: 'bad', text: 'Block…', onclick: () => openBox('block') }));
+    const delBtn = !mine && myRole === 'master_admin' && u.kind !== 'staff' && h('button', { type: 'button', class: 'bad', text: 'Delete…', onclick: () => openBox('delete') });
+    function openBox(kind) {
+      box.innerHTML = ''; box.hidden = false;
+      if (kind === 'block') {
+        const why = h('input', { type: 'text', maxlength: 300, placeholder: 'Reason (for the team), e.g. fake products, many refused orders', 'aria-label': 'Reason for blocking', style: 'width:100%' });
+        box.append(h('b', { text: `Block ${name}?` }),
+          h('p', { class: 'prod-meta', text: 'They can\'t sign in any more and are signed out now.' + (u.kind === 'shop' || u.kind === 'one_time' ? ' Their shop and live products are hidden from buyers.' : '') + ' Nothing is deleted; you can Unblock later.' }),
+          why, h('div', { class: 'actions', style: 'justify-content:start' },
+            actionBtn('Block account', 'bad', async () => { if (!why.value.trim()) { why.focus(); return toast('Write a short reason.'); }
+              const { error } = await db.rpc('admin_block_user', { p_user: u.id, p_block: true, p_reason: why.value.trim() }); if (error) return toast(friendly(error)); toast('Blocked'); loadUsers(); }),
+            h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => box.hidden = true })));
+      } else {
+        const key = u.email || 'DELETE';
+        const typed = h('input', { type: 'text', placeholder: key, 'aria-label': 'Type to confirm', autocomplete: 'off', style: 'width:100%' });
+        const lost = [u.products && `${u.products} product(s)`, u.shop_orders && `${u.shop_orders} order(s) this shop received`, u.buyer_orders && `${u.buyer_orders} order(s) this person placed (shops lose them too)`,
+          u.payments && `${u.payments} Featured/ad payment record(s): your income reports will go down`].filter(Boolean);
+        box.append(h('b', { text: `Delete ${name} permanently?`, style: 'color:var(--danger)' }),
+          h('p', { class: 'prod-meta', text: 'This removes the account and everything linked to it. It can\'t be undone.' + (lost.length ? ' Also deleted: ' + lost.join('; ') + '.' : '') + (lost.length ? ' Consider Block instead.' : '') }),
+          h('label', { class: 'prod-meta' }, `To confirm, type ${u.email ? 'the email' : 'DELETE'}: `, h('b', { text: key })), typed,
+          h('div', { class: 'actions', style: 'justify-content:start' },
+            actionBtn('Delete permanently', 'bad', async () => {
+              if (typed.value.trim().toLowerCase() !== key.toLowerCase()) { typed.focus(); return toast('Type it exactly to confirm.'); }
+              const { error } = await db.rpc('admin_delete_user', { p_user: u.id, p_confirm: typed.value.trim() }); if (error) return toast(friendly(error)); toast('Account deleted'); loadUsers(); }),
+            h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => box.hidden = true })));
+      }
+      (box.querySelector('input') || box).focus();
+    }
+    return h('div', { class: 'prod', style: 'grid-template-columns:minmax(0,1fr) auto' },
+      h('div', { style: 'min-width:0;display:grid;gap:3px' },
+        h('div', { class: 'prod-title' }, name, h('span', { class: 'chip ' + (u.kind === 'staff' ? 'approved' : u.kind === 'guest' ? 'plain' : 'pending'), text: U_KIND[u.kind] }),
+          u.blocked_at && h('span', { class: 'chip rejected', text: 'Blocked' }), mine && h('span', { class: 'chip plain', text: 'You' })),
+        h('div', { class: 'prod-meta', text: [u.full_name && u.shop_name ? u.full_name : null, u.email, u.phone, u.city].filter(Boolean).join(' · ') || '—' }),
+        h('div', { class: 'prod-meta', text: `Joined ${fmtDate(u.created_at)}` + (u.last_sign_in_at ? ` · last signed in ${fmtDate(u.last_sign_in_at)}` : '') + (facts.length ? ' · ' + facts.join(' · ') : '') }),
+        u.blocked_at && h('div', { class: 'prod-meta', style: 'color:var(--danger)', text: `Blocked ${fmtDate(u.blocked_at)}: ${u.blocked_reason || ''}` }),
+        u.kind === 'staff' && !isMaster && h('div', { class: 'prod-meta', text: 'Team member: change or remove their role in Team before deleting.' }),
+        box),
+      h('div', { class: 'actions' }, (u.kind === 'shop' || u.kind === 'one_time') && u.shop_name !== null && h('a', { class: 'ghost', href: 'store.html?s=' + u.id, target: '_blank', rel: 'noopener', text: 'Shop page', style: 'text-decoration:none;font-weight:600;font-size:14px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);color:var(--fg)' }), blockBtn, delBtn));
   }
 
   // ===================== Team =====================

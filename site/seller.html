@@ -1853,6 +1853,13 @@
     $('fSku').value = p.sku || ''; $('fManage').checked = p.manage_stock; $('fStock').value = p.stock ?? 0;
     $('fLow').value = p.low_stock_threshold ?? ''; $('fBackorders').value = p.backorders; $('fStockStatus').value = p.stock_status;
     $('fSoldInd').checked = p.sold_individually;
+    // Featured products: title, product code and quantity are locked (the database enforces it too, 0040)
+    const featLock = !!(p.id && p.is_featured);
+    ['fTitle', 'fTitleBn', 'fSku', 'fStock'].forEach(id => { const el = $(id); if (el) { el.disabled = featLock; el.title = featLock ? 'Locked while this product is Featured' : ''; } });
+    let fl = $('featLockNote');
+    if (!fl) { fl = h('p', { id: 'featLockNote', class: 'hint', style: 'margin:0;color:var(--warn,#8a5a00)' }); $('fTitle').closest('label').after(fl); }
+    fl.textContent = featLock ? '🔒 This product is Featured: the title, product code (SKU) and quantity cannot be changed until Featured ends.' : '';
+    fl.hidden = !featLock;
     $('fWeight').value = p.weight_kg ?? ''; $('fLen').value = p.length_cm ?? ''; $('fWid').value = p.width_cm ?? ''; $('fHei').value = p.height_cm ?? '';
     $('fShipClass').value = p.shipping_class; $('fDelivery').value = p.delivery_time; $('fShipsTo').value = p.ships_to; $('fFreeDel').checked = p.free_delivery;
     $('fReturn').value = p.return_policy; $('fNote').value = p.purchase_note || '';

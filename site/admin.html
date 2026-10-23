@@ -117,6 +117,8 @@
   .ar-head b { overflow-wrap: anywhere; }
   .ar-stars { color: #F5C400; letter-spacing: 1px; }
   .ar-act { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .ar .pill.cp-open { background: #FDE7E8; color: #B3000C; } .ar .pill.cp-reviewing { background: #FFF6CC; color: #6B5300; }
+  .ar .pill.cp-resolved, .ar .pill.cp-dismissed { background: #E5F4EA; color: #00802B; }
   .ar .pill { background: #FDE7E8; color: #B3000C; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 700; }
   .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .page-head p { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
@@ -392,6 +394,7 @@
     <button class="nav tone-blue" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Products<span class="count" id="navProducts" hidden></span></button>
     <button class="nav tone-green" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders</button>
     <button class="nav tone-amber" data-view="reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Reviews</button>
+    <button class="nav tone-red" data-view="complaints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>Complaints<span class="count" id="navComplaints" hidden></span></button>
 
     <div class="nav-group tone-green">People</div>
     <button class="nav tone-green" data-view="sellers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Sellers<span class="count" id="navPending" hidden></span></button>
@@ -606,6 +609,17 @@
           <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
           <input type="search" id="arSearch" placeholder="Search words, buyer, shop or product" aria-label="Search reviews" style="flex:1;min-width:220px"></div>
         <div id="arList" class="ar-list"></div>
+      </div>
+    </section>
+
+    <section data-page="complaints" hidden>
+      <div class="page-head"><div><h1>Complaints</h1><p>Reports from shoppers about products and shops (fake items, scams, no delivery…). Check each one, take action where needed (reject the product in Products, suspend the shop in Sellers, hide a review), then mark it resolved or dismissed. The person who reported gets an alert with your note.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar"><div class="filters" id="cpFilter">
+          <button type="button" data-f="open" aria-pressed="true">To check</button><button type="button" data-f="closed" aria-pressed="false">Closed</button>
+          <button type="button" data-f="all" aria-pressed="false">All</button></div>
+          <input type="search" id="cpSearch" placeholder="Search shop, product or words" aria-label="Search complaints" style="flex:1;min-width:220px"></div>
+        <div id="cpList" class="ar-list"></div>
       </div>
     </section>
 
@@ -1111,6 +1125,61 @@
   async function loadAll() {
     await Promise.all([loadCatalog(), loadSellers(), loadCustomers(), loadFeatured(), loadProducts(), loadPayments()]);
     drawDashboard();
+    loadComplaints(true);
+  }
+
+  // ===================== Complaints (0030_reports_fraud.sql) =====================
+  const CP_REASON = { fake: 'Fake or copy product', scam: 'Scam or fraud', no_delivery: 'Ordered but never delivered', wrong_info: 'Wrong price, photos or information',
+    prohibited: 'Item not allowed for sale', offensive: 'Rude or offensive', spam: 'Spam or repeated listing', other: 'Something else' };
+  let complaints = [], cpShops = new Map(), cpFilter = 'open';
+  async function loadComplaints(countOnly) {
+    const r = await db.from('reports').select('*, products(title, status)').order('created_at', { ascending: false }).limit(1000);
+    if (r.error) { if (!countOnly) { $('cpList').innerHTML = ''; $('cpList').append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Complaints are not switched on yet: run 0030_reports_fraud.sql.' : friendly(r.error) })); } return; }
+    complaints = r.data || [];
+    const open = complaints.filter(x => x.status === 'open').length;
+    $('navComplaints').hidden = !open; $('navComplaints').textContent = open;
+    if (countOnly) return;
+    const ids = [...new Set(complaints.map(x => x.seller_id).filter(Boolean))];
+    const sd = ids.length ? await db.from('seller_details').select('user_id, shop_name, shop_slug, status').in('user_id', ids) : { data: [] };
+    cpShops = new Map((sd.data || []).map(x => [x.user_id, x]));
+    drawComplaints();
+  }
+  $('cpFilter').querySelectorAll('button').forEach(b => b.onclick = () => { cpFilter = b.dataset.f; $('cpFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawComplaints(); });
+  $('cpSearch').oninput = () => drawComplaints();
+  function drawComplaints() {
+    const q = $('cpSearch').value.trim().toLowerCase();
+    let list = complaints;
+    if (cpFilter === 'open') list = list.filter(x => x.status === 'open' || x.status === 'reviewing');
+    if (cpFilter === 'closed') list = list.filter(x => x.status === 'resolved' || x.status === 'dismissed');
+    if (q) list = list.filter(x => [x.details, x.admin_note, x.contact, CP_REASON[x.reason], (cpShops.get(x.seller_id) || {}).shop_name, x.products && x.products.title].join(' ').toLowerCase().includes(q));
+    const perShop = new Map(); complaints.forEach(x => perShop.set(x.seller_id, (perShop.get(x.seller_id) || 0) + 1));
+    const box = $('cpList'); box.innerHTML = '';
+    if (!list.length) { box.append(h('p', { class: 'muted', style: 'padding:12px 0', text: complaints.length ? 'Nothing here.' : 'No complaints yet.' })); return; }
+    list.slice(0, 300).forEach(x => {
+      const shop = cpShops.get(x.seller_id) || {};
+      const note = h('input', { type: 'text', maxlength: 300, placeholder: 'Note for the person who reported (optional)', 'aria-label': 'Note', value: x.admin_note || '', style: 'flex:1;min-width:200px' });
+      const set = st => db.rpc('admin_update_report', { p_report: x.id, p_status: st, p_note: note.value.trim() || null }).then(({ error }) => {
+        if (error) return toast(friendly(error)); toast('Complaint marked ' + st); loadComplaints();
+      });
+      const n = perShop.get(x.seller_id) || 0;
+      const closed = x.status === 'resolved' || x.status === 'dismissed';
+      box.append(h('article', { class: 'ar' + (closed ? ' hid' : '') },
+        h('div', { class: 'ar-head' },
+          h('span', { class: 'pill cp-' + x.status, text: { open: 'New', reviewing: 'Checking', resolved: 'Resolved', dismissed: 'Dismissed' }[x.status] }),
+          h('b', { text: CP_REASON[x.reason] || x.reason }),
+          h('span', { class: 'muted', text: new Date(x.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) })),
+        h('div', { class: 'ar-act' },
+          x.product_id ? h('a', { href: 'product.html?id=' + x.product_id, target: '_blank', rel: 'noopener', text: 'Product: ' + (x.products ? x.products.title : '#' + x.product_id) + (x.products && x.products.status !== 'approved' ? ' (' + x.products.status + ')' : '') + ' ↗' }) : null,
+          x.seller_id && h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || x.seller_id), target: '_blank', rel: 'noopener', text: 'Shop: ' + (shop.shop_name || 'unknown') + (shop.status && shop.status !== 'approved' ? ' (' + shop.status + ')' : '') + ' ↗' }),
+          n > 1 && h('span', { class: 'pill', text: n + ' complaints about this shop' })),
+        h('p', { style: 'margin:0;overflow-wrap:anywhere', text: x.details || '(no details written)' }),
+        x.contact && h('p', { class: 'muted', style: 'margin:0', text: 'Reporter contact: ' + x.contact }),
+        h('div', { class: 'ar-act' }, note,
+          x.status === 'open' && h('button', { type: 'button', class: 'ghost', text: 'Checking', onclick: () => set('reviewing') }),
+          !closed && h('button', { type: 'button', class: 'good', text: 'Resolved', onclick: () => set('resolved') }),
+          !closed && h('button', { type: 'button', class: 'ghost', text: 'Dismiss', onclick: () => set('dismissed') }),
+          closed && h('button', { type: 'button', class: 'ghost', text: 'Open again', onclick: () => set('open') }))));
+    });
   }
 
   // ===================== Reviews (0029_reviews.sql) =====================
@@ -1162,8 +1231,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'reviews', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', reviews: 'Reviews', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'reviews', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', reviews: 'Reviews', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1181,6 +1250,7 @@
     if (view === 'payments') loadPayments();
     if (view === 'orders') loadAdminOrders();
     if (view === 'reviews') loadAdminReviews();
+    if (view === 'complaints') loadComplaints();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));

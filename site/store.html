@@ -72,9 +72,10 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=8"></script>
+<script src="i18n.js?v=9"></script>
 <script src="shop.js?v=15"></script>
 <script src="reviews.js?v=1"></script>
+<script src="report.js?v=1"></script>
 <script src="menu.js?v=5"></script>
 <script>
   const PAGE = 20;
@@ -145,6 +146,7 @@
       h('nav', { class: 'pager', id: 'pager', 'aria-label': T('Pages'), hidden: true }), h('p', { class: 'pager-info', id: 'pagerInfo', hidden: true })));
     // what buyers say about the shop (0029_reviews.sql)
     box.append(h('section', { class: 'about', id: 'reviews' }, h('h2', { text: T('Shop reviews') }), RGBReviews.section(db, { shop: S.user_id })));
+    box.append(h('div', { style: 'text-align:center' }, RGBReport.link(db, { shop: S.user_id })));
     // categories this shop sells in (top level)
     db.from('products').select('category_id').eq('seller_id', S.user_id).eq('status', 'approved').limit(1000).then(r => {
       const top = id => { let c = cats.find(x => x.id === id); while (c && c.parent_id) c = cats.find(x => x.id === c.parent_id); return c; };

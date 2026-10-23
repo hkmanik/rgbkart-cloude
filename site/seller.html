@@ -119,6 +119,13 @@
   .rv-reply-form { display: grid; gap: 8px; }
   .rv-reply-form textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); resize: vertical; }
   .row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .risk { display: grid; gap: 2px; border-radius: 8px; padding: 6px 10px; font-size: .84rem; margin-top: 4px; background: var(--bg); border: 1px solid var(--line); }
+  .risk small { color: var(--muted); }
+  .risk.high { background: #FDE7E8; border-color: #F3A6AB; color: #8F000A; }
+  .risk.watch { background: #FFF6CC; border-color: #F5C400; color: #6B5300; }
+  .risk.trusted { background: #E5F4EA; border-color: #A9D9B9; color: #00602A; }
+  .qrs { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+  .qrs .qr { padding: 5px 10px; font-size: .8rem; }
   .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .page-head p { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
   .banner { border-radius: 10px; padding: 12px 16px; font-size: .92rem; display: grid; gap: 4px; }
@@ -378,7 +385,6 @@
     <button class="nav tone-green" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders<span id="navOrders" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></button>
     <button class="nav tone-amber" data-view="reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="m12 7.5 1.3 2.7 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z"/></svg>Reviews<span id="navReviews" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></button>
     <a class="nav tone-green" id="navShopPage" href="store.html" target="_blank" rel="noopener" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>My shop page ↗</a>
-    <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payouts<span class="soon">5.3</span></button>
 
     <div class="nav-group">Settings</div>
     <button class="nav tone-blue" data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Shop settings</button>
@@ -1216,6 +1222,26 @@
     const r = await db.from('orders').select('*, order_items(*)').eq('seller_id', me.id).order('created_at', { ascending: false }).limit(300);
     if (r.error) { $('ordList').innerHTML = ''; $('ordList').append(h('div', { class: 'empty' }, h('span', { text: /does not exist|Could not find/i.test(r.error.message) ? 'Orders aren\'t switched on yet.' : friendly(r.error) }))); return; }
     orders = r.data; drawOrderCount(); drawOrders();
+    // buyer history for open orders (0030_reports_fraud.sql): delivered / refused / cancelled before, on all shops
+    const ids = orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).map(o => o.id);
+    if (ids.length) {
+      const hr = await db.rpc('order_buyer_history', { p_orders: ids });
+      if (!hr.error && hr.data) { buyerRisk = new Map(hr.data.map(x => [x.order_id, x])); drawOrders(); }
+    }
+  }
+  let buyerRisk = new Map();
+  function riskBadge(o) {
+    const x = buyerRisk.get(o.id); if (!x) return null;
+    const bits = [];
+    if (x.delivered) bits.push(`${x.delivered} delivered`);
+    if (x.refused) bits.push(`${x.refused} refused`);
+    if (x.buyer_cancelled) bits.push(`${x.buyer_cancelled} cancelled by buyer`);
+    if (x.open_orders) bits.push(`${x.open_orders} other open`);
+    const label = { high: '⚠ Risky buyer', watch: '⚠ Check first', trusted: '✓ Trusted buyer', new: 'New buyer', ok: 'Buyer history' }[x.level];
+    const tip = { high: 'This buyer refused or cancelled several orders before. Call to confirm, or ask for the delivery charge in advance.',
+                  watch: 'This buyer refused or cancelled before. Call to confirm before you pack.',
+                  trusted: 'This buyer received orders on RGBKart before.', new: 'First order on RGBKart. Call to confirm.', ok: '' }[x.level];
+    return h('div', { class: 'risk ' + x.level, title: tip }, h('b', { text: label }), bits.length ? h('span', { text: bits.join(' · ') + ' (all shops)' }) : null, tip && x.level !== 'trusted' ? h('small', { text: tip }) : null);
   }
   function drawOrderCount() { const n = orders.filter(o => o.status === 'pending').length; $('navOrders').hidden = !n; $('navOrders').textContent = n; }
   $('ordSearch').oninput = () => drawOrders();
@@ -1237,7 +1263,9 @@
     const next = O_NEXT[o.status];
     const note = h('input', { type: 'text', maxlength: 200, placeholder: 'Courier and tracking number (optional), e.g. Pathao PA123456', 'aria-label': 'Delivery info for the customer' });
     const reason = h('input', { type: 'text', maxlength: 200, placeholder: 'Reason the customer will see', 'aria-label': 'Reason for cancelling' });
-    const cancelBox = h('div', { class: 'ord-cancel', hidden: true }, reason,
+    const quick = (o.status === 'shipped' ? ['Customer refused the parcel', 'Customer did not answer the phone'] : ['Customer did not answer the phone', 'Out of stock', 'Customer asked to cancel'])
+      .map(t => h('button', { type: 'button', class: 'ghost qr', text: t, onclick: () => { reason.value = t; reason.focus(); } }));
+    const cancelBox = h('div', { class: 'ord-cancel', hidden: true }, h('div', { class: 'qrs' }, quick), reason,
       actionBtn('Cancel order', 'bad', async () => { if (!reason.value.trim()) { reason.focus(); return toast('Write a reason the customer will see.'); } await setOrderStatus(o, 'cancelled', reason.value.trim()); }),
       h('button', { type: 'button', class: 'ghost', text: 'Keep', onclick: () => cancelBox.hidden = true }));
     const at = O_STEPS.indexOf(o.status);
@@ -1251,7 +1279,8 @@
           h('a', { href: 'tel:' + o.phone, text: '📞 ' + o.phone }),
           h('span', { text: [o.address, o.area, o.district].filter(Boolean).join(', ') }),
           o.email && h('span', { class: 'pmeta', text: o.email }),
-          o.note && h('span', { class: 'ord-note', text: 'Note: ' + o.note })),
+          o.note && h('span', { class: 'ord-note', text: 'Note: ' + o.note }),
+          riskBadge(o)),
         h('div', { class: 'ord-items' }, (o.order_items || []).map(i => h('div', { class: 'srow' }, h('span', { text: `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}` }), h('span', { text: money(i.line_total) }))),
           h('div', { class: 'srow pmeta' }, h('span', { text: SHIPN[o.ship_method] || o.ship_method }), h('span', { text: o.ship_fee > 0 ? money(o.ship_fee) : o.ship_method === 'negotiated' ? 'agree' : 'free' })),
           h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })))),

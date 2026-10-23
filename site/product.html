@@ -268,6 +268,7 @@
         <div class="panel">
           <span class="lbl" id="sellerLbl">Sold by</span>
           <div class="seller" id="seller"></div>
+          <div id="reportBox" style="margin-top:6px"></div>
         </div>
       </div>
     </div>
@@ -307,9 +308,10 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=8"></script>
+<script src="i18n.js?v=9"></script>
 <script src="menu.js?v=5"></script>
 <script src="reviews.js?v=1"></script>
+<script src="report.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -545,6 +547,7 @@
   // ---------- seller + contact ----------
   function drawSeller() {
     const box = $('seller');
+    if (window.RGBReport) $('reportBox').append(RGBReport.link(db, { product: P.id }));
     const oneTime = P.contact_only;
     $('sellerLbl').textContent = oneTime ? 'Listed by' : 'Sold by';
     if (!shop) { box.append(h('span', { text: 'Seller details unavailable' })); return; }

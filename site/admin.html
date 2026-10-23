@@ -730,6 +730,11 @@
         <p class="msg muted" style="margin:4px 0 10px">Until which step a buyer can cancel an order by themselves. After that they can only ask the shop, and the shop accepts or declines. Shops must always give a reason when they cancel.</p>
         <div id="cancelBox"></div>
       </div>
+      <div class="card" style="margin-top:18px">
+        <h2>VAT on invoices</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Prices already include VAT. When this is on, each new order records how much of its total is VAT, and the shop's invoice and the buyer's order show "Includes VAT". Orders placed before you switch it on don't change.</p>
+        <div id="vatBox"></div>
+      </div>
     </section>
 
     <!-- Payments -->
@@ -2758,7 +2763,7 @@
     const ids = [...new Set(aOrders.map(x => x.seller_id))];
     aoShops = new Map();
     if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public').in('user_id', ids); (sd.data || []).forEach(x => aoShops.set(x.user_id, x)); }
-    drawAdminOrders(); drawShip(); drawCod(); drawCancelRules();
+    drawAdminOrders(); drawShip(); drawCod(); drawCancelRules(); drawVat();
   }
   $('aoFilter').querySelectorAll('button').forEach(b => b.onclick = () => { aoFilter = b.dataset.s; $('aoFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAdminOrders(); });
   $('aoSearch').oninput = () => drawAdminOrders();
@@ -2848,6 +2853,25 @@
       }) : h('span')));
   }
 
+  async function drawVat() {
+    const box = $('vatBox'); box.innerHTML = '';
+    const r = await db.from('site_settings').select('value').eq('key', 'vat').maybeSingle();
+    if (r.error || !r.data) { box.append(h('p', { class: 'msg muted', text: r.error && !/does not exist|Could not find/i.test(r.error.message) ? friendly(r.error) : 'Run 0043_vat.sql in Supabase to turn on VAT.' })); return; }
+    const v = r.data.value || {}, edit = canApprove();
+    const on = h('input', { type: 'checkbox', checked: !!v.on, disabled: !edit });
+    const rate = h('input', { type: 'number', min: 0, max: 50, step: 0.5, value: Number(v.rate) || 0, 'aria-label': 'VAT rate in percent', disabled: !edit });
+    box.append(h('div', { class: 'rate-row cod-row' },
+      h('label', { class: 'check' }, on, 'Show VAT on new orders'),
+      h('label', {}, 'VAT rate (%)', rate), h('span'),
+      edit ? actionBtn('Save', 'good', async () => {
+        const n = Number(rate.value);
+        if (!(n >= 0 && n <= 50)) return toast('Enter a VAT rate from 0 to 50.');
+        if (on.checked && !n) return toast('Enter the VAT rate, for example 5 or 15.');
+        const { error } = await db.from('site_settings').upsert({ key: 'vat', value: { on: on.checked, rate: n }, updated_at: new Date().toISOString() });
+        if (error) return toast(friendly(error)); toast(on.checked ? `VAT ${n}% is on for new orders` : 'VAT is off'); drawVat();
+      }) : h('span')));
+  }
+
   // ===================== Reports =====================
   let repPeriod = 'day', repAnchor = null, repData = null, repRange = null, repOrders = null;
   const dhakaToday = () => new Date(Date.now() + 6 * 3600e3).toISOString().slice(0, 10);
@@ -2909,7 +2933,7 @@
     const from = dhakaStart(f), to = dhakaStart(dayAfter(t)), token = f + t;
     try {
       const [orders, pays] = await Promise.all([
-        pageAll(() => db.from('orders').select('id, order_no, created_at, seller_id, customer_name, phone, district, ship_method, status, subtotal, ship_fee, discount, total, coupon_code, cancelled_by, cancel_reason, delivered_at, order_items(product_id, title, variant_label, qty, unit_price, line_total)').gte('created_at', from).lt('created_at', to).order('created_at')),
+        pageAll(() => db.from('orders').select('*, order_items(product_id, title, variant_label, qty, unit_price, line_total)').gte('created_at', from).lt('created_at', to).order('created_at')),
         pageAll(() => db.from('payments').select('id, kind, item_title, seller_id, amount, method_id, sender_no, trx_id, created_at, reviewed_at').eq('status', 'verified').gte('reviewed_at', from).lt('reviewed_at', to).order('reviewed_at')).catch(() => []),
       ]);
       const ids = [...new Set([...orders.map(o => o.seller_id), ...pays.map(p => p.seller_id)])];
@@ -3025,10 +3049,10 @@
         ['Visitors', d.visitors], ['Page visits', d.page_views], ['Messages', d.messages], ['New customers', d.new_customers], ['New shops', d.new_shops], ['New one-time sellers', d.new_one_time],
         ['New listings', d.new_listings], ['Listings that went live', d.approved_listings], ['Live products now', d.live_products], [],
         ['Period from', 'Period to', 'Visitors', 'New sign-ups', 'New listings', 'Income (BDT)'], ...(d.series || []).map(r => [r.from, r.to, r.visitors, r.signups, r.listings, Number(r.income)])],
-      Orders: [['Order no.', 'Placed', 'Shop', 'Customer', 'Phone', 'District', 'Delivery', 'Status', 'Items', 'Items value', 'Delivery fee', 'Coupon', 'Discount', 'Total (BDT)', 'Cancelled by', 'Cancel reason', 'Delivered']]
+      Orders: [['Order no.', 'Placed', 'Shop', 'Customer', 'Phone', 'District', 'Delivery', 'Status', 'Items', 'Items value', 'Delivery fee', 'Coupon', 'Discount', 'Total (BDT)', 'VAT included (BDT)', 'Cancelled by', 'Cancel reason', 'Delivered']]
         .concat(x.orders.map(o => [o.order_no, dt(o.created_at), shop(o.seller_id), o.customer_name, o.phone, o.district, o.ship_method, o.status,
           (o.order_items || []).map(i => `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}`).join('; '),
-          Number(o.subtotal), Number(o.ship_fee), o.coupon_code || '', Number(o.discount || 0), Number(o.total), o.cancelled_by || '', o.cancel_reason || '', dt(o.delivered_at)])),
+          Number(o.subtotal), Number(o.ship_fee), o.coupon_code || '', Number(o.discount || 0), Number(o.total), o.vat_amount == null ? '' : Number(o.vat_amount), o.cancelled_by || '', o.cancel_reason || '', dt(o.delivered_at)])),
       'Payments received': [['Checked', 'Shop', 'For', 'Item', 'Method', 'Sender no.', 'TrxID', 'Amount (BDT)']]
         .concat(x.pays.map(p => [dt(p.reviewed_at), shop(p.seller_id), p.kind === 'ad' ? 'Advertisement' : 'Featured', p.item_title || '', p.method_id, p.sender_no, p.trx_id, Number(p.amount)])),
       'Top shops': [['#', 'Shop', 'Phone', 'City', 'Orders', 'Value (not cancelled)', 'Delivered', 'Delivered value', 'Cancelled']]

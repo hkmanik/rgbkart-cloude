@@ -33,7 +33,7 @@
       <div class="box"><div class="lb">Payment</div><b>Cash on Delivery</b><div>Delivery: ${esc(SHIP[o.ship_method] || o.ship_method)}</div>${o.tracking_note ? `<div class="sm">${esc(o.tracking_note)}</div>` : ''}</div></div>
       <table><thead><tr><th class="c">#</th><th>Item</th><th class="n">Qty</th><th class="n">Price</th><th class="n">Amount</th></tr></thead><tbody>${rows}</tbody>
       <tfoot><tr><td colspan="4">Subtotal</td><td class="n">${tk(o.subtotal)}</td></tr><tr><td colspan="4">Delivery charge</td><td class="n">${o.ship_method === 'negotiated' ? 'As agreed' : tk(o.ship_fee)}</td></tr>${Number(o.discount) > 0 ? `<tr><td colspan="4">Coupon ${esc(o.coupon_code || '')}</td><td class="n">−${tk(o.discount)}</td></tr>` : ''}
-      <tr class="tot"><td colspan="4">Total to collect (cash)</td><td class="n">${tk(o.total)}</td></tr></tfoot></table>
+      <tr class="tot"><td colspan="4">Total to collect (cash)</td><td class="n">${tk(o.total)}</td></tr>${Number(o.vat_amount) > 0 ? `<tr><td colspan="4" class="sm">Includes VAT ${Number(o.vat_rate)}%</td><td class="n sm">${tk(o.vat_amount)}</td></tr>` : ''}</tfoot></table>
       ${o.note ? `<p class="sm"><b>Customer note:</b> ${esc(o.note)}</p>` : ''}
       ${s.footer ? `<p class="foot">${esc(s.footer)}</p>` : ''}<div class="sign"><span>Received by (customer)</span><span>For ${esc(shop.shop_name || 'the shop')}</span></div></section>`;
   }

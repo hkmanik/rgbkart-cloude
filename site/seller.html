@@ -971,7 +971,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
 <script src="pay.js?v=1"></script>
-<script src="printdocs.js?v=2"></script>
+<script src="printdocs.js?v=3"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -1577,7 +1577,8 @@
         h('div', { class: 'ord-items' }, (o.order_items || []).map(i => h('div', { class: 'srow' }, h('span', { text: `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}` }), h('span', { text: money(i.line_total) }))),
           h('div', { class: 'srow pmeta' }, h('span', { text: SHIPN[o.ship_method] || o.ship_method }), h('span', { text: o.ship_fee > 0 ? money(o.ship_fee) : o.ship_method === 'negotiated' ? 'agree' : 'free' })),
           Number(o.discount) > 0 && h('div', { class: 'srow pmeta' }, h('span', { text: 'Coupon ' + (o.coupon_code || '') }), h('span', { text: '−' + money(o.discount) })),
-          h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })))),
+          h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })),
+          Number(o.vat_amount) > 0 && h('div', { class: 'srow pmeta' }, h('span', { text: `Includes VAT ${Number(o.vat_rate)}%` }), h('span', { text: money(o.vat_amount) })))),
       o.status === 'cancelled' && h('p', { class: 'pmeta', style: 'color:var(--danger)', text: `Cancelled by ${o.cancelled_by || '—'}${o.cancel_reason ? ': ' + o.cancel_reason : ''}` }),
       o.tracking_note && h('p', { class: 'pmeta', text: 'Delivery info: ' + o.tracking_note }),
       cancelAsk(o),

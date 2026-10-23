@@ -322,6 +322,7 @@
     ['Cash on Delivery limit: {p} per shop. Please remove some items from {s}.', 'ক্যাশ অন ডেলিভারির সীমা: প্রতি দোকানে {p}। অনুগ্রহ করে {s} থেকে কিছু পণ্য সরান।'],
     ['First order on RGBKart? Then the limit is {p} per shop.', 'RGBKart-এ প্রথম অর্ডার? তাহলে প্রতি দোকানে সীমা {p}।'],
     ['Buyer asks to cancel order {o}', 'ক্রেতা অর্ডার {o} বাতিল করতে চান'], ['Order {o} is cancelled as you asked', 'আপনার অনুরোধে অর্ডার {o} বাতিল হয়েছে'], ['Order {o}: the shop could not cancel it', 'অর্ডার {o}: দোকান বাতিল করতে পারেনি'],
+    ['Includes VAT {n}%: {p}', 'ভ্যাট {n}% সহ: {p}'], ['Prices include VAT ({n}%)', 'দামে ভ্যাট ({n}%) ধরা আছে'],
     ['Your {meth} number (you paid from)', 'আপনার {meth} নম্বর (যেটি থেকে পেমেন্ট করেছেন)'],
     ['✓ Payment sent ({meth}, TrxID {t}). Our team will check it soon, usually within a few hours.', '✓ পেমেন্ট পাঠানো হয়েছে ({meth}, TrxID {t})। আমাদের টিম শিগগিরই, সাধারণত কয়েক ঘণ্টার মধ্যে, যাচাই করবে।'],
   ];

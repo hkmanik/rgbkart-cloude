@@ -194,6 +194,7 @@
     'Browse all products': 'সব পণ্য দেখুন', 'Visit shop →': 'দোকানে যান →', 'Previous shops': 'আগের দোকানগুলো', 'Next shops': 'পরের দোকানগুলো', 'Top Shops': 'সেরা দোকান', '🏪 Visit shop →': '🏪 দোকানে যান →', 'See all products from this seller →': 'এই বিক্রেতার সব পণ্য দেখুন →', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
     'RGBKart Categories': 'ক্যাটাগরি | RGBKart', 'RGBKart Sign In': 'সাইন ইন | RGBKart', 'RGBKart Products': 'পণ্য | RGBKart', 'RGBKart Product': 'পণ্য | RGBKart',
     '✓ Verified shop': '✓ যাচাইকৃত দোকান', "RGBKart checked this shop's ID or trade licence": 'RGBKart এই দোকানের পরিচয়পত্র বা ট্রেড লাইসেন্স যাচাই করেছে',
+    'Information': 'তথ্য', 'Coming soon': 'শিগগিরই আসছে', 'This page is being prepared.': 'এই পৃষ্ঠা তৈরি হচ্ছে।', 'Page not found': 'পৃষ্ঠা পাওয়া যায়নি',
     // returns (0036)
     'Arrived damaged or broken': 'ভাঙা বা ক্ষতিগ্রস্ত অবস্থায় এসেছে', 'Wrong item or wrong size/colour sent': 'ভুল পণ্য বা ভুল সাইজ/রং পাঠানো হয়েছে', 'Not as described or shown': 'বর্ণনা বা ছবির সাথে মিল নেই',
     'Parts or accessories missing': 'যন্ত্রাংশ বা অ্যাকসেসরিজ নেই', 'Size or fit is not right': 'সাইজ বা মাপ ঠিক হয়নি', 'Poor quality or not working': 'মান খারাপ বা কাজ করে না', 'Changed my mind': 'মত বদলেছি',
@@ -303,7 +304,7 @@
     ['Page {n}', 'পৃষ্ঠা {n}'], ['Showing {a}–{b} of {n} products', '{n}টি পণ্যের মধ্যে {a}–{b} দেখানো হচ্ছে'],
     ['On RGBKart since {n}', '{n} থেকে RGBKart-এ'], ['Hi, I found your shop on RGBKart: {u}', 'আসসালামু আলাইকুম, RGBKart-এ আপনার দোকান দেখলাম: {u}'],
     ['★ {n} Featured', '★ {n}টি ফিচার্ড'],
-    ['Coupon {c}', 'কুপন {c}'], ['↩ Return this item (until {d})', '↩ পণ্যটি ফেরত দিন ({d} পর্যন্ত)'], ['Return: {t}', 'ফেরত: {t}'], ['The return time for this item has ended ({n} days after delivery)', 'এই পণ্যের ফেরতের সময় শেষ (ডেলিভারির {n} দিন পর)'], ['Choose how many to return (1 to {n})', 'কয়টি ফেরত দেবেন বেছে নিন (১ থেকে {n})'], ['applied: you save {p}', 'প্রয়োগ হয়েছে: আপনি বাঁচালেন {p}'], ['Coupon code for {s}', '{s}-এর কুপন কোড'],
+    ['Coupon {c}', 'কুপন {c}'], ['Last changed: {d}', 'সর্বশেষ পরিবর্তন: {d}'], ['↩ Return this item (until {d})', '↩ পণ্যটি ফেরত দিন ({d} পর্যন্ত)'], ['Return: {t}', 'ফেরত: {t}'], ['The return time for this item has ended ({n} days after delivery)', 'এই পণ্যের ফেরতের সময় শেষ (ডেলিভারির {n} দিন পর)'], ['Choose how many to return (1 to {n})', 'কয়টি ফেরত দেবেন বেছে নিন (১ থেকে {n})'], ['applied: you save {p}', 'প্রয়োগ হয়েছে: আপনি বাঁচালেন {p}'], ['Coupon code for {s}', '{s}-এর কুপন কোড'],
     ['This coupon needs an order of at least ৳{x} from this shop', 'এই কুপনের জন্য এই দোকান থেকে কমপক্ষে ৳{x}-এর অর্ডার লাগবে'], ['This coupon can be used from {d}', 'এই কুপন {d} থেকে ব্যবহার করা যাবে'],
     ['Waiting for your answer ({n})', 'আপনার উত্তরের অপেক্ষায় ({n})'], ['New question about {t}', '{t} নিয়ে নতুন প্রশ্ন'],
     ['Rated {a} out of 5', '৫-এর মধ্যে {a} রেটিং'], ['{n} stars', '{n} স্টার'], ['({n} review)', '({n}টি রিভিউ)'], ['({n} reviews)', '({n}টি রিভিউ)'], ['{n} review', '{n}টি রিভিউ'], ['{n} reviews', '{n}টি রিভিউ'], ['The shop: {s}', 'দোকান: {s}'],

@@ -65,9 +65,19 @@ function updateBadges() {
     el.setAttribute('aria-label', `Alerts, ${a} new`);
   });
 }
+// Policy / info pages in the footer (0039_site_pages.sql, edited in Admin → Pages)
+function footerPages() {
+  const ft = document.querySelector('footer .wrap'); if (!ft) return;
+  db.from('site_pages').select('slug, title, title_bn').eq('in_footer', true).eq('is_active', true).order('sort_order').then(r => {
+    if (r.error || !r.data || !r.data.length) return;
+    const row = h('nav', { class: 'foot-pages', 'aria-label': T('Information') }, r.data.map(p => h('a', { href: 'page.html?p=' + encodeURIComponent(p.slug), text: L(p, 'title') })));
+    ft.after(row);
+  }, () => {});
+}
 async function initShell() {
   document.body.insertAdjacentHTML('afterbegin', headerHTML());
   document.body.insertAdjacentHTML('beforeend', footerHTML());
+  footerPages();
   if (window.RGBLang) RGBLang.mountSwitches();
   if (window.RGBMenu) RGBMenu.mount();
   trackVisit();

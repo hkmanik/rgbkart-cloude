@@ -111,6 +111,8 @@
   .main { min-width: 0; padding-block: 28px 60px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; align-content: start; }
   .ret-pics { display: flex; gap: 8px; flex-wrap: wrap; } .ret-pics img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
   #logWho, #logArea, #logAct { width: auto; flex: none; min-width: 160px; } .inline-d input { width: auto; }
+  .pg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } @media (max-width: 640px) { .pg-grid { grid-template-columns: minmax(0, 1fr); } }
+  #pgBody, #pgBodyBn { font-family: inherit; line-height: 1.6; }
   .log-row { padding: 9px 0; gap: 3px; } .log-t { min-width: 150px; font-variant-numeric: tabular-nums; } .log-ch { margin: 0; font-size: .84rem; overflow-wrap: anywhere; }
   .ar .pill.log-add { background: #E5F4EA; color: #00802B; } .ar .pill.log-change { background: #FFF6CC; color: #6B5300; }
   .inline-d { display: flex; align-items: center; gap: 6px; flex-direction: row; text-transform: none; letter-spacing: 0; }
@@ -412,6 +414,7 @@
     <div class="nav-group tone-amber">Storefront &amp; money</div>
     <button class="nav tone-amber" data-view="homepage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 9v12h14V9"/></svg>Home page</button>
     <button class="nav tone-amber" data-view="mainmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Main menu</button>
+    <button class="nav tone-amber" data-view="pages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>Pages &amp; policies</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured &amp; ads<span class="count" id="navFeatured" hidden></span></button>
     <button class="nav tone-green" data-view="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments<span class="count" id="navPayments" hidden></span></button>
 
@@ -620,6 +623,26 @@
           <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
           <input type="search" id="arSearch" placeholder="Search words, buyer, shop or product" aria-label="Search reviews" style="flex:1;min-width:220px"></div>
         <div id="arList" class="ar-list"></div>
+      </div>
+    </section>
+
+    <section data-page="pages" hidden>
+      <div class="page-head"><div><h1>Pages &amp; policies</h1><p>About, Contact, Terms, Privacy, Return &amp; refund and Seller rules, shown in the footer of every page in English and Bangla. They start as drafts: fill in the parts in [square brackets] and have a lawyer check Terms and Privacy before launch. Format: "## " for a heading, "- " for a bullet, "1. " for a numbered step, an empty line between paragraphs, **bold**.</p></div>
+        <button type="button" class="primary" id="pgNew">+ New page</button></div>
+      <div class="card" style="margin-top:18px"><div id="pgList" class="ar-list"></div></div>
+      <div class="card" id="pgForm" hidden style="margin-top:18px">
+        <h2 id="pgFormTitle">Edit page</h2>
+        <div class="pg-grid">
+          <label>Title (English)<input id="pgTitle" type="text" maxlength="100"></label>
+          <label>Title (Bangla)<input id="pgTitleBn" type="text" maxlength="100" lang="bn"></label>
+          <label>Web address name<input id="pgSlug" type="text" maxlength="40" placeholder="e.g. shipping-info"><span class="hint">Small letters, numbers and - only. Page link: page.html?p=<b id="pgSlugShow"></b></span></label>
+          <label>Order in the footer<input id="pgSort" type="number" step="10" value="100"></label>
+        </div>
+        <label>Text (English)<textarea id="pgBody" rows="16" maxlength="30000"></textarea></label>
+        <label>Text (Bangla)<textarea id="pgBodyBn" rows="16" maxlength="30000" lang="bn"></textarea></label>
+        <label class="check"><input type="checkbox" id="pgFooter"> Show in the footer</label>
+        <label class="check"><input type="checkbox" id="pgActive"> Page is on (visible to everyone)</label>
+        <div class="ar-act"><button type="button" class="primary" id="pgSave">Save page</button><a id="pgView" target="_blank" rel="noopener">Open page ↗</a><button type="button" class="ghost" id="pgCancel">Close</button></div>
       </div>
     </section>
 
@@ -1188,6 +1211,53 @@
     loadVerifications(true);
   }
 
+  // ===================== Pages & policies (0039_site_pages.sql) =====================
+  let sitePages = [], pgEditing = null;
+  async function loadPages() {
+    const r = await db.from('site_pages').select('*').order('sort_order');
+    const box = $('pgList'); box.innerHTML = '';
+    if (r.error) { box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Pages are not switched on yet: run 0039_site_pages.sql.' : friendly(r.error) })); return; }
+    sitePages = r.data || [];
+    sitePages.forEach(p => {
+      const todo = ((p.body || '') + (p.body_bn || '')).match(/\[[^\]]+\]/g) || [];
+      box.append(h('article', { class: 'ar' }, h('div', { class: 'ar-head' },
+        h('b', { text: p.title }), p.title_bn && h('span', { class: 'muted', lang: 'bn', text: p.title_bn }),
+        !p.is_active && h('span', { class: 'pill', text: 'Off' }), p.in_footer && p.is_active && h('span', { class: 'pill cp-resolved', text: 'In footer' }),
+        !p.body_bn && h('span', { class: 'pill cp-reviewing', text: 'No Bangla text' }),
+        todo.length > 0 && h('span', { class: 'pill cp-reviewing', title: [...new Set(todo)].join(', '), text: `${new Set(todo).size} part${new Set(todo).size === 1 ? '' : 's'} to fill in` })),
+        h('div', { class: 'ar-act' }, h('button', { type: 'button', class: 'ghost', text: 'Edit', onclick: () => pgOpen(p) }),
+          h('a', { href: 'page.html?p=' + encodeURIComponent(p.slug), target: '_blank', rel: 'noopener', text: 'Open ↗' }),
+          h('span', { class: 'muted', text: 'Changed ' + new Date(p.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) }))));
+    });
+  }
+  function pgOpen(p) {
+    pgEditing = p || null;
+    $('pgFormTitle').textContent = p ? 'Edit: ' + p.title : 'New page';
+    $('pgTitle').value = p ? p.title : ''; $('pgTitleBn').value = p && p.title_bn || ''; $('pgSlug').value = p ? p.slug : ''; $('pgSlug').disabled = !!p;
+    $('pgSort').value = p ? p.sort_order : 100; $('pgBody').value = p ? p.body : ''; $('pgBodyBn').value = p && p.body_bn || '';
+    $('pgFooter').checked = p ? p.in_footer : true; $('pgActive').checked = p ? p.is_active : true;
+    $('pgSlugShow').textContent = p ? p.slug : ''; $('pgView').href = p ? 'page.html?p=' + encodeURIComponent(p.slug) : '#'; $('pgView').hidden = !p;
+    $('pgForm').hidden = false; $('pgForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  $('pgSlug').oninput = () => { $('pgSlug').value = $('pgSlug').value.toLowerCase().replace(/[^a-z0-9-]/g, '-'); $('pgSlugShow').textContent = $('pgSlug').value; };
+  $('pgNew').onclick = () => pgOpen(null);
+  $('pgCancel').onclick = () => { $('pgForm').hidden = true; };
+  $('pgSave').onclick = async () => {
+    const row = { title: $('pgTitle').value.trim(), title_bn: $('pgTitleBn').value.trim() || null, body: $('pgBody').value, body_bn: $('pgBodyBn').value.trim() ? $('pgBodyBn').value : null,
+      sort_order: Number($('pgSort').value) || 100, in_footer: $('pgFooter').checked, is_active: $('pgActive').checked };
+    if (row.title.length < 2) return toast('Write a title');
+    let q;
+    if (pgEditing) q = db.from('site_pages').update(row).eq('slug', pgEditing.slug);
+    else {
+      const slug = $('pgSlug').value.replace(/^-+|-+$/g, '');
+      if (!/^[a-z0-9-]{2,40}$/.test(slug)) return toast('Web address name: 2–40 small letters, numbers or -');
+      q = db.from('site_pages').insert({ ...row, slug });
+    }
+    const { error } = await q;
+    if (error) return toast(/duplicate|unique/i.test(error.message) ? 'A page with this web address already exists' : friendly(error));
+    toast('Page saved'); $('pgForm').hidden = true; loadPages();
+  };
+
   // ===================== Verification (0038_seller_verification.sql) =====================
   const VF_DOC = { nid: 'National ID (NID)', trade_licence: 'Trade licence', passport: 'Passport', other: 'Other document' };
   let vfRows = [], vfFilter = 'pending', vfShops = new Map();
@@ -1504,8 +1574,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify', 'pages'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1517,6 +1587,7 @@
     if (view === 'team') loadTeam();
     if (view === 'activity') loadLog(true);
     if (view === 'verify') loadVerifications();
+    if (view === 'pages') loadPages();
     if (view === 'featured') loadFeatured();
     if (view === 'products') loadProducts();
     if (view === 'homepage') loadSections();

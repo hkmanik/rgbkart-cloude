@@ -21,14 +21,16 @@
 
   /* Sidebar */
   .side { position: sticky; top: calc(var(--head-h, 84px) + 12px); max-height: calc(100vh - var(--head-h, 84px) - 24px); overflow-y: auto; display: grid; gap: 14px; padding-right: 2px; }
-  .side-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 4px; }
+  .side-card { background: #F1F9F3; border: 1px solid #CFE8D7; border-radius: 14px; padding: 12px; display: grid; gap: 4px; }
+  .node:hover { background: #E1F2E6; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .side-card { background: #13261A; border-color: #24402D; } :root:not([data-theme="light"]) .node:hover { background: #1B3524; } }
   .side h2 { font: 600 1.05rem var(--display); margin: 2px 6px 6px; }
   .tree { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
   .tree ul { list-style: none; margin: 2px 0 6px 18px; padding: 0 0 0 10px; border-left: 2px solid var(--line); display: grid; gap: 1px; }
   .node { display: flex; align-items: center; border-radius: 8px; }
-  .node:hover { background: var(--bg); }
   .node a { flex: 1; min-width: 0; display: flex; gap: 8px; align-items: center; padding: 7px 8px; text-decoration: none; color: var(--fg); font-size: .92rem; overflow-wrap: anywhere; }
   .node a .ic { width: 22px; text-align: center; flex: none; }
+  .node a img.ic { width: 28px; height: 28px; border-radius: 7px; object-fit: cover; box-shadow: 0 0 0 1px rgb(0 0 0 / .08); background: #fff; }
   .node a[aria-current="page"] { color: var(--accent); font-weight: 700; }
   .node.active { background: var(--accent-soft); }
   .tw { width: 32px; height: 32px; flex: none; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: 6px; font-size: .8rem; transition: transform .15s; }
@@ -57,8 +59,13 @@
   .fchip { display: inline-flex; gap: 6px; align-items: center; background: var(--accent-soft); color: var(--accent); border: 0; border-radius: 999px; padding: 5px 10px; font: 600 .82rem var(--body); cursor: pointer; }
   .fchip:hover { filter: brightness(.95); }
   .subcats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; }
-  .subcats a { flex: none; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; text-decoration: none; color: var(--fg); font-size: .88rem; font-weight: 600; }
-  .subcats a:hover { border-color: var(--accent); color: var(--accent); }
+  /* sub-category buttons in the brand colours: green, red, yellow in turn; filled on hover */
+  .subcats a { --c: #00802B; --soft: #E5F4EA; --on: #fff; flex: none; background: var(--soft); border: 1.5px solid var(--c); border-radius: 999px; padding: 6px 14px;
+    text-decoration: none; color: var(--c); font-size: .88rem; font-weight: 700; transition: background-color .15s, color .15s, transform .15s, box-shadow .15s; }
+  .subcats a:nth-child(3n+2) { --c: #E30613; --soft: #FDE7E8; }
+  .subcats a:nth-child(3n+3) { --c: #8A6A00; --soft: #FFF6CC; --fill: #F5C400; --on: #2A1A00; }
+  .subcats a:hover, .subcats a:focus-visible { background: var(--fill, var(--c)); border-color: var(--fill, var(--c)); color: var(--on); transform: translateY(-2px); box-shadow: 0 4px 10px rgb(0 0 0 / .15); }
+  @media (prefers-reduced-motion: reduce) { .subcats a { transition: none; } .subcats a:hover { transform: none; } }
   /* page numbers under the products */
   .pager { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 22px; }
   .pager a, .pager span.gap { min-width: 42px; height: 42px; display: inline-grid; place-items: center; padding: 0 12px; border-radius: 10px;
@@ -152,8 +159,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="i18n.js?v=3"></script>
-<script src="shop.js?v=12"></script>
-<script src="menu.js?v=4"></script>
+<script src="shop.js?v=13"></script>
+<script src="menu.js?v=5"></script>
 <script>
   const PAGE = 24;
   const DISTRICTS = ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail',
@@ -205,7 +212,7 @@
       const li = h('li', {});
       const link = h('a', { href: urlFor({ c: c.slug }), 'aria-current': isActive ? 'page' : null,
         onclick: e => { e.preventDefault(); if (sub.length) expanded.add(c.id); apply({ c: c.slug }); if (!sub.length) closeSide(); } },
-        depth === 0 && h('span', { class: 'ic', 'aria-hidden': 'true', text: /^https?:/.test(c.icon || '') ? '•' : (c.icon || '•') }), L(c, 'name'));
+        depth === 0 && (c.image_url ? h('img', { class: 'ic', src: c.image_url, alt: '', loading: 'lazy', onerror: e => e.target.replaceWith(h('span', { class: 'ic', 'aria-hidden': 'true', text: c.icon && !/^https?:/.test(c.icon) ? c.icon : '•' })) }) : h('span', { class: 'ic', 'aria-hidden': 'true', text: /^https?:/.test(c.icon || '') ? '•' : (c.icon || '•') })), L(c, 'name'));
       li.append(h('div', { class: 'node' + (isActive ? ' active' : '') }, link,
         sub.length ? h('button', { type: 'button', class: 'tw', 'aria-expanded': String(isOpen), 'aria-label': T(isOpen ? 'Hide {c} sub-categories' : 'Show {c} sub-categories', { c: L(c, 'name') }), text: '▶',
           onclick: () => { isOpen ? expanded.delete(c.id) : expanded.add(c.id); drawTree(); } }) : null));
@@ -353,7 +360,7 @@
   async function start() {
     await initShell();
     const d = $('district'); d.append(h('option', { value: '', text: 'Anywhere in Bangladesh' }), ...DISTRICTS.map(x => h('option', { value: x, text: x })));
-    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true);
+    const r = await db.from('categories').select('*').eq('is_active', true);
     cats = r.data || [];
     const active = bySlug(state.c);
     if (active) expandTo(active);

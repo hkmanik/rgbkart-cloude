@@ -119,7 +119,7 @@
     try {
       const [m, c] = await Promise.all([
         db.from('menu_items').select('*').eq('is_active', true).order('sort_order').order('id'),
-        db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name'),
+        db.from('categories').select('*').eq('is_active', true).order('sort_order').order('name'),
       ]);
       if (!m.error && m.data) items = m.data;
       cats = c.data || [];
@@ -139,8 +139,9 @@
     for (const top of kids(null)) {
       const subs = kids(top.id);
       const icon = top.icon && !/^https?:/.test(top.icon) ? top.icon : '🛍️';
+      const pic = top.image_url ? el('img', { src: top.image_url, alt: '', loading: 'lazy', style: 'width:30px;height:30px;border-radius:8px;object-fit:cover;flex:none', onerror: e => e.target.replaceWith(el('span', { text: icon, 'aria-hidden': 'true' })) }) : el('span', { text: icon, 'aria-hidden': 'true' });
       inner.append(el('div', { class: 'mgroup' },
-        el('a', { class: 'mhead', href: 'browse.html?c=' + encodeURIComponent(top.slug) }, el('span', { text: icon, 'aria-hidden': 'true' }), el('span', { text: L(top, 'name') })),
+        el('a', { class: 'mhead', href: 'browse.html?c=' + encodeURIComponent(top.slug) }, pic, el('span', { text: L(top, 'name') })),
         subs.slice(0, 6).map(s => el('a', { class: 'msub', href: 'browse.html?c=' + encodeURIComponent(s.slug), text: L(s, 'name') })),
         subs.length > 6 && el('a', { class: 'msub mmore', href: 'browse.html?c=' + encodeURIComponent(top.slug), text: T('All {n} →', { n: subs.length }) })));
     }

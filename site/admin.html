@@ -120,6 +120,7 @@
   .ar .pill.cp-open { background: #FDE7E8; color: #B3000C; } .ar .pill.cp-reviewing { background: #FFF6CC; color: #6B5300; }
   .ar .pill.cp-resolved, .ar .pill.cp-dismissed { background: #E5F4EA; color: #00802B; }
   .ar .pill { background: #FDE7E8; color: #B3000C; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 700; }
+  .bn-missing { margin: 14px 0 0; background: #FFF6CC; border: 1px solid #F5C400; color: #6B5300; border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
   .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .page-head p { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
   .readonly-note { background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 10px 14px; font-size: .9rem; }
@@ -453,6 +454,7 @@
         <div><h1>Categories</h1><p>Build the shop's category tree. Sub-categories inherit the attributes of the categories above them.</p></div>
         <button class="primary catalog-edit" type="button" id="addRootCat">+ Add category</button>
       </div>
+      <p class="bn-missing" id="bnMissing" hidden></p>
       <div class="card" style="margin-top:18px">
         <p class="readonly-note catalog-ro" hidden>You can view the catalog. Only the Master Admin and Co-admins can change it.</p>
         <div class="toolbar">
@@ -711,7 +713,7 @@
   <div class="drawer-head"><h2 id="catDrawerTitle">Add category</h2><button type="button" class="icon-btn" id="catClose" aria-label="Close">✕</button></div>
   <div class="drawer-body">
     <label>Name <input id="cName" type="text" maxlength="80" required placeholder="e.g. Smartphones"></label>
-    <label>Name in Bangla (shown on the Bangla site) <input id="cNameBn" type="text" maxlength="80" lang="bn" placeholder="যেমন: স্মার্টফোন"></label>
+    <label>Name in Bangla (shown on the Bangla site; please fill it in, there is no automatic translation) <input id="cNameBn" type="text" maxlength="80" lang="bn" placeholder="যেমন: স্মার্টফোন"></label>
     <label>Web address
       <input id="cSlug" type="text" class="slug-input" maxlength="80" required pattern="[a-z0-9]+(-[a-z0-9]+)*">
       <span class="hint">Used in links: rgbkart.com/c/<b id="cSlugPreview">…</b>. Lowercase letters, numbers and dashes.</span>
@@ -1367,6 +1369,9 @@
 
   function drawTree() {
     const box = $('catTree'); box.innerHTML = '';
+    const noBn = cats.filter(c => !c.name_bn);
+    $('bnMissing').hidden = !noBn.length;
+    $('bnMissing').textContent = noBn.length ? `${noBn.length} categor${noBn.length === 1 ? 'y has' : 'ies have'} no Bangla name, so Bangla shoppers see English: ${noBn.slice(0, 12).map(c => c.name).join(', ')}${noBn.length > 12 ? '…' : ''}. Tap Edit on each and fill in "Name in Bangla".` : '';
     const q = $('catSearch').value.trim().toLowerCase();
     let visible = null;
     if (q) {
@@ -1408,7 +1413,7 @@
       h('div', { class: 'node-main' },
         iconEl,
         h('span', { class: 'node-name', text: c.name }),
-        c.name_bn && h('span', { class: 'node-slug', lang: 'bn', text: c.name_bn }),
+        c.name_bn ? h('span', { class: 'node-slug', lang: 'bn', text: c.name_bn }) : h('span', { class: 'chip off', title: 'Shoppers using Bangla see the English name. Tap Edit and fill in "Name in Bangla".', text: 'No Bangla name' }),
         h('span', { class: 'node-slug', text: '/' + c.slug }),
         !c.is_active && h('span', { class: 'chip off', text: 'Hidden' }),
         kids.length > 0 && h('span', { class: 'chip plain', text: kids.length + (kids.length === 1 ? ' sub-category' : ' sub-categories') }),

@@ -719,6 +719,11 @@
         <p class="msg muted" style="margin:4px 0 10px">What customers pay for delivery, per shop in their order. Products marked "Free delivery" by the seller deliver free. Store pickup only shows for shops that offer it.</p>
         <div id="shipList"></div>
       </div>
+      <div class="card" style="margin-top:18px">
+        <h2>Cash on Delivery limits</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Protects shops from fake or very large Cash on Delivery orders. Checked by the database for every new order. Write 0 for no limit.</p>
+        <div id="codBox"></div>
+      </div>
     </section>
 
     <!-- Payments -->
@@ -1316,7 +1321,7 @@
   // ===================== Activity log (0037_activity_log.sql) =====================
   const LOG_AREA = { products: 'Products', product_images: 'Product photos', categories: 'Categories', attributes: 'Attributes', attribute_options: 'Attribute options', category_attributes: 'Category attributes',
     areas: 'Areas', home_sections: 'Home page', menu_items: 'Main menu', featured_plans: 'Featured rates', featured_requests: 'Featured requests', ad_rates: 'Ad rates', ads: 'Ads',
-    payment_methods: 'Payment numbers', payments: 'Payments', shipping_methods: 'Delivery fees', seller_details: 'Sellers / shops', profiles: 'People', staff: 'Team', staff_invites: 'Team invites',
+    payment_methods: 'Payment numbers', payments: 'Payments', shipping_methods: 'Delivery fees', site_settings: 'Site settings', seller_details: 'Sellers / shops', profiles: 'People', staff: 'Team', staff_invites: 'Team invites',
     reviews: 'Reviews', product_questions: 'Questions', reports: 'Complaints', return_requests: 'Returns', orders: 'Orders', shop_coupons: 'Coupons' };
   const LOG_VERB = { add: 'added', change: 'changed', delete: 'deleted' };
   const LOG_PAGE = 100;
@@ -2746,7 +2751,7 @@
     const ids = [...new Set(aOrders.map(x => x.seller_id))];
     aoShops = new Map();
     if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public').in('user_id', ids); (sd.data || []).forEach(x => aoShops.set(x.user_id, x)); }
-    drawAdminOrders(); drawShip();
+    drawAdminOrders(); drawShip(); drawCod();
   }
   $('aoFilter').querySelectorAll('button').forEach(b => b.onclick = () => { aoFilter = b.dataset.s; $('aoFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAdminOrders(); });
   $('aoSearch').oninput = () => drawAdminOrders();
@@ -2794,6 +2799,28 @@
           if (error) return toast(friendly(error)); toast(`Saved ${name.value.trim()}`); loadAdminOrders();
         }) : h('span')));
     }
+  }
+
+  async function drawCod() {
+    const box = $('codBox'); box.innerHTML = '';
+    const r = await db.from('site_settings').select('value').eq('key', 'cod').maybeSingle();
+    if (r.error) { box.append(h('p', { class: 'msg muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Run 0041_cod_limits.sql in Supabase to turn on these limits.' : friendly(r.error) })); return; }
+    const v = (r.data && r.data.value) || {}, edit = canApprove();
+    const num = (val, label) => h('input', { type: 'number', min: 0, step: 1, value: Number(val) || 0, 'aria-label': label, disabled: !edit });
+    const mx = num(v.max_order, 'Biggest order per shop'), fm = num(v.first_order_max, 'Biggest first order per shop'), op = num(v.max_open, 'Orders on the way per buyer');
+    box.append(h('div', { class: 'rate-row' },
+      h('label', {}, 'Biggest order per shop (৳)', mx),
+      h('label', {}, 'Biggest FIRST order per shop (৳)', fm),
+      h('label', {}, 'Orders on the way per buyer', op),
+      edit ? actionBtn('Save', 'good', async () => {
+        const val = { max_order: Math.round(Number(mx.value)), first_order_max: Math.round(Number(fm.value)), max_open: Math.round(Number(op.value)) };
+        if (Object.values(val).some(x => !(x >= 0))) return toast('Enter 0 or more in each box.');
+        if (val.max_order && val.first_order_max > val.max_order) return toast('The first-order limit should not be bigger than the normal limit.');
+        if (val.max_open > 100) return toast('Orders on the way: 100 at most (or 0 for no limit).');
+        const { error } = await db.from('site_settings').upsert({ key: 'cod', value: val, updated_at: new Date().toISOString() });
+        if (error) return toast(friendly(error)); toast('Cash on Delivery limits saved'); drawCod();
+      }) : h('span')),
+      h('p', { class: 'msg muted', style: 'margin:8px 0 0', text: 'A "first order" is a buyer with nothing delivered yet (matched by account or mobile number). "On the way" = all shops together, not yet delivered or cancelled.' + (edit ? '' : ' Only the Master Admin or a Co-admin can change these.') }));
   }
 
   // ===================== Reports =====================

@@ -311,6 +311,11 @@
     ['Rated {a} out of 5', '৫-এর মধ্যে {a} রেটিং'], ['{n} stars', '{n} স্টার'], ['({n} review)', '({n}টি রিভিউ)'], ['({n} reviews)', '({n}টি রিভিউ)'], ['{n} review', '{n}টি রিভিউ'], ['{n} reviews', '{n}টি রিভিউ'], ['The shop: {s}', 'দোকান: {s}'],
     ['Customer since {d}', '{d} থেকে ক্রেতা'], ['{n} order', '{n}টি অর্ডার'], ['{n} orders', '{n}টি অর্ডার'], ['{n} item', '{n}টি পণ্য'], ['{n} new', '{n}টি নতুন'], ['You have {n} items in your cart.', 'আপনার কার্টে {n}টি পণ্য আছে।'], ['You have {n} item in your cart.', 'আপনার কার্টে {n}টি পণ্য আছে।'],
     ['Up to {n} photos.', 'সর্বোচ্চ {n}টি ছবি।'], ['Pick from {n} areas or type a new one', '{n}টি এলাকা থেকে বাছুন অথবা নতুন লিখুন'], ['I have paid {p}', 'আমি {p} পেমেন্ট করেছি'],
+    ['Cash on Delivery is limited to {p} per shop. Your order from {s} is {m}. Please remove some items.', 'ক্যাশ অন ডেলিভারিতে প্রতি দোকানে সর্বোচ্চ {p}-এর অর্ডার দেওয়া যায়। {s} থেকে আপনার অর্ডার {m}। অনুগ্রহ করে কিছু পণ্য সরান।'],
+    ['For your first order, Cash on Delivery is limited to {p} per shop. Your order from {s} is {m}. Please order less this time.', 'প্রথম অর্ডারে ক্যাশ অন ডেলিভারিতে প্রতি দোকানে সর্বোচ্চ {p}-এর অর্ডার দেওয়া যায়। {s} থেকে আপনার অর্ডার {m}। এবার অনুগ্রহ করে কম অর্ডার দিন।'],
+    ['You can have at most {a} Cash on Delivery orders on the way at one time (you have {b} now). Please wait for them to arrive, or order from fewer shops.', 'একসাথে সর্বোচ্চ {a}টি ক্যাশ অন ডেলিভারি অর্ডার পথে থাকতে পারে (এখন আপনার {b}টি আছে)। সেগুলো পৌঁছানো পর্যন্ত অপেক্ষা করুন, অথবা কম দোকান থেকে অর্ডার দিন।'],
+    ['Cash on Delivery limit: {p} per shop. Please remove some items from {s}.', 'ক্যাশ অন ডেলিভারির সীমা: প্রতি দোকানে {p}। অনুগ্রহ করে {s} থেকে কিছু পণ্য সরান।'],
+    ['First order on RGBKart? Then the limit is {p} per shop.', 'RGBKart-এ প্রথম অর্ডার? তাহলে প্রতি দোকানে সীমা {p}।'],
     ['Your {meth} number (you paid from)', 'আপনার {meth} নম্বর (যেটি থেকে পেমেন্ট করেছেন)'],
     ['✓ Payment sent ({meth}, TrxID {t}). Our team will check it soon, usually within a few hours.', '✓ পেমেন্ট পাঠানো হয়েছে ({meth}, TrxID {t})। আমাদের টিম শিগগিরই, সাধারণত কয়েক ঘণ্টার মধ্যে, যাচাই করবে।'],
   ];

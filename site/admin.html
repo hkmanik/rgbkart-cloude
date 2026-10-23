@@ -725,6 +725,11 @@
         <p class="msg muted" style="margin:4px 0 10px">Protects shops from fake or very large Cash on Delivery orders. Checked by the database for every new order. Write 0 for no limit.</p>
         <div id="codBox"></div>
       </div>
+      <div class="card" style="margin-top:18px">
+        <h2>Cancellation rules</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Until which step a buyer can cancel an order by themselves. After that they can only ask the shop, and the shop accepts or declines. Shops must always give a reason when they cancel.</p>
+        <div id="cancelBox"></div>
+      </div>
     </section>
 
     <!-- Payments -->
@@ -2752,7 +2757,7 @@
     const ids = [...new Set(aOrders.map(x => x.seller_id))];
     aoShops = new Map();
     if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public').in('user_id', ids); (sd.data || []).forEach(x => aoShops.set(x.user_id, x)); }
-    drawAdminOrders(); drawShip(); drawCod();
+    drawAdminOrders(); drawShip(); drawCod(); drawCancelRules();
   }
   $('aoFilter').querySelectorAll('button').forEach(b => b.onclick = () => { aoFilter = b.dataset.s; $('aoFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAdminOrders(); });
   $('aoSearch').oninput = () => drawAdminOrders();
@@ -2771,7 +2776,8 @@
         h('td', {}, h('div', { text: o.customer_name }), h('div', { class: 'date', text: `${o.phone} · ${o.district}` })),
         h('td', { class: 'date', text: (o.order_items || []).map(i => `${i.qty} × ${i.title}`).join(', ') }),
         h('td', { text: taka(o.total) }),
-        h('td', {}, h('span', { class: 'chip ' + cls, text: AO_LABEL[o.status] }), o.cancel_reason && h('div', { class: 'date', text: o.cancel_reason })),
+        h('td', {}, h('span', { class: 'chip ' + cls, text: AO_LABEL[o.status] }), o.cancel_reason && h('div', { class: 'date', text: o.cancel_reason }),
+          o.cancel_request_status === 'open' && o.status !== 'cancelled' && h('div', { class: 'date', style: 'color:var(--danger)', text: 'Buyer asks to cancel: ' + (o.cancel_request || '') })),
         h('td', {}, !['delivered', 'cancelled'].includes(o.status) && canApprove() ? (() => {
           const btn = h('button', { type: 'button', class: 'bad', text: 'Cancel' });
           btn.onclick = async () => {
@@ -2822,6 +2828,23 @@
         if (error) return toast(friendly(error)); toast('Cash on Delivery limits saved'); drawCod();
       }) : h('span')),
       h('p', { class: 'msg muted', style: 'margin:8px 0 0', text: 'A "first order" is a buyer with nothing delivered yet (matched by account or mobile number). "On the way" = all shops together, not yet delivered or cancelled.' + (edit ? '' : ' Only the Master Admin or a Co-admin can change these.') }));
+  }
+
+  async function drawCancelRules() {
+    const box = $('cancelBox'); box.innerHTML = '';
+    const r = await db.from('site_settings').select('value').eq('key', 'cancel').maybeSingle();
+    if (r.error || !r.data) { box.append(h('p', { class: 'msg muted', text: r.error && !/does not exist|Could not find/i.test(r.error.message) ? friendly(r.error) : 'Run 0042_cancel_rules.sql in Supabase to turn on these rules.' })); return; }
+    const v = r.data.value || {}, edit = canApprove();
+    const until = h('select', { 'aria-label': 'Buyer can cancel by themselves until', disabled: !edit },
+      [['pending', 'New (before the shop confirms)'], ['confirmed', 'Confirmed (before packing)'], ['packed', 'Packed (before it is sent)']].map(([k, t]) => h('option', { value: k, text: t, selected: (v.buyer_until || 'confirmed') === k })));
+    const need = h('input', { type: 'checkbox', checked: v.need_reason !== false, disabled: !edit });
+    box.append(h('div', { class: 'rate-row cod-row' },
+      h('label', { style: 'grid-column:span 2' }, 'Buyer can cancel by themselves while the order is', until),
+      h('label', { class: 'check' }, need, 'Buyer must choose a reason'),
+      edit ? actionBtn('Save', 'good', async () => {
+        const { error } = await db.from('site_settings').upsert({ key: 'cancel', value: { buyer_until: until.value, need_reason: need.checked }, updated_at: new Date().toISOString() });
+        if (error) return toast(friendly(error)); toast('Cancellation rules saved'); drawCancelRules();
+      }) : h('span')));
   }
 
   // ===================== Reports =====================

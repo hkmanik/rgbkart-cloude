@@ -51,7 +51,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=17"></script>
+<script src="i18n.js?v=18"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
@@ -61,6 +61,35 @@
   const LABEL = { pending: 'Waiting for shop', confirmed: 'Confirmed', packed: 'Packed', shipped: 'On the way', delivered: 'Delivered', cancelled: 'Cancelled' };
   const fmt = t => RGBLang.date(t, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+  let cancelRules = { buyer_until: 'confirmed', need_reason: true };
+  const CANCEL_WHY = ['Ordered by mistake', 'Found a better price', 'Delivery takes too long', 'Want to change the order', 'Other reason'];
+  // cancel by myself, or ask the shop (after the step allowed by RGBKart)
+  function cancelBits(o) {
+    const idx = k => STEPS.findIndex(x => x[0] === k);
+    const self = ['pending', 'confirmed', 'packed'].includes(o.status) && idx(o.status) <= idx(cancelRules.buyer_until);
+    const canAsk = !self && !cancelRules.old && ['confirmed', 'packed', 'shipped'].includes(o.status) && o.cancel_request_status !== 'open';
+    const why = h('select', { 'aria-label': T('Reason for cancelling'), style: 'font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)' },
+      h('option', { value: '', text: T('Why do you want to cancel?') }), CANCEL_WHY.map(t => h('option', { value: t, text: T(t) })));
+    const more = h('input', { type: 'text', maxlength: 200, placeholder: T('More details (optional)'), 'aria-label': T('More details'), style: 'flex:1;min-width:180px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)' });
+    const row = h('div', { class: 'oact', hidden: true }, why, more,
+      h('button', { type: 'button', class: 'bad', text: self ? T('Yes, cancel order') : T('Send request to the shop'), onclick: async e => {
+        const txt = [why.value, more.value.trim()].filter(Boolean).join(': ');
+        if (!why.value && (cancelRules.need_reason || !self)) { why.focus(); return toast(T('Please choose why you are cancelling')); }
+        e.target.disabled = true;
+        const { error } = self ? await db.rpc('update_order', { p_order: o.id, p_status: 'cancelled', p_note: txt || 'Cancelled by customer' })
+                               : await db.rpc('request_cancel', { p_order: o.id, p_reason: txt });
+        if (error) { e.target.disabled = false; return toast(T(error.message)); }
+        toast(T(self ? 'Order cancelled' : 'Request sent. The shop will answer soon.')); load();
+      } }),
+      h('button', { type: 'button', text: T('Keep order'), onclick: () => row.hidden = true }));
+    const open = () => { row.hidden = false; why.focus(); };
+    const button = self ? h('button', { type: 'button', class: 'bad', text: T('Cancel order'), onclick: open })
+                 : canAsk ? h('button', { type: 'button', class: 'bad', text: T('Ask the shop to cancel'), onclick: open }) : null;
+    const state = o.status === 'cancelled' ? null
+      : o.cancel_request_status === 'open' ? h('p', { class: 'm', style: 'background:#FFF6CC;color:#6B5300;padding:8px 10px;border-radius:8px' }, T('You asked the shop to cancel this order. Waiting for the shop\'s answer.'), h('br'), h('span', { translate: 'no', text: o.cancel_request || '' }))
+      : o.cancel_request_status === 'declined' ? h('p', { class: 'm bad' }, T('The shop could not cancel this order:'), ' ', h('span', { translate: 'no', text: o.cancel_request_reply || '' })) : null;
+    return { button, row, state };
+  }
   async function load() {
     const box = $('content');
     const { data: { session } } = await db.auth.getSession();
@@ -73,6 +102,8 @@
     const r = await db.from('orders').select('*, order_items(*)').eq('customer_id', session.user.id).order('created_at', { ascending: false }).limit(100);
     if (r.error) { box.innerHTML = ''; box.append(h('div', { class: 'box', text: /does not exist|Could not find/i.test(r.error.message) ? 'Orders aren\'t switched on yet.' : r.error.message })); return; }
     const orders = r.data;
+    // cancellation rules set by RGBKart (0042): until which step buyers cancel themselves; after that they ask the shop
+    const cr = await db.rpc('cancel_rules'); cancelRules = (!cr.error && cr.data) || { buyer_until: 'confirmed', need_reason: true, old: true };
     const sids = [...new Set(orders.map(o => o.seller_id))];
     const s = sids.length ? await db.from('shops').select('user_id, shop_name, shop_name_bn, shop_slug, phone_public, whatsapp, pickup_address').in('user_id', sids) : { data: [] };
     const shops = new Map((s.data || []).map(x => [x.user_id, x]));
@@ -91,20 +122,13 @@
       const retHolder = h('div', { class: 'ret-holder' });
       const shop = shops.get(o.seller_id) || {};
       const at = STEPS.findIndex(x => x[0] === o.status);
-      const reason = h('input', { type: 'text', maxlength: 200, placeholder: 'Why are you cancelling? (optional)', 'aria-label': 'Reason for cancelling', style: 'flex:1;min-width:180px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)' });
-      const cancelRow = h('div', { class: 'oact', hidden: true }, reason,
-        h('button', { type: 'button', class: 'bad', text: 'Yes, cancel order', onclick: async e => {
-          e.target.disabled = true;
-          const { error } = await db.rpc('update_order', { p_order: o.id, p_status: 'cancelled', p_note: reason.value.trim() || 'Cancelled by customer' });
-          if (error) { e.target.disabled = false; return toast(error.message); }
-          toast('Order cancelled'); load();
-        } }),
-        h('button', { type: 'button', text: 'Keep order', onclick: () => cancelRow.hidden = true }));
+      const cx = cancelBits(o);
       list.append(h('article', { class: 'box ocard' },
         h('div', { class: 'ohead' }, h('div', {}, h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || o.seller_id), style: 'color:inherit;text-decoration:none' }, h('b', { text: L(shop, 'shop_name') || T('Shop'), translate: 'no' })), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), ' · ' + fmt(o.created_at))),
           h('span', { class: 'ost ' + o.status, text: LABEL[o.status] })),
         o.status !== 'cancelled' && h('div', { class: 'track', 'aria-label': 'Order progress' }, STEPS.map(([k, t], i) => h('span', { class: i <= at ? 'on' : '', text: t }))),
         o.status === 'cancelled' && h('p', { class: 'm bad', text: T(o.cancelled_by === 'customer' ? 'Cancelled by you' : o.cancelled_by === 'seller' ? 'Cancelled by the shop' : 'Cancelled') + (o.cancel_reason ? ': ' + o.cancel_reason : '') }),
+        cx.state,
         o.tracking_note && o.status !== 'cancelled' && h('p', { class: 'm', text: T('Delivery info from the shop: ') + o.tracking_note }),
         h('div', { class: 'oitems' }, (o.order_items || []).map(i => h('div', { class: 'oitem' },
           i.image_path ? h('img', { src: imgUrl(i.image_path), alt: '', loading: 'lazy' }) : h('div', { class: 'noimg' }),
@@ -119,9 +143,9 @@
         h('div', { class: 'oact' },
           shop.phone_public && h('a', { href: 'tel:' + shop.phone_public, text: '📞 Call shop' }),
           (shop.whatsapp || shop.phone_public) && h('a', { href: `https://wa.me/${((shop.whatsapp || shop.phone_public).replace(/[^0-9]/g, '').replace(/^0/, '880'))}?text=${encodeURIComponent(T('Hi, about my RGBKart order {o}', { o: o.order_no }))}`, target: '_blank', rel: 'noopener', text: T('WhatsApp') }),
-          ['pending', 'confirmed'].includes(o.status) && h('button', { type: 'button', class: 'bad', text: 'Cancel order', onclick: () => { cancelRow.hidden = false; reason.focus(); } }),
+          cx.button,
           window.RGBReport && h('span', { style: 'margin-left:auto' }, RGBReport.link(db, { shop: o.seller_id }))),
-        cancelRow,
+        cx.row,
         o.status === 'delivered' && rateBox(o, shop, myReviews.filter(r => r.order_id === o.id))));
     }
     box.append(list);

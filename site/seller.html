@@ -351,6 +351,8 @@
   .ord-items { display: grid; gap: 4px; font-size: .9rem; }
   .ord-items .srow { display: flex; justify-content: space-between; gap: 10px; } .ord-items .srow span:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .ord-items .tot { font-weight: 700; border-top: 1px solid var(--line); padding-top: 4px; }
+  .ord-ask { display: grid; gap: 6px; background: #FFF6CC; color: #4A3A00; border: 1px solid #F5C400; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+  .ord-ask input { width: 100%; }
   .ord-cancel { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .ord-cancel input { flex: 1; min-width: 200px; }
 </style>
 </head>
@@ -1578,6 +1580,7 @@
           h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })))),
       o.status === 'cancelled' && h('p', { class: 'pmeta', style: 'color:var(--danger)', text: `Cancelled by ${o.cancelled_by || '—'}${o.cancel_reason ? ': ' + o.cancel_reason : ''}` }),
       o.tracking_note && h('p', { class: 'pmeta', text: 'Delivery info: ' + o.tracking_note }),
+      cancelAsk(o),
       next && next[0] === 'shipped' && note,
       h('div', { class: 'actions', style: 'justify-content:flex-start' },
         next && actionBtn(next[1], 'primary', () => setOrderStatus(o, next[0], next[0] === 'shipped' ? note.value.trim() : null)),
@@ -1586,6 +1589,27 @@
         h('button', { type: 'button', class: 'ghost', text: '🏷 Shipping label', onclick: () => printOrder([o], 'label') }),
         !['delivered', 'cancelled'].includes(o.status) && h('button', { type: 'button', class: 'ghost', style: 'color:var(--danger)', text: 'Cancel…', onclick: () => { cancelBox.hidden = false; reason.focus(); } })),
       cancelBox);
+  }
+  // buyer asked to cancel after the shop started (0042_cancel_rules.sql)
+  function cancelAsk(o) {
+    if (o.status === 'cancelled') return null;
+    if (o.cancel_request_status === 'declined') return h('p', { class: 'pmeta', text: `Buyer asked to cancel (${o.cancel_request || ''}). You declined: ${o.cancel_request_reply || ''}` });
+    if (o.cancel_request_status !== 'open') return null;
+    const why = h('input', { type: 'text', maxlength: 300, placeholder: 'If you decline: tell the buyer why (e.g. already sent with the courier)', 'aria-label': 'Reason for declining' });
+    return h('div', { class: 'ord-ask' },
+      h('b', { text: '⚠ The buyer asks to cancel this order' }),
+      h('span', { text: 'Reason: ' + (o.cancel_request || '—') + (o.cancel_requested_at ? ' · ' + ofmt(o.cancel_requested_at) : '') }),
+      why,
+      h('div', { class: 'actions', style: 'justify-content:flex-start' },
+        actionBtn('Accept and cancel', 'bad', async () => {
+          const { error } = await db.rpc('answer_cancel_request', { p_order: o.id, p_accept: true, p_note: why.value.trim() || null });
+          if (error) return toast(friendly(error)); toast('Order cancelled as the buyer asked. Stock was put back.'); loadOrders();
+        }),
+        actionBtn('Decline', 'ghost', async () => {
+          if (!why.value.trim()) { why.focus(); return toast('Write why you can\'t cancel it.'); }
+          const { error } = await db.rpc('answer_cancel_request', { p_order: o.id, p_accept: false, p_note: why.value.trim() });
+          if (error) return toast(friendly(error)); toast('Buyer told: the order stays.'); loadOrders();
+        })));
   }
   async function setOrderStatus(o, st, note) {
     const { error } = await db.rpc('update_order', { p_order: o.id, p_status: st, p_note: note || null });

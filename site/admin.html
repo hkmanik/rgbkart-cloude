@@ -435,7 +435,7 @@
     <!-- Dashboard -->
     <section data-page="reports">
       <div class="page-head"><div><h1>Reports</h1><p>Visitors, new people, listings and income for any period. Income counts paid Featured listings and paid ads; free listings and free Featured count as ৳0.</p></div>
-        <button class="ghost" type="button" id="repCsv">Download (Excel / CSV)</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="button" id="repXlsx">⬇ Download Excel</button><button class="ghost" type="button" id="repCsv">CSV (summary)</button></div></div>
       <div class="card rep-bar" style="margin-top:18px">
         <div class="filters" id="repTabs" role="group" aria-label="Period">
           <button type="button" data-p="day" aria-pressed="true">Daily</button><button type="button" data-p="week" aria-pressed="false">Weekly</button>
@@ -1036,6 +1036,7 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
+<script src="xlsx-lite.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -2892,7 +2893,58 @@
     const [{ data, error }, ord] = await Promise.all([db.rpc('admin_report', { p_from: f, p_to: t }), db.rpc('admin_order_report', { p_from: f, p_to: t }).then(x => x, () => ({}))]);
     repOrders = ord && !ord.error ? ord.data : null;
     if (error) { setMsg('repMsg', /Could not find the function/i.test(error.message) ? 'Run 0018_admin_tools.sql in Supabase to turn on reports.' : friendly(error), true); $('repBody').innerHTML = ''; return; }
-    setMsg('repMsg', ''); repData = data; drawReport(f, t);
+    setMsg('repMsg', ''); repData = data; repDetail = null; drawReport(f, t);
+    loadRepDetail(f, t);
+  }
+  // ---- details for the period: orders, payments received, top shops and products (all read with the admin's rights) ----
+  let repDetail = null;
+  const dhakaStart = d => d + 'T00:00:00+06:00';
+  const dayAfter = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); return iso(x); };
+  async function pageAll(build) {
+    const out = [];
+    for (let i = 0; i < 20; i++) { const r = await build().range(i * 1000, i * 1000 + 999); if (r.error) throw r.error; out.push(...r.data); if (r.data.length < 1000) break; }
+    return out;
+  }
+  async function loadRepDetail(f, t) {
+    const from = dhakaStart(f), to = dhakaStart(dayAfter(t)), token = f + t;
+    try {
+      const [orders, pays] = await Promise.all([
+        pageAll(() => db.from('orders').select('id, order_no, created_at, seller_id, customer_name, phone, district, ship_method, status, subtotal, ship_fee, discount, total, coupon_code, cancelled_by, cancel_reason, delivered_at, order_items(product_id, title, variant_label, qty, unit_price, line_total)').gte('created_at', from).lt('created_at', to).order('created_at')),
+        pageAll(() => db.from('payments').select('id, kind, item_title, seller_id, amount, method_id, sender_no, trx_id, created_at, reviewed_at').eq('status', 'verified').gte('reviewed_at', from).lt('reviewed_at', to).order('reviewed_at')).catch(() => []),
+      ]);
+      const ids = [...new Set([...orders.map(o => o.seller_id), ...pays.map(p => p.seller_id)])];
+      const shops = new Map();
+      for (let i = 0; i < ids.length; i += 200) { const r = await db.from('seller_details').select('user_id, shop_name, phone_public, city').in('user_id', ids.slice(i, i + 200)); (r.data || []).forEach(x => shops.set(x.user_id, x)); }
+      if (!repRange || repRange[0] + repRange[1] !== token) return;   // another period was opened meanwhile
+      const live = orders.filter(o => o.status !== 'cancelled');
+      const byShop = new Map(), byProd = new Map();
+      for (const o of orders) {
+        const k = byShop.get(o.seller_id) || { seller_id: o.seller_id, orders: 0, value: 0, delivered: 0, cancelled: 0, delivered_value: 0 };
+        k.orders++; if (o.status === 'cancelled') k.cancelled++; else k.value += Number(o.total);
+        if (o.status === 'delivered') { k.delivered++; k.delivered_value += Number(o.total); }
+        byShop.set(o.seller_id, k);
+      }
+      for (const o of live) for (const i of o.order_items || []) {
+        const key = i.product_id || i.title, k = byProd.get(key) || { product_id: i.product_id, title: i.title, seller_id: o.seller_id, qty: 0, value: 0, orders: 0 };
+        k.qty += i.qty; k.value += Number(i.line_total); k.orders++; byProd.set(key, k);
+      }
+      repDetail = { orders, pays, shops,
+        topShops: [...byShop.values()].sort((a, b) => b.value - a.value || b.orders - a.orders),
+        topProducts: [...byProd.values()].sort((a, b) => b.value - a.value || b.qty - a.qty) };
+      drawRepTop();
+    } catch (e) { const b = $('repTop'); if (b) b.replaceChildren(h('p', { class: 'msg muted', text: 'Details couldn\'t load: ' + friendly(e) })); }
+  }
+  function drawRepTop() {
+    const box = $('repTop'); if (!box || !repDetail) return; box.innerHTML = '';
+    const d = repDetail, name = id => (d.shops.get(id) || {}).shop_name || '—';
+    const table = (title, note, head, rows) => h('div', { class: 'card', style: 'margin-top:14px' }, h('h2', { text: title }), h('p', { class: 'msg muted', style: 'margin:2px 0 8px', text: note }),
+      rows.length ? h('div', { class: 'table-wrap' }, h('table', {}, h('thead', {}, h('tr', {}, head.map(x => h('th', { text: x })))), h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', { text: c }))))))) : h('p', { class: 'empty', text: 'Nothing in this period.' }));
+    box.append(
+      table('Top shops', 'By value of orders placed in this period (not cancelled). Cash goes to the shops, not RGBKart.', ['#', 'Shop', 'Orders', 'Value', 'Delivered', 'Cancelled'],
+        d.topShops.slice(0, 10).map((x, i) => [String(i + 1), name(x.seller_id), num(x.orders), taka(x.value), num(x.delivered), num(x.cancelled)])),
+      table('Top products', 'By value sold in this period (orders not cancelled).', ['#', 'Product', 'Shop', 'Pieces', 'Value'],
+        d.topProducts.slice(0, 10).map((x, i) => [String(i + 1), x.title, name(x.seller_id), num(x.qty), taka(x.value)])),
+      h('p', { class: 'msg muted', style: 'margin-top:10px', text: `Download Excel gives all ${num(d.orders.length)} orders, ${num(d.pays.length)} payments received, and the full shop and product lists for this period.` }));
   }
   const num = n => Number(n || 0).toLocaleString('en-IN');
   function kpi(value, label, note, cls) { return h('div', { class: 'kpi' + (cls ? ' ' + cls : '') }, h('b', { text: value }), h('span', { text: label }), note && h('small', { text: note })); }
@@ -2930,7 +2982,8 @@
         kpi(num(d.new_one_time), 'New one-time sellers', `${num(d.total_one_time)} in total`))),
       h('div', { class: 'rep-group' }, h('h2', { text: 'Listings' }), h('div', { class: 'kpis' },
         kpi(num(d.new_listings), 'New listings sent'), kpi(num(d.approved_listings), 'Listings that went live'), kpi(num(d.featured_paid + d.featured_free), 'Featured started', `${num(d.featured_paid)} paid · ${num(d.featured_free)} free`),
-        kpi(num(d.live_products), 'Live products now', `${num(d.featured_now)} Featured now`))));
+        kpi(num(d.live_products), 'Live products now', `${num(d.featured_now)} Featured now`))),
+      h('div', { id: 'repTop' }, h('p', { class: 'msg muted', text: 'Loading top shops and products…' })));
     const byMonth = d.by_month;
     const series = (d.series || []).map(s => ({ ...s, label: byMonth ? new Date(s.from + 'T00:00:00').toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }) : new Date(s.from + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) }));
     if (series.length > 1) {
@@ -2952,9 +3005,38 @@
       ['Visitors', d.visitors], ['Page visits', d.page_views], ['Messages', d.messages], ['New customers', d.new_customers], ['New shops', d.new_shops], ['New one-time sellers', d.new_one_time],
       ['New listings', d.new_listings], ['Listings that went live', d.approved_listings], ['Live products now', d.live_products], [],
       ['Period from', 'Period to', 'Visitors', 'New sign-ups', 'New listings', 'Income (BDT)'], ...(d.series || []).map(s => [s.from, s.to, s.visitors, s.signups, s.listings, s.income])];
-    const csv = '﻿' + rows.map(r => r.map(c => /[",\n]/.test(String(c ?? '')) ? `"${String(c).replace(/"/g, '""')}"` : (c ?? '')).join(',')).join('\r\n');
+    const csv = '﻿' + rows.map(r => r.map(safeCell).map(c => /[",\n]/.test(String(c ?? '')) ? `"${String(c).replace(/"/g, '""')}"` : (c ?? '')).join(',')).join('\r\n');
     const a = h('a', { href: URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })), download: `rgbkart-report-${repRange[0]}-to-${repRange[1]}.csv` });
     document.body.append(a); a.click(); a.remove();
+  };
+
+  // Excel workbook with one sheet per list (xlsx-lite.js, no outside library)
+  const safeCell = v => typeof v === 'string' && /^[=+\-@]/.test(v) ? "'" + v : v;   // stop spreadsheet formulas in names typed by people
+  $('repXlsx').onclick = () => {
+    if (!repData || !repRange) return toast('Open a report first.');
+    if (!repDetail) return toast('Still loading the details, try again in a moment.');
+    const d = repData, x = repDetail, shop = id => (x.shops.get(id) || {}).shop_name || '';
+    const dt = t => t ? new Date(t).toLocaleString('en-GB', { timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    const sheets = {
+      Summary: [['RGBKart report', `${repRange[0]} to ${repRange[1]}`], [],
+        ['Total income (BDT)', Number(d.featured_income) + Number(d.ad_income)], ['Featured income (BDT)', Number(d.featured_income)], ['Ad income (BDT)', Number(d.ad_income)],
+        ['Featured paid', d.featured_paid], ['Featured free from admin', d.featured_free], ['Ads started', d.ads_started],
+        ...(repOrders ? [['Orders placed', repOrders.orders], ['Value of orders (BDT, paid to shops)', Number(repOrders.orders_value)], ['Orders delivered', repOrders.delivered], ['Orders cancelled', repOrders.cancelled]] : []),
+        ['Visitors', d.visitors], ['Page visits', d.page_views], ['Messages', d.messages], ['New customers', d.new_customers], ['New shops', d.new_shops], ['New one-time sellers', d.new_one_time],
+        ['New listings', d.new_listings], ['Listings that went live', d.approved_listings], ['Live products now', d.live_products], [],
+        ['Period from', 'Period to', 'Visitors', 'New sign-ups', 'New listings', 'Income (BDT)'], ...(d.series || []).map(r => [r.from, r.to, r.visitors, r.signups, r.listings, Number(r.income)])],
+      Orders: [['Order no.', 'Placed', 'Shop', 'Customer', 'Phone', 'District', 'Delivery', 'Status', 'Items', 'Items value', 'Delivery fee', 'Coupon', 'Discount', 'Total (BDT)', 'Cancelled by', 'Cancel reason', 'Delivered']]
+        .concat(x.orders.map(o => [o.order_no, dt(o.created_at), shop(o.seller_id), o.customer_name, o.phone, o.district, o.ship_method, o.status,
+          (o.order_items || []).map(i => `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}`).join('; '),
+          Number(o.subtotal), Number(o.ship_fee), o.coupon_code || '', Number(o.discount || 0), Number(o.total), o.cancelled_by || '', o.cancel_reason || '', dt(o.delivered_at)])),
+      'Payments received': [['Checked', 'Shop', 'For', 'Item', 'Method', 'Sender no.', 'TrxID', 'Amount (BDT)']]
+        .concat(x.pays.map(p => [dt(p.reviewed_at), shop(p.seller_id), p.kind === 'ad' ? 'Advertisement' : 'Featured', p.item_title || '', p.method_id, p.sender_no, p.trx_id, Number(p.amount)])),
+      'Top shops': [['#', 'Shop', 'Phone', 'City', 'Orders', 'Value (not cancelled)', 'Delivered', 'Delivered value', 'Cancelled']]
+        .concat(x.topShops.map((r, i) => { const s = x.shops.get(r.seller_id) || {}; return [i + 1, s.shop_name || '', s.phone_public || '', s.city || '', r.orders, r.value, r.delivered, r.delivered_value, r.cancelled]; })),
+      'Top products': [['#', 'Product', 'Product ID', 'Shop', 'Orders', 'Pieces', 'Value (BDT)']]
+        .concat(x.topProducts.map((r, i) => [i + 1, r.title, r.product_id || '', shop(r.seller_id), r.orders, r.qty, r.value])),
+    };
+    RGBXlsx.download(`rgbkart-report-${repRange[0]}-to-${repRange[1]}.xlsx`, sheets);
   };
 
   // ===================== Admin adds a product =====================

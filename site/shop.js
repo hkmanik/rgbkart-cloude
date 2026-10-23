@@ -2,6 +2,7 @@
 const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if (window.RGBSync) RGBSync.start(db);   // wishlist & cart in the account (sync.js, 0031)
 const $ = id => document.getElementById(id);
 function h(tag, props, ...kids) {
   const el = document.createElement(tag);

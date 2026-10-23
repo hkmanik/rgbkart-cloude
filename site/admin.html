@@ -110,6 +110,10 @@
   .scrim { display: none; }
   .main { min-width: 0; padding-block: 28px 60px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; align-content: start; }
   .ret-pics { display: flex; gap: 8px; flex-wrap: wrap; } .ret-pics img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+  #logWho, #logArea, #logAct { width: auto; flex: none; min-width: 160px; } .inline-d input { width: auto; }
+  .log-row { padding: 9px 0; gap: 3px; } .log-t { min-width: 150px; font-variant-numeric: tabular-nums; } .log-ch { margin: 0; font-size: .84rem; overflow-wrap: anywhere; }
+  .ar .pill.log-add { background: #E5F4EA; color: #00802B; } .ar .pill.log-change { background: #FFF6CC; color: #6B5300; }
+  .inline-d { display: flex; align-items: center; gap: 6px; flex-direction: row; text-transform: none; letter-spacing: 0; }
   .ar-list { display: grid; }
   .ar { border-top: 1px solid var(--line); padding: 12px 0; display: grid; gap: 6px; min-width: 0; }
   .ar:first-child { border-top: 0; }
@@ -412,6 +416,7 @@
 
     <div class="nav-group tone-violet" id="settingsGroup">Settings</div>
     <button class="nav tone-violet" data-view="team" id="navTeam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>Team</button>
+    <button class="nav tone-violet" data-view="activity" id="navLog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Activity log</button>
 
     <div class="side-foot">
       <span class="email" id="meEmail"></span>
@@ -614,6 +619,22 @@
           <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
           <input type="search" id="arSearch" placeholder="Search words, buyer, shop or product" aria-label="Search reviews" style="flex:1;min-width:220px"></div>
         <div id="arList" class="ar-list"></div>
+      </div>
+    </section>
+
+    <section data-page="activity" hidden>
+      <div class="page-head"><div><h1>Activity log</h1><p>Everything the RGBKart team changed, and who did it: approvals, rejections, payments, Featured, categories, home page, menu, settings, hidden reviews and more. Entries are written by the database automatically and cannot be edited or deleted. Only the Master Admin and Co-admins can see this page.</p></div>
+        <button type="button" class="ghost" id="logCsv">⬇ Download (CSV)</button></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+          <select id="logWho" aria-label="Person"><option value="">Everyone</option></select>
+          <select id="logArea" aria-label="Area"><option value="">All areas</option></select>
+          <select id="logAct" aria-label="Action"><option value="">Add, change, delete</option><option value="add">Added</option><option value="change">Changed</option><option value="delete">Deleted</option></select>
+          <label class="inline-d">From <input type="date" id="logFrom"></label><label class="inline-d">To <input type="date" id="logTo"></label>
+          <input type="search" id="logSearch" placeholder="Search name, title, order no…" aria-label="Search the log" style="flex:1;min-width:200px">
+        </div>
+        <div id="logList" class="ar-list"></div>
+        <button type="button" class="ghost" id="logMore" hidden style="margin-top:10px">Show more</button>
       </div>
     </section>
 
@@ -1133,14 +1154,16 @@
     myRole = role; myId = session.user.id;
     $('meEmail').textContent = session.user.email;
     $('meRole').textContent = ROLE_NAMES[role];
-    $('navTeam').hidden = $('settingsGroup').hidden = role !== 'master_admin';
+    $('navTeam').hidden = role !== 'master_admin';
+    $('navLog').hidden = !['master_admin', 'co_admin'].includes(role);
+    $('settingsGroup').hidden = $('navTeam').hidden && $('navLog').hidden;
     document.querySelectorAll('.catalog-edit').forEach(el => el.hidden = !canCatalog());
     document.querySelectorAll('.catalog-ro').forEach(el => el.hidden = canCatalog());
     $('sellerReadOnly').hidden = canApprove();
     $('authWrap').hidden = true; $('shell').hidden = false;
     document.body.classList.add('signed-in');
     const start = location.hash.slice(1);
-    go(VIEWS.includes(start) && (start !== 'team' || role === 'master_admin') ? start : 'dashboard');
+    go(VIEWS.includes(start) && (start !== 'team' || role === 'master_admin') && (start !== 'activity' || ['master_admin', 'co_admin'].includes(role)) ? start : 'dashboard');
     loadAll();
   }
 
@@ -1153,6 +1176,67 @@
     loadComplaints(true);
     loadReturns(true);
   }
+
+  // ===================== Activity log (0037_activity_log.sql) =====================
+  const LOG_AREA = { products: 'Products', product_images: 'Product photos', categories: 'Categories', attributes: 'Attributes', attribute_options: 'Attribute options', category_attributes: 'Category attributes',
+    areas: 'Areas', home_sections: 'Home page', menu_items: 'Main menu', featured_plans: 'Featured rates', featured_requests: 'Featured requests', ad_rates: 'Ad rates', ads: 'Ads',
+    payment_methods: 'Payment numbers', payments: 'Payments', shipping_methods: 'Delivery fees', seller_details: 'Sellers / shops', profiles: 'People', staff: 'Team', staff_invites: 'Team invites',
+    reviews: 'Reviews', product_questions: 'Questions', reports: 'Complaints', return_requests: 'Returns', orders: 'Orders', shop_coupons: 'Coupons' };
+  const LOG_VERB = { add: 'added', change: 'changed', delete: 'deleted' };
+  const LOG_PAGE = 100;
+  let logRows = [], logOffset = 0, logPeopleDone = false;
+  Object.entries(LOG_AREA).sort((a, b) => a[1].localeCompare(b[1])).forEach(([k, v]) => $('logArea').append(h('option', { value: k, text: v })));
+  function logQuery() {
+    let q = db.from('activity_log').select('*').order('at', { ascending: false });
+    if ($('logWho').value) q = q.eq('actor_id', $('logWho').value);
+    if ($('logArea').value) q = q.eq('table_name', $('logArea').value);
+    if ($('logAct').value) q = q.eq('action', $('logAct').value);
+    if ($('logFrom').value) q = q.gte('at', new Date($('logFrom').value + 'T00:00:00+06:00').toISOString());
+    if ($('logTo').value) q = q.lte('at', new Date($('logTo').value + 'T23:59:59+06:00').toISOString());
+    const t = $('logSearch').value.trim().replace(/[%,()*]/g, ' ');
+    if (t) q = q.or(`label.ilike.%${t}%,row_key.ilike.%${t}%,actor_email.ilike.%${t}%`);
+    return q;
+  }
+  async function loadLog(reset) {
+    if (!logPeopleDone) {
+      const p = await db.rpc('activity_log_people');
+      if (!p.error) { logPeopleDone = true; (p.data || []).forEach(x => $('logWho').append(h('option', { value: x.actor_id, text: `${x.actor_email} (${x.actions})` }))); }
+    }
+    if (reset) { logRows = []; logOffset = 0; }
+    const r = await logQuery().range(logOffset, logOffset + LOG_PAGE - 1);
+    const box = $('logList');
+    if (r.error) { box.innerHTML = ''; box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'The activity log is not switched on yet: run 0037_activity_log.sql.' : friendly(r.error) })); return; }
+    logRows = logRows.concat(r.data || []); logOffset += (r.data || []).length;
+    $('logMore').hidden = (r.data || []).length < LOG_PAGE;
+    drawLog();
+  }
+  const fmtChange = (x) => {
+    if (x.action !== 'change') return Object.entries(x.changes || {}).filter(([k]) => !['id', 'seller_id', 'user_id', 'created_by'].includes(k)).slice(0, 6).map(([k, v]) => `${k}: ${v}`).join(' · ');
+    return Object.entries(x.changes || {}).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v.from === '' ? '—' : v.from} → ${v.to === '' ? '—' : v.to}`).join(' · ');
+  };
+  function drawLog() {
+    const box = $('logList'); box.innerHTML = '';
+    if (!logRows.length) { box.append(h('p', { class: 'muted', style: 'padding:12px 0', text: 'Nothing recorded for these filters yet. Changes made by staff from now on appear here.' })); return; }
+    logRows.forEach(x => box.append(h('article', { class: 'ar log-row' },
+      h('div', { class: 'ar-head' },
+        h('span', { class: 'muted log-t', text: new Date(x.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }),
+        h('b', { text: x.actor_email || 'Staff' }), h('span', { class: 'pill log-' + x.action, text: LOG_VERB[x.action] }),
+        h('span', { text: (LOG_AREA[x.table_name] || x.table_name) + (x.label ? ': ' : '') }), x.label && h('b', { text: x.label })),
+      h('p', { class: 'muted log-ch', text: fmtChange(x) || '' }))));
+  }
+  ['logWho', 'logArea', 'logAct', 'logFrom', 'logTo'].forEach(id => $(id).onchange = () => loadLog(true));
+  let logT; $('logSearch').oninput = () => { clearTimeout(logT); logT = setTimeout(() => loadLog(true), 350); };
+  $('logMore').onclick = () => loadLog(false);
+  $('logCsv').onclick = async () => {
+    const r = await logQuery().limit(5000);
+    if (r.error) return toast(friendly(r.error));
+    const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const lines = [['When', 'Who', 'Role', 'Area', 'Action', 'Item', 'Details'].join(',')].concat((r.data || []).map(x =>
+      [new Date(x.at).toLocaleString('en-GB'), x.actor_email, x.actor_role, LOG_AREA[x.table_name] || x.table_name, LOG_VERB[x.action], x.label || x.row_key, fmtChange(x)].map(esc).join(',')));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'rgbkart-activity-log-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+  };
 
   // ===================== Returns (0036_returns.sql) =====================
   const money = window.money || (n => '৳' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 }));
@@ -1355,8 +1439,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1366,6 +1450,7 @@
     setMenu(false);
     setMsg('dashMsg', '');
     if (view === 'team') loadTeam();
+    if (view === 'activity') loadLog(true);
     if (view === 'featured') loadFeatured();
     if (view === 'products') loadProducts();
     if (view === 'homepage') loadSections();

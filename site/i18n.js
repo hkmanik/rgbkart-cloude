@@ -179,7 +179,11 @@
     'Enter the mobile number you paid from, like 01711000000.': 'যে নম্বর থেকে পেমেন্ট করেছেন তা লিখুন, যেমন 01711000000।', 'Enter the Transaction ID (TrxID) from your payment message. It has 6 to 20 letters and numbers.': 'পেমেন্ট মেসেজের ট্রানজেকশন আইডি (TrxID) লিখুন। এতে ৬ থেকে ২০টি অক্ষর ও সংখ্যা থাকে।',
     "Payment numbers aren't set up yet. Our team will contact you about payment.": 'পেমেন্ট নম্বর এখনো ঠিক করা হয়নি। পেমেন্টের বিষয়ে আমাদের টিম যোগাযোগ করবে।', "Payments aren't switched on yet. Please try again later.": 'পেমেন্ট এখনো চালু হয়নি। পরে আবার চেষ্টা করুন।',
     // brand tagline in Bangla mode
-    'Your Online Marketplace': 'আপনার অনলাইন মার্কেটপ্লেস', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
+    'Your Online Marketplace': 'আপনার অনলাইন মার্কেটপ্লেস',
+    'Store pickup available': 'দোকান থেকে সংগ্রহ করা যায়', 'This shop is on holiday and not taking orders right now.': 'এই দোকান এখন ছুটিতে, অর্ডার নিচ্ছে না।',
+    'About the shop': 'দোকান সম্পর্কে', 'Search this shop': 'এই দোকানে খুঁজুন', 'Featured first': 'ফিচার্ড আগে', 'This shop has no products yet.': 'এই দোকানে এখনো কোনো পণ্য নেই।',
+    "This shop isn't available": 'এই দোকানটি পাওয়া যাচ্ছে না', 'It may be closed or still waiting for approval.': 'হয়তো বন্ধ আছে বা এখনো অনুমোদনের অপেক্ষায়।',
+    'Browse all products': 'সব পণ্য দেখুন', 'Visit shop →': 'দোকানে যান →', 'See all products from this seller →': 'এই বিক্রেতার সব পণ্য দেখুন →', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
     'RGBKart Categories': 'ক্যাটাগরি | RGBKart', 'RGBKart Sign In': 'সাইন ইন | RGBKart', 'RGBKart Products': 'পণ্য | RGBKart', 'RGBKart Product': 'পণ্য | RGBKart',
   };
   // 64 districts
@@ -229,6 +233,7 @@
     ['Price {p}. After you send the listing, pay by bKash, Nagad, Upay or Rocket from Your listings (Pay button) and enter the Transaction ID. Featured starts as soon as we confirm your payment (and approve the listing). Until then it shows as a free listing.',
      'দাম {p}। লিস্টিং পাঠানোর পর "আপনার লিস্টিং" থেকে (পেমেন্ট বাটন) বিকাশ, নগদ, উপায় বা রকেটে পেমেন্ট করে ট্রানজেকশন আইডি দিন। পেমেন্ট নিশ্চিত হলে (এবং লিস্টিং অনুমোদিত হলে) ফিচার্ড শুরু হবে। ততদিন এটি ফ্রি লিস্টিং হিসেবে দেখাবে।'],
     ['Page {n}', 'পৃষ্ঠা {n}'], ['Showing {a}–{b} of {n} products', '{n}টি পণ্যের মধ্যে {a}–{b} দেখানো হচ্ছে'],
+    ['On RGBKart since {n}', '{n} থেকে RGBKart-এ'], ['Hi, I found your shop on RGBKart: {u}', 'আসসালামু আলাইকুম, RGBKart-এ আপনার দোকান দেখলাম: {u}'],
     ['Up to {n} photos.', 'সর্বোচ্চ {n}টি ছবি।'], ['Pick from {n} areas or type a new one', '{n}টি এলাকা থেকে বাছুন অথবা নতুন লিখুন'], ['I have paid {p}', 'আমি {p} পেমেন্ট করেছি'],
     ['Your {meth} number (you paid from)', 'আপনার {meth} নম্বর (যেটি থেকে পেমেন্ট করেছেন)'],
     ['✓ Payment sent ({meth}, TrxID {t}). Our team will check it soon, usually within a few hours.', '✓ পেমেন্ট পাঠানো হয়েছে ({meth}, TrxID {t})। আমাদের টিম শিগগিরই, সাধারণত কয়েক ঘণ্টার মধ্যে, যাচাই করবে।'],

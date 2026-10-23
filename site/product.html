@@ -297,7 +297,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=3"></script>
+<script src="i18n.js?v=4"></script>
 <script src="menu.js?v=5"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -531,7 +531,8 @@
     if (shop.logo_path) logo.append(h('img', { src: imgUrl('shop-assets', shop.logo_path), alt: '' })); else logo.textContent = (shop.shop_name || '?').charAt(0).toUpperCase();
     box.append(logo, h('div', { style: 'min-width:0' }, h('b', { text: L(shop, 'shop_name'), translate: 'no' }),
       h('span', { text: [T(oneTime ? 'Individual seller' : 'Shop on RGBKart'), [shop.area, shop.city].filter(Boolean).map(x => RGBLang.tr(x)).join(', '), T('since {n}', { n: new Date(shop.created_at).getFullYear() })].filter(Boolean).join(' · ') }),
-      shop.vacation_mode && h('span', { style: 'display:block;color:var(--warn)', text: T('On holiday: ') + (shop.vacation_message || T('not taking orders right now')) })));
+      shop.vacation_mode && h('span', { style: 'display:block;color:var(--warn)', text: T('On holiday: ') + (shop.vacation_message || T('not taking orders right now')) }),
+      h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || shop.user_id), text: T(oneTime ? 'See all products from this seller →' : 'Visit shop →'), style: 'display:inline-block;margin-top:4px;font-weight:700;font-size:.9rem' })));
   }
 
   // What a buyer may see: shops → phone/WhatsApp; one-time sellers → only when Featured (checked by the database)

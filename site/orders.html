@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=12">
+<link rel="stylesheet" href="shop.css?v=13">
 <link rel="stylesheet" href="order.css?v=2">
 </head>
 <body>
@@ -21,7 +21,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=3"></script>
+<script src="i18n.js?v=4"></script>
 <script src="shop.js?v=13"></script>
 <script src="menu.js?v=5"></script>
 <script>
@@ -42,7 +42,7 @@
     if (r.error) { box.innerHTML = ''; box.append(h('div', { class: 'box', text: /does not exist|Could not find/i.test(r.error.message) ? 'Orders aren\'t switched on yet.' : r.error.message })); return; }
     const orders = r.data;
     const sids = [...new Set(orders.map(o => o.seller_id))];
-    const s = sids.length ? await db.from('shops').select('user_id, shop_name, shop_name_bn, phone_public, whatsapp, pickup_address').in('user_id', sids) : { data: [] };
+    const s = sids.length ? await db.from('shops').select('user_id, shop_name, shop_name_bn, shop_slug, phone_public, whatsapp, pickup_address').in('user_id', sids) : { data: [] };
     const shops = new Map((s.data || []).map(x => [x.user_id, x]));
     box.innerHTML = '';
     if (!orders.length) {
@@ -63,7 +63,7 @@
         } }),
         h('button', { type: 'button', text: 'Keep order', onclick: () => cancelRow.hidden = true }));
       list.append(h('article', { class: 'box ocard' },
-        h('div', { class: 'ohead' }, h('div', {}, h('b', { text: L(shop, 'shop_name') || T('Shop'), translate: 'no' }), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), ' · ' + fmt(o.created_at))),
+        h('div', { class: 'ohead' }, h('div', {}, h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || o.seller_id), style: 'color:inherit;text-decoration:none' }, h('b', { text: L(shop, 'shop_name') || T('Shop'), translate: 'no' })), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), ' · ' + fmt(o.created_at))),
           h('span', { class: 'ost ' + o.status, text: LABEL[o.status] })),
         o.status !== 'cancelled' && h('div', { class: 'track', 'aria-label': 'Order progress' }, STEPS.map(([k, t], i) => h('span', { class: i <= at ? 'on' : '', text: t }))),
         o.status === 'cancelled' && h('p', { class: 'm bad', text: T(o.cancelled_by === 'customer' ? 'Cancelled by you' : o.cancelled_by === 'seller' ? 'Cancelled by the shop' : 'Cancelled') + (o.cancel_reason ? ': ' + o.cancel_reason : '') }),

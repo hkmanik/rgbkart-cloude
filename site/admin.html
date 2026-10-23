@@ -301,7 +301,8 @@
   .ad-banner.has-img { grid-template-columns: 96px minmax(0, 1fr) auto; } .ad-banner img { width: 96px; height: 64px; object-fit: cover; border-radius: 8px; }
   .rate-row { display: grid; grid-template-columns: minmax(0, 1.6fr) 130px 110px auto auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
   .rate-row:first-child { border-top: 0; } .rate-row input[type=number] { width: 100%; }
-  @media (max-width: 760px) { .rate-row { grid-template-columns: 1fr 1fr; } .rate-row > div:first-child { grid-column: 1 / -1; } }
+  .rate-row.cod-row { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; }
+  @media (max-width: 760px) { .rate-row.cod-row { grid-template-columns: 1fr; } .rate-row { grid-template-columns: 1fr 1fr; } .rate-row > div:first-child { grid-column: 1 / -1; } }
   .ad-row { display: grid; grid-template-columns: minmax(180px, 280px) minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
   .ad-row:first-child { border-top: 0; } .ad-row.off { opacity: .55; }
   @media (max-width: 860px) { .ad-row { grid-template-columns: 1fr; } }
@@ -2808,7 +2809,7 @@
     const v = (r.data && r.data.value) || {}, edit = canApprove();
     const num = (val, label) => h('input', { type: 'number', min: 0, step: 1, value: Number(val) || 0, 'aria-label': label, disabled: !edit });
     const mx = num(v.max_order, 'Biggest order per shop'), fm = num(v.first_order_max, 'Biggest first order per shop'), op = num(v.max_open, 'Orders on the way per buyer');
-    box.append(h('div', { class: 'rate-row' },
+    box.append(h('div', { class: 'rate-row cod-row' },
       h('label', {}, 'Biggest order per shop (৳)', mx),
       h('label', {}, 'Biggest FIRST order per shop (৳)', fm),
       h('label', {}, 'Orders on the way per buyer', op),

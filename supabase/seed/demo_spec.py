@@ -498,3 +498,36 @@ SELLERS = {
            role='individual', city='Dhaka', area='Mirpur 10', phone='01700000103', whatsapp='01700000103', mail='demo-one-time-seller@rgbkart.test',
            address=None, tagline=None, about=None, pickup=False),
 }
+
+# 23 Oct: more demo shops so the home page "Top shops" row has enough to slide. Products of these sub-categories move to them.
+def _shop(n, email, name, name_bn, city, area, tagline, pickup=False):
+    return dict(id=f'd0000000-0000-4000-8000-{n:012d}', email=email, name=name, name_bn=name_bn, role='seller', city=city, area=area,
+                phone=f'017000001{n:02d}', whatsapp=f'017000001{n:02d}', mail=email, address=f'{area}, {city}', tagline=tagline + ' (demo shop)',
+                about='This is a demo shop made for testing RGBKart. Its products are not real.', pickup=pickup)
+SELLERS.update({
+ 'F': _shop(4, 'demo-fashion-hub@rgbkart.test', 'Demo Fashion Hub', 'ডেমো ফ্যাশন হাব', 'Dhaka', 'Dhanmondi 27', 'Clothing for men and women', True),
+ 'S': _shop(5, 'demo-shoe-palace@rgbkart.test', 'Demo Shoe Palace', 'ডেমো শু প্যালেস', 'Dhaka', 'Gulshan 1', 'Shoes, watches and bags'),
+ 'K': _shop(6, 'demo-kids-world@rgbkart.test', 'Demo Kids World', 'ডেমো কিডস ওয়ার্ল্ড', 'Khulna', 'Sonadanga', 'Everything for babies and kids'),
+ 'B': _shop(7, 'demo-beauty-care@rgbkart.test', 'Demo Beauty Care', 'ডেমো বিউটি কেয়ার', 'Sylhet', 'Zindabazar', 'Original skin, hair and beauty products'),
+ 'R': _shop(8, 'demo-fresh-bazar@rgbkart.test', 'Demo Fresh Bazar', 'ডেমো ফ্রেশ বাজার', 'Dhaka', 'Mirpur 10', 'Daily groceries delivered in Dhaka', True),
+ 'H': _shop(9, 'demo-home-decor@rgbkart.test', 'Demo Home Decor', 'ডেমো হোম ডেকর', 'Rajshahi', 'Shaheb Bazar', 'Home, kitchen and decor'),
+ 'P': _shop(10, 'demo-sports-zone@rgbkart.test', 'Demo Sports Zone', 'ডেমো স্পোর্টস জোন', 'Chattogram', 'Agrabad', 'Cricket, football, fitness'),
+ 'O': _shop(11, 'demo-book-corner@rgbkart.test', 'Demo Book Corner', 'ডেমো বুক কর্নার', 'Dhaka', 'Nilkhet', 'Books and stationery', True),
+ 'A': _shop(12, 'demo-auto-tools@rgbkart.test', 'Demo Auto & Tools', 'ডেমো অটো অ্যান্ড টুলস', 'Gazipur', 'Tongi', 'Car, bike and tool supplies'),
+})
+REASSIGN = {
+ **dict.fromkeys(['T-Shirts & Polos', 'Shirts', 'Pants & Jeans', 'Panjabi & Ethnic Wear', 'Winter Wear', 'Wallets & Belts', 'Sarees',
+                  'Salwar Kameez & Three-Piece', 'Kurtis & Tops', 'Hijab & Abaya', 'Western Wear', 'Jewellery & Sunglasses'], 'F'),
+ **dict.fromkeys(["Men's Shoes", "Women's Shoes", 'Sports & Running Shoes', 'Sandals & Slippers', "Kids' Shoes", 'Watches', 'Bags & Backpacks'], 'S'),
+ **dict.fromkeys(['Kids Clothing', 'Diapers & Wipes', 'Baby Feeding', 'Baby Bath & Skin Care', 'Strollers & Baby Gear', 'Remote Control Toys',
+                  'Educational & STEM Toys', 'Dolls & Soft Toys', 'Board Games & Puzzles', 'Outdoor & Ride-On Toys'], 'K'),
+ **dict.fromkeys(['Skin Care', 'Hair Care', 'Makeup', 'Fragrances', 'Personal Care & Hygiene'], 'B'),
+ **dict.fromkeys(['Rice, Dal & Flour', 'Cooking Oil & Spices', 'Snacks & Beverages', 'Dairy & Breakfast', 'Household Cleaning'], 'R'),
+ **dict.fromkeys(['Bedding & Bath', 'Cookware & Dining', 'Home Décor', 'Lighting'], 'H'),   # kitchen appliances stay with Demo Lifestyle Mart
+ **dict.fromkeys(['Cricket', 'Football', 'Badminton & Racket Sports', 'Gym & Fitness Equipment'], 'P'),
+ **dict.fromkeys(["Children's Books", 'Islamic Books', 'Stationery & Office Supplies', 'Academic & Admission'], 'O'),
+ **dict.fromkeys(['Helmets & Riding Gear', 'Motorbike Parts & Accessories', 'Car Accessories', 'Car Electronics', 'Oils & Car Care',
+                  'Power Tools', 'Hand Tools', 'Electrical & Wiring', 'Plumbing & Sanitary', 'Locks & Safety'], 'A'),
+}
+for _p in PRODUCTS:
+    if _p['seller'] != 'I' and _p['sub'] in REASSIGN: _p['seller'] = REASSIGN[_p['sub']]

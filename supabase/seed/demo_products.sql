@@ -22,36 +22,117 @@ create or replace function pg_temp.ok(p_cat bigint, p_attr text) returns boolean
 
 -- 1. remove the old demo data (if this was run before) -----------------------------------------------------
 delete from public.home_sections where subtitle like '%· demo';
-delete from auth.users where id in ('d0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000002', 'd0000000-0000-4000-8000-000000000003');
+delete from auth.users where id in ('d0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000002', 'd0000000-0000-4000-8000-000000000003', 'd0000000-0000-4000-8000-000000000004', 'd0000000-0000-4000-8000-000000000005', 'd0000000-0000-4000-8000-000000000006', 'd0000000-0000-4000-8000-000000000007', 'd0000000-0000-4000-8000-000000000008', 'd0000000-0000-4000-8000-000000000009', 'd0000000-0000-4000-8000-000000000010', 'd0000000-0000-4000-8000-000000000011', 'd0000000-0000-4000-8000-000000000012');
 
 -- 2. demo sellers ------------------------------------------------------------------------------------------
 insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
 values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'demo-gadget-house@rgbkart.test', '', now(),
-  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Gadget House"}', now() - interval '200 days', now(), '', '', '', '');
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Gadget House"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
 insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000001', 'Demo Gadget House') on conflict (id) do nothing;
 update public.profiles set role = 'seller', full_name = 'Demo Gadget House', phone = '01700000101', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000001';
 insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
 values ('d0000000-0000-4000-8000-000000000001', 'Demo Gadget House', 'ডেমো গ্যাজেট হাউস', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Gadgets, computers and appliances with warranty (demo shop)', 'Shop 12, Multiplan Center, Elephant Road, Dhaka', 'Dhaka', 'Elephant Road',
-  '01700000101', '01700000101', 'demo-gadget-house@rgbkart.test', 'approved', true, now() - interval '200 days');
+  '01700000101', '01700000101', 'demo-gadget-house@rgbkart.test', 'approved', true, now() - interval '200 days') on conflict (user_id) do nothing;
 insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
 values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'demo-lifestyle-mart@rgbkart.test', '', now(),
-  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Lifestyle Mart"}', now() - interval '200 days', now(), '', '', '', '');
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Lifestyle Mart"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
 insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000002', 'Demo Lifestyle Mart') on conflict (id) do nothing;
 update public.profiles set role = 'seller', full_name = 'Demo Lifestyle Mart', phone = '01700000102', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000002';
 insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
 values ('d0000000-0000-4000-8000-000000000002', 'Demo Lifestyle Mart', 'ডেমো লাইফস্টাইল মার্ট', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Fashion, home, grocery and more (demo shop)', 'House 5, Road 2, GEC Circle, Chattogram', 'Chattogram', 'GEC Circle',
-  '01700000102', '01700000102', 'demo-lifestyle-mart@rgbkart.test', 'approved', false, now() - interval '200 days');
+  '01700000102', '01700000102', 'demo-lifestyle-mart@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
 insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
 values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'demo-one-time-seller@rgbkart.test', '', now(),
-  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo One-time Seller"}', now() - interval '200 days', now(), '', '', '', '');
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo One-time Seller"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
 insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000003', 'Demo One-time Seller') on conflict (id) do nothing;
 update public.profiles set role = 'individual', full_name = 'Demo One-time Seller', phone = '01700000103', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000003';
 insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
 values ('d0000000-0000-4000-8000-000000000003', 'Demo One-time Seller', null, null, null, null, 'Dhaka', 'Mirpur 10',
-  '01700000103', '01700000103', 'demo-one-time-seller@rgbkart.test', 'approved', false, now() - interval '200 days');
+  '01700000103', '01700000103', 'demo-one-time-seller@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'demo-fashion-hub@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Fashion Hub"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000004', 'Demo Fashion Hub') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Fashion Hub', phone = '01700000104', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000004';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000004', 'Demo Fashion Hub', 'ডেমো ফ্যাশন হাব', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Clothing for men and women (demo shop)', 'Dhanmondi 27, Dhaka', 'Dhaka', 'Dhanmondi 27',
+  '01700000104', '01700000104', 'demo-fashion-hub@rgbkart.test', 'approved', true, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000005', 'authenticated', 'authenticated', 'demo-shoe-palace@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Shoe Palace"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000005', 'Demo Shoe Palace') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Shoe Palace', phone = '01700000105', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000005';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000005', 'Demo Shoe Palace', 'ডেমো শু প্যালেস', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Shoes, watches and bags (demo shop)', 'Gulshan 1, Dhaka', 'Dhaka', 'Gulshan 1',
+  '01700000105', '01700000105', 'demo-shoe-palace@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000006', 'authenticated', 'authenticated', 'demo-kids-world@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Kids World"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000006', 'Demo Kids World') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Kids World', phone = '01700000106', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000006';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000006', 'Demo Kids World', 'ডেমো কিডস ওয়ার্ল্ড', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Everything for babies and kids (demo shop)', 'Sonadanga, Khulna', 'Khulna', 'Sonadanga',
+  '01700000106', '01700000106', 'demo-kids-world@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000007', 'authenticated', 'authenticated', 'demo-beauty-care@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Beauty Care"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000007', 'Demo Beauty Care') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Beauty Care', phone = '01700000107', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000007';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000007', 'Demo Beauty Care', 'ডেমো বিউটি কেয়ার', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Original skin, hair and beauty products (demo shop)', 'Zindabazar, Sylhet', 'Sylhet', 'Zindabazar',
+  '01700000107', '01700000107', 'demo-beauty-care@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000008', 'authenticated', 'authenticated', 'demo-fresh-bazar@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Fresh Bazar"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000008', 'Demo Fresh Bazar') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Fresh Bazar', phone = '01700000108', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000008';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000008', 'Demo Fresh Bazar', 'ডেমো ফ্রেশ বাজার', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Daily groceries delivered in Dhaka (demo shop)', 'Mirpur 10, Dhaka', 'Dhaka', 'Mirpur 10',
+  '01700000108', '01700000108', 'demo-fresh-bazar@rgbkart.test', 'approved', true, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000009', 'authenticated', 'authenticated', 'demo-home-decor@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Home Decor"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000009', 'Demo Home Decor') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Home Decor', phone = '01700000109', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000009';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000009', 'Demo Home Decor', 'ডেমো হোম ডেকর', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Home, kitchen and decor (demo shop)', 'Shaheb Bazar, Rajshahi', 'Rajshahi', 'Shaheb Bazar',
+  '01700000109', '01700000109', 'demo-home-decor@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000010', 'authenticated', 'authenticated', 'demo-sports-zone@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Sports Zone"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000010', 'Demo Sports Zone') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Sports Zone', phone = '01700000110', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000010';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000010', 'Demo Sports Zone', 'ডেমো স্পোর্টস জোন', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Cricket, football, fitness (demo shop)', 'Agrabad, Chattogram', 'Chattogram', 'Agrabad',
+  '01700000110', '01700000110', 'demo-sports-zone@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000011', 'authenticated', 'authenticated', 'demo-book-corner@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Book Corner"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000011', 'Demo Book Corner') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Book Corner', phone = '01700000111', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000011';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000011', 'Demo Book Corner', 'ডেমো বুক কর্নার', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Books and stationery (demo shop)', 'Nilkhet, Dhaka', 'Dhaka', 'Nilkhet',
+  '01700000111', '01700000111', 'demo-book-corner@rgbkart.test', 'approved', true, now() - interval '200 days') on conflict (user_id) do nothing;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'd0000000-0000-4000-8000-000000000012', 'authenticated', 'authenticated', 'demo-auto-tools@rgbkart.test', '', now(),
+  '{"provider":"email","providers":["email"]}', '{"full_name": "Demo Auto & Tools"}', now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
+insert into public.profiles (id, full_name) values ('d0000000-0000-4000-8000-000000000012', 'Demo Auto & Tools') on conflict (id) do nothing;
+update public.profiles set role = 'seller', full_name = 'Demo Auto & Tools', phone = '01700000112', email_alerts = false where id = 'd0000000-0000-4000-8000-000000000012';
+insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
+values ('d0000000-0000-4000-8000-000000000012', 'Demo Auto & Tools', 'ডেমো অটো অ্যান্ড টুলস', 'This is a demo shop made for testing RGBKart. Its products are not real.', 'Car, bike and tool supplies (demo shop)', 'Tongi, Gazipur', 'Gazipur', 'Tongi',
+  '01700000112', '01700000112', 'demo-auto-tools@rgbkart.test', 'approved', false, now() - interval '200 days') on conflict (user_id) do nothing;
 
 -- 3. products ------------------------------------------------------------------------------------------------
 do $$
@@ -1086,7 +1167,7 @@ Delivery: Ships in 3–5 days. 7-day returns.
   c := pg_temp.cat('T-Shirts & Polos');
   if c is null then missing := missing || 'T-Shirts & Polos' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Cotton Polo Shirt', 'সুতির পোলো শার্ট', '100% combed cotton pique · Regular fit · Breathable for summer', 'Cotton Polo Shirt
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Cotton Polo Shirt', 'সুতির পোলো শার্ট', '100% combed cotton pique · Regular fit · Breathable for summer', 'Cotton Polo Shirt
 
 • 100% combed cotton pique
 • Regular fit
@@ -1149,7 +1230,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Clothing Size'), pg_temp.opt('Clothing Size', 'XL')), (vid, pg_temp.attr('Colour'), pg_temp.opt('Colour', 'White'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000004', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'T-Shirts & Polos' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -1158,7 +1239,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Shirts');
   if c is null then missing := missing || 'Shirts' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Formal Oxford Shirt', 'ফরমাল অক্সফোর্ড শার্ট', 'Easy-iron oxford cotton · Slim fit · Office and formal wear', 'Formal Oxford Shirt
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Formal Oxford Shirt', 'ফরমাল অক্সফোর্ড শার্ট', 'Easy-iron oxford cotton · Slim fit · Office and formal wear', 'Formal Oxford Shirt
 
 • Easy-iron oxford cotton
 • Slim fit
@@ -1199,7 +1280,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Pants & Jeans');
   if c is null then missing := missing || 'Pants & Jeans' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Slim Fit Stretch Denim Jeans', 'স্লিম ফিট স্ট্রেচ ডেনিম জিন্স', 'Stretch denim for comfort · Slim fit, dark blue wash · 5 pockets', 'Slim Fit Stretch Denim Jeans
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Slim Fit Stretch Denim Jeans', 'স্লিম ফিট স্ট্রেচ ডেনিম জিন্স', 'Stretch denim for comfort · Slim fit, dark blue wash · 5 pockets', 'Slim Fit Stretch Denim Jeans
 
 • Stretch denim for comfort
 • Slim fit, dark blue wash
@@ -1242,7 +1323,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Panjabi & Ethnic Wear');
   if c is null then missing := missing || 'Panjabi & Ethnic Wear' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Embroidered Cotton Panjabi', 'এমব্রয়ডারি করা সুতির পাঞ্জাবি', 'Fine embroidery on the collar · Soft cotton · Perfect for Eid and Puja', 'Embroidered Cotton Panjabi
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Embroidered Cotton Panjabi', 'এমব্রয়ডারি করা সুতির পাঞ্জাবি', 'Fine embroidery on the collar · Soft cotton · Perfect for Eid and Puja', 'Embroidered Cotton Panjabi
 
 • Fine embroidery on the collar
 • Soft cotton
@@ -1282,7 +1363,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Clothing Size'), pg_temp.opt('Clothing Size', 'XXL'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000004', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Panjabi & Ethnic Wear' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -1291,7 +1372,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Winter Wear');
   if c is null then missing := missing || 'Winter Wear' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Fleece Hoodie', 'ফ্লিস হুডি', 'Warm brushed fleece inside · Kangaroo pocket · Unisex fit', 'Fleece Hoodie
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Fleece Hoodie', 'ফ্লিস হুডি', 'Warm brushed fleece inside · Kangaroo pocket · Unisex fit', 'Fleece Hoodie
 
 • Warm brushed fleece inside
 • Kangaroo pocket
@@ -1343,7 +1424,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Wallets & Belts');
   if c is null then missing := missing || 'Wallets & Belts' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Genuine Leather Wallet', 'আসল চামড়ার মানিব্যাগ', 'Real cow leather · 8 card slots, coin pocket · Gift box included', 'Genuine Leather Wallet
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Genuine Leather Wallet', 'আসল চামড়ার মানিব্যাগ', 'Real cow leather · 8 card slots, coin pocket · Gift box included', 'Genuine Leather Wallet
 
 • Real cow leather
 • 8 card slots, coin pocket
@@ -1366,7 +1447,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Sarees');
   if c is null then missing := missing || 'Sarees' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Tangail Cotton Saree', 'টাঙ্গাইলের সুতি শাড়ি', 'Handwoven in Tangail · Soft cotton, comfortable all day · With blouse piece', 'Tangail Cotton Saree
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Tangail Cotton Saree', 'টাঙ্গাইলের সুতি শাড়ি', 'Handwoven in Tangail · Soft cotton, comfortable all day · With blouse piece', 'Tangail Cotton Saree
 
 • Handwoven in Tangail
 • Soft cotton, comfortable all day
@@ -1400,7 +1481,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Colour'), pg_temp.opt('Colour', 'Maroon'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000004', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Sarees' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -1409,7 +1490,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Salwar Kameez & Three-Piece');
   if c is null then missing := missing || 'Salwar Kameez & Three-Piece' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Printed Lawn Three-Piece', 'প্রিন্টেড লন থ্রি-পিস', 'Soft lawn cotton · Printed dupatta · Stitched, ready to wear', 'Printed Lawn Three-Piece
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Printed Lawn Three-Piece', 'প্রিন্টেড লন থ্রি-পিস', 'Soft lawn cotton · Printed dupatta · Stitched, ready to wear', 'Printed Lawn Three-Piece
 
 • Soft lawn cotton
 • Printed dupatta
@@ -1447,7 +1528,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Kurtis & Tops');
   if c is null then missing := missing || 'Kurtis & Tops' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Block Print Kurti', 'ব্লক প্রিন্ট কুর্তি', 'Hand block print · Breathable cotton · 3/4 sleeve', 'Block Print Kurti
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Block Print Kurti', 'ব্লক প্রিন্ট কুর্তি', 'Hand block print · Breathable cotton · 3/4 sleeve', 'Block Print Kurti
 
 • Hand block print
 • Breathable cotton
@@ -1485,7 +1566,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Hijab & Abaya');
   if c is null then missing := missing || 'Hijab & Abaya' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Premium Georgette Abaya', 'প্রিমিয়াম জর্জেট আবায়া', 'Flowy georgette · Matching hijab included · Free size', 'Premium Georgette Abaya
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Premium Georgette Abaya', 'প্রিমিয়াম জর্জেট আবায়া', 'Flowy georgette · Matching hijab included · Free size', 'Premium Georgette Abaya
 
 • Flowy georgette
 • Matching hijab included
@@ -1522,7 +1603,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Western Wear');
   if c is null then missing := missing || 'Western Wear' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Floral Midi Dress', 'ফ্লোরাল মিডি ড্রেস', 'Worn twice, like new · Floral chiffon · Size M', 'Floral Midi Dress
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Floral Midi Dress', 'ফ্লোরাল মিডি ড্রেস', 'Worn twice, like new · Floral chiffon · Size M', 'Floral Midi Dress
 
 • Worn twice, like new
 • Floral chiffon
@@ -1546,7 +1627,7 @@ Price is negotiable, message or call the seller.
   c := pg_temp.cat('Jewellery & Sunglasses');
   if c is null then missing := missing || 'Jewellery & Sunglasses' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Polarized Aviator Sunglasses', 'পোলারাইজড এভিয়েটর সানগ্লাস', 'Polarized UV400 lenses · Metal frame · Hard case included', 'Polarized Aviator Sunglasses
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000004', c, 'Polarized Aviator Sunglasses', 'পোলারাইজড এভিয়েটর সানগ্লাস', 'Polarized UV400 lenses · Metal frame · Hard case included', 'Polarized Aviator Sunglasses
 
 • Polarized UV400 lenses
 • Metal frame
@@ -1568,7 +1649,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Kids Clothing');
   if c is null then missing := missing || 'Kids Clothing' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Kids Cotton Pajama Set (2 pcs)', 'বাচ্চাদের সুতির পায়জামা সেট (২ পিস)', 'Soft cotton for sensitive skin · Cute cartoon print · Top and pajama', 'Kids Cotton Pajama Set (2 pcs)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Kids Cotton Pajama Set (2 pcs)', 'বাচ্চাদের সুতির পায়জামা সেট (২ পিস)', 'Soft cotton for sensitive skin · Cute cartoon print · Top and pajama', 'Kids Cotton Pajama Set (2 pcs)
 
 • Soft cotton for sensitive skin
 • Cute cartoon print
@@ -1605,7 +1686,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Diapers & Wipes');
   if c is null then missing := missing || 'Diapers & Wipes' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Huggies Dry Pants Diaper', 'হাগিস ড্রাই প্যান্টস ডায়াপার', 'Up to 12 hours dryness · Easy pull-up pants · Soft waistband', 'Huggies Dry Pants Diaper
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Huggies Dry Pants Diaper', 'হাগিস ড্রাই প্যান্টস ডায়াপার', 'Up to 12 hours dryness · Easy pull-up pants · Soft waistband', 'Huggies Dry Pants Diaper
 
 • Up to 12 hours dryness
 • Easy pull-up pants
@@ -1636,7 +1717,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Diaper Size'), pg_temp.opt('Diaper Size', 'Pants – XL'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000006', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Diapers & Wipes' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -1645,7 +1726,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Baby Feeding');
   if c is null then missing := missing || 'Baby Feeding' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Philips Avent Feeding Bottle 260ml', 'ফিলিপস অ্যাভেন্ট ফিডিং বোতল ২৬০ মিলি', 'Anti-colic valve · BPA-free · Natural-feel nipple', 'Philips Avent Feeding Bottle 260ml
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Philips Avent Feeding Bottle 260ml', 'ফিলিপস অ্যাভেন্ট ফিডিং বোতল ২৬০ মিলি', 'Anti-colic valve · BPA-free · Natural-feel nipple', 'Philips Avent Feeding Bottle 260ml
 
 • Anti-colic valve
 • BPA-free
@@ -1667,7 +1748,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Baby Bath & Skin Care');
   if c is null then missing := missing || 'Baby Bath & Skin Care' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Johnson''s Baby Bath Gift Set', 'জনসনস বেবি বাথ গিফট সেট', 'Shampoo, soap, lotion, oil and powder · Gentle for newborn skin · Gift box', 'Johnson''s Baby Bath Gift Set
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Johnson''s Baby Bath Gift Set', 'জনসনস বেবি বাথ গিফট সেট', 'Shampoo, soap, lotion, oil and powder · Gentle for newborn skin · Gift box', 'Johnson''s Baby Bath Gift Set
 
 • Shampoo, soap, lotion, oil and powder
 • Gentle for newborn skin
@@ -1688,7 +1769,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Strollers & Baby Gear');
   if c is null then missing := missing || 'Strollers & Baby Gear' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Foldable Baby Stroller', 'ফোল্ডেবল বেবি স্ট্রলার', 'Used 6 months, very clean · Folds with one hand · Sun canopy and basket', 'Foldable Baby Stroller
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Foldable Baby Stroller', 'ফোল্ডেবল বেবি স্ট্রলার', 'Used 6 months, very clean · Folds with one hand · Sun canopy and basket', 'Foldable Baby Stroller
 
 • Used 6 months, very clean
 • Folds with one hand
@@ -1710,7 +1791,7 @@ Price is negotiable, message or call the seller.
   c := pg_temp.cat('Men''s Shoes');
   if c is null then missing := missing || 'Men''s Shoes' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Leather Formal Oxford Shoes', 'চামড়ার ফরমাল অক্সফোর্ড জুতা', 'Genuine leather upper · Cushioned insole · Rubber sole', 'Leather Formal Oxford Shoes
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Leather Formal Oxford Shoes', 'চামড়ার ফরমাল অক্সফোর্ড জুতা', 'Genuine leather upper · Cushioned insole · Rubber sole', 'Leather Formal Oxford Shoes
 
 • Genuine leather upper
 • Cushioned insole
@@ -1748,7 +1829,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Shoe Size'), pg_temp.opt('Shoe Size', 'EU 43'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000005', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Men''s Shoes' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -1757,7 +1838,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Women''s Shoes');
   if c is null then missing := missing || 'Women''s Shoes' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Comfort Block Heel Sandal', 'কমফোর্ট ব্লক হিল স্যান্ডেল', '2" block heel · Soft padded footbed · Ankle strap', 'Comfort Block Heel Sandal
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Comfort Block Heel Sandal', 'কমফোর্ট ব্লক হিল স্যান্ডেল', '2" block heel · Soft padded footbed · Ankle strap', 'Comfort Block Heel Sandal
 
 • 2" block heel
 • Soft padded footbed
@@ -1800,7 +1881,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Sports & Running Shoes');
   if c is null then missing := missing || 'Sports & Running Shoes' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Lightweight Running Shoes', 'হালকা রানিং জুতা', 'Breathable mesh upper · EVA cushioning · Grippy rubber outsole', 'Lightweight Running Shoes
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Lightweight Running Shoes', 'হালকা রানিং জুতা', 'Breathable mesh upper · EVA cushioning · Grippy rubber outsole', 'Lightweight Running Shoes
 
 • Breathable mesh upper
 • EVA cushioning
@@ -1848,7 +1929,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Sandals & Slippers');
   if c is null then missing := missing || 'Sandals & Slippers' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Comfort Slide Slippers', 'আরামদায়ক স্লাইড স্লিপার', 'Soft EVA, very light · Anti-slip sole · Waterproof', 'Comfort Slide Slippers
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Comfort Slide Slippers', 'আরামদায়ক স্লাইড স্লিপার', 'Soft EVA, very light · Anti-slip sole · Waterproof', 'Comfort Slide Slippers
 
 • Soft EVA, very light
 • Anti-slip sole
@@ -1891,7 +1972,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Kids'' Shoes');
   if c is null then missing := missing || 'Kids'' Shoes' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Kids Light-up Sneakers', 'বাচ্চাদের লাইট-আপ স্নিকার্স', 'LED lights flash when walking · Velcro strap, easy to wear · Soft sole', 'Kids Light-up Sneakers
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Kids Light-up Sneakers', 'বাচ্চাদের লাইট-আপ স্নিকার্স', 'LED lights flash when walking · Velcro strap, easy to wear · Soft sole', 'Kids Light-up Sneakers
 
 • LED lights flash when walking
 • Velcro strap, easy to wear
@@ -1934,7 +2015,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Watches');
   if c is null then missing := missing || 'Watches' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Casio Analog Steel Watch MTP-1302', 'ক্যাসিও অ্যানালগ স্টিল ঘড়ি MTP-1302', 'Original Casio · Stainless steel strap · Water resistant 50 m', 'Casio Analog Steel Watch MTP-1302
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Casio Analog Steel Watch MTP-1302', 'ক্যাসিও অ্যানালগ স্টিল ঘড়ি MTP-1302', 'Original Casio · Stainless steel strap · Water resistant 50 m', 'Casio Analog Steel Watch MTP-1302
 
 • Original Casio
 • Stainless steel strap
@@ -1954,7 +2035,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
     if pg_temp.ok(c, 'Gender') and pg_temp.opt('Gender', 'Men') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Gender'), pg_temp.opt('Gender', 'Men')); end if;
     if pg_temp.ok(c, 'Warranty') and pg_temp.opt('Warranty', '1 Year') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Warranty'), pg_temp.opt('Warranty', '1 Year')); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000005', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Watches' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -1963,7 +2044,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Bags & Backpacks');
   if c is null then missing := missing || 'Bags & Backpacks' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Water-resistant Laptop Backpack', 'পানিরোধী ল্যাপটপ ব্যাকপ্যাক', 'Fits up to 15.6" laptop · USB charging port · Water-resistant fabric', 'Water-resistant Laptop Backpack
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000005', c, 'Water-resistant Laptop Backpack', 'পানিরোধী ল্যাপটপ ব্যাকপ্যাক', 'Fits up to 15.6" laptop · USB charging port · Water-resistant fabric', 'Water-resistant Laptop Backpack
 
 • Fits up to 15.6" laptop
 • USB charging port
@@ -2001,7 +2082,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Skin Care');
   if c is null then missing := missing || 'Skin Care' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'CeraVe Hydrating Facial Cleanser 236ml', 'সেরাভি হাইড্রেটিং ফেসিয়াল ক্লিনজার ২৩৬ মিলি', 'With ceramides and hyaluronic acid · For normal to dry skin · Fragrance-free', 'CeraVe Hydrating Facial Cleanser 236ml
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000007', c, 'CeraVe Hydrating Facial Cleanser 236ml', 'সেরাভি হাইড্রেটিং ফেসিয়াল ক্লিনজার ২৩৬ মিলি', 'With ceramides and hyaluronic acid · For normal to dry skin · Fragrance-free', 'CeraVe Hydrating Facial Cleanser 236ml
 
 • With ceramides and hyaluronic acid
 • For normal to dry skin
@@ -2019,7 +2100,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
     if pg_temp.ok(c, 'Formulation') and pg_temp.opt('Formulation', 'Foam / Cleanser') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Formulation'), pg_temp.opt('Formulation', 'Foam / Cleanser')); end if;
     if pg_temp.ok(c, 'Country of Origin') and pg_temp.opt('Country of Origin', 'USA') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Country of Origin'), pg_temp.opt('Country of Origin', 'USA')); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000007', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Skin Care' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2028,7 +2109,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Hair Care');
   if c is null then missing := missing || 'Hair Care' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Parachute Advansed Coconut Hair Oil', 'প্যারাস্যুট অ্যাডভান্সড নারকেল তেল', 'Pure coconut oil · Strong, healthy hair · Non-sticky', 'Parachute Advansed Coconut Hair Oil
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000007', c, 'Parachute Advansed Coconut Hair Oil', 'প্যারাস্যুট অ্যাডভান্সড নারকেল তেল', 'Pure coconut oil · Strong, healthy hair · Non-sticky', 'Parachute Advansed Coconut Hair Oil
 
 • Pure coconut oil
 • Strong, healthy hair
@@ -2061,7 +2142,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Makeup');
   if c is null then missing := missing || 'Makeup' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Maybelline SuperStay Matte Lipstick', 'মেবেলিন সুপারস্টে ম্যাট লিপস্টিক', 'Lasts up to 16 hours · Matte finish · Transfer-proof', 'Maybelline SuperStay Matte Lipstick
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000007', c, 'Maybelline SuperStay Matte Lipstick', 'মেবেলিন সুপারস্টে ম্যাট লিপস্টিক', 'Lasts up to 16 hours · Matte finish · Transfer-proof', 'Maybelline SuperStay Matte Lipstick
 
 • Lasts up to 16 hours
 • Matte finish
@@ -2098,7 +2179,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Fragrances');
   if c is null then missing := missing || 'Fragrances' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Fogg Body Spray', 'ফগ বডি স্প্রে', 'Long-lasting fragrance · No gas, all perfume · For men', 'Fogg Body Spray
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000007', c, 'Fogg Body Spray', 'ফগ বডি স্প্রে', 'Long-lasting fragrance · No gas, all perfume · For men', 'Fogg Body Spray
 
 • Long-lasting fragrance
 • No gas, all perfume
@@ -2131,7 +2212,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Personal Care & Hygiene');
   if c is null then missing := missing || 'Personal Care & Hygiene' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Dettol Antiseptic Liquid 500ml', 'ডেটল অ্যান্টিসেপটিক লিকুইড ৫০০ মিলি', 'Kills 99.9% germs · For first aid and bathing · 500 ml bottle', 'Dettol Antiseptic Liquid 500ml
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000007', c, 'Dettol Antiseptic Liquid 500ml', 'ডেটল অ্যান্টিসেপটিক লিকুইড ৫০০ মিলি', 'Kills 99.9% germs · For first aid and bathing · 500 ml bottle', 'Dettol Antiseptic Liquid 500ml
 
 • Kills 99.9% germs
 • For first aid and bathing
@@ -2153,7 +2234,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Rice, Dal & Flour');
   if c is null then missing := missing || 'Rice, Dal & Flour' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Chinigura Aromatic Rice', 'চিনিগুঁড়া সুগন্ধি চাল', 'Premium aromatic rice · For polao and biryani · Cleaned and sorted', 'Chinigura Aromatic Rice
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000008', c, 'Chinigura Aromatic Rice', 'চিনিগুঁড়া সুগন্ধি চাল', 'Premium aromatic rice · For polao and biryani · Cleaned and sorted', 'Chinigura Aromatic Rice
 
 • Premium aromatic rice
 • For polao and biryani
@@ -2186,7 +2267,7 @@ Delivery: Ships today. 7-day returns.
   c := pg_temp.cat('Cooking Oil & Spices');
   if c is null then missing := missing || 'Cooking Oil & Spices' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Teer Soybean Oil', 'তীর সয়াবিন তেল', 'Fortified with vitamin A · Pure soybean oil · Sealed bottle', 'Teer Soybean Oil
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000008', c, 'Teer Soybean Oil', 'তীর সয়াবিন তেল', 'Fortified with vitamin A · Pure soybean oil · Sealed bottle', 'Teer Soybean Oil
 
 • Fortified with vitamin A
 • Pure soybean oil
@@ -2223,7 +2304,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Snacks & Beverages');
   if c is null then missing := missing || 'Snacks & Beverages' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Pran Potato Crackers (Pack of 12)', 'প্রাণ পটেটো ক্র্যাকার্স (১২টির প্যাক)', 'Crispy and tasty · 12 small packs · Great for tiffin', 'Pran Potato Crackers (Pack of 12)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000008', c, 'Pran Potato Crackers (Pack of 12)', 'প্রাণ পটেটো ক্র্যাকার্স (১২টির প্যাক)', 'Crispy and tasty · 12 small packs · Great for tiffin', 'Pran Potato Crackers (Pack of 12)
 
 • Crispy and tasty
 • 12 small packs
@@ -2246,7 +2327,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Dairy & Breakfast');
   if c is null then missing := missing || 'Dairy & Breakfast' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Aarong Dairy Full Cream Milk Powder 1kg', 'আড়ং ডেইরি ফুল ক্রিম মিল্ক পাউডার ১ কেজি', 'Rich and creamy · For tea and family · Resealable pack', 'Aarong Dairy Full Cream Milk Powder 1kg
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000008', c, 'Aarong Dairy Full Cream Milk Powder 1kg', 'আড়ং ডেইরি ফুল ক্রিম মিল্ক পাউডার ১ কেজি', 'Rich and creamy · For tea and family · Resealable pack', 'Aarong Dairy Full Cream Milk Powder 1kg
 
 • Rich and creamy
 • For tea and family
@@ -2263,7 +2344,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
     if pg_temp.ok(c, 'Pack Size') and pg_temp.opt('Pack Size', '1 kg / 1 L') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Pack Size'), pg_temp.opt('Pack Size', '1 kg / 1 L')); end if;
     if pg_temp.ok(c, 'Dietary') and pg_temp.opt('Dietary', 'Halal') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Dietary'), pg_temp.opt('Dietary', 'Halal')); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000008', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Dairy & Breakfast' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2272,7 +2353,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Household Cleaning');
   if c is null then missing := missing || 'Household Cleaning' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Vim Dishwashing Liquid 500ml', 'ভিম ডিশওয়াশিং লিকুইড ৫০০ মিলি', 'Removes grease fast · Lemon fresh · Gentle on hands', 'Vim Dishwashing Liquid 500ml
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000008', c, 'Vim Dishwashing Liquid 500ml', 'ভিম ডিশওয়াশিং লিকুইড ৫০০ মিলি', 'Removes grease fast · Lemon fresh · Gentle on hands', 'Vim Dishwashing Liquid 500ml
 
 • Removes grease fast
 • Lemon fresh
@@ -2316,7 +2397,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Bedding & Bath');
   if c is null then missing := missing || 'Bedding & Bath' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Cotton Bed Sheet Set (Double)', 'সুতির বেডশিট সেট (ডাবল)', '1 bed sheet + 2 pillow covers · Soft 100% cotton · Colour-fast', 'Cotton Bed Sheet Set (Double)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000009', c, 'Cotton Bed Sheet Set (Double)', 'সুতির বেডশিট সেট (ডাবল)', '1 bed sheet + 2 pillow covers · Soft 100% cotton · Colour-fast', 'Cotton Bed Sheet Set (Double)
 
 • 1 bed sheet + 2 pillow covers
 • Soft 100% cotton
@@ -2348,7 +2429,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Cookware & Dining');
   if c is null then missing := missing || 'Cookware & Dining' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Non-stick Cookware Set (5 pcs)', 'নন-স্টিক রান্নার পাত্র সেট (৫ পিস)', 'Frying pan, kadai, saucepan and lids · Induction compatible · PFOA-free coating', 'Non-stick Cookware Set (5 pcs)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000009', c, 'Non-stick Cookware Set (5 pcs)', 'নন-স্টিক রান্নার পাত্র সেট (৫ পিস)', 'Frying pan, kadai, saucepan and lids · Induction compatible · PFOA-free coating', 'Non-stick Cookware Set (5 pcs)
 
 • Frying pan, kadai, saucepan and lids
 • Induction compatible
@@ -2364,7 +2445,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
     if pg_temp.ok(c, 'Material') and pg_temp.opt('Material', 'Non-stick Coated') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Material'), pg_temp.opt('Material', 'Non-stick Coated')); end if;
     if pg_temp.ok(c, 'Induction Compatible') then insert into public.product_attribute_values (product_id, attribute_id, bool_value) values (pid, pg_temp.attr('Induction Compatible'), true); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000009', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Cookware & Dining' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2373,7 +2454,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Home Décor');
   if c is null then missing := missing || 'Home Décor' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Handmade Jute Wall Hanging', 'হাতে তৈরি পাটের ওয়াল হ্যাঙ্গিং', 'Made by rural artisans · Natural jute · 60 × 45 cm', 'Handmade Jute Wall Hanging
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000009', c, 'Handmade Jute Wall Hanging', 'হাতে তৈরি পাটের ওয়াল হ্যাঙ্গিং', 'Made by rural artisans · Natural jute · 60 × 45 cm', 'Handmade Jute Wall Hanging
 
 • Made by rural artisans
 • Natural jute
@@ -2396,7 +2477,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Lighting');
   if c is null then missing := missing || 'Lighting' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Philips 12W LED Bulb (Pack of 4)', 'ফিলিপস ১২ ওয়াট এলইডি বাল্ব (৪টির প্যাক)', 'Bright light, low bill · Lasts 15,000 hours · B22 pin type', 'Philips 12W LED Bulb (Pack of 4)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000009', c, 'Philips 12W LED Bulb (Pack of 4)', 'ফিলিপস ১২ ওয়াট এলইডি বাল্ব (৪টির প্যাক)', 'Bright light, low bill · Lasts 15,000 hours · B22 pin type', 'Philips 12W LED Bulb (Pack of 4)
 
 • Bright light, low bill
 • Lasts 15,000 hours
@@ -2426,7 +2507,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Cricket');
   if c is null then missing := missing || 'Cricket' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Kashmir Willow Cricket Bat', 'কাশ্মীর উইলো ক্রিকেট ব্যাট', 'Kashmir willow, pre-knocked · Cover included · For leather and tennis ball', 'Kashmir Willow Cricket Bat
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000010', c, 'Kashmir Willow Cricket Bat', 'কাশ্মীর উইলো ক্রিকেট ব্যাট', 'Kashmir willow, pre-knocked · Cover included · For leather and tennis ball', 'Kashmir Willow Cricket Bat
 
 • Kashmir willow, pre-knocked
 • Cover included
@@ -2457,7 +2538,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Bat Size'), pg_temp.opt('Bat Size', 'Short Handle (SH)'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000010', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Cricket' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2466,7 +2547,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Football');
   if c is null then missing := missing || 'Football' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Molten Match Football', 'মোল্টেন ম্যাচ ফুটবল', 'Official size and weight · Durable PU cover · Good for grass and turf', 'Molten Match Football
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000010', c, 'Molten Match Football', 'মোল্টেন ম্যাচ ফুটবল', 'Official size and weight · Durable PU cover · Good for grass and turf', 'Molten Match Football
 
 • Official size and weight
 • Durable PU cover
@@ -2497,7 +2578,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Badminton & Racket Sports');
   if c is null then missing := missing || 'Badminton & Racket Sports' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Yonex Nanoray Badminton Racket', 'ইয়োনেক্স ন্যানোরে ব্যাডমিন্টন র‍্যাকেট', 'Light graphite frame · Head-light balance for fast play · Full cover', 'Yonex Nanoray Badminton Racket
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000010', c, 'Yonex Nanoray Badminton Racket', 'ইয়োনেক্স ন্যানোরে ব্যাডমিন্টন র‍্যাকেট', 'Light graphite frame · Head-light balance for fast play · Full cover', 'Yonex Nanoray Badminton Racket
 
 • Light graphite frame
 • Head-light balance for fast play
@@ -2518,7 +2599,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Gym & Fitness Equipment');
   if c is null then missing := missing || 'Gym & Fitness Equipment' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Adjustable Dumbbell Set 20kg', 'অ্যাডজাস্টেবল ডাম্বেল সেট ২০ কেজি', 'Two handles with plates · Total 20 kg · Case included', 'Adjustable Dumbbell Set 20kg
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000010', c, 'Adjustable Dumbbell Set 20kg', 'অ্যাডজাস্টেবল ডাম্বেল সেট ২০ কেজি', 'Two handles with plates · Total 20 kg · Case included', 'Adjustable Dumbbell Set 20kg
 
 • Two handles with plates
 • Total 20 kg
@@ -2590,7 +2671,7 @@ Price is negotiable, message or call the seller.
   c := pg_temp.cat('Academic & Admission');
   if c is null then missing := missing || 'Academic & Admission' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Free: HSC Science textbooks (old syllabus)', 'ফ্রি: এইচএসসি বিজ্ঞান বই (পুরোনো সিলেবাস)', 'Physics, Chemistry, Biology, Math · Some notes in pencil · Free for a student who needs them', 'Free: HSC Science textbooks (old syllabus)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000011', c, 'Free: HSC Science textbooks (old syllabus)', 'ফ্রি: এইচএসসি বিজ্ঞান বই (পুরোনো সিলেবাস)', 'Physics, Chemistry, Biology, Math · Some notes in pencil · Free for a student who needs them', 'Free: HSC Science textbooks (old syllabus)
 
 • Physics, Chemistry, Biology, Math
 • Some notes in pencil
@@ -2613,7 +2694,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Children''s Books');
   if c is null then missing := missing || 'Children''s Books' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Thakurmar Jhuli (Illustrated)', 'ঠাকুরমার ঝুলি (সচিত্র)', 'Classic Bangla folk tales · Colour pictures · Hardcover', 'Thakurmar Jhuli (Illustrated)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000011', c, 'Thakurmar Jhuli (Illustrated)', 'ঠাকুরমার ঝুলি (সচিত্র)', 'Classic Bangla folk tales · Colour pictures · Hardcover', 'Thakurmar Jhuli (Illustrated)
 
 • Classic Bangla folk tales
 • Colour pictures
@@ -2637,7 +2718,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Islamic Books');
   if c is null then missing := missing || 'Islamic Books' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Tafsir Ibn Kathir (Bangla, full set)', 'তাফসীর ইবনে কাসীর (বাংলা, সম্পূর্ণ সেট)', 'Complete 11 volumes · Clear Bangla translation · Hardcover', 'Tafsir Ibn Kathir (Bangla, full set)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000011', c, 'Tafsir Ibn Kathir (Bangla, full set)', 'তাফসীর ইবনে কাসীর (বাংলা, সম্পূর্ণ সেট)', 'Complete 11 volumes · Clear Bangla translation · Hardcover', 'Tafsir Ibn Kathir (Bangla, full set)
 
 • Complete 11 volumes
 • Clear Bangla translation
@@ -2653,7 +2734,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
     if pg_temp.ok(c, 'Language') and pg_temp.opt('Language', 'Arabic + Bangla') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Language'), pg_temp.opt('Language', 'Arabic + Bangla')); end if;
     if pg_temp.ok(c, 'Book Format') and pg_temp.opt('Book Format', 'Hardcover') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Book Format'), pg_temp.opt('Book Format', 'Hardcover')); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000011', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Islamic Books' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2662,7 +2743,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Stationery & Office Supplies');
   if c is null then missing := missing || 'Stationery & Office Supplies' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Matador Ball Pen (Box of 50)', 'মাতাদোর বল পেন (৫০টির বাক্স)', 'Smooth writing · Blue ink · Box of 50', 'Matador Ball Pen (Box of 50)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000011', c, 'Matador Ball Pen (Box of 50)', 'মাতাদোর বল পেন (৫০টির বাক্স)', 'Smooth writing · Blue ink · Box of 50', 'Matador Ball Pen (Box of 50)
 
 • Smooth writing
 • Blue ink
@@ -2684,7 +2765,7 @@ Delivery: Ships today. 7-day returns.
   c := pg_temp.cat('Remote Control Toys');
   if c is null then missing := missing || 'Remote Control Toys' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'RC Off-road Car 1:16', 'রিমোট কন্ট্রোল অফ-রোড গাড়ি ১:১৬', '2.4 GHz remote, 25 km/h · Rechargeable battery · Shock-absorbing wheels', 'RC Off-road Car 1:16
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'RC Off-road Car 1:16', 'রিমোট কন্ট্রোল অফ-রোড গাড়ি ১:১৬', '2.4 GHz remote, 25 km/h · Rechargeable battery · Shock-absorbing wheels', 'RC Off-road Car 1:16
 
 • 2.4 GHz remote, 25 km/h
 • Rechargeable battery
@@ -2706,7 +2787,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Educational & STEM Toys');
   if c is null then missing := missing || 'Educational & STEM Toys' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Magnetic Building Tiles (60 pcs)', 'ম্যাগনেটিক বিল্ডিং টাইলস (৬০ পিস)', 'Build 3D shapes · Strong safe magnets · Learning through play', 'Magnetic Building Tiles (60 pcs)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Magnetic Building Tiles (60 pcs)', 'ম্যাগনেটিক বিল্ডিং টাইলস (৬০ পিস)', 'Build 3D shapes · Strong safe magnets · Learning through play', 'Magnetic Building Tiles (60 pcs)
 
 • Build 3D shapes
 • Strong safe magnets
@@ -2722,7 +2803,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
     if pg_temp.ok(c, 'Recommended Age') and pg_temp.opt('Recommended Age', '3–4 years') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Recommended Age'), pg_temp.opt('Recommended Age', '3–4 years')); end if;
     if pg_temp.ok(c, 'Material') and pg_temp.opt('Material', 'ABS Plastic') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Material'), pg_temp.opt('Material', 'ABS Plastic')); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000002', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000006', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Educational & STEM Toys' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2731,7 +2812,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Dolls & Soft Toys');
   if c is null then missing := missing || 'Dolls & Soft Toys' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Teddy Bear 60cm', 'টেডি বিয়ার ৬০ সেমি', 'Super soft plush · Safe for kids · Washable', 'Teddy Bear 60cm
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Teddy Bear 60cm', 'টেডি বিয়ার ৬০ সেমি', 'Super soft plush · Safe for kids · Washable', 'Teddy Bear 60cm
 
 • Super soft plush
 • Safe for kids
@@ -2762,7 +2843,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Board Games & Puzzles');
   if c is null then missing := missing || 'Board Games & Puzzles' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Ludo & Snakes and Ladders (2-in-1)', 'লুডু ও সাপ-লুডু (২-ইন-১)', 'Folding board · Dice and counters included · Family fun', 'Ludo & Snakes and Ladders (2-in-1)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Ludo & Snakes and Ladders (2-in-1)', 'লুডু ও সাপ-লুডু (২-ইন-১)', 'Folding board · Dice and counters included · Family fun', 'Ludo & Snakes and Ladders (2-in-1)
 
 • Folding board
 • Dice and counters included
@@ -2784,7 +2865,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Outdoor & Ride-On Toys');
   if c is null then missing := missing || 'Outdoor & Ride-On Toys' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000002', c, 'Kids Tricycle with Push Handle', 'পুশ হ্যান্ডেলসহ বাচ্চাদের ট্রাইসাইকেল', 'Parent push handle · Safety belt and canopy · Storage basket', 'Kids Tricycle with Push Handle
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000006', c, 'Kids Tricycle with Push Handle', 'পুশ হ্যান্ডেলসহ বাচ্চাদের ট্রাইসাইকেল', 'Parent push handle · Safety belt and canopy · Storage basket', 'Kids Tricycle with Push Handle
 
 • Parent push handle
 • Safety belt and canopy
@@ -2805,7 +2886,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Helmets & Riding Gear');
   if c is null then missing := missing || 'Helmets & Riding Gear' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Studds Full-face Helmet', 'স্টাডস ফুল-ফেস হেলমেট', 'DOT certified · Scratch-resistant visor · Removable washable lining', 'Studds Full-face Helmet
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Studds Full-face Helmet', 'স্টাডস ফুল-ফেস হেলমেট', 'DOT certified · Scratch-resistant visor · Removable washable lining', 'Studds Full-face Helmet
 
 • DOT certified
 • Scratch-resistant visor
@@ -2835,7 +2916,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
       insert into public.product_variation_options (variation_id, attribute_id, option_id) values (vid, pg_temp.attr('Helmet Size'), pg_temp.opt('Helmet Size', 'XL (61–62 cm)'));
     end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000001', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000012', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Helmets & Riding Gear' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2844,7 +2925,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Motorbike Parts & Accessories');
   if c is null then missing := missing || 'Motorbike Parts & Accessories' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Motorbike Mobile Holder (Waterproof)', 'মোটরবাইকের মোবাইল হোল্ডার (পানিরোধী)', 'Fits phones up to 6.8" · Waterproof touch cover · Fits all handlebars', 'Motorbike Mobile Holder (Waterproof)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Motorbike Mobile Holder (Waterproof)', 'মোটরবাইকের মোবাইল হোল্ডার (পানিরোধী)', 'Fits phones up to 6.8" · Waterproof touch cover · Fits all handlebars', 'Motorbike Mobile Holder (Waterproof)
 
 • Fits phones up to 6.8"
 • Waterproof touch cover
@@ -2868,7 +2949,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Car Accessories');
   if c is null then missing := missing || 'Car Accessories' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Car Seat Cover Set (Leatherette)', 'কার সিট কভার সেট (লেদারেট)', 'Full set for 5 seats · Easy to clean · Fits most sedans', 'Car Seat Cover Set (Leatherette)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Car Seat Cover Set (Leatherette)', 'কার সিট কভার সেট (লেদারেট)', 'Full set for 5 seats · Easy to clean · Fits most sedans', 'Car Seat Cover Set (Leatherette)
 
 • Full set for 5 seats
 • Easy to clean
@@ -2892,7 +2973,7 @@ Delivery: Ships in 3–5 days. 7-day returns.
   c := pg_temp.cat('Car Electronics');
   if c is null then missing := missing || 'Car Electronics' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, '70mai Dash Cam M300', '৭০মাই ড্যাশ ক্যাম M300', 'Records the road while you drive · Night vision, Wi-Fi app · Parking monitor', '70mai Dash Cam M300
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, '70mai Dash Cam M300', '৭০মাই ড্যাশ ক্যাম M300', 'Records the road while you drive · Night vision, Wi-Fi app · Parking monitor', '70mai Dash Cam M300
 
 • Records the road while you drive
 • Night vision, Wi-Fi app
@@ -2914,7 +2995,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Oils & Car Care');
   if c is null then missing := missing || 'Oils & Car Care' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Motul Engine Oil 1L', 'মটুল ইঞ্জিন অয়েল ১ লিটার', 'Synthetic technology · For motorbikes · Smooth engine, better mileage', 'Motul Engine Oil 1L
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Motul Engine Oil 1L', 'মটুল ইঞ্জিন অয়েল ১ লিটার', 'Synthetic technology · For motorbikes · Smooth engine, better mileage', 'Motul Engine Oil 1L
 
 • Synthetic technology
 • For motorbikes
@@ -2945,7 +3026,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Power Tools');
   if c is null then missing := missing || 'Power Tools' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Bosch GSB 550 Impact Drill', 'বশ GSB ৫৫০ ইমপ্যাক্ট ড্রিল', '550 W, drills wall, wood and metal · 100 accessories kit · Carry case', 'Bosch GSB 550 Impact Drill
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Bosch GSB 550 Impact Drill', 'বশ GSB ৫৫০ ইমপ্যাক্ট ড্রিল', '550 W, drills wall, wood and metal · 100 accessories kit · Carry case', 'Bosch GSB 550 Impact Drill
 
 • 550 W, drills wall, wood and metal
 • 100 accessories kit
@@ -2962,7 +3043,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
     if pg_temp.ok(c, 'Power Source') and pg_temp.opt('Power Source', 'Corded electric') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Power Source'), pg_temp.opt('Power Source', 'Corded electric')); end if;
     if pg_temp.ok(c, 'Warranty') and pg_temp.opt('Warranty', '6 Months') is not null then insert into public.product_attribute_values (product_id, attribute_id, option_id) values (pid, pg_temp.attr('Warranty'), pg_temp.opt('Warranty', '6 Months')); end if;
     insert into public.featured_requests (product_id, seller_id, placement, days, price, status, starts_at, ends_at, is_complimentary, note)
-    values (pid, 'd0000000-0000-4000-8000-000000000001', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
+    values (pid, 'd0000000-0000-4000-8000-000000000012', 'home_and_category', 30, 0, 'active', now(), now() + interval '30 days', true, 'Demo data');
     update public.products set is_featured = true where id = pid;
   exception when others then missing := missing || 'Power Tools' || ' (' || sqlerrm || '), ';
   end; end if;
@@ -2971,7 +3052,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Hand Tools');
   if c is null then missing := missing || 'Hand Tools' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Stanley Screwdriver Set (10 pcs)', 'স্ট্যানলি স্ক্রুড্রাইভার সেট (১০ পিস)', 'Flat and Phillips heads · Magnetic tips · Comfortable grip', 'Stanley Screwdriver Set (10 pcs)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Stanley Screwdriver Set (10 pcs)', 'স্ট্যানলি স্ক্রুড্রাইভার সেট (১০ পিস)', 'Flat and Phillips heads · Magnetic tips · Comfortable grip', 'Stanley Screwdriver Set (10 pcs)
 
 • Flat and Phillips heads
 • Magnetic tips
@@ -2992,7 +3073,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Electrical & Wiring');
   if c is null then missing := missing || 'Electrical & Wiring' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Home Electrical Check-up (Service)', 'বাসার ইলেকট্রিক চেক-আপ (সার্ভিস)', 'Licensed electrician visits your home · Checks wiring, switches and DB box · Small fixes included', 'Home Electrical Check-up (Service)
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Home Electrical Check-up (Service)', 'বাসার ইলেকট্রিক চেক-আপ (সার্ভিস)', 'Licensed electrician visits your home · Checks wiring, switches and DB box · Small fixes included', 'Home Electrical Check-up (Service)
 
 • Licensed electrician visits your home
 • Checks wiring, switches and DB box
@@ -3013,7 +3094,7 @@ Delivery: Ships in 1–2 days. 7-day returns.
   c := pg_temp.cat('Plumbing & Sanitary');
   if c is null then missing := missing || 'Plumbing & Sanitary' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Stainless Steel Kitchen Sink Mixer Tap', 'স্টেইনলেস স্টিল কিচেন সিঙ্ক মিক্সার ট্যাপ', 'Hot and cold mixer · 360° swivel spout · Rust-proof steel', 'Stainless Steel Kitchen Sink Mixer Tap
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Stainless Steel Kitchen Sink Mixer Tap', 'স্টেইনলেস স্টিল কিচেন সিঙ্ক মিক্সার ট্যাপ', 'Hot and cold mixer · 360° swivel spout · Rust-proof steel', 'Stainless Steel Kitchen Sink Mixer Tap
 
 • Hot and cold mixer
 • 360° swivel spout
@@ -3035,7 +3116,7 @@ Delivery: Ships in 1–2 days. 7-day returns. Free delivery.
   c := pg_temp.cat('Locks & Safety');
   if c is null then missing := missing || 'Locks & Safety' || ', ';
   else begin
-    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000001', c, 'Digital Fingerprint Door Lock', 'ডিজিটাল ফিঙ্গারপ্রিন্ট দরজার তালা', 'Fingerprint, PIN, card and key · Low battery alarm · Easy to install', 'Digital Fingerprint Door Lock
+    insert into public.products (seller_id, category_id, title, title_bn, short_description, description, description_bn, tags, price, sale_price, sale_starts_at, sale_ends_at, sku, manage_stock, stock, low_stock_threshold, backorders, stock_status, sold_individually, weight_kg, length_cm, width_cm, height_cm, shipping_class, delivery_time, ships_to, free_delivery, return_policy, purchase_note, listing_type, product_type, price_negotiable, cod_allowed, is_service, service_mode, service_duration, is_preorder, preorder_date, preorder_advance_percent, status, published_at, created_at) values ('d0000000-0000-4000-8000-000000000012', c, 'Digital Fingerprint Door Lock', 'ডিজিটাল ফিঙ্গারপ্রিন্ট দরজার তালা', 'Fingerprint, PIN, card and key · Low battery alarm · Easy to install', 'Digital Fingerprint Door Lock
 
 • Fingerprint, PIN, card and key
 • Low battery alarm

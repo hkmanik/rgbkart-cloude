@@ -56,18 +56,20 @@ delete from auth.users where id in (""" + ', '.join(q(s['id']) for s in SELLERS.
 
 -- 2. demo sellers ------------------------------------------------------------------------------------------
 """)
-for k, s in SELLERS.items():
+def seller_sql(s):
     meta = json.dumps({'full_name': s['name']})
-    w(f"""insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    return f"""insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
 values ('00000000-0000-0000-0000-000000000000', {q(s['id'])}, 'authenticated', 'authenticated', {q(s['email'])}, '', now(),
-  '{{"provider":"email","providers":["email"]}}', {q(meta)}, now() - interval '200 days', now(), '', '', '', '');
+  '{{"provider":"email","providers":["email"]}}', {q(meta)}, now() - interval '200 days', now(), '', '', '', '') on conflict (id) do nothing;
 insert into public.profiles (id, full_name) values ({q(s['id'])}, {q(s['name'])}) on conflict (id) do nothing;
 update public.profiles set role = {q(s['role'])}, full_name = {q(s['name'])}, phone = {q(s['phone'])}, email_alerts = false where id = {q(s['id'])};
 insert into public.seller_details (user_id, shop_name, shop_name_bn, shop_description, tagline, business_address, city, area, phone_public, whatsapp, email_public, status, allow_pickup, created_at)
 values ({q(s['id'])}, {q(s['name'])}, {q(s['name_bn'])}, {q(s['about'])}, {q(s['tagline'])}, {q(s['address'])}, {q(s['city'])}, {q(s['area'])},
-  {q(s['phone'])}, {q(s['whatsapp'])}, {q(s['mail'])}, 'approved', {str(s['pickup']).lower()}, now() - interval '200 days');
-""")
+  {q(s['phone'])}, {q(s['whatsapp'])}, {q(s['mail'])}, 'approved', {str(s['pickup']).lower()}, now() - interval '200 days') on conflict (user_id) do nothing;
+"""
+for k, s in SELLERS.items():
+    w(seller_sql(s))
 
 w("""
 -- 3. products ------------------------------------------------------------------------------------------------
@@ -214,3 +216,27 @@ commit;
 select (select count(*) from public.products where 'demo' = any(tags)) as demo_products_left;
 """)
 print('written', len(PRODUCTS), 'products')
+
+# Add-on for a live site that already has the first demo data: create the extra demo shops and move their products to them
+# (keeps product ids and any photos added since). Safe to run again.
+from demo_spec import REASSIGN
+extra = [k for k in SELLERS if k not in ('G', 'L', 'I')]
+moves = [(p['title'], SELLERS[p['seller']]['id']) for p in PRODUCTS if p['seller'] in extra]
+old = ', '.join(q(SELLERS[k]['id']) for k in ('G', 'L'))
+more = ["""-- RGBKart DEMO: 9 more demo shops for the home page "Top shops" row (23 Oct).
+-- Moves the matching demo products (same products, same photos) from Demo Gadget House / Demo Lifestyle Mart to the new shops.
+-- Run in Supabase → SQL Editor after demo_products.sql. Safe to run again. demo_products_remove.sql removes these shops too.
+begin;
+"""]
+for k in extra: more.append(seller_sql(SELLERS[k]))
+more.append("\n-- move products\n")
+for t, sid in moves:
+    more.append(f"update public.products set seller_id = {q(sid)} where 'demo' = any(tags) and title = {q(t)} and seller_id in ({old});\n")
+more.append("""update public.featured_requests f set seller_id = p.seller_id from public.products p where p.id = f.product_id and 'demo' = any(p.tags) and f.seller_id is distinct from p.seller_id;
+commit;
+select (select count(*) from public.top_shops(48)) as shops_in_top_shops,
+       (select count(*) from public.seller_details where shop_name like 'Demo %') as demo_shops;
+""")
+open(os.path.join(HERE, 'demo_more_shops.sql'), 'w').write(''.join(more))
+print('written demo_more_shops.sql with', len(moves), 'moves')
+

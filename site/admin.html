@@ -407,6 +407,7 @@
     <div class="nav-group tone-green">People</div>
     <button class="nav tone-green" data-view="sellers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Sellers<span class="count" id="navPending" hidden></span></button>
     <button class="nav tone-green" data-view="customers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6M22 21a6 6 0 0 0-4-5.6"/></svg>Customers</button>
+    <button class="nav tone-green" data-view="verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Verification<span class="count" id="navVerify" hidden></span></button>
 
     <div class="nav-group tone-amber">Storefront &amp; money</div>
     <button class="nav tone-amber" data-view="homepage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 9v12h14V9"/></svg>Home page</button>
@@ -619,6 +620,15 @@
           <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
           <input type="search" id="arSearch" placeholder="Search words, buyer, shop or product" aria-label="Search reviews" style="flex:1;min-width:220px"></div>
         <div id="arList" class="ar-list"></div>
+      </div>
+    </section>
+
+    <section data-page="verify" hidden>
+      <div class="page-head"><div><h1>Verification</h1><p>Shops send their NID or trade licence to get the "✓ Verified shop" badge. Check that the name matches the shop owner and the photo is clear and real, then approve or reject with a note. Documents are private.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar"><div class="filters" id="vfFilter">
+          <button type="button" data-f="pending" aria-pressed="true">To check</button><button type="button" data-f="done" aria-pressed="false">Checked</button><button type="button" data-f="verified" aria-pressed="false">Verified shops</button></div></div>
+        <div id="vfList" class="ar-list"></div>
       </div>
     </section>
 
@@ -1175,6 +1185,61 @@
     drawDashboard();
     loadComplaints(true);
     loadReturns(true);
+    loadVerifications(true);
+  }
+
+  // ===================== Verification (0038_seller_verification.sql) =====================
+  const VF_DOC = { nid: 'National ID (NID)', trade_licence: 'Trade licence', passport: 'Passport', other: 'Other document' };
+  let vfRows = [], vfFilter = 'pending', vfShops = new Map();
+  async function loadVerifications(countOnly) {
+    const r = await db.from('seller_verifications').select('*').order('created_at', { ascending: false }).limit(500);
+    const box = $('vfList');
+    if (r.error) { if (!countOnly) { box.innerHTML = ''; box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Verification is not switched on yet: run 0038_seller_verification.sql.' : friendly(r.error) })); } return; }
+    vfRows = r.data || [];
+    const n = vfRows.filter(x => x.status === 'pending').length;
+    $('navVerify').hidden = !n; $('navVerify').textContent = n;
+    if (countOnly) return;
+    const sd = await db.from('seller_details').select('user_id, shop_name, shop_slug, phone_public, is_verified, verified_at, status');
+    vfShops = new Map((sd.data || []).map(x => [x.user_id, x]));
+    drawVerifications();
+  }
+  $('vfFilter').querySelectorAll('button').forEach(b => b.onclick = () => { vfFilter = b.dataset.f; $('vfFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawVerifications(); });
+  function drawVerifications() {
+    const box = $('vfList'); box.innerHTML = '';
+    if (vfFilter === 'verified') {
+      const shops = [...vfShops.values()].filter(x => x.is_verified);
+      if (!shops.length) { box.append(h('p', { class: 'muted', style: 'padding:12px 0', text: 'No verified shops yet.' })); return; }
+      shops.forEach(x => box.append(h('article', { class: 'ar' }, h('div', { class: 'ar-head' }, h('span', { class: 'pill cp-resolved', text: '✓ Verified' }), h('b', { text: x.shop_name }),
+        h('span', { class: 'muted', text: x.verified_at ? 'since ' + new Date(x.verified_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '' })),
+        h('div', { class: 'ar-act' }, h('a', { href: 'store.html?s=' + encodeURIComponent(x.shop_slug || x.user_id), target: '_blank', rel: 'noopener', text: 'Open shop ↗' }),
+          h('button', { type: 'button', class: 'ghost', style: 'color:var(--danger)', text: 'Remove badge', onclick: async () => {
+            const { error } = await db.rpc('admin_set_verified', { p_seller: x.user_id, p_on: false }); if (error) return toast(friendly(error)); toast('Badge removed'); loadVerifications(); } })))));
+      return;
+    }
+    const list = vfRows.filter(x => vfFilter === 'pending' ? x.status === 'pending' : x.status !== 'pending');
+    if (!list.length) { box.append(h('p', { class: 'muted', style: 'padding:12px 0', text: vfFilter === 'pending' ? 'Nothing waiting. 👍' : 'Nothing here.' })); return; }
+    list.forEach(x => {
+      const shop = vfShops.get(x.seller_id) || {};
+      const note = h('input', { type: 'text', maxlength: 500, placeholder: 'Note to the shop (needed when rejecting), e.g. photo is blurry', 'aria-label': 'Note to the shop', style: 'flex:1;min-width:220px' });
+      const decide = ok => db.rpc('admin_review_verification', { p_id: x.id, p_approve: ok, p_note: note.value.trim() || null }).then(({ error }) => {
+        if (error) return toast(friendly(error)); toast(ok ? 'Shop verified ✓' : 'Rejected; the shop was told'); loadVerifications(); });
+      const files = h('div', { class: 'ret-pics' });
+      (x.files || []).forEach(async p => {
+        const sgn = await db.storage.from('seller-docs').createSignedUrl(p, 3600);
+        if (!sgn.data) return;
+        files.append(/\.pdf$/i.test(p) ? h('a', { href: sgn.data.signedUrl, target: '_blank', rel: 'noopener', class: 'ghost', style: 'padding:8px 12px;border:1px solid var(--line);border-radius:8px', text: '📄 Open PDF' })
+          : h('a', { href: sgn.data.signedUrl, target: '_blank', rel: 'noopener' }, h('img', { src: sgn.data.signedUrl, alt: 'Document photo', style: 'width:150px;height:100px' })));
+      });
+      box.append(h('article', { class: 'ar' },
+        h('div', { class: 'ar-head' }, h('span', { class: 'pill cp-' + ({ pending: 'open', approved: 'resolved', rejected: 'dismissed' }[x.status]), text: { pending: 'To check', approved: 'Approved', rejected: 'Rejected' }[x.status] }),
+          h('b', { text: shop.shop_name || 'Shop' }), h('span', { class: 'muted', text: [VF_DOC[x.doc_type], x.doc_number && 'No. ' + x.doc_number, x.holder_name && 'Name: ' + x.holder_name, new Date(x.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · ') })),
+        files,
+        x.note && h('p', { class: 'muted', style: 'margin:0', text: 'Shop wrote: ' + x.note }),
+        x.admin_note && h('p', { class: 'muted', style: 'margin:0', text: 'Your note: ' + x.admin_note }),
+        h('div', { class: 'ar-act' }, h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || x.seller_id), target: '_blank', rel: 'noopener', text: 'Open shop ↗' }),
+          x.status === 'pending' && note, x.status === 'pending' && h('button', { type: 'button', class: 'good', text: '✓ Approve', onclick: () => decide(true) }),
+          x.status === 'pending' && h('button', { type: 'button', class: 'bad', text: 'Reject', onclick: () => decide(false) }))));
+    });
   }
 
   // ===================== Activity log (0037_activity_log.sql) =====================
@@ -1439,8 +1504,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1451,6 +1516,7 @@
     setMsg('dashMsg', '');
     if (view === 'team') loadTeam();
     if (view === 'activity') loadLog(true);
+    if (view === 'verify') loadVerifications();
     if (view === 'featured') loadFeatured();
     if (view === 'products') loadProducts();
     if (view === 'homepage') loadSections();

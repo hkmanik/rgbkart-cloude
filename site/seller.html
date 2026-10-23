@@ -111,6 +111,7 @@
   .rv-card.hid { opacity: .65; }
   .rv-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
   .rv-head b { overflow-wrap: anywhere; }
+  .vf-ok, .vf-wait, .vf-no { display: grid; gap: 4px; } .vf-ok b { color: var(--accent); font-size: 1.1rem; } .vf-no b { color: var(--danger); }
   .ret-pics { display: flex; gap: 8px; flex-wrap: wrap; } .ret-pics img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
   .cp-code { font-family: ui-monospace, Menlo, monospace; font-size: 1.05rem; letter-spacing: .06em; background: var(--accent-soft); color: var(--accent); padding: 2px 10px; border-radius: 6px; border: 1px dashed var(--accent); }
   .rv-stars { color: #F5C400; letter-spacing: 1px; font-size: 1.05rem; }
@@ -393,6 +394,7 @@
 
     <div class="nav-group">Settings</div>
     <button class="nav tone-blue" data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Shop settings</button>
+    <button class="nav tone-green" data-view="verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Get verified<span id="navVerify" hidden style="margin-left:auto;font-size:.72rem;font-weight:700"></span></button>
 
     <div class="side-foot">
       <span class="email" id="meEmail"></span>
@@ -462,6 +464,22 @@
     </section>
 
     <!-- ===== Advertise ===== -->
+    <section data-page="verify" hidden>
+      <div class="page-head"><div><h1>Get verified</h1><p>Send a photo of your National ID (front and back) or your trade licence. RGBKart checks it, and buyers then see <b>✓ Verified shop</b> on your shop and products, which helps them trust you. Your documents are private: only you and the RGBKart team can see them.</p></div></div>
+      <div class="card" id="vfStatus" style="margin-top:16px"></div>
+      <div class="card" id="vfForm" hidden style="margin-top:16px">
+        <h2>Send your document</h2>
+        <div class="grid3">
+          <label>Document<select id="vfType"><option value="nid">National ID (NID)</option><option value="trade_licence">Trade licence</option><option value="passport">Passport</option><option value="other">Other document</option></select></label>
+          <label>Document number<input id="vfNum" type="text" maxlength="40" inputmode="numeric"></label>
+          <label>Name on the document<input id="vfName" type="text" maxlength="100"></label>
+        </div>
+        <label>Photos or PDF (up to 4: e.g. NID front and back)<input id="vfFiles" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple><span class="hint">Clear photo, all four corners visible, no glare. Up to 5 MB each.</span></label>
+        <label>Note for RGBKart (optional)<input id="vfNote" type="text" maxlength="500"></label>
+        <div class="row-btns"><button type="button" class="primary" id="vfSend">Send for checking</button></div>
+      </div>
+    </section>
+
     <section data-page="returns" hidden>
       <div class="page-head"><div><h1>Returns</h1><p>Buyers ask to return an item after delivery, within the return days you set on each product. Accept and arrange the pickup, or decline with a reason. When the item is back, tap "Item received back" (stock goes back) and give the refund or exchange directly to the customer.</p></div></div>
       <div class="card" style="margin-top:16px">
@@ -1014,6 +1032,7 @@
     loadReviews(true);
     loadQuestions(true);
     loadReturns(true);
+    loadVerify(true);
     if (shop) $('navShopPage').href = 'store.html?s=' + encodeURIComponent(shop.shop_slug || me.id);
     const start = location.hash.slice(1);
     if (start === 'featured') go('featured');
@@ -1024,6 +1043,7 @@
     else if (start === 'questions') go('questions');
     else if (start === 'coupons') go('coupons');
     else if (start === 'returns') go('returns');
+    else if (start === 'verify') go('verify');
     else if (start === 'new' && approved) openEditor(null);
     else go('products');
   }
@@ -1070,6 +1090,47 @@
   }
   const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   const mainPhoto = p => { const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0]; return im ? photoUrl(im.storage_path) : null; };
+
+  // ===================== Get verified (0038_seller_verification.sql) =====================
+  const VF_DOC = { nid: 'National ID (NID)', trade_licence: 'Trade licence', passport: 'Passport', other: 'Other document' };
+  async function loadVerify(countOnly) {
+    const [v, sd] = await Promise.all([
+      db.from('seller_verifications').select('*').eq('seller_id', me.id).order('created_at', { ascending: false }),
+      db.from('seller_details').select('is_verified, verified_at').eq('user_id', me.id).maybeSingle(),
+    ]);
+    const box = $('vfStatus');
+    if (v.error) { if (!countOnly) { box.innerHTML = ''; box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(v.error.message) ? 'Verification is not switched on yet (0038_seller_verification.sql).' : friendly(v.error) })); } return; }
+    const list = v.data || [], last = list[0], ok = sd.data && sd.data.is_verified;
+    $('navVerify').hidden = !ok && !(last && last.status === 'rejected');
+    $('navVerify').textContent = ok ? '✓' : '!'; $('navVerify').style.color = ok ? '#7CE0A0' : '#F5C400';
+    if (countOnly) return;
+    box.innerHTML = '';
+    if (ok) box.append(h('div', { class: 'vf-ok' }, h('b', { text: '✓ Your shop is verified' }), h('span', { class: 'muted', text: 'Since ' + new Date(sd.data.verified_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '. Buyers see the Verified shop badge.' })));
+    else if (last && last.status === 'pending') box.append(h('div', { class: 'vf-wait' }, h('b', { text: '⏳ Waiting to be checked' }), h('span', { class: 'muted', text: `${VF_DOC[last.doc_type]} sent on ${new Date(last.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}. You will get an alert when it is checked, usually within 1–2 days.` })));
+    else if (last && last.status === 'rejected') box.append(h('div', { class: 'vf-no' }, h('b', { text: 'Please send your document again' }), h('span', { text: 'RGBKart: ' + (last.admin_note || '') })));
+    else box.append(h('div', {}, h('b', { text: 'Not verified yet' }), h('span', { class: 'muted', style: 'display:block', text: 'Send one document below. It takes about a minute.' })));
+    $('vfForm').hidden = !!ok || (last && last.status === 'pending');
+  }
+  $('vfSend').onclick = async () => {
+    const files = [...$('vfFiles').files].slice(0, 4);
+    if (!files.length) return toast('Add a photo or PDF of the document');
+    if (files.some(f => f.size > 5 * 1024 * 1024)) return toast('Each file must be under 5 MB');
+    const btn = $('vfSend'); btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const paths = [];
+      for (const f of files) {
+        const ext = f.type === 'application/pdf' ? 'pdf' : (f.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+        const path = `${me.id}/verify-${Date.now()}-${paths.length}.${ext}`;
+        const up = await db.storage.from('seller-docs').upload(path, f, { contentType: f.type, upsert: false });
+        if (up.error) throw up.error;
+        paths.push(path);
+      }
+      const { error } = await db.rpc('submit_verification', { p_doc_type: $('vfType').value, p_doc_number: $('vfNum').value.trim() || null, p_holder: $('vfName').value.trim() || null, p_files: paths, p_note: $('vfNote').value.trim() || null });
+      if (error) throw error;
+      toast('Sent. RGBKart will check it soon.'); $('vfFiles').value = ''; loadVerify();
+    } catch (e) { toast(friendly(e)); }
+    btn.disabled = false; btn.textContent = 'Send for checking';
+  };
 
   // ===================== Returns (0036_returns.sql) =====================
   window.RET_SELLER = () => me.id;
@@ -1297,7 +1358,7 @@
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
     document.querySelectorAll('.nav[data-view]').forEach(b => b.dataset.view === (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view) ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons', returns: 'Returns' }[view];
+    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons', returns: 'Returns', verify: 'Get verified' }[view];
     if (view === 'orders') loadOrders();
     if (view === 'settings') loadSettings();
     if (view === 'ads') loadSellerAds();
@@ -1305,6 +1366,7 @@
     if (view === 'questions') loadQuestions();
     if (view === 'coupons') loadCoupons();
     if (view === 'returns') loadReturns();
+    if (view === 'verify') loadVerify();
     try { history.replaceState(null, '', '#' + (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view)); } catch (_) {}
     setMenu(false); window.scrollTo(0, 0);
   }

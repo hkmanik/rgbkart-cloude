@@ -25,6 +25,7 @@
   .tagline { color: var(--muted); margin: 0 0 8px; }
   .facts { display: flex; flex-wrap: wrap; gap: 6px; }
   .fact { background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 4px 11px; font-size: .82rem; font-weight: 600; }
+  .fact.verified { background: #00802B; color: #fff; }
   .fact.rate { background: #FFF6CC; text-decoration: none; display: inline-flex; } .fact.rate .rt { font-size: .82rem; color: #6B5300; }
   #reviews { scroll-margin-top: calc(var(--head-h, 120px) + 12px); }
   .fact.red { background: #FDE7E8; color: #B3000C; } .fact.yellow { background: #FFF6CC; color: #6B5300; }
@@ -72,7 +73,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=12"></script>
+<script src="i18n.js?v=13"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=16"></script>
 <script src="reviews.js?v=1"></script>
@@ -121,6 +122,7 @@
     const logo = h('div', { class: 'slogo', 'aria-hidden': 'true' }, S.logo_path ? h('img', { src: shopImg(S.logo_path), alt: '' }) : (S.shop_name || '?').charAt(0).toUpperCase());
     const where = [S.area, S.city && RGBLang.tr(S.city)].filter(Boolean).join(', ');
     const facts = h('div', { class: 'facts' },
+      S.is_verified && h('span', { class: 'fact verified', title: T('RGBKart checked this shop\'s ID or trade licence'), text: T('✓ Verified shop') }),
       S.rating_count > 0 && h('a', { class: 'fact rate', href: '#reviews' }, RGBReviews.line(S)),
       where && h('span', { class: 'fact', text: '📍 ' + where }),
       h('span', { class: 'fact yellow', text: T('On RGBKart since {n}', { n: new Date(S.created_at).getFullYear() }) }),

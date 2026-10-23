@@ -51,6 +51,7 @@
   .shopcard .sl img { width: 100%; height: 100%; object-fit: cover; }
   .shopcard b { font: 600 1rem/1.25 var(--display); overflow-wrap: anywhere; }
   .shopcard .sm { color: var(--muted); font-size: .8rem; }
+  .shopcard .vtick { color: #00802B; }
   .shopcard .rt { justify-content: center; min-height: 20px; }
   .shopcard .sbadges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
   .shopcard .sbadges span { font-size: .74rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: #FFF4CC; color: #7A5A00; }
@@ -93,7 +94,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=12"></script>
+<script src="i18n.js?v=13"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=16"></script>
 <script src="menu.js?v=5"></script>
@@ -136,7 +137,7 @@
         h('div', { class: 'sb' }, sh.banner_path && h('img', { src: shopPic(sh.banner_path), alt: '', loading: 'lazy' })),
         h('div', { class: 'sbody' },
           h('div', { class: 'sl', 'aria-hidden': 'true' }, sh.logo_path ? h('img', { src: shopPic(sh.logo_path), alt: '', loading: 'lazy' }) : (sh.shop_name || '?').charAt(0).toUpperCase()),
-          h('b', { text: L(sh, 'shop_name'), translate: 'no' }),
+          h('b', { text: L(sh, 'shop_name'), translate: 'no' }, sh.is_verified ? h('span', { class: 'vtick', title: T('✓ Verified shop'), 'aria-label': T('✓ Verified shop'), text: ' ✓' }) : null),
           h('span', { class: 'sm', text: [sh.area, sh.city && RGBLang.tr(sh.city)].filter(Boolean).join(', ') || ' ' }),
           ratingLine(sh) || h('span', { class: 'rt', 'aria-hidden': 'true', text: ' ' }),
           h('div', { class: 'sbadges' }, sh.featured_count > 0 && h('span', { text: T('★ {n} Featured', { n: sh.featured_count }) }), h('span', { text: T(sh.product_count === 1 ? '{n} product' : '{n} products', { n: sh.product_count }) })),

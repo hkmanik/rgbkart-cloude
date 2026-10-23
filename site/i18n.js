@@ -193,6 +193,7 @@
     "This shop isn't available": 'এই দোকানটি পাওয়া যাচ্ছে না', 'It may be closed or still waiting for approval.': 'হয়তো বন্ধ আছে বা এখনো অনুমোদনের অপেক্ষায়।',
     'Browse all products': 'সব পণ্য দেখুন', 'Visit shop →': 'দোকানে যান →', 'Previous shops': 'আগের দোকানগুলো', 'Next shops': 'পরের দোকানগুলো', 'Top Shops': 'সেরা দোকান', '🏪 Visit shop →': '🏪 দোকানে যান →', 'See all products from this seller →': 'এই বিক্রেতার সব পণ্য দেখুন →', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
     'RGBKart Categories': 'ক্যাটাগরি | RGBKart', 'RGBKart Sign In': 'সাইন ইন | RGBKart', 'RGBKart Products': 'পণ্য | RGBKart', 'RGBKart Product': 'পণ্য | RGBKart',
+    '✓ Verified shop': '✓ যাচাইকৃত দোকান', "RGBKart checked this shop's ID or trade licence": 'RGBKart এই দোকানের পরিচয়পত্র বা ট্রেড লাইসেন্স যাচাই করেছে',
     // returns (0036)
     'Arrived damaged or broken': 'ভাঙা বা ক্ষতিগ্রস্ত অবস্থায় এসেছে', 'Wrong item or wrong size/colour sent': 'ভুল পণ্য বা ভুল সাইজ/রং পাঠানো হয়েছে', 'Not as described or shown': 'বর্ণনা বা ছবির সাথে মিল নেই',
     'Parts or accessories missing': 'যন্ত্রাংশ বা অ্যাকসেসরিজ নেই', 'Size or fit is not right': 'সাইজ বা মাপ ঠিক হয়নি', 'Poor quality or not working': 'মান খারাপ বা কাজ করে না', 'Changed my mind': 'মত বদলেছি',

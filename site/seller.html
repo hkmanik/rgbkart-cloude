@@ -43,6 +43,9 @@
   .req::after { content: " *"; color: var(--danger); }
   .check { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 500; color: var(--fg); }
   .check input { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; flex: none; }
+  #editor { padding-bottom: 150px; }
+  .agree-bar { flex-basis: 100%; order: -1; align-items: flex-start; background: #FFFBEA; border: 1px solid #F1E2A6; border-radius: 10px; padding: 8px 12px; font-size: .86rem; }
+  .agree-bar input { margin-top: 2px; } .agree-bar.need { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(227, 6, 19, .15); }
   input[type=text], input[type=number], input[type=url], input[type=date], input[type=search], select, textarea {
     font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; width: 100%; text-transform: none; letter-spacing: 0; min-width: 0; }
   textarea { min-height: 90px; resize: vertical; }
@@ -973,6 +976,7 @@
         <span class="chip draft" id="barStatus">Draft</span>
         <span class="hint" id="barHint"></span>
         <span class="spacer"></span>
+        <label class="check agree-bar" id="agreeWrap"><input type="checkbox" id="fAgree"> <span>I confirm this product is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and <a href="page.html?p=seller-rules" target="_blank">RGBKart's seller rules</a>.</span></label>
         <button type="button" class="ghost" id="saveBtn">Save draft</button>
         <button type="button" class="primary" id="submitBtn">Send for review</button>
         <p class="msg error" id="edMsg" role="alert" hidden></p>
@@ -1519,6 +1523,7 @@
   }
 
   async function quickSubmit(p, btn) {
+    if (!p.rules_accepted_at) { openEditor(p.id, 'Tick the box at the bottom to agree to the rules, then press Send for review.'); return; }
     btn.disabled = true;
     const { error } = await db.rpc('submit_product', { p_product: p.id });
     btn.disabled = false;
@@ -1955,6 +1960,7 @@
     $('fProductType').value = currentKind() === 'variable' ? 'variable' : 'simple';
     $('fGiftValid').value = String(p.gift_card_validity_days || 365);
     $('fCod').checked = p.cod_allowed !== false;
+    $('fAgree').checked = !!p.rules_accepted_at; $('agreeWrap').classList.remove('need');
     $('fPre').checked = !!p.is_preorder; $('fPreDate').value = p.preorder_date || ''; $('fPreAdv').value = String(p.preorder_advance_percent || 0);
     $('fDlLimit').value = p.download_limit ? String(p.download_limit) : ''; $('fDlExpiry').value = p.download_expiry_days ? String(p.download_expiry_days) : '';
     $('fSvcMode').value = p.service_mode || ''; $('fSvcDur').value = p.service_duration || ''; $('fSvcArea').value = p.ships_to || 'all_bangladesh';
@@ -2034,6 +2040,7 @@
   }
   $('fManage').onchange = syncType;
   $('fPre').addEventListener('change', () => { syncType(); drawSummary(); dirty = true; });
+  $('fAgree').addEventListener('change', () => { if ($('fAgree').checked) $('agreeWrap').classList.remove('need'); });
   ['fCod', 'fGiftValid', 'fPreDate', 'fPreAdv', 'fDlLimit', 'fDlExpiry', 'fSvcMode', 'fSvcDur', 'fSvcArea'].forEach(id => $(id).addEventListener('change', () => { dirty = true; }));
 
   // ---------- wholesale price breaks ----------
@@ -2423,6 +2430,7 @@
       preorder_advance_percent: !(dl || gift || svc) && $('fPre').checked ? Number($('fPreAdv').value) : null,
       cod_allowed: (dl || gift) ? false : $('fCod').checked,
     });
+    if ($('fAgree').checked && !editing.rules_accepted_at) row.rules_accepted_at = new Date().toISOString();   // the server stamps its own time
     if (svc) row.ships_to = $('fSvcArea').value;
     if (dl || svc || gift) Object.assign(row, { weight_kg: null, length_cm: null, width_cm: null, height_cm: null, free_delivery: false });
     return row;
@@ -2459,6 +2467,7 @@
     if (forReview && row.is_service && !row.service_mode) errs.push('Choose where the service happens (Service tab).');
     if (forReview) {
       if (!photos.length) errs.push('Add a main image.');
+      if (!$('fAgree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and RGBKart\'s seller rules.'); $('agreeWrap').classList.add('need'); }
     }
     return errs;
   }

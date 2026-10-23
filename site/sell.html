@@ -63,6 +63,10 @@
   .req::after { content: " *"; color: var(--danger); }
   .check { display: flex; align-items: center; gap: 8px; font-size: .95rem; font-weight: 500; color: var(--fg); }
   .check input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+  .agree { border: 1px solid #F1E2A6; background: #FFFBEA; border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; }
+  .agree .check { align-items: flex-start; } .agree .check input { margin-top: 2px; flex: none; }
+  .agree.need { border-color: var(--danger, #E30613); box-shadow: 0 0 0 2px rgba(227, 6, 19, .15); }
+  .agree-links { margin: 0 0 0 26px; font-size: .84rem; color: var(--muted); } .agree-links a { color: var(--accent); font-weight: 600; }
   input[type=text], input[type=tel], input[type=email], input[type=number], select, textarea {
     font: inherit; font-size: 16px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; width: 100%; min-width: 0; }
   textarea { min-height: 96px; resize: vertical; }
@@ -235,6 +239,10 @@
       <p class="hint" style="margin:0" id="contactHint"></p>
     </section>
 
+    <div class="agree" id="agreeWrap">
+      <label class="check"><input id="agree" type="checkbox"> <span>I confirm this item is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and the rules of RGBKart.</span></label>
+      <p class="agree-links"><span>Read:</span> <a href="page.html?p=seller-rules" target="_blank">Seller rules</a> · <a href="page.html?p=terms" target="_blank">Terms of use</a></p>
+    </div>
     <p class="msg error" id="msg" role="alert" hidden></p>
     <button type="submit" class="primary big" id="submitBtn">Submit for approval</button>
     <p class="hint" style="text-align:center;margin:0">RGBKart checks each listing, usually within 24 hours. Selling often? <a href="login.html">Open a free shop</a>.</p>
@@ -251,7 +259,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=22"></script>
+<script src="i18n.js?v=23"></script>
 <script src="pay.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -519,6 +527,7 @@
     if (v.whatsapp && !BD_MOBILE.test(v.whatsapp)) errs.push('Check the WhatsApp number.');
     if (!v.district) errs.push('Choose your district.');
     if (v.email && !/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v.email)) errs.push('Check the email address.');
+    if (!$('agree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and RGBKart\'s rules.'); $('agreeWrap').classList.add('need'); }
     if (v.area && !/^[A-Za-z0-9][A-Za-z0-9 .\/'()-]{1,39}$/.test(v.area)) errs.push('Use only letters, numbers and spaces for the area, like "Rampura".');
     if (errs.length) return setMsg(errs.join(' '));
 
@@ -537,7 +546,7 @@
       if (r.error && !(/Could not find the function/i.test(r.error.message) && !v.email)) throw r.error;
       // 3. the listing
       const row = { category_id: v.category, title: v.title, title_bn: v.titleBn || null, price: v.price, price_negotiable: v.negotiable, listing_type: condition,
-        description: v.desc || null, stock: 1, manage_stock: true, ships_to: 'all_bangladesh' };
+        description: v.desc || null, stock: 1, manage_stock: true, ships_to: 'all_bangladesh', rules_accepted_at: new Date().toISOString() };
       const res = pendingProductId ? await db.from('products').update(row).eq('id', pendingProductId).select().single()
                                    : await db.from('products').insert(row).select().single();
       if (res.error) throw res.error;
@@ -584,6 +593,7 @@
   };
 
   // ---------- helpers ----------
+  $('agree').addEventListener('change', () => { if ($('agree').checked) $('agreeWrap').classList.remove('need'); });
   function setMsg(t) { $('msg').textContent = t; $('msg').hidden = !t; if (t) $('msg').scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   let tt; function toast(t) { $('toast').textContent = t; $('toast').hidden = false; clearTimeout(tt); tt = setTimeout(() => $('toast').hidden = true, 3000); }
   function confirmBtn(label, confirmLabel, onConfirm) {

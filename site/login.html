@@ -76,6 +76,11 @@
   .seg button small { font-weight: 400; font-size: .78rem; }
   .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
   .seg button[aria-pressed="true"] small { color: var(--muted); }
+  .agree { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #FFFBEA; display: grid; gap: 4px; }
+  .agree-row { display: flex; gap: 10px; align-items: flex-start; text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 500; color: var(--fg); }
+  .agree-row input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
+  .agree-links { margin: 0 0 0 28px; font-size: .82rem; color: var(--muted); }
+  .agree-links a { color: var(--accent); font-weight: 600; }
   .section-label { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 6px 0 -4px; }
 
   /* Signed-in view */
@@ -209,7 +214,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=22"></script>
+<script src="i18n.js?v=23"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -249,6 +254,7 @@
       { k: 'business_address', label: 'Business address', req: true, ac: 'street-address', ph: 'House, road, area' },
       { k: 'city', label: 'District', req: true, districts: true },
       { k: 'trade_license', label: 'Trade license no. (optional)' },
+      { k: 'rules_accepted', agree: true },
     ],
   };
 
@@ -278,7 +284,7 @@
   }
 
   function collect(box) {
-    return Object.fromEntries([...box.querySelectorAll('input, textarea, select')].map(el => [el.name, el.value.trim()]));
+    return Object.fromEntries([...box.querySelectorAll('input, textarea, select')].map(el => [el.name, el.type === 'checkbox' ? (el.checked ? 'yes' : '') : el.value.trim()]));
   }
 
   function renderFields(box, role, prefix, prefill = {}) {
@@ -293,6 +299,7 @@
         s.className = 'section-label'; s.textContent = f.section;
         box.append(s); continue;
       }
+      if (f.agree) { box.append(agreeBox(prefix + '-' + f.k, f.k, keep[f.k] === 'yes')); continue; }
       const label = document.createElement('label');
       label.textContent = f.label;
       let el;
@@ -310,6 +317,22 @@
       el.required = !!f.req;
       label.append(el); box.append(label);
     }
+  }
+
+  // "I agree to follow the laws of Bangladesh and RGBKart's rules" (required for sellers)
+  function agreeBox(id, name, checked) {
+    const wrap = document.createElement('div'); wrap.className = 'agree';
+    const lab = document.createElement('label'); lab.className = 'agree-row';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = id; cb.name = name; cb.required = true; cb.checked = checked;
+    const txt = document.createElement('span'); txt.textContent = 'I agree to follow the laws of the Government of Bangladesh and the rules of RGBKart.';
+    lab.append(cb, txt);
+    const links = document.createElement('p'); links.className = 'agree-links';
+    const a1 = document.createElement('a'); a1.href = 'page.html?p=seller-rules'; a1.target = '_blank'; a1.textContent = 'Seller rules';
+    const a2 = document.createElement('a'); a2.href = 'page.html?p=terms'; a2.target = '_blank'; a2.textContent = 'Terms of use';
+    const r = document.createElement('span'); r.textContent = 'Read:';
+    links.append(r, ' ', a1, ' · ', a2);
+    wrap.append(lab, links);
+    return wrap;
   }
 
   function wireRoleSwitch(groupId, onPick) {
@@ -457,6 +480,7 @@
     const { error } = await db.rpc('complete_profile', { meta });
     $('onboardBtn').disabled = false;
     if (error) return setMsg('onboardMsg', friendly(error), true);
+    if (onboardRole === 'seller' && meta.rules_accepted === 'yes') await db.rpc('accept_seller_rules');
     try { sessionStorage.removeItem('rgbkart-role'); } catch (_) {}
     const { data } = await db.auth.getSession();
     render(data.session);

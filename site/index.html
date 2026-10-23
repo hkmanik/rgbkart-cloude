@@ -34,6 +34,32 @@
   .sell-band { background: var(--surface); border: 1.5px solid var(--accent); border-radius: 18px; padding: 22px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .sell-band b { font: 600 1.3rem var(--display); display: block; } .sell-band span { color: var(--muted); }
   .btn-acc { background: var(--accent); color: var(--accent-fg); } .btn-acc:hover { background: var(--accent-hover); }
+  /* Top shops: sliding row of shop cards (5 at a time on wide screens, fewer on small ones) */
+  .shoprow { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 4 * 14px) / 5); gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 2px 2px 8px; }
+  .shoprow::-webkit-scrollbar { display: none; }
+  @media (max-width: 1150px) { .shoprow { grid-auto-columns: calc((100% - 3 * 14px) / 4); } }
+  @media (max-width: 820px) { .shoprow { grid-auto-columns: calc((100% - 2 * 12px) / 3); gap: 12px; } }
+  @media (max-width: 560px) { .shoprow { grid-auto-columns: calc((100% - 12px) / 2.15); } }
+  .shopcard { scroll-snap-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; text-decoration: none; color: var(--fg);
+    display: grid; grid-template-rows: auto 1fr; transition: transform .18s, box-shadow .18s; }
+  .shopcard:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgb(0 0 0 / .12); }
+  .shopcard .sb { height: 86px; background: linear-gradient(135deg, hsl(var(--hue) 70% 42%), hsl(calc(var(--hue) + 40) 80% 55%)); }
+  .shopcard .sb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shopcard .sbody { padding: 0 12px 14px; display: grid; gap: 6px; justify-items: center; text-align: center; }
+  .shopcard .sl { width: 64px; height: 64px; margin-top: -32px; border-radius: 16px; background: #fff; border: 3px solid var(--surface); box-shadow: 0 4px 10px rgb(0 0 0 / .15);
+    display: grid; place-items: center; overflow: hidden; font: 700 1.6rem var(--display); color: #00802B; }
+  .shopcard .sl img { width: 100%; height: 100%; object-fit: cover; }
+  .shopcard b { font: 600 1rem/1.25 var(--display); overflow-wrap: anywhere; }
+  .shopcard .sm { color: var(--muted); font-size: .8rem; }
+  .shopcard .sbadges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+  .shopcard .sbadges span { font-size: .74rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: #FFF4CC; color: #7A5A00; }
+  .shopcard .sbadges span + span { background: var(--accent-soft); color: var(--accent); }
+  .shopcard .go { margin-top: 2px; font-size: .82rem; font-weight: 700; color: #fff; background: #00802B; border-radius: 999px; padding: 5px 12px; }
+  .shopcard:hover .go { background: #E30613; }
+  .arrows { display: flex; gap: 6px; align-items: center; }
+  .arrows button { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--accent); background: var(--surface); color: var(--accent); font-size: 1.1rem; cursor: pointer; }
+  .arrows button:hover { background: var(--accent); color: var(--accent-fg); }
+  @media (prefers-reduced-motion: reduce) { .shoprow { scroll-behavior: auto; } .shopcard { transition: none; } .shopcard:hover { transform: none; } }
 </style>
 </head>
 <body>
@@ -66,7 +92,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=5"></script>
+<script src="i18n.js?v=6"></script>
 <script src="shop.js?v=13"></script>
 <script src="menu.js?v=5"></script>
 <script>
@@ -92,10 +118,49 @@
   function seeAllLink(s) {
     const cat = cats.find(c => c.id === s.category_id);
     return { featured: 'browse.html?featured=1', deals: 'browse.html?deals=1', newest: 'browse.html?sort=newest', pre_owned: 'browse.html?condition=pre_owned',
-      free_delivery: 'browse.html?free=1', variable: 'browse.html', brand_new: 'browse.html?condition=new', negotiable: 'browse.html', category: cat ? `browse.html?c=${encodeURIComponent(cat.slug)}` : 'browse.html' }[s.section_type];
+      free_delivery: 'browse.html?free=1', top_shops: 'browse.html', variable: 'browse.html', brand_new: 'browse.html?condition=new', negotiable: 'browse.html', category: cat ? `browse.html?c=${encodeURIComponent(cat.slug)}` : 'browse.html' }[s.section_type];
+  }
+
+  // Top shops: a sliding row that moves by itself every few seconds (stops while the mouse or a finger is on it)
+  const shopPic = path => db.storage.from('shop-assets').getPublicUrl(path).data.publicUrl;
+  async function renderTopShops(s, holder) {
+    const r = await db.rpc('top_shops', { p_limit: s.item_count || 12 });
+    const list = r.error ? [] : (r.data || []);
+    if (!list.length) return;
+    const row = h('div', { class: 'shoprow', role: 'list' });
+    list.forEach((sh, i) => {
+      const href = 'store.html?s=' + encodeURIComponent(sh.shop_slug || sh.user_id);
+      row.append(h('a', { class: 'shopcard', href, role: 'listitem', style: `--hue:${(i * 67 + 130) % 360}` },
+        h('div', { class: 'sb' }, sh.banner_path && h('img', { src: shopPic(sh.banner_path), alt: '', loading: 'lazy' })),
+        h('div', { class: 'sbody' },
+          h('div', { class: 'sl', 'aria-hidden': 'true' }, sh.logo_path ? h('img', { src: shopPic(sh.logo_path), alt: '', loading: 'lazy' }) : (sh.shop_name || '?').charAt(0).toUpperCase()),
+          h('b', { text: L(sh, 'shop_name'), translate: 'no' }),
+          h('span', { class: 'sm', text: [sh.area, sh.city && RGBLang.tr(sh.city)].filter(Boolean).join(', ') || ' ' }),
+          h('div', { class: 'sbadges' }, sh.featured_count > 0 && h('span', { text: T('★ {n} Featured', { n: sh.featured_count }) }), h('span', { text: T(sh.product_count === 1 ? '{n} product' : '{n} products', { n: sh.product_count }) })),
+          h('span', { class: 'go', text: T('Visit shop →') }))));
+    });
+    const step = dir => { const card = row.firstElementChild; const w = card ? card.getBoundingClientRect().width + 14 : 200;
+      const end = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+      row.scrollTo({ left: dir > 0 && end ? 0 : dir < 0 && row.scrollLeft <= 4 ? row.scrollWidth : row.scrollLeft + dir * w }); };
+    const arrows = h('div', { class: 'arrows' },
+      h('button', { type: 'button', 'aria-label': T('Previous shops'), text: '‹', onclick: () => step(-1) }),
+      h('button', { type: 'button', 'aria-label': T('Next shops'), text: '›', onclick: () => step(1) }));
+    holder.append(h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), arrows), row));
+    // slide by itself only when there are more shops than fit, and not for people who asked for less motion
+    requestAnimationFrame(() => {
+      const more = row.scrollWidth > row.clientWidth + 4;
+      arrows.hidden = !more;
+      if (!more || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      let paused = false;
+      ['mouseenter', 'focusin', 'touchstart'].forEach(ev => row.addEventListener(ev, () => paused = true, { passive: true }));
+      ['mouseleave', 'focusout'].forEach(ev => row.addEventListener(ev, () => paused = false));
+      row.addEventListener('touchend', () => setTimeout(() => paused = false, 6000), { passive: true });
+      setInterval(() => { if (!paused && !document.hidden) step(1); }, 3500);
+    });
   }
 
   async function renderSection(s, holder) {
+    if (s.section_type === 'top_shops') return renderTopShops(s, holder);
     const grid = h('div', { class: 'grid6' });
     const sec = h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), h('a', { href: seeAllLink(s), text: 'View all' })), grid);
     holder.append(sec);

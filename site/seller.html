@@ -102,6 +102,23 @@
   .side-foot button:hover { background: var(--t-red); border-color: var(--t-red); color: #fff; }
   .mobile-bar, .scrim { display: none; }
   .main { min-width: 0; padding-block: 28px 120px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; align-content: start; }
+  .rv-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; }
+  .rv-stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+  .rv-stat span { color: var(--muted); font-size: .85rem; } .rv-stat b { font-size: 1.6rem; } .rv-stat small { color: var(--muted); }
+  .rvs { display: grid; }
+  .rv-card { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 8px; min-width: 0; }
+  .rv-card:first-child { border-top: 0; }
+  .rv-card.hid { opacity: .65; }
+  .rv-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .rv-head b { overflow-wrap: anywhere; }
+  .rv-stars { color: #F5C400; letter-spacing: 1px; font-size: 1.05rem; }
+  .rv-text { margin: 0; overflow-wrap: anywhere; }
+  .rv-hid { margin: 0; color: var(--warn, #8a5a00); font-size: .88rem; }
+  .rv-reply { background: var(--bg); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 8px 12px; display: grid; gap: 4px; }
+  .rv-reply b { font-size: .8rem; color: var(--accent); }
+  .rv-reply-form { display: grid; gap: 8px; }
+  .rv-reply-form textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); resize: vertical; }
+  .row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
   .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .page-head p { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
   .banner { border-radius: 10px; padding: 12px 16px; font-size: .92rem; display: grid; gap: 4px; }
@@ -359,7 +376,8 @@
     <a class="nav tone-blue" href="messages.html" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>Messages<span id="navMsg" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></a>
     <a class="nav tone-blue" href="alerts.html" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>Alerts &amp; emails<span id="navAlerts" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></a>
     <button class="nav tone-green" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders<span id="navOrders" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></button>
-    <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Shop page<span class="soon">1.8</span></button>
+    <button class="nav tone-amber" data-view="reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="m12 7.5 1.3 2.7 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z"/></svg>Reviews<span id="navReviews" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></button>
+    <a class="nav tone-green" id="navShopPage" href="store.html" target="_blank" rel="noopener" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>My shop page ↗</a>
     <button class="nav" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payouts<span class="soon">5.3</span></button>
 
     <div class="nav-group">Settings</div>
@@ -433,6 +451,23 @@
     </section>
 
     <!-- ===== Advertise ===== -->
+    <section data-page="reviews" hidden>
+      <div class="page-head"><div><h1>Reviews</h1><p>What buyers say after their order is delivered. Only real buyers can review. A kind, quick reply builds trust; you can reply once to each review and change your reply later.</p></div></div>
+      <div class="rv-stats" id="rvStats"></div>
+      <div class="card" style="margin-top:16px">
+        <div class="toolbar">
+          <div class="filters" id="rvFilter">
+            <button type="button" data-f="all" aria-pressed="true">All</button>
+            <button type="button" data-f="noreply" aria-pressed="false">Need a reply</button>
+            <button type="button" data-f="shop" aria-pressed="false">About the shop</button>
+            <button type="button" data-f="product" aria-pressed="false">About products</button>
+            <button type="button" data-f="low" aria-pressed="false">1–2 stars</button>
+          </div>
+        </div>
+        <div id="rvList" class="rvs"></div>
+      </div>
+    </section>
+
     <section data-page="ads">
       <div class="page-head"><div><h1>Advertise</h1><p>Put a banner for your shop on RGBKart. Choose a space and the days, pay by bKash, Nagad, Upay or Rocket, and your ad goes live when we confirm the payment.</p></div></div>
       <div class="card" style="margin-top:16px">
@@ -915,11 +950,14 @@
     await loadCatalog();
     await loadProducts();
     loadOrders();
+    loadReviews(true);
+    if (shop) $('navShopPage').href = 'store.html?s=' + encodeURIComponent(shop.shop_slug || me.id);
     const start = location.hash.slice(1);
     if (start === 'featured') go('featured');
     else if (start === 'ads') go('ads');
     else if (start === 'orders') go('orders');
     else if (start === 'settings') go('settings');
+    else if (start === 'reviews') go('reviews');
     else if (start === 'new' && approved) openEditor(null);
     else go('products');
   }
@@ -967,14 +1005,72 @@
   const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   const mainPhoto = p => { const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0]; return im ? photoUrl(im.storage_path) : null; };
 
+  // ===================== Reviews (0029_reviews.sql) =====================
+  let myReviews = [], rvFilter = 'all';
+  async function loadReviews(countOnly) {
+    const r = await db.from('reviews').select('*, products(title), orders(order_no)').eq('seller_id', me.id).order('created_at', { ascending: false }).limit(500);
+    if (r.error) { if (!countOnly) { $('rvList').innerHTML = ''; $('rvList').append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Reviews are not switched on yet (0029_reviews.sql).' : r.error.message })); } return; }
+    myReviews = r.data || [];
+    const need = myReviews.filter(x => !x.reply && !x.is_hidden && x.comment).length;
+    $('navReviews').hidden = !need; $('navReviews').textContent = need;
+    if (!countOnly) drawReviews();
+  }
+  $('rvFilter').querySelectorAll('button').forEach(b => b.onclick = () => {
+    rvFilter = b.dataset.f; $('rvFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawReviews();
+  });
+  const starTxt = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+  function drawReviews() {
+    const vis = myReviews.filter(x => !x.is_hidden);
+    const shopR = vis.filter(x => !x.product_id), prodR = vis.filter(x => x.product_id);
+    const avg = a => a.length ? (a.reduce((t, x) => t + x.rating, 0) / a.length).toFixed(1) : '–';
+    $('rvStats').innerHTML = '';
+    $('rvStats').append(
+      h('div', { class: 'rv-stat' }, h('span', { text: 'Shop rating' }), h('b', { text: avg(shopR) }), h('small', { text: `${shopR.length} review${shopR.length === 1 ? '' : 's'}` })),
+      h('div', { class: 'rv-stat' }, h('span', { text: 'Product rating (all products)' }), h('b', { text: avg(prodR) }), h('small', { text: `${prodR.length} review${prodR.length === 1 ? '' : 's'}` })),
+      h('div', { class: 'rv-stat' }, h('span', { text: 'Waiting for your reply' }), h('b', { text: String(vis.filter(x => !x.reply && x.comment).length) }), h('small', { text: 'reviews with a comment' })));
+    let list = myReviews;
+    if (rvFilter === 'noreply') list = list.filter(x => !x.reply && x.comment && !x.is_hidden);
+    else if (rvFilter === 'shop') list = list.filter(x => !x.product_id);
+    else if (rvFilter === 'product') list = list.filter(x => x.product_id);
+    else if (rvFilter === 'low') list = list.filter(x => x.rating <= 2);
+    const box = $('rvList'); box.innerHTML = '';
+    if (!list.length) { box.append(h('p', { class: 'muted', style: 'padding:14px 0', text: myReviews.length ? 'No reviews here.' : 'No reviews yet. Buyers can rate your shop and products after their order is delivered.' })); return; }
+    list.slice(0, 200).forEach(x => box.append(reviewCard(x)));
+  }
+  function reviewCard(x) {
+    const ta = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'Write a polite reply. Everyone can see it.', 'aria-label': 'Your reply' });
+    ta.value = x.reply || '';
+    const save = async (text) => {
+      const { error } = await db.rpc('seller_reply_review', { p_review: x.id, p_reply: text });
+      if (error) return toast(friendly(error));
+      toast(text ? 'Reply saved' : 'Reply removed'); loadReviews();
+    };
+    const form = h('div', { class: 'rv-reply-form', hidden: !!x.reply || !x.comment }, ta,
+      h('div', { class: 'row-btns' }, h('button', { type: 'button', class: 'primary', text: x.reply ? 'Save reply' : 'Send reply', onclick: () => ta.value.trim() ? save(ta.value.trim()) : toast('Write a reply first') }),
+        x.reply && h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => { form.hidden = true; shown.hidden = false; } })));
+    const shown = x.reply ? h('div', { class: 'rv-reply' }, h('b', { text: 'Your reply' }), h('span', { text: x.reply }),
+      h('div', { class: 'row-btns' }, h('button', { type: 'button', class: 'ghost', text: 'Edit reply', onclick: () => { form.hidden = false; shown.hidden = true; ta.focus(); } }),
+        h('button', { type: 'button', class: 'ghost', text: 'Remove reply', onclick: () => save(null) }))) : null;
+    return h('article', { class: 'rv-card' + (x.is_hidden ? ' hid' : '') },
+      h('div', { class: 'rv-head' },
+        h('span', { class: 'rv-stars', 'aria-label': `${x.rating} out of 5 stars`, text: starTxt(x.rating) }),
+        h('b', { text: x.product_id ? (x.products && x.products.title || 'Product') : 'Your shop' }),
+        h('span', { class: 'muted', text: `${x.reviewer_name} · ${new Date(x.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}${x.orders ? ' · ' + x.orders.order_no : ''}` })),
+      x.is_hidden && h('p', { class: 'rv-hid', text: 'Hidden by RGBKart' + (x.hidden_reason ? ': ' + x.hidden_reason : '') + '. It does not count in your stars.' }),
+      h('p', { class: 'rv-text', text: x.comment || '(No comment, stars only)' }),
+      !x.is_hidden && shown, !x.is_hidden && form,
+      !x.is_hidden && !x.reply && !x.comment && h('div', { class: 'row-btns' }, h('button', { type: 'button', class: 'ghost', text: 'Reply', onclick: e => { e.target.parentNode.remove(); form.hidden = false; ta.focus(); } })));
+  }
+
   // ===================== Navigation =====================
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
     document.querySelectorAll('.nav[data-view]').forEach(b => b.dataset.view === (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view) ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings' }[view];
+    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews' }[view];
     if (view === 'orders') loadOrders();
     if (view === 'settings') loadSettings();
     if (view === 'ads') loadSellerAds();
+    if (view === 'reviews') loadReviews();
     try { history.replaceState(null, '', '#' + (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view)); } catch (_) {}
     setMenu(false); window.scrollTo(0, 0);
   }

@@ -174,3 +174,15 @@ footer b { font: 600 1.2rem var(--display); color: #fff; }
 .pager span.gap { border: 0; background: none; min-width: 20px; padding: 0; }
 .pager-info { text-align: center; color: var(--muted); font-size: .88rem; margin-top: 8px; }
 @media (max-width: 560px) { .pager .num:not([aria-current="page"]):not(.edge) { display: none; } }
+
+/* ---------- stars (reviews & ratings) ---------- */
+.stars { --r: 0; display: inline-block; letter-spacing: 1px; line-height: 1; font-size: 1em; white-space: nowrap; color: transparent !important;
+  background: linear-gradient(90deg, #F5C400 calc(var(--r) / 5 * 100%), #cfd6d1 0); -webkit-background-clip: text; background-clip: text; }
+.rt { display: inline-flex; align-items: center; gap: 5px; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rt b { color: var(--fg); font-weight: 700; }
+.card .rt { font-size: .76rem; }
+.star-in { display: inline-flex; gap: 2px; }
+.star-in button { border: 0; background: none; padding: 2px; font-size: 1.7rem; line-height: 1; color: #cfd6d1; cursor: pointer; transition: transform .12s, color .12s; }
+.star-in button.on { color: #F5C400; }
+.star-in button:hover { transform: scale(1.15); }
+.star-in button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }

@@ -109,6 +109,15 @@
   .mobile-bar { display: none; }
   .scrim { display: none; }
   .main { min-width: 0; padding-block: 28px 60px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; align-content: start; }
+  .ar-list { display: grid; }
+  .ar { border-top: 1px solid var(--line); padding: 12px 0; display: grid; gap: 6px; min-width: 0; }
+  .ar:first-child { border-top: 0; }
+  .ar.hid { opacity: .7; }
+  .ar-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .ar-head b { overflow-wrap: anywhere; }
+  .ar-stars { color: #F5C400; letter-spacing: 1px; }
+  .ar-act { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .ar .pill { background: #FDE7E8; color: #B3000C; border-radius: 999px; padding: 1px 8px; font-size: .75rem; font-weight: 700; }
   .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .page-head p { margin: 4px 0 0; color: var(--muted); max-width: 60ch; }
   .readonly-note { background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 10px 14px; font-size: .9rem; }
@@ -382,6 +391,7 @@
     <button class="nav tone-blue" data-view="attributes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>Attributes</button>
     <button class="nav tone-blue" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Products<span class="count" id="navProducts" hidden></span></button>
     <button class="nav tone-green" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders</button>
+    <button class="nav tone-amber" data-view="reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Reviews</button>
 
     <div class="nav-group tone-green">People</div>
     <button class="nav tone-green" data-view="sellers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v8h14v-8"/></svg>Sellers<span class="count" id="navPending" hidden></span></button>
@@ -588,6 +598,17 @@
     </section>
 
     <!-- Orders -->
+    <section data-page="reviews" hidden>
+      <div class="page-head"><div><h1>Reviews</h1><p>Star ratings and reviews from buyers whose order was delivered. Hide a review that is rude, fake, has phone numbers or is about something else. A hidden review stays saved but stops counting in the stars.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar"><div class="filters" id="arFilter">
+          <button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="low" aria-pressed="false">1–2 stars</button>
+          <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
+          <input type="search" id="arSearch" placeholder="Search words, buyer, shop or product" aria-label="Search reviews" style="flex:1;min-width:220px"></div>
+        <div id="arList" class="ar-list"></div>
+      </div>
+    </section>
+
     <section data-page="orders">
       <div class="page-head"><div><h1>Orders</h1><p>All orders on RGBKart. Each shop confirms, packs and delivers its own orders and collects the cash. You can step in and cancel an order if needed.</p></div></div>
       <div class="card" style="margin-top:18px">
@@ -1092,9 +1113,57 @@
     drawDashboard();
   }
 
+  // ===================== Reviews (0029_reviews.sql) =====================
+  let adminReviews = [], arShops = new Map(), arFilter = 'all';
+  async function loadAdminReviews() {
+    const box = $('arList');
+    const r = await db.from('reviews').select('*, products(title), orders(order_no)').order('created_at', { ascending: false }).limit(1000);
+    if (r.error) { box.innerHTML = ''; box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Reviews are not switched on yet: run 0029_reviews.sql.' : friendly(r.error) })); return; }
+    adminReviews = r.data || [];
+    const ids = [...new Set(adminReviews.map(x => x.seller_id))];
+    const s = ids.length ? await db.from('seller_details').select('user_id, shop_name').in('user_id', ids) : { data: [] };
+    arShops = new Map((s.data || []).map(x => [x.user_id, x.shop_name]));
+    drawAdminReviews();
+  }
+  $('arFilter').querySelectorAll('button').forEach(b => b.onclick = () => { arFilter = b.dataset.f; $('arFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawAdminReviews(); });
+  $('arSearch').oninput = () => drawAdminReviews();
+  function drawAdminReviews() {
+    const q = $('arSearch').value.trim().toLowerCase();
+    let list = adminReviews;
+    if (arFilter === 'low') list = list.filter(x => x.rating <= 2);
+    if (arFilter === 'hidden') list = list.filter(x => x.is_hidden);
+    if (q) list = list.filter(x => [x.comment, x.reply, x.reviewer_name, arShops.get(x.seller_id), x.products && x.products.title, x.orders && x.orders.order_no].join(' ').toLowerCase().includes(q));
+    const box = $('arList'); box.innerHTML = '';
+    if (!list.length) { box.append(h('p', { class: 'muted', style: 'padding:12px 0', text: adminReviews.length ? 'No reviews match.' : 'No reviews yet.' })); return; }
+    list.slice(0, 300).forEach(x => {
+      const reason = h('input', { type: 'text', maxlength: 200, placeholder: 'Reason (the shop sees it)', 'aria-label': 'Reason for hiding', style: 'flex:1;min-width:180px' });
+      const hideRow = h('div', { class: 'ar-act', hidden: true }, reason,
+        h('button', { type: 'button', class: 'bad', text: 'Hide review', onclick: () => hideReview(x, true, reason.value) }),
+        h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => hideRow.hidden = true }));
+      box.append(h('article', { class: 'ar' + (x.is_hidden ? ' hid' : '') },
+        h('div', { class: 'ar-head' }, h('span', { class: 'ar-stars', 'aria-label': `${x.rating} out of 5 stars`, text: '★'.repeat(x.rating) + '☆'.repeat(5 - x.rating) }),
+          h('b', { text: x.product_id ? (x.products && x.products.title || 'Product') : 'Shop review' }),
+          h('span', { class: 'muted', text: [arShops.get(x.seller_id), x.reviewer_name, x.orders && x.orders.order_no, new Date(x.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · ') }),
+          x.is_hidden && h('span', { class: 'pill', text: 'Hidden' })),
+        h('p', { style: 'margin:0;overflow-wrap:anywhere', text: x.comment || '(stars only)' }),
+        x.reply && h('p', { class: 'muted', style: 'margin:0;overflow-wrap:anywhere', text: 'Shop replied: ' + x.reply }),
+        x.is_hidden && x.hidden_reason && h('p', { class: 'muted', style: 'margin:0', text: 'Hidden because: ' + x.hidden_reason }),
+        h('div', { class: 'ar-act' },
+          x.product_id && h('a', { href: 'product.html?id=' + x.product_id, target: '_blank', rel: 'noopener', text: 'Open product ↗' }),
+          x.is_hidden ? h('button', { type: 'button', class: 'ghost', text: 'Show again', onclick: () => hideReview(x, false) })
+                      : h('button', { type: 'button', class: 'ghost', text: 'Hide…', onclick: () => { hideRow.hidden = false; reason.focus(); } })),
+        hideRow));
+    });
+  }
+  async function hideReview(x, hide, reason) {
+    const { error } = await db.rpc('admin_hide_review', { p_review: x.id, p_hide: hide, p_reason: reason || null });
+    if (error) return toast(friendly(error));
+    toast(hide ? 'Review hidden' : 'Review shown again'); loadAdminReviews();
+  }
+
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'reviews', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', reviews: 'Reviews', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1111,6 +1180,7 @@
     if (view === 'reports') loadReport();
     if (view === 'payments') loadPayments();
     if (view === 'orders') loadAdminOrders();
+    if (view === 'reviews') loadAdminReviews();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));

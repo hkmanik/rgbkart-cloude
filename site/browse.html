@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=13">
+<link rel="stylesheet" href="shop.css?v=14">
 <style>
   /* Layout: left sidebar (categories that expand + filters) beside a product grid; sidebar becomes a drawer on phones */
   main { padding-block: 20px 40px; }
@@ -112,6 +112,7 @@
           <label class="chk"><input type="checkbox" id="featuredOnly"> ★ Featured only</label>
           <label class="chk"><input type="checkbox" id="freeDel"> Free delivery</label>
           <label class="chk"><input type="checkbox" id="dealsOnly"> On sale</label>
+          <label class="chk"><input type="checkbox" id="rated4"> ★ 4 &amp; up</label>
         </div>
         <button type="button" class="clear" id="clearAll">Clear all filters</button>
       </form>
@@ -130,6 +131,7 @@
             <option value="newest">Newest first</option>
             <option value="price_asc">Price: low to high</option>
             <option value="price_desc">Price: high to low</option>
+            <option value="rating">Top rated</option>
           </select>
         </div>
       </div>
@@ -146,8 +148,8 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=7"></script>
-<script src="shop.js?v=14"></script>
+<script src="i18n.js?v=8"></script>
+<script src="shop.js?v=15"></script>
 <script src="menu.js?v=5"></script>
 <script>
   const PAGE = 24;
@@ -162,7 +164,7 @@
   const params = new URLSearchParams(location.search);
   const state = {
     c: params.get('c') || '', t: (params.get('t') || '').slice(0, 40), q: (params.get('q') || '').trim(), condition: params.get('condition') || '', sort: params.get('sort') || 'best',
-    min: params.get('min') || '', max: params.get('max') || '', district: params.get('district') || '', featured: params.get('featured') === '1', free: params.get('free') === '1', deals: params.get('deals') === '1', wishlist: params.get('wishlist') === '1', page: Math.max(1, parseInt(params.get('page'), 10) || 1),
+    min: params.get('min') || '', max: params.get('max') || '', district: params.get('district') || '', featured: params.get('featured') === '1', free: params.get('free') === '1', deals: params.get('deals') === '1', r4: params.get('r4') === '1', wishlist: params.get('wishlist') === '1', page: Math.max(1, parseInt(params.get('page'), 10) || 1),
   };
   const expanded = new Set();
   const kids = id => cats.filter(c => (c.parent_id ?? null) === id).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
@@ -179,7 +181,7 @@
     const p = new URLSearchParams();
     if (s.c) p.set('c', s.c); if (s.c && s.c.includes(',') && s.t) p.set('t', s.t); if (s.q) p.set('q', s.q); if (s.condition) p.set('condition', s.condition);
     if (s.sort && s.sort !== 'best') p.set('sort', s.sort); if (s.min) p.set('min', s.min); if (s.max) p.set('max', s.max);
-    if (s.district) p.set('district', s.district); if (s.featured) p.set('featured', '1'); if (s.free) p.set('free', '1'); if (s.deals) p.set('deals', '1'); if (s.wishlist) p.set('wishlist', '1'); if (s.page > 1) p.set('page', s.page);
+    if (s.district) p.set('district', s.district); if (s.featured) p.set('featured', '1'); if (s.free) p.set('free', '1'); if (s.deals) p.set('deals', '1'); if (s.r4) p.set('r4', '1'); if (s.wishlist) p.set('wishlist', '1'); if (s.page > 1) p.set('page', s.page);
     const qs = p.toString(); return 'browse.html' + (qs ? '?' + qs : '');
   }
   // any change of category, search or filter starts again at page 1
@@ -246,7 +248,7 @@
     const s = { ...state, ...change };
     document.querySelectorAll('input[name=condition]').forEach(r => r.checked = r.value === s.condition);
     $('min').value = s.min; $('max').value = s.max; $('district').value = s.district;
-    $('featuredOnly').checked = s.featured; $('freeDel').checked = s.free; $('dealsOnly').checked = s.deals; $('sort').value = s.sort;
+    $('featuredOnly').checked = s.featured; $('freeDel').checked = s.free; $('dealsOnly').checked = s.deals; $('rated4').checked = s.r4; $('sort').value = s.sort;
   }
   document.querySelectorAll('input[name=condition]').forEach(r => r.onchange = () => apply({ condition: r.value }));
   $('filters').onsubmit = e => { e.preventDefault(); const mn = $('min').value, mx = $('max').value; apply({ min: mn, max: mx }); closeSide(); };
@@ -254,8 +256,9 @@
   $('featuredOnly').onchange = () => apply({ featured: $('featuredOnly').checked });
   $('freeDel').onchange = () => apply({ free: $('freeDel').checked });
   $('dealsOnly').onchange = () => apply({ deals: $('dealsOnly').checked });
+  $('rated4').onchange = () => apply({ r4: $('rated4').checked });
   $('sort').onchange = () => apply({ sort: $('sort').value });
-  $('clearAll').onclick = () => { const c = { condition: '', min: '', max: '', district: '', featured: false, free: false, deals: false }; syncForm(c); apply(c); };
+  $('clearAll').onclick = () => { const c = { condition: '', min: '', max: '', district: '', featured: false, free: false, deals: false, r4: false }; syncForm(c); apply(c); };
 
   // phone drawer
   function openSide() { $('side').classList.add('open'); $('scrim').classList.add('open'); }
@@ -289,6 +292,7 @@
     if (state.featured) q = q.eq('is_featured', true);
     if (state.free) q = q.eq('free_delivery', true);
     if (state.deals) q = q.not('sale_price', 'is', null);
+    if (state.r4) q = q.gte('rating_avg', 4);
     if (state.wishlist) { const ids = store.get(WISH_KEY); if (!ids.length) return show([], 0, reset, token); q = q.in('id', ids); }
     if (state.min) q = q.gte('price', Number(state.min));
     if (state.max) q = q.lte('price', Number(state.max));
@@ -296,6 +300,7 @@
     if (state.sort === 'newest') q = q.order('published_at', { ascending: false, nullsFirst: false });
     else if (state.sort === 'price_asc') q = q.order('price', { ascending: true });
     else if (state.sort === 'price_desc') q = q.order('price', { ascending: false });
+    else if (state.sort === 'rating') q = q.order('rating_avg', { ascending: false, nullsFirst: false }).order('rating_count', { ascending: false });
     else q = q.order('is_featured', { ascending: false }).order('published_at', { ascending: false, nullsFirst: false });
     const r = await q.range(offset, offset + PAGE - 1);
     show(r.data || [], r.count || 0, reset, token, r.error);

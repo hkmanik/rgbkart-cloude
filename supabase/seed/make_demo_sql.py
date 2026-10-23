@@ -206,12 +206,14 @@ select (select count(*) from public.products where 'demo' = any(tags) and status
 """)
 open(os.path.join(HERE, 'demo_products.sql'), 'w').write(''.join(out))
 
-open(os.path.join(HERE, 'demo_products_remove.sql'), 'w').write("""-- Removes ALL RGBKart demo data added by demo_products.sql: the 3 demo sellers, their 100 products
--- (with versions, Featured, orders and messages about them) and the demo home page sections.
+open(os.path.join(HERE, 'demo_products_remove.sql'), 'w').write("""-- Removes ALL RGBKart demo data added by demo_products.sql: the demo shops, their 100 products
+-- (with versions, Featured, orders, reviews and messages about them), the demo buyers from demo_reviews.sql and the demo home page sections.
 -- Run in Supabase → SQL Editor. Safe to run again.
 begin;
 delete from public.home_sections where subtitle like '%· demo';
+delete from public.orders where order_no like 'DEMO-%';
 delete from auth.users where id in (""" + ', '.join(q(s['id']) for s in SELLERS.values()) + """);
+delete from auth.users where email like 'demo-buyer-%@rgbkart.test';
 commit;
 select (select count(*) from public.products where 'demo' = any(tags)) as demo_products_left;
 """)

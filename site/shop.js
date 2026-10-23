@@ -14,7 +14,7 @@ function h(tag, props, ...kids) {
 }
 const money = n => '৳' + N(Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 }));
 const imgUrl = path => db.storage.from('product-images').getPublicUrl(path).data.publicUrl;
-const CARD_FIELDS = 'id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, product_images(storage_path, sort_order), product_variations(price, sale_price, is_active)';
+const CARD_FIELDS = 'id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, rating_avg, rating_count, product_images(storage_path, sort_order), product_variations(price, sale_price, is_active)';
 const CART_KEY = 'rgbkart-cart', WISH_KEY = 'rgbkart-wishlist';
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (_) { return []; } },
@@ -119,7 +119,28 @@ function card(p, shops) {
     h('div', { class: 'body' },
       h('div', { class: 't', text: title, translate: 'no' }),
       h('div', { class: 'p' }, price, was && h('s', { text: was })),
+      ratingLine(p),
       h('div', { class: 'm', text: [s && [s.area, s.city && RGBLang.tr(s.city)].filter(Boolean).join(', '), p.price_negotiable ? T('Negotiable') : p.free_delivery ? T('Free delivery') : null].filter(Boolean).join(' · ') || ' ' })));
+}
+// ---------- stars (reviews & ratings, 0029) ----------
+function starsEl(avg) {
+  const r = Math.max(0, Math.min(5, Number(avg) || 0));
+  return h('span', { class: 'stars', style: `--r:${r}`, role: 'img', 'aria-label': T('Rated {a} out of 5', { a: r.toFixed(1) }), text: '★★★★★' });
+}
+function ratingLine(x, cls) {
+  if (!x || !x.rating_count) return null;
+  return h('span', { class: 'rt' + (cls ? ' ' + cls : '') }, starsEl(x.rating_avg), h('b', { text: N(Number(x.rating_avg).toFixed(1)) }), h('span', { text: `(${N(x.rating_count)})` }));
+}
+// Clickable 1–5 stars; returns the element, with .value and an onchange callback
+function starInput(value, onchange) {
+  const el = h('span', { class: 'star-in', role: 'radiogroup', 'aria-label': T('Your rating') });
+  const names = ['', 'Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
+  el.value = value || 0;
+  const btns = [1, 2, 3, 4, 5].map(n => h('button', { type: 'button', role: 'radio', 'aria-label': T('{n} stars', { n }) + ' · ' + T(names[n]), title: T(names[n]), text: '★',
+    onclick: () => { el.value = n; paint(); onchange && onchange(n); } }));
+  function paint() { btns.forEach((b, i) => { b.classList.toggle('on', i < el.value); b.setAttribute('aria-checked', String(i + 1 === el.value)); }); }
+  el.append(...btns); paint();
+  return el;
 }
 async function shopsFor(list) {
   const ids = [...new Set(list.map(p => p.seller_id))];

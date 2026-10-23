@@ -9,8 +9,23 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=13">
+<link rel="stylesheet" href="shop.css?v=14">
 <link rel="stylesheet" href="order.css?v=3">
+<style>
+  .rate { margin-top: 10px; }
+  .rate:empty { display: none; }
+  .rate-ask, .rate-done { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; background: #FFF8D6; border: 1px solid #F5C400; border-radius: 10px; padding: 10px 14px; }
+  .rate-done { background: var(--bg); border-color: var(--line); }
+  .rate-done .stars { font-size: 1.05rem; vertical-align: -2px; }
+  .rate-form { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; background: var(--bg); }
+  .rate-form h3 { margin: 0; font-size: 1.05rem; }
+  .rate-item { display: grid; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .rate-h { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .rate-h b { overflow-wrap: anywhere; }
+  .rate-item textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); resize: vertical; width: 100%; box-sizing: border-box; }
+  .linkbtn { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; padding: 4px 0; text-decoration: underline; }
+  @media (prefers-color-scheme: dark) { .rate-ask { background: #3a3210; } }
+</style>
 </head>
 <body>
 
@@ -21,8 +36,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=7"></script>
-<script src="shop.js?v=14"></script>
+<script src="i18n.js?v=8"></script>
+<script src="shop.js?v=15"></script>
 <script src="menu.js?v=5"></script>
 <script>
   const STEPS = [['pending', 'Placed'], ['confirmed', 'Confirmed'], ['packed', 'Packed'], ['shipped', 'On the way'], ['delivered', 'Delivered']];
@@ -44,6 +59,9 @@
     const sids = [...new Set(orders.map(o => o.seller_id))];
     const s = sids.length ? await db.from('shops').select('user_id, shop_name, shop_name_bn, shop_slug, phone_public, whatsapp, pickup_address').in('user_id', sids) : { data: [] };
     const shops = new Map((s.data || []).map(x => [x.user_id, x]));
+    const done = orders.filter(o => o.status === 'delivered').map(o => o.id);
+    const rv = done.length ? await db.from('reviews').select('*').in('order_id', done) : { data: [] };
+    const myReviews = rv.data || [];
     box.innerHTML = '';
     if (!orders.length) {
       box.append(h('div', { class: 'box empty-cart' }, h('b', { text: 'No orders yet' }), h('span', { text: 'When you place an order, you can track it here.' }), h('a', { class: 'btn-acc', href: 'browse.html', text: 'Start shopping' })));
@@ -79,9 +97,69 @@
           shop.phone_public && h('a', { href: 'tel:' + shop.phone_public, text: '📞 Call shop' }),
           (shop.whatsapp || shop.phone_public) && h('a', { href: `https://wa.me/${((shop.whatsapp || shop.phone_public).replace(/[^0-9]/g, '').replace(/^0/, '880'))}?text=${encodeURIComponent(T('Hi, about my RGBKart order {o}', { o: o.order_no }))}`, target: '_blank', rel: 'noopener', text: T('WhatsApp') }),
           ['pending', 'confirmed'].includes(o.status) && h('button', { type: 'button', class: 'bad', text: 'Cancel order', onclick: () => { cancelRow.hidden = false; reason.focus(); } })),
-        cancelRow));
+        cancelRow,
+        o.status === 'delivered' && rateBox(o, shop, myReviews.filter(r => r.order_id === o.id))));
     }
     box.append(list);
+  }
+  // ---------- Rate a delivered order (0029_reviews.sql) ----------
+  const DAY = 864e5;
+  function rateBox(o, shop, mine) {
+    const holder = h('div', { class: 'rate' });
+    const shopR = mine.find(r => !r.product_id);
+    const items = [...new Map((o.order_items || []).filter(i => i.product_id).map(i => [i.product_id, i])).values()];
+    const open = Date.now() - new Date(o.delivered_at || o.updated_at).getTime() < 90 * DAY;
+    const canEdit = r => !r || Date.now() - new Date(r.created_at).getTime() < 30 * DAY;
+    function summary() {
+      holder.innerHTML = '';
+      if (shopR) {
+        holder.append(h('div', { class: 'rate-done' },
+          h('span', {}, T('Your rating for the shop: '), starsEl(shopR.rating)),
+          shopR.reply && h('span', { class: 'm', text: T('The shop replied: ') + shopR.reply }),
+          (canEdit(shopR) || (open && items.some(i => !mine.find(r => r.product_id === i.product_id)))) &&
+            h('button', { type: 'button', class: 'linkbtn', text: T('Change my review'), onclick: form })));
+      } else if (open) {
+        holder.append(h('div', { class: 'rate-ask' },
+          h('span', {}, h('b', { text: T('How was this order?') }), ' ', h('span', { class: 'm', text: T('Your stars help other shoppers choose good shops.') })),
+          h('button', { type: 'button', class: 'btn-acc', text: T('★ Rate this order'), onclick: form })));
+      }
+    }
+    function block(title, r, sub) {
+      const st = starInput(r ? r.rating : 0);
+      const tx = h('textarea', { rows: 2, maxlength: 1000, placeholder: T(sub ? 'What did you like or not like about this product? (optional)' : 'How was the shop: packing, speed, behaviour? (optional)'), 'aria-label': T('Your review') });
+      tx.value = r && r.comment || '';
+      const locked = !canEdit(r);
+      if (locked) { st.style.pointerEvents = 'none'; tx.disabled = true; }
+      const el = h('div', { class: 'rate-item' }, h('div', { class: 'rate-h' }, h('b', { text: title, translate: sub ? 'no' : null }), st,
+        locked && h('span', { class: 'm', text: T('(can no longer be changed)') })), tx);
+      return { el, st, tx, locked };
+    }
+    function form() {
+      holder.innerHTML = '';
+      const sb = block(T('The shop: {s}', { s: L(shop, 'shop_name') || T('Shop') }), shopR, false);
+      const pbs = items.map(i => ({ i, b: block(i.title, mine.find(r => r.product_id === i.product_id), true) }));
+      const err = h('p', { class: 'm bad', hidden: true });
+      const save = h('button', { type: 'button', class: 'btn-acc', text: T('Send review'), onclick: async () => {
+        err.hidden = true;
+        if (!sb.st.value) { err.textContent = T('Please give the shop 1 to 5 stars.'); err.hidden = false; return; }
+        save.disabled = true;
+        const jobs = [];
+        if (!sb.locked) jobs.push([null, sb]);
+        pbs.forEach(({ i, b }) => { if (b.st.value && !b.locked) jobs.push([i.product_id, b]); });
+        for (const [pid, b] of jobs) {
+          const { error } = await db.rpc('submit_review', { p_order: o.id, p_product: pid, p_rating: b.st.value, p_comment: b.tx.value.trim() || null });
+          if (error) { save.disabled = false; err.textContent = error.message; err.hidden = false; return; }
+        }
+        toast(T('Thank you for your review!')); load();
+      } });
+      holder.append(h('div', { class: 'rate-form' },
+        h('h3', { text: T('Rate this order') }),
+        h('p', { class: 'm', text: T('Only buyers who received the order can review. Your first name and the first letter of your last name are shown with the review.') }),
+        sb.el, pbs.length && h('div', { class: 'm', style: 'margin-top:6px', text: T('Rate the products (optional)') }), ...pbs.map(x => x.b.el), err,
+        h('div', { class: 'oact' }, save, h('button', { type: 'button', text: T('Not now'), onclick: summary }))));
+    }
+    summary();
+    return holder;
   }
   (async () => { await initShell(); load(); })();
 </script>

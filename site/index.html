@@ -83,7 +83,7 @@
 
   async function loadCats() {
     const box = $('cats'); skeletons(box, 12);
-    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, image_url, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const r = await db.from('categories').select('*').eq('is_active', true).order('sort_order').order('name');
     cats = r.data || [];
     box.innerHTML = '';
     cats.filter(c => !c.parent_id).slice(0, 12).forEach((c, i) => box.append(categoryCard(c, i)));

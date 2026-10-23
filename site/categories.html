@@ -57,7 +57,7 @@
   (async () => {
     await initShell();
     const box = $('grid'); skeletons(box, 8);
-    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, image_url, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const r = await db.from('categories').select('*').eq('is_active', true).order('sort_order').order('name');
     const cats = r.data || [];
     const kids = id => cats.filter(c => c.parent_id === id);
     box.innerHTML = '';

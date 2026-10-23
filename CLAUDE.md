@@ -17,7 +17,7 @@ Owner: hkmanik@gmail.com (the person). Master Admin account on the site since 23
 ## Technical rules
 - Plain HTML/CSS/JS in `site/`, no build step (the session cannot reach npm). Libraries only from cdn.jsdelivr.net with exact pinned versions.
 - Supabase: anon key only in `site/config.js`; RLS on every table; schema changes as numbered SQL files in `supabase/migrations/` that the owner runs in the SQL Editor.
-- Deploy: push to `main` → GitHub Action uploads `site/` to Hostinger by FTP.
+- Deploy: push to `main` → GitHub Action uploads `site/` to Hostinger by FTP. Since 23 Oct 2026 the live site is **https://rgbkart.com** (Hostinger PHP/HTML website, FTP account u456241157.deploy whose home is rgbkart.com/public_html; repo secrets FTP_SERVER/USERNAME/PASSWORD updated, variable SITE_URL=https://rgbkart.com, no FTP_DIR). The old WordPress site on rgbkart.com was deleted (mailboxes kept). The old demo folder rgbkartdemo.hkmanik.com no longer receives updates (to be redirected to rgbkart.com). `.htaccess` sends www → no-www.
 - `site/prototype/` is the approved clickable prototype; match its behaviour and look. Its source is `prototype-src/`.
 
 ## The live app (in `site/`)

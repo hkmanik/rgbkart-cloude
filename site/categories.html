@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=11">
+<link rel="stylesheet" href="shop.css?v=12">
 <style>
   /* Layout: every category as a card (picture, name, its sub-categories as links) — 4 per row on desktop */
   main { padding-block: 20px 60px; display: grid; gap: 18px; }
@@ -26,7 +26,8 @@
   .catbox .top-link { text-decoration: none; display: block; }
   .catbox .cimg { aspect-ratio: 16 / 9; max-width: 100%; display: grid; place-items: center; font-size: 2.8rem; overflow: hidden;
     background: linear-gradient(135deg, hsl(var(--hue) 70% 92%), hsl(calc(var(--hue) + 40) 75% 84%)); }
-  .catbox .cimg img { width: 100%; height: 100%; object-fit: cover; }
+  .catbox .cimg { position: relative; }
+  .catbox .cimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 72%; }
   .catbox .cimg span { transition: transform .25s; filter: drop-shadow(0 4px 6px rgb(0 0 0 / .15)); }
   .catbox:hover .cimg span { transform: scale(1.15) rotate(-4deg); }
   .catbox .cname { display: block; padding: 12px 12px 4px; text-align: center; font: 700 1.05rem var(--body); color: hsl(var(--hue) 65% 30%); }
@@ -50,13 +51,13 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="i18n.js?v=3"></script>
-<script src="shop.js?v=11"></script>
+<script src="shop.js?v=12"></script>
 <script src="menu.js?v=4"></script>
 <script>
   (async () => {
     await initShell();
     const box = $('grid'); skeletons(box, 8);
-    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, image_url, sort_order').eq('is_active', true).order('sort_order').order('name');
     const cats = r.data || [];
     const kids = id => cats.filter(c => c.parent_id === id);
     box.innerHTML = '';
@@ -64,7 +65,8 @@
     $('lead').textContent = T('{a} categories and {b} sub-categories. Pick one to start browsing.', { a: tops.length, b: cats.length - tops.length });
     tops.forEach((c, i) => {
       const img = h('div', { class: 'cimg', 'aria-hidden': 'true' });
-      if (/^https?:\/\//.test(c.icon || '')) img.append(h('img', { src: c.icon, alt: '', loading: 'lazy' })); else img.append(h('span', { text: c.icon || '🛍️' }));
+      const pic = c.image_url || (/^https?:\/\//.test(c.icon || '') ? c.icon : null);
+      if (pic) img.append(h('img', { src: pic, alt: '', loading: 'lazy' })); else img.append(h('span', { text: c.icon || '🛍️' }));
       const subs = kids(c.id);
       box.append(h('article', { class: 'catbox', style: `--hue:${Math.round(catHue(c, i))}` },
         h('a', { class: 'top-link', href: `browse.html?c=${encodeURIComponent(c.slug)}` }, img, h('span', { class: 'cname', text: L(c, 'name') })),

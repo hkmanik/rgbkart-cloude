@@ -673,6 +673,8 @@
       <label>Icon <input id="cIcon" type="text" maxlength="300" placeholder="📱 or image URL"></label>
       <label class="check" style="align-self:end;padding-bottom:10px"><input id="cActive" type="checkbox" checked> Show to shoppers</label>
     </div>
+    <label>Picture for the category card (optional) <input id="cImage" type="text" maxlength="500" placeholder="https://… or assets/categories/….svg"><span class="muted" style="font-weight:400;font-size:.8rem">Shown on the home page and All categories page. Leave empty to show the icon.</span></label>
+    <img id="cImagePrev" alt="" hidden style="width:160px;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
     <label>Description (optional) <textarea id="cDesc" maxlength="500"></textarea></label>
     <div style="display:grid;gap:8px">
       <h3>Attributes sellers fill in</h3>
@@ -1254,6 +1256,7 @@
     $('cSlug').value = cat ? cat.slug : '';
     $('cSlugPreview').textContent = $('cSlug').value || '…';
     $('cIcon').value = cat ? (cat.icon || '') : '';
+    $('cImage').value = cat ? (cat.image_url || '') : ''; $('cImage').oninput();
     $('cDesc').value = cat ? (cat.description || '') : '';
     $('cActive').checked = cat ? cat.is_active : true;
 
@@ -1321,6 +1324,7 @@
   function closeCat() { $('catDrawer').hidden = $('catScrim').hidden = true; editingCat = null; }
   $('catClose').onclick = $('catCancel').onclick = $('catScrim').onclick = closeCat;
 
+  $('cImage').oninput = () => { const v = $('cImage').value.trim(); const ok = /^(https:\/\/|assets\/)\S+$/i.test(v); $('cImagePrev').hidden = !ok; if (ok) $('cImagePrev').src = v; };
   $('catDrawer').onsubmit = async e => {
     e.preventDefault();
     setMsg('catMsg', '');
@@ -1331,7 +1335,7 @@
       return setMsg('catMsg', `The web address "${slug}" is already used by another category. Change it slightly.`, true);
     }
     const parentId = Number($('cParent').value) || null;
-    const row = { name, name_bn: $('cNameBn').value.trim() || null, slug, parent_id: parentId, icon: $('cIcon').value.trim() || null,
+    const row = { name, name_bn: $('cNameBn').value.trim() || null, slug, parent_id: parentId, icon: $('cIcon').value.trim() || null, ...('image_url' in (editingCat || cats[0] || {}) ? { image_url: $('cImage').value.trim() || null } : {}),
       description: $('cDesc').value.trim() || null, is_active: $('cActive').checked };
     if (!editingCat) row.sort_order = (childrenOf(parentId).reduce((m, c) => Math.max(m, c.sort_order), -10)) + 10;
 

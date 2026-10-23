@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=11">
+<link rel="stylesheet" href="shop.css?v=12">
 <style>
   /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
   main { padding-block: 20px 60px; display: grid; gap: 36px; }
@@ -67,7 +67,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="i18n.js?v=3"></script>
-<script src="shop.js?v=11"></script>
+<script src="shop.js?v=12"></script>
 <script src="menu.js?v=4"></script>
 <script>
   // Used when the home_sections table hasn't been set up yet
@@ -83,7 +83,7 @@
 
   async function loadCats() {
     const box = $('cats'); skeletons(box, 12);
-    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, sort_order').eq('is_active', true).order('sort_order').order('name');
+    const r = await db.from('categories').select('id, parent_id, name, name_bn, slug, icon, image_url, sort_order').eq('is_active', true).order('sort_order').order('name');
     cats = r.data || [];
     box.innerHTML = '';
     cats.filter(c => !c.parent_id).slice(0, 12).forEach((c, i) => box.append(categoryCard(c, i)));

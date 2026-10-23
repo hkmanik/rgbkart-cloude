@@ -133,7 +133,8 @@ function skeletons(box, n) { box.innerHTML = ''; for (let i = 0; i < n; i++) box
 function catHue(c, i) { return ((c.sort_order ?? i * 10) * 3.7 + i * 47) % 360; }
 function categoryCard(c, i, extra) {
   const img = h('div', { class: 'cimg', 'aria-hidden': 'true' });
-  if (/^https?:\/\//.test(c.icon || '')) img.append(h('img', { src: c.icon, alt: '', loading: 'lazy' }));
+  const pic = c.image_url || (/^https?:\/\//.test(c.icon || '') ? c.icon : null);   // picture from Admin → Categories, else the emoji
+  if (pic) img.append(h('img', { src: pic, alt: '', loading: 'lazy' }));
   else img.append(h('span', { text: c.icon || '🛍️' }));
   const el = h('a', { class: 'ccard', href: `browse.html?c=${encodeURIComponent(c.slug)}`, style: `--hue:${Math.round(catHue(c, i))}` }, img, h('div', { class: 'cname', text: L(c, 'name') }));
   if (extra) el.append(extra);

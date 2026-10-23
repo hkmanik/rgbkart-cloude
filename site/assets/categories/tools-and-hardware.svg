@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9D1"/><stop offset="1" stop-color="#FFC98F"/></linearGradient></defs>
+<rect width="400" height="300" fill="url(#bg)"/>
+<circle cx="335" cy="55" r="70" fill="#FFF6EC" opacity=".35"/><circle cx="55" cy="250" r="55" fill="#FFF6EC" opacity=".3"/>
+<circle cx="80" cy="70" r="6" fill="#FFF6EC" opacity=".7"/><circle cx="320" cy="235" r="8" fill="#FFF6EC" opacity=".6"/><circle cx="355" cy="150" r="4" fill="#FFF6EC" opacity=".8"/>
+<ellipse cx="200" cy="258" rx="135" ry="12" fill="#000" opacity=".10"/>
+
+<rect x="190" y="176" width="140" height="72" rx="8" fill="#E30613"/><rect x="190" y="176" width="140" height="18" rx="8" fill="#B3000C"/><path d="M234 176 v-16 q0 -8 8 -8 h36 q8 0 8 8 v16" fill="none" stroke="#2B2D42" stroke-width="7"/>
+<rect x="250" y="206" width="20" height="12" rx="3" fill="#F5C400"/>
+<path d="M78 112 h98 q12 0 12 12 v18 q0 12 -12 12 h-98z" fill="#F5C400"/><rect x="176" y="122" width="34" height="14" rx="3" fill="#5A5F6B"/><rect x="208" y="126" width="34" height="6" fill="#9AA4B2"/>
+<path d="M104 154 h40 l-8 78 h-30z" fill="#2B2D42"/><rect x="96" y="226" width="54" height="22" rx="6" fill="#3D3D45"/><rect x="88" y="120" width="20" height="26" rx="4" fill="#2B2D42"/>
+<defs><mask id="jaw"><rect width="400" height="300" fill="#fff"/><rect x="330" y="66" width="16" height="24" fill="#000" transform="rotate(-40 338 78)"/></mask></defs>
+<g mask="url(#jaw)"><rect x="236" y="96" width="104" height="16" rx="8" fill="#9AA4B2" transform="rotate(-40 288 104)"/><circle cx="334" cy="72" r="19" fill="#9AA4B2"/><circle cx="242" cy="148" r="15" fill="#9AA4B2"/><circle cx="242" cy="148" r="7" fill="#FFE9D1"/></g>
+</svg>

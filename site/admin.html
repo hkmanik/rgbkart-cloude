@@ -263,6 +263,9 @@
   .ap-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ap-main { position: absolute; top: 5px; left: 5px; background: var(--accent); color: var(--accent-fg); font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
   .ap-x { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 0; background: rgb(0 0 0 / .6); color: #fff; cursor: pointer; }
+  .ap-mv { position: absolute; bottom: 4px; display: flex; gap: 4px; left: 4px; }
+  .ap-mv button { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 0; background: rgb(0 0 0 / .6); color: #fff; cursor: pointer; font-size: .8rem; }
+  .ap-mv button:disabled { opacity: .3; cursor: default; }
   .ap-add { aspect-ratio: 1; border: 2px dashed var(--line); border-radius: 10px; background: var(--bg); color: var(--muted); display: grid; place-content: center; gap: 2px; cursor: pointer; font: inherit; font-size: .82rem; }
   .ap-add b { font-size: 1.6rem; line-height: 1; color: var(--accent); } .ap-add:hover { border-color: var(--accent); color: var(--accent); }
   .ap-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -674,6 +677,7 @@
       <label class="check" style="align-self:end;padding-bottom:10px"><input id="cActive" type="checkbox" checked> Show to shoppers</label>
     </div>
     <label>Picture for the category card (optional) <input id="cImage" type="text" maxlength="500" placeholder="https://… or assets/categories/….svg"><span class="muted" style="font-weight:400;font-size:.8rem">Shown on the home page and All categories page. Leave empty to show the icon.</span></label>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="ghost" id="cImageUp">⬆ Upload picture</button><button type="button" class="ghost" id="cImageClear">Remove picture</button><input type="file" id="cImageFile" accept="image/jpeg,image/png,image/webp" hidden></div>
     <img id="cImagePrev" alt="" hidden style="width:160px;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
     <label>Description (optional) <textarea id="cDesc" maxlength="500"></textarea></label>
     <div style="display:grid;gap:8px">
@@ -1325,6 +1329,24 @@
   $('catClose').onclick = $('catCancel').onclick = $('catScrim').onclick = closeCat;
 
   $('cImage').oninput = () => { const v = $('cImage').value.trim(); const ok = /^(https:\/\/|assets\/)\S+$/i.test(v); $('cImagePrev').hidden = !ok; if (ok) $('cImagePrev').src = v; };
+  $('cImageUp').onclick = () => $('cImageFile').click();
+  $('cImageClear').onclick = () => { $('cImage').value = ''; $('cImage').oninput(); };
+  $('cImageFile').onchange = async () => {
+    const f = $('cImageFile').files[0]; $('cImageFile').value = '';
+    if (!f) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return toast('Use a JPG, PNG or WebP picture.');
+    $('cImageUp').disabled = true; $('cImageUp').textContent = 'Uploading…';
+    try {
+      const blob = await apShrink(f, 1200);
+      const slug = ($('cSlug').value || 'category').replace(/[^a-z0-9-]/g, '');
+      const path = `admin/${myId}/category-${slug}-${Date.now()}.${blob.type === 'image/webp' ? 'webp' : 'jpg'}`;
+      const up = await db.storage.from('product-images').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' });
+      if (up.error) throw up.error;
+      $('cImage').value = photoUrlAdmin(path); $('cImage').oninput();
+      toast('Picture uploaded. Press Save to keep it.');
+    } catch (e) { toast(friendly(e)); }
+    $('cImageUp').disabled = false; $('cImageUp').textContent = '⬆ Upload picture';
+  };
   $('catDrawer').onsubmit = async e => {
     e.preventDefault();
     setMsg('catMsg', '');
@@ -1850,6 +1872,7 @@
       oneTime && h('div', { class: 'prod-meta', text: `Contact: ${s.phone_public || s.phone || '—'}${s.whatsapp ? ' · WhatsApp ' + s.whatsapp : ''} · ${[s.area, s.city].filter(Boolean).join(', ')}` }));
     const rejectBox = h('div', { class: 'reject-box', hidden: true });
     const featBox = freeFeatureBox(p);
+    const photoBox = productPhotoBox(p, imgs);
     const reasonInput = h('textarea', { rows: 2, maxlength: 300, placeholder: 'Tell the seller what to fix', 'aria-label': 'Reason for rejecting' });
     rejectBox.append(h('div', { class: 'reasons' }, REASONS.map(r => h('button', { type: 'button', text: r, onclick: () => { reasonInput.value = r + '.'; reasonInput.focus(); } }))),
       reasonInput,
@@ -1870,13 +1893,63 @@
         h('div', { class: 'prod-meta' }, oneTime ? h('b', { text: 'One-time seller: ' }) : h('b', { text: 'Shop: ' }), (oneTime ? s.name : s.shop) || '—',
           oneTime ? ` · ${s.phone_public || s.phone || ''}` : '', ` · sent ${fmtDate(p.updated_at)}`),
         p.status === 'rejected' && p.review_note && h('div', { class: 'prod-meta', style: 'color:var(--danger)', text: 'Reason given: ' + p.review_note }),
-        more, rejectBox, featBox),
+        more, rejectBox, featBox, photoBox),
       h('div', { class: 'actions' },
         h('a', { class: 'ghost', href: `product.html?id=${p.id}`, target: '_blank', rel: 'noopener', text: 'View page', style: 'text-decoration:none;font-weight:600;font-size:14px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);color:var(--fg)' }),
         h('button', { type: 'button', class: 'ghost', text: 'Details', onclick: e => { more.hidden = !more.hidden; e.target.textContent = more.hidden ? 'Details' : 'Hide details'; } }),
+        canApprove() && h('button', { type: 'button', class: 'ghost', text: '📷 Photos', onclick: () => photoBox.open() }),
         p.status !== 'approved' && actionBtn('Approve', 'good', () => review(p, 'approved')),
         p.status === 'approved' && canApprove() && h('button', { type: 'button', class: 'ghost', style: 'border-color:#d48806;color:#8a5a00', text: p.is_featured ? '★ Add free days' : '★ Make Featured (free)', onclick: () => { featBox.hidden = !featBox.hidden; } }),
         p.status !== 'rejected' && h('button', { type: 'button', class: 'bad', text: p.status === 'approved' ? 'Take down' : 'Reject', onclick: () => { rejectBox.hidden = false; reasonInput.focus(); } })));
+  }
+
+  // Staff edit the photos of any product: add, remove, change order (the first is the main photo)
+  function productPhotoBox(p, imgs) {
+    const box = h('div', { class: 'reject-box', hidden: true, style: 'background:var(--surface);border-color:var(--accent)' });
+    const grid = h('div', { class: 'ap-photos', style: 'min-width:min(100%,420px)' });
+    const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', multiple: true, hidden: true });
+    let list = [];
+    const draw = () => {
+      grid.innerHTML = '';
+      list.forEach((ph, i) => grid.append(h('div', { class: 'ap-ph' }, h('img', { src: ph.url, alt: i ? `Photo ${i + 1}` : 'Main photo' }), i === 0 && h('span', { class: 'ap-main', text: 'Main' }),
+        h('button', { type: 'button', class: 'ap-x', text: '✕', 'aria-label': 'Remove photo', onclick: () => { list.splice(i, 1); draw(); } }),
+        h('div', { class: 'ap-mv' },
+          h('button', { type: 'button', text: '←', 'aria-label': 'Move earlier', disabled: i === 0, onclick: () => { [list[i - 1], list[i]] = [list[i], list[i - 1]]; draw(); } }),
+          h('button', { type: 'button', text: '→', 'aria-label': 'Move later', disabled: i === list.length - 1, onclick: () => { [list[i + 1], list[i]] = [list[i], list[i + 1]]; draw(); } })))));
+      if (list.length < 10) grid.append(h('button', { type: 'button', class: 'ap-add', onclick: () => file.click() }, h('b', { text: '+' }), list.length ? 'Add more' : 'Add photos'));
+    };
+    file.onchange = async () => {
+      for (const f of file.files) {
+        if (list.length >= 10) { toast('Up to 10 photos.'); break; }
+        if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { toast('Use JPG, PNG or WebP photos.'); continue; }
+        try { const blob = await apShrink(f); list.push({ blob, url: URL.createObjectURL(blob) }); } catch (_) { toast(`Couldn't read ${f.name}.`); }
+      }
+      file.value = ''; draw();
+    };
+    box.open = () => { list = imgs.map(i => ({ path: i.storage_path, url: photoUrlAdmin(i.storage_path) })); draw(); box.hidden = false; box.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+    const save = actionBtn('Save photos', 'good', async () => {
+      try {
+        const paths = [];
+        for (let i = 0; i < list.length; i++) {
+          const ph = list[i];
+          if (!ph.path) {
+            const ext = ph.blob.type === 'image/webp' ? 'webp' : 'jpg';
+            const path = `admin/${myId}/p${p.id}-${Date.now()}-${i}.${ext}`;
+            const up = await db.storage.from('product-images').upload(path, ph.blob, { contentType: ph.blob.type, cacheControl: '31536000' });
+            if (up.error) throw up.error;
+            ph.path = path;
+          }
+          paths.push(ph.path);
+        }
+        const { error } = await db.rpc('admin_set_product_photos', { p_product: p.id, p_paths: paths });
+        if (error) throw error;
+        toast(`Photos saved for ${p.title}`); loadProducts();
+      } catch (e) { toast(/Could not find the function/i.test(e.message || '') ? 'Run 0025_category_pictures.sql in Supabase first.' : friendly(e)); }
+    });
+    box.append(h('b', { text: 'Photos (up to 10, the first is the main photo)' }), grid, file,
+      h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, save, h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => box.hidden = true })),
+      h('div', { class: 'prod-meta', text: 'Photos are made smaller automatically. Use ← → to change the order. Saving changes the photos shoppers see right away.' }));
+    return box;
   }
 
   // Free Featured (no payment): pick days, optional note

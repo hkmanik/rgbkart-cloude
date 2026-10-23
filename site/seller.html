@@ -351,6 +351,9 @@
   .ord-items { display: grid; gap: 4px; font-size: .9rem; }
   .ord-items .srow { display: flex; justify-content: space-between; gap: 10px; } .ord-items .srow span:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .ord-items .tot { font-weight: 700; border-top: 1px solid var(--line); padding-top: 4px; }
+  .dl-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .dl-row:first-child { border-top: 0; } .dl-row .check { display: flex; gap: 10px; align-items: flex-start; } .dl-row .check input { margin-top: 3px; } .dl-row > label:not(.check) { display: grid; gap: 4px; }
+  @media (max-width: 640px) { .dl-row { grid-template-columns: 1fr; } }
   .ord-ask { display: grid; gap: 6px; background: #FFF6CC; color: #4A3A00; border: 1px solid #F5C400; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
   .ord-ask input { width: 100%; }
   .ord-cancel { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .ord-cancel input { flex: 1; min-width: 200px; }
@@ -384,6 +387,7 @@
     <button class="nav" data-view="new" id="navNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add product</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured requests</button>
     <button class="nav tone-red" data-view="ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>Advertise</button>
+    <button class="nav tone-blue" data-view="delivery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M1 4h13v11H1zM14 8h4l3 4v3h-7"/><circle cx="5.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>Delivery</button>
     <button class="nav tone-green" data-view="coupons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>Coupons</button>
 
     <div class="nav-group">Selling</div>
@@ -490,6 +494,16 @@
           <button type="button" data-f="open" aria-pressed="true">Open</button><button type="button" data-f="closed" aria-pressed="false">Closed</button><button type="button" data-f="all" aria-pressed="false">All</button></div></div>
         <div id="retList" class="rvs"></div>
       </div>
+    </section>
+
+    <section data-page="delivery" hidden>
+      <div class="page-head"><div><h1>Delivery</h1><p>Choose how you deliver and what you charge. Buyers see only the methods you tick, at your fees. Leave a fee empty to use RGBKart's suggested fee. Products marked Heavy, Vehicle, Flammable or Fragile (in the product's "Parcel type") can only be sent with a matching special method, or Store pickup / Agree with buyer.</p></div></div>
+      <div class="card" style="margin-top:16px"><h2>Normal parcels</h2><div id="dlNormal"></div></div>
+      <div class="card" style="margin-top:16px"><h2>Special items</h2><p class="hint" style="margin:0 0 8px">Only needed if you sell heavy, vehicle, flammable or fragile items.</p><div id="dlSpecial"></div></div>
+      <div class="card" style="margin-top:16px"><h2>Free delivery</h2>
+        <label style="max-width:340px">Free delivery when a buyer's order from your shop is at least (৳) <input id="dlFreeOver" type="number" min="1" step="1" placeholder="Leave empty for no free delivery"></label>
+        <p class="hint" style="margin:6px 0 0">Applies to normal parcels only. Store pickup is set in Shop settings.</p></div>
+      <div class="actions" style="justify-content:flex-start;margin-top:14px"><button type="button" class="primary" id="dlSave">Save delivery settings</button><span id="dlMsg" class="hint"></span></div>
     </section>
 
     <section data-page="coupons" hidden>
@@ -902,7 +916,8 @@
                 <label>Parcel type
                   <select id="fShipClass">
                     <option value="standard">Standard parcel</option><option value="small">Small / document</option>
-                    <option value="large">Large item</option><option value="heavy">Heavy item</option><option value="fragile">Fragile</option>
+                    <option value="large">Large item</option><option value="heavy">Heavy item (special delivery)</option><option value="fragile">Fragile (special delivery)</option>
+                    <option value="vehicle">Vehicle: car, motorbike… (special transport)</option><option value="flammable">Flammable / hazardous (special courier)</option>
                   </select></label>
                 <label>Ready to ship in
                   <select id="fDelivery">
@@ -971,7 +986,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
 <script src="pay.js?v=1"></script>
-<script src="printdocs.js?v=4"></script>
+<script src="printdocs.js?v=5"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -1045,6 +1060,7 @@
     else if (start === 'reviews') go('reviews');
     else if (start === 'questions') go('questions');
     else if (start === 'coupons') go('coupons');
+    else if (start === 'delivery') go('delivery');
     else if (start === 'returns') go('returns');
     else if (start === 'verify') go('verify');
     else if (start === 'new' && approved) openEditor(null);
@@ -1202,6 +1218,51 @@
   };
   const cpText = c => (c.kind === 'percent' ? `${Number(c.value)}% off` + (c.max_discount ? ` (up to ${money(c.max_discount)})` : '') : `${money(c.value)} off`)
     + (Number(c.min_order) > 0 ? ` on orders of ${money(c.min_order)}+` : '');
+  // ===================== Delivery (0045_shop_delivery.sql) =====================
+  const CLASS_NAME = { heavy: 'Heavy items', vehicle: 'Vehicles', flammable: 'Flammable goods', fragile: 'Fragile items' };
+  let dlRows = [];
+  async function loadDelivery() {
+    $('dlNormal').innerHTML = $('dlSpecial').innerHTML = ''; $('dlMsg').textContent = '';
+    const [m, mine, fd] = await Promise.all([
+      db.from('shipping_methods').select('*').eq('is_active', true).order('sort_order'),
+      db.from('seller_shipping').select('*').eq('seller_id', me.id),
+      db.from('seller_delivery').select('*').eq('seller_id', me.id).maybeSingle(),
+    ]);
+    if (m.error || mine.error) { $('dlNormal').append(h('p', { class: 'hint', text: /does not exist|Could not find/i.test((mine.error || m.error).message) ? 'Delivery settings are being switched on by RGBKart. Please check again later.' : friendly(mine.error || m.error) })); $('dlSave').disabled = true; return; }
+    $('dlSave').disabled = false;
+    const have = new Map(mine.data.map(r => [r.method_id, r])), setup = mine.data.length > 0;
+    dlRows = [];
+    for (const mm of m.data.filter(x => !['pickup', 'negotiated'].includes(x.id))) {
+      const r = have.get(mm.id);
+      const on = h('input', { type: 'checkbox', checked: r ? r.is_on : !setup && !mm.for_class, 'aria-label': 'Offer ' + mm.name });
+      const fee = h('input', { type: 'number', min: 0, max: mm.max_fee ?? undefined, step: 1, value: r && r.fee != null ? Number(r.fee) : '', placeholder: money(mm.fee), 'aria-label': mm.name + ' fee', style: 'max-width:170px' });
+      dlRows.push({ mm, on, fee });
+      (mm.for_class ? $('dlSpecial') : $('dlNormal')).append(h('div', { class: 'dl-row' },
+        h('label', { class: 'check' }, on, h('span', {}, h('b', { text: mm.name }), h('small', { class: 'hint', style: 'display:block', text: [mm.for_class ? 'For ' + CLASS_NAME[mm.for_class] : null, mm.eta].filter(Boolean).join(' · ') }))),
+        h('label', {}, 'Your fee (৳)', fee, h('small', { class: 'hint', text: `Suggested ${money(mm.fee)}` + (mm.max_fee != null ? ` · up to ${money(mm.max_fee)}` : '') }))));
+    }
+    if (!$('dlSpecial').children.length) $('dlSpecial').append(h('p', { class: 'hint', text: 'RGBKart has no special methods switched on yet.' }));
+    $('dlFreeOver').value = fd.data && fd.data.free_over ? Number(fd.data.free_over) : '';
+  }
+  $('dlSave').onclick = async () => {
+    $('dlMsg').textContent = '';
+    for (const r of dlRows) {
+      const v = r.fee.value.trim();
+      if (v !== '' && !(Number(v) >= 0)) { r.fee.focus(); return toast('Enter a fee of 0 or more, or leave it empty.'); }
+      if (v !== '' && r.mm.max_fee != null && Number(v) > Number(r.mm.max_fee)) { r.fee.focus(); return toast(`The most you can charge for ${r.mm.name} is ${money(r.mm.max_fee)}.`); }
+    }
+    if (!dlRows.some(r => r.on.checked && !r.mm.for_class)) { if (!confirm('You have not ticked any normal delivery method. Buyers can then only pick up or agree with you. Save anyway?')) return; }
+    const fo = $('dlFreeOver').value.trim();
+    if (fo !== '' && !(Number(fo) > 0)) return toast('Free delivery amount must be more than 0, or empty.');
+    $('dlSave').disabled = true;
+    const up = await db.from('seller_shipping').upsert(dlRows.map(r => ({ seller_id: me.id, method_id: r.mm.id, is_on: r.on.checked, fee: r.fee.value.trim() === '' ? null : Number(r.fee.value) })), { onConflict: 'seller_id,method_id' });
+    const fd = up.error ? null : await db.from('seller_delivery').upsert({ seller_id: me.id, free_over: fo === '' ? null : Number(fo), updated_at: new Date().toISOString() }, { onConflict: 'seller_id' });
+    $('dlSave').disabled = false;
+    const err = up.error || (fd && fd.error);
+    if (err) return toast(friendly(err));
+    toast('Delivery settings saved'); $('dlMsg').textContent = 'Saved. Buyers see these methods and fees in their cart.'; loadDelivery();
+  };
+
   async function loadCoupons() {
     const r = await db.from('shop_coupons').select('*').eq('seller_id', me.id).order('created_at', { ascending: false });
     const box = $('cpList'); box.innerHTML = '';
@@ -1361,13 +1422,14 @@
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
     document.querySelectorAll('.nav[data-view]').forEach(b => b.dataset.view === (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view) ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons', returns: 'Returns', verify: 'Get verified' }[view];
+    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons', returns: 'Returns', verify: 'Get verified', delivery: 'Delivery' }[view];
     if (view === 'orders') loadOrders();
     if (view === 'settings') loadSettings();
     if (view === 'ads') loadSellerAds();
     if (view === 'reviews') loadReviews();
     if (view === 'questions') loadQuestions();
     if (view === 'coupons') loadCoupons();
+    if (view === 'delivery') loadDelivery();
     if (view === 'returns') loadReturns();
     if (view === 'verify') loadVerify();
     try { history.replaceState(null, '', '#' + (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view)); } catch (_) {}
@@ -1575,7 +1637,7 @@
           o.note && h('span', { class: 'ord-note', text: 'Note: ' + o.note }),
           riskBadge(o)),
         h('div', { class: 'ord-items' }, (o.order_items || []).map(i => h('div', { class: 'srow' }, h('span', { text: `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}` }), h('span', { text: money(i.line_total) }))),
-          h('div', { class: 'srow pmeta' }, h('span', { text: SHIPN[o.ship_method] || o.ship_method }), h('span', { text: o.ship_fee > 0 ? money(o.ship_fee) : o.ship_method === 'negotiated' ? 'agree' : 'free' })),
+          h('div', { class: 'srow pmeta' }, h('span', { text: SHIPN[o.ship_method] || o.ship_name || o.ship_method }), h('span', { text: o.ship_fee > 0 ? money(o.ship_fee) : o.ship_method === 'negotiated' ? 'agree' : 'free' })),
           Number(o.discount) > 0 && h('div', { class: 'srow pmeta' }, h('span', { text: 'Coupon ' + (o.coupon_code || '') }), h('span', { text: '−' + money(o.discount) })),
           h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })),
           Number(o.vat_amount) > 0 && h('div', { class: 'srow pmeta' }, h('span', { text: 'Includes VAT' + (o.vat_rate != null ? ` ${Number(o.vat_rate)}%` : '') }), h('span', { text: money(o.vat_amount) })))),

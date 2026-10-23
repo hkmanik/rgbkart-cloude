@@ -31,7 +31,7 @@
     const rows = (o.order_items || []).map((i, k) => `<tr><td class="c">${k + 1}</td><td>${esc(i.title)}${i.variant_label ? `<div class="sm">${esc(i.variant_label)}</div>` : ''}${mixed && i.vat_rate != null ? `<div class="sm">${Number(i.vat_rate) ? `VAT ${Number(i.vat_rate)}%: ${tk(i.vat_amount)}` : 'No VAT'}</div>` : ''}</td><td class="n">${i.qty}</td><td class="n">${tk(i.unit_price)}</td><td class="n">${tk(i.line_total)}</td></tr>`).join('');
     return `<section class="pg">${head(o, shop, 'INVOICE', s, logoUrl)}
       <div class="two"><div class="box"><div class="lb">Bill / deliver to</div><b>${esc(o.customer_name)}</b><div>${esc(o.phone)}</div><div>${esc(addr(o))}</div>${o.email ? `<div class="sm">${esc(o.email)}</div>` : ''}</div>
-      <div class="box"><div class="lb">Payment</div><b>Cash on Delivery</b><div>Delivery: ${esc(SHIP[o.ship_method] || o.ship_method)}</div>${o.tracking_note ? `<div class="sm">${esc(o.tracking_note)}</div>` : ''}</div></div>
+      <div class="box"><div class="lb">Payment</div><b>Cash on Delivery</b><div>Delivery: ${esc(SHIP[o.ship_method] || o.ship_name || o.ship_method)}</div>${o.tracking_note ? `<div class="sm">${esc(o.tracking_note)}</div>` : ''}</div></div>
       <table><thead><tr><th class="c">#</th><th>Item</th><th class="n">Qty</th><th class="n">Price</th><th class="n">Amount</th></tr></thead><tbody>${rows}</tbody>
       <tfoot><tr><td colspan="4">Subtotal</td><td class="n">${tk(o.subtotal)}</td></tr><tr><td colspan="4">Delivery charge</td><td class="n">${o.ship_method === 'negotiated' ? 'As agreed' : tk(o.ship_fee)}</td></tr>${Number(o.discount) > 0 ? `<tr><td colspan="4">Coupon ${esc(o.coupon_code || '')}</td><td class="n">−${tk(o.discount)}</td></tr>` : ''}
       <tr class="tot"><td colspan="4">Total to collect (cash)</td><td class="n">${tk(o.total)}</td></tr>${Number(o.vat_amount) > 0 ? `<tr><td colspan="4" class="sm">Includes VAT${o.vat_rate != null ? ' ' + Number(o.vat_rate) + '%' : ''}</td><td class="n sm">${tk(o.vat_amount)}</td></tr>` : ''}</tfoot></table>
@@ -44,14 +44,14 @@
     return `<section class="pg">${head(o, shop, 'PACKING LIST', s, logoUrl)}
       <div class="box"><div class="lb">Deliver to</div><b>${esc(o.customer_name)}</b> · ${esc(o.phone)}<div>${esc(addr(o))}</div>${o.note ? `<div class="sm"><b>Note:</b> ${esc(o.note)}</div>` : ''}</div>
       <table><thead><tr><th class="c">#</th><th>Item</th><th class="n">Qty</th>${s.packPrices ? '<th class="n">Amount</th>' : ''}<th class="c">Packed</th></tr></thead><tbody>${rows}</tbody></table>
-      <p><b>${count}</b> piece${count === 1 ? '' : 's'} in total · Delivery: ${esc(SHIP[o.ship_method] || o.ship_method)}</p>
+      <p><b>${count}</b> piece${count === 1 ? '' : 's'} in total · Delivery: ${esc(SHIP[o.ship_method] || o.ship_name || o.ship_method)}</p>
       <div class="sign"><span>Packed by</span><span>Checked by</span><span>Date</span></div></section>`;
   }
   function label(o, shop, s) {
     const count = (o.order_items || []).reduce((a, i) => a + i.qty, 0);
     return `<div class="lbl"><div class="lrow"><div class="sm"><b>FROM</b> ${esc([shop.shop_name, shop.phone_public].filter(Boolean).join(' · '))}<br>${esc([shop.area, shop.city].filter(Boolean).join(', '))}</div><div class="brand">RGBKart</div></div>
       <div class="to"><div class="lb">DELIVER TO</div><div class="nm">${esc(o.customer_name)}</div><div class="ph">${esc(o.phone)}</div><div class="ad">${esc([o.address, o.area].filter(Boolean).join(', '))}</div><div class="dist">${esc(o.district)}</div></div>
-      <div class="lrow cod"><div><div class="lb">CASH ON DELIVERY</div><div class="amt">${tk(o.total)}</div></div><div class="sm r">${esc(SHIP[o.ship_method] || o.ship_method)}<br>${count} piece${count === 1 ? '' : 's'}<br>${day(o.created_at)}</div></div>
+      <div class="lrow cod"><div><div class="lb">CASH ON DELIVERY</div><div class="amt">${tk(o.total)}</div></div><div class="sm r">${esc(SHIP[o.ship_method] || o.ship_name || o.ship_method)}<br>${count} piece${count === 1 ? '' : 's'}<br>${day(o.created_at)}</div></div>
       ${s.barcode ? `<svg class="bc big" data-code="${esc(o.order_no)}"></svg>` : ''}<div class="ono">${esc(o.order_no)}</div>${o.note ? `<div class="sm nt">Note: ${esc(o.note)}</div>` : ''}</div>`;
   }
 

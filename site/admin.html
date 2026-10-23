@@ -301,6 +301,8 @@
   .ad-banner.has-img { grid-template-columns: 96px minmax(0, 1fr) auto; } .ad-banner img { width: 96px; height: 64px; object-fit: cover; border-radius: 8px; }
   .rate-row { display: grid; grid-template-columns: minmax(0, 1.6fr) 130px 110px auto auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
   .rate-row:first-child { border-top: 0; } .rate-row input[type=number] { width: 100%; }
+  .rate-row.ship-row { grid-template-columns: minmax(150px, 1.4fr) repeat(2, minmax(90px, .7fr)) minmax(90px, .8fr) repeat(2, minmax(110px, .9fr)) auto auto; align-items: end; }
+  @media (max-width: 1100px) { .rate-row.ship-row { grid-template-columns: 1fr 1fr; } }
   .rate-row.cod-row { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; }
   @media (max-width: 760px) { .rate-row.cod-row { grid-template-columns: 1fr; } .rate-row { grid-template-columns: 1fr 1fr; } .rate-row > div:first-child { grid-column: 1 / -1; } }
   .ad-row { display: grid; grid-template-columns: minmax(180px, 280px) minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
@@ -716,8 +718,8 @@
           <tbody id="aoRows"></tbody></table></div>
       </div>
       <div class="card" style="margin-top:18px">
-        <h2>Delivery charges</h2>
-        <p class="msg muted" style="margin:4px 0 10px">What customers pay for delivery, per shop in their order. Products marked "Free delivery" by the seller deliver free. Store pickup only shows for shops that offer it.</p>
+        <h2>Delivery methods</h2>
+        <p class="msg muted" style="margin:4px 0 10px">The delivery methods shops can offer. Each shop ticks the ones it offers in Seller Center → Delivery and sets its own fee up to the maximum here (empty fee = your suggested fee). Shops that have not set this up use the normal methods at your suggested fees. "For" makes a special method for Heavy, Vehicle, Flammable or Fragile products: those products can only use a matching method, pickup or "agree with the seller".</p>
         <div id="shipList"></div>
       </div>
       <div class="card" style="margin-top:18px">
@@ -2840,23 +2842,42 @@
     }
   }
   function drawShip() {
-    const box = $('shipList'); box.innerHTML = ''; const edit = canApprove();
-    for (const m of shipMethods) {
-      const name = h('input', { type: 'text', maxlength: 40, value: m.name, 'aria-label': 'Name', disabled: !edit });
-      const fee = h('input', { type: 'number', min: 0, step: 1, value: Number(m.fee), 'aria-label': `${m.name} fee`, disabled: !edit || ['pickup', 'negotiated'].includes(m.id) });
-      const eta = h('input', { type: 'text', maxlength: 40, value: m.eta || '', 'aria-label': `${m.name} delivery time`, disabled: !edit });
-      const on = h('input', { type: 'checkbox', checked: m.is_active, disabled: !edit });
-      box.append(h('div', { class: 'rate-row' },
-        h('div', {}, h('label', {}, 'Name', name)), h('label', {}, 'Fee (৳)', fee), h('label', {}, 'Delivery time', eta), h('label', { class: 'check' }, on, 'On'),
-        edit ? actionBtn('Save', 'good', async () => {
+    const box = $('shipList'); box.innerHTML = ''; const edit = canApprove(), v2 = shipMethods.some(m => 'max_fee' in m);
+    const CLS = [['', 'Normal parcels'], ['heavy', 'Heavy items'], ['vehicle', 'Vehicles'], ['flammable', 'Flammable goods'], ['fragile', 'Fragile items']];
+    const AREA = [['any', 'Anywhere'], ['dhaka', 'Inside Dhaka'], ['outside', 'Outside Dhaka']];
+    const row = (m, isNew) => {
+      const fixed = m && ['pickup', 'negotiated'].includes(m.id), base = m && ['dhaka', 'outside'].includes(m.id);
+      const name = h('input', { type: 'text', maxlength: 60, value: m ? m.name : '', placeholder: 'e.g. Express Dhaka', 'aria-label': 'Name', disabled: !edit });
+      const fee = h('input', { type: 'number', min: 0, step: 1, value: m ? Number(m.fee) : '', 'aria-label': 'Suggested fee', disabled: !edit || fixed });
+      const max = h('input', { type: 'number', min: 0, step: 1, value: m && m.max_fee != null ? Number(m.max_fee) : '', placeholder: 'no limit', 'aria-label': 'Maximum fee shops can charge', disabled: !edit || fixed });
+      const eta = h('input', { type: 'text', maxlength: 40, value: m ? (m.eta || '') : '', placeholder: '1–2 days', 'aria-label': 'Delivery time', disabled: !edit });
+      const cls = h('select', { 'aria-label': 'For which products', disabled: !edit || fixed || base }, CLS.map(([k, t]) => h('option', { value: k, text: t, selected: ((m && m.for_class) || '') === k })));
+      const area = h('select', { 'aria-label': 'Area', disabled: !edit || fixed || base }, AREA.map(([k, t]) => h('option', { value: k, text: t, selected: ((m && m.area) || 'any') === k })));
+      const on = h('input', { type: 'checkbox', checked: m ? m.is_active : true, disabled: !edit });
+      return h('div', { class: 'rate-row ship-row' },
+        h('label', {}, isNew ? 'New method' : 'Name', name), h('label', {}, 'Suggested fee (৳)', fee), v2 && h('label', {}, 'Max fee (৳)', max),
+        h('label', {}, 'Delivery time', eta), v2 && h('label', {}, 'For', cls), v2 && h('label', {}, 'Area', area), h('label', { class: 'check' }, on, 'On'),
+        edit ? actionBtn(isNew ? 'Add' : 'Save', 'good', async () => {
           if (name.value.trim().length < 2) return toast('Give it a name.');
-          if (!(Number(fee.value) >= 0)) return toast('Enter a fee (0 or more).');
-          const { error } = await db.from('shipping_methods').update({ name: name.value.trim(), fee: Number(fee.value) || 0, eta: eta.value.trim() || null, is_active: on.checked, updated_at: new Date().toISOString() }).eq('id', m.id);
-          if (error) return toast(friendly(error)); toast(`Saved ${name.value.trim()}`); loadAdminOrders();
-        }) : h('span')));
-    }
+          if (!(Number(fee.value) >= 0) || fee.value === '') { if (!fixed) return toast('Enter a suggested fee (0 or more).'); }
+          if (max.value !== '' && Number(max.value) < Number(fee.value)) return toast('The maximum must be at least the suggested fee.');
+          const r = { name: name.value.trim(), eta: eta.value.trim() || null, is_active: on.checked, updated_at: new Date().toISOString() };
+          if (!fixed) r.fee = Number(fee.value) || 0;
+          if (v2 && !fixed) r.max_fee = max.value === '' ? null : Number(max.value);
+          if (v2 && !fixed && !base) { r.for_class = cls.value || null; r.area = area.value; }
+          let res;
+          if (isNew) {
+            const id = (r.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/^[^a-z]+/, '') || 'method').slice(0, 24) + '_' + Date.now().toString(36).slice(-4);
+            delete r.updated_at; r.sort_order = 100 + shipMethods.length;
+            res = await db.from('shipping_methods').insert({ id, ...r });
+          } else res = await db.from('shipping_methods').update(r).eq('id', m.id);
+          if (res.error) return toast(friendly(res.error)); toast(`Saved ${r.name}`); loadAdminOrders();
+        }) : h('span'));
+    };
+    shipMethods.forEach(m => box.append(row(m, false)));
+    if (edit && v2) box.append(row(null, true));
+    if (!v2) box.append(h('p', { class: 'msg muted', text: 'Run 0045_shop_delivery.sql to add special methods, maximum fees and shop-set fees.' }));
   }
-
   async function drawCod() {
     const box = $('codBox'); box.innerHTML = '';
     const r = await db.from('site_settings').select('value').eq('key', 'cod').maybeSingle();

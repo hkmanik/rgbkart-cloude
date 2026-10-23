@@ -25,11 +25,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=20"></script>
+<script src="i18n.js?v=21"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
-<script src="cartlib.js?v=3"></script>
+<script src="cartlib.js?v=4"></script>
 <script>
   const ADDR_KEY = 'rgbkart-address';
   let data = null, session = null, isGuest = true, savedAddrs = [], cod = {}, vat = {};
@@ -80,7 +80,7 @@
       h('div', { class: 'pay-o' }, h('span', { style: 'font-size:1.6rem', 'aria-hidden': 'true', text: '💵' }), h('span', {}, h('b', { text: 'Cash on Delivery' }), h('small', { text: 'Pay the shop in cash when your order arrives. RGBKart never takes your money.' }))));
     dist.onchange = () => {
       // pick Inside / Outside Dhaka automatically for each shop
-      data.groups.forEach(g => { const d = CartLib.defaultFor(g, dist.value); if (d && (!g.method || g.method.id === 'dhaka' || g.method.id === 'outside')) CartLib.setShip(g.seller, d.id); });
+      data.groups.forEach(g => { const d = CartLib.defaultFor(g, dist.value); if (d && (!g.method || (CartLib.isArea(g.method) && CartLib.areaOf(g.method) !== 'any'))) CartLib.setShip(g.seller, d.id); });
       CartLib.load().then(x => { data = x; drawSum(); });
     };
     box.append(h('div', { class: 'cartgrid' }, f, h('div', { id: 'sumBox' })));
@@ -109,7 +109,7 @@
     holder.append(h('aside', { class: 'box sum' }, h('h2', { text: 'Your order' }),
       data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: L(g.shop, 'shop_name'), translate: 'no' }),
         g.items.map(i => h('div', { class: 'srow small' }, h('span', { style: 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: `${N(i.qty)} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}`, translate: 'no' }), h('span', { text: money(i.unit * i.qty) }))),
-        h('div', { class: 'srow small' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
+        h('div', { class: 'srow small' }, h('span', { text: g.method ? L(g.method, 'name') : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
         g.discount > 0 && h('div', { class: 'srow small', style: 'color:var(--accent);font-weight:600' }, h('span', { text: T('Coupon {c}', { c: g.coupon.code }) }), h('span', { text: '−' + money(g.discount) })),
         overMax(g) ? h('p', { class: 'err small', style: 'margin:4px 0 0', text: T('Cash on Delivery limit: {p} per shop. Please remove some items from {s}.', { p: money(cod.max_order), s: L(g.shop, 'shop_name') }) })
           : overFirst(g) && h('p', { class: 'm small', style: 'margin:4px 0 0', text: T('First order on RGBKart? Then the limit is {p} per shop.', { p: money(cod.first_order_max) }) }))),

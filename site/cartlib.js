@@ -15,14 +15,20 @@ const CartLib = {
     if (!cart.length) return { groups: [], methods: [], cart };
     const ids = [...new Set(cart.map(i => i.product_id))];
     const [p, m] = await Promise.all([
-      db.from('products').select('id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, status, seller_id, product_type, manage_stock, stock, backorders, stock_status, free_delivery, ships_to, contact_only, cod_allowed, is_downloadable, sold_individually, product_images(storage_path, sort_order), product_price_tiers(min_qty, unit_price), product_variations(id, price, sale_price, stock, is_active)').in('id', ids),
+      db.from('products').select('id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, status, seller_id, product_type, manage_stock, stock, backorders, stock_status, free_delivery, ships_to, shipping_class, contact_only, cod_allowed, is_downloadable, sold_individually, product_images(storage_path, sort_order), product_price_tiers(min_qty, unit_price), product_variations(id, price, sale_price, stock, is_active)').in('id', ids),
       db.from('shipping_methods').select('*').eq('is_active', true).order('sort_order'),
     ]);
     const prods = new Map((p.data || []).map(x => [x.id, x]));
     const methods = m.error ? [] : m.data;
     const sellerIds = [...new Set((p.data || []).map(x => x.seller_id))];
-    const s = sellerIds.length ? await db.from('shops').select('*').in('user_id', sellerIds) : { data: [] };
+    const [s, ss, sd] = sellerIds.length ? await Promise.all([
+      db.from('shops').select('*').in('user_id', sellerIds),
+      db.from('seller_shipping').select('*').in('seller_id', sellerIds),     // each shop's methods and fees (0045)
+      db.from('seller_delivery').select('*').in('seller_id', sellerIds),
+    ]) : [{ data: [] }, { data: [] }, { data: [] }];
     const shops = new Map((s.data || []).map(x => [x.user_id, x]));
+    const shopShip = new Map(); (ss.error ? [] : ss.data || []).forEach(r => { if (!shopShip.has(r.seller_id)) shopShip.set(r.seller_id, new Map()); shopShip.get(r.seller_id).set(r.method_id, r); });
+    const freeOver = new Map((sd.error ? [] : sd.data || []).filter(r => r.free_over).map(r => [r.seller_id, Number(r.free_over)]));
 
     const items = cart.map((c, idx) => {
       const pr = prods.get(c.product_id);
@@ -59,16 +65,31 @@ const CartLib = {
     for (const sid of [...new Set(items.filter(i => !i.problem).map(i => i.pr.seller_id))]) {
       const its = items.filter(i => !i.problem && i.pr.seller_id === sid);
       const shop = shops.get(sid) || { shop_name: 'Seller' };
-      const options = methods.filter(mm =>
-        (mm.id === 'dhaka' && its.every(i => i.pr.ships_to !== 'outside_dhaka')) ||
-        (mm.id === 'outside' && its.every(i => i.pr.ships_to !== 'inside_dhaka')) ||
-        (mm.id === 'pickup' && shop.allow_pickup) || mm.id === 'negotiated');
-      const allFree = its.every(i => i.pr.free_delivery);
-      const feeOf = mm => (mm.id === 'dhaka' || mm.id === 'outside') ? (allFree ? 0 : Number(mm.fee)) : 0;
-      let method = options.find(o => o.id === choice[sid]) || options[0] || null;
+      // same rules as place_order (0045): special items need a matching special method; shops choose methods and fees
+      const cls = CartLib.SPECIAL.find(c => its.some(i => i.pr.shipping_class === c)) || null;
+      const rows = shopShip.get(sid) || new Map(), hasSetup = rows.size > 0;
       const subtotal = its.reduce((a, i) => a + i.unit * i.qty, 0);
+      const options = methods.filter(mm => {
+        if (mm.id === 'negotiated') return true;
+        if (mm.id === 'pickup') return !!shop.allow_pickup;
+        if ((mm.for_class || null) !== cls) return false;
+        if (hasSetup) { const r = rows.get(mm.id); if (!r || !r.is_on) return false; } else if (mm.for_class) return false;
+        const area = CartLib.areaOf(mm);
+        if (area === 'dhaka' && its.some(i => i.pr.ships_to === 'outside_dhaka')) return false;
+        if (area === 'outside' && its.some(i => i.pr.ships_to === 'inside_dhaka')) return false;
+        return true;
+      }).sort((a, b) => (['pickup', 'negotiated'].indexOf(a.id) + 1 ? 1 : 0) - (['pickup', 'negotiated'].indexOf(b.id) + 1 ? 1 : 0));   // real delivery first, pickup / agree last
+      const allFree = its.every(i => i.pr.free_delivery), over = freeOver.get(sid) || null;
+      const feeOf = mm => {
+        if (mm.id === 'pickup' || mm.id === 'negotiated') return 0;
+        if (!cls && allFree) return 0;
+        if (!cls && over && subtotal >= over) return 0;
+        const r = rows.get(mm.id), base = Number(r && r.fee != null ? r.fee : mm.fee);
+        return mm.max_fee != null ? Math.min(base, Number(mm.max_fee)) : base;
+      };
+      let method = options.find(o => o.id === choice[sid]) || options[0] || null;
       const fee = method ? feeOf(method) : 0;
-      groups.push({ seller: sid, shop, items: its, subtotal, options, method, fee, feeOf, allFree, total: subtotal + fee, discount: 0, coupon: null });
+      groups.push({ seller: sid, shop, items: its, subtotal, options, method, fee, feeOf, allFree, cls, freeOver: cls ? null : over, total: subtotal + fee, discount: 0, coupon: null });
     }
     // shop coupons (0033): check each saved code against the shop's items total; place_order checks again
     const codes = CartLib.coupons();
@@ -79,12 +100,16 @@ const CartLib = {
     }));
     return { groups, methods, items, problems: items.filter(i => i.problem) };
   },
-  // Pick a sensible default delivery for a district (Dhaka → Inside Dhaka, others → Outside Dhaka)
+  SPECIAL: ['vehicle', 'flammable', 'heavy', 'fragile'],
+  areaOf(mm) { return mm.area || (mm.id === 'dhaka' ? 'dhaka' : mm.id === 'outside' ? 'outside' : 'any'); },
+  // Pick a sensible default delivery for a district (Dhaka → an Inside Dhaka method, others → an Outside Dhaka one)
   defaultFor(group, district) {
     if (!district) return null;
     const want = district === 'Dhaka' ? 'dhaka' : 'outside';
-    return group.options.find(o => o.id === want) || null;
+    const real = group.options.filter(o => o.id !== 'pickup' && o.id !== 'negotiated');
+    return real.find(o => CartLib.areaOf(o) === want) || real.find(o => CartLib.areaOf(o) === 'any') || null;
   },
+  isArea(mm) { return mm && mm.id !== 'pickup' && mm.id !== 'negotiated'; },
 };
 const DISTRICTS_BD = ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail',
   'Chattogram', 'Bandarban', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Cumilla', 'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati',

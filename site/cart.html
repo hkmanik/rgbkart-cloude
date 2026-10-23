@@ -35,11 +35,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=20"></script>
+<script src="i18n.js?v=21"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
-<script src="cartlib.js?v=3"></script>
+<script src="cartlib.js?v=4"></script>
 <script>
   let data = null;
   function setQty(idx, q) {
@@ -94,19 +94,22 @@
       const opts = h('div', { class: 'ship', role: 'radiogroup', 'aria-label': T('Delivery from {s}', { s: L(g.shop, 'shop_name') }) });
       g.options.forEach(o => opts.append(h('label', { class: 'ship-o' },
         h('input', { type: 'radio', name: 'ship_' + g.seller, value: o.id, checked: g.method && g.method.id === o.id, onchange: () => { CartLib.setShip(g.seller, o.id); draw(); } }),
-        h('span', { class: 'grow' }, h('b', { text: o.name }), h('small', { text: o.id === 'pickup' ? (g.shop.pickup_address || 'From the shop') : (o.eta || '') })),
+        h('span', { class: 'grow' }, h('b', { text: L(o, 'name') }), h('small', { text: o.id === 'pickup' ? (g.shop.pickup_address || 'From the shop') : (o.eta || '') })),
         h('b', { class: 'fee', text: o.id === 'negotiated' ? 'Agree with shop' : g.feeOf(o) ? money(g.feeOf(o)) : 'Free' }))));
       left.append(h('section', { class: 'box group' },
         h('div', { class: 'ghead' }, h('span', { class: 'shopic', 'aria-hidden': 'true', text: (g.shop.shop_name || '?').charAt(0).toUpperCase() }), h('b', {}, h('a', { href: 'store.html?s=' + encodeURIComponent(g.shop.shop_slug || g.seller), text: T('From {s}', { s: L(g.shop, 'shop_name') }), style: 'color:inherit;text-decoration:none' })), h('span', { class: 'sub', text: money(g.subtotal) })),
         g.items.map(itemRow),
-        h('div', { class: 'gfoot' }, h('b', { class: 'small', text: 'Delivery' }), opts, g.allFree && h('p', { class: 'm good', text: '✓ Free delivery from this shop' }), couponBox(g))));
+        h('div', { class: 'gfoot' }, h('b', { class: 'small', text: 'Delivery' }), opts, g.allFree && !g.cls && h('p', { class: 'm good', text: '✓ Free delivery from this shop' }),
+          !g.allFree && g.freeOver && h('p', { class: g.subtotal >= g.freeOver ? 'm good' : 'm', text: g.subtotal >= g.freeOver ? T('✓ Free delivery: your order from this shop is over {p}', { p: money(g.freeOver) }) : T('Free delivery from this shop on orders of {p} or more', { p: money(g.freeOver) }) }),
+          g.cls && h('p', { class: 'm', text: T(({ heavy: 'Heavy items need special delivery.', vehicle: 'Vehicles need special transport.', flammable: 'Flammable goods need a special courier.', fragile: 'Fragile items need careful delivery.' })[g.cls]) }),
+          couponBox(g))));
     }
     if (data.problems.length) left.append(h('section', { class: 'box group' }, h('div', { class: 'ghead' }, h('b', { text: 'Can\'t be ordered' })), data.problems.map(itemRow)));
     const total = data.groups.reduce((a, g) => a + g.total, 0);
     const sum = h('aside', { class: 'box sum' }, h('h2', { text: 'Order summary' }),
       data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: L(g.shop, 'shop_name'), translate: 'no' }),
         h('div', { class: 'srow' }, h('span', { text: T('Items ({n})', { n: g.items.reduce((a, i) => a + i.qty, 0) }) }), h('span', { text: money(g.subtotal) })),
-        h('div', { class: 'srow' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
+        h('div', { class: 'srow' }, h('span', { text: g.method ? L(g.method, 'name') : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
         g.discount > 0 && h('div', { class: 'srow good' }, h('span', { text: T('Coupon {c}', { c: g.coupon.code }) }), h('span', { text: '−' + money(g.discount) })))),
       h('div', { class: 'srow total' }, h('span', { text: 'Total' }), h('span', { text: money(total) })),
       h('p', { class: 'm', text: 'Pay in cash when your order arrives (Cash on Delivery).' }),

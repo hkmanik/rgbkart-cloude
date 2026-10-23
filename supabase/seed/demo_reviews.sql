@@ -81,7 +81,7 @@ begin
       values (oid, p.id, p.seller_id, buyers[1 + (i + j) % 8], r, cm, short[1 + (i + j) % 8], now() - make_interval(days => days - 1), now() - make_interval(days => days - 1))
       returning id into rid;
       if seed % 3 = 1 or r <= 2 then
-        update public.reviews set reply = case when r <= 2 then replies[3] else replies[1 + seed % 4] end, replied_at = now() - make_interval(days => greatest(0, days - 2)) where id = rid;
+        update public.reviews set reply = case when r <= 2 then replies[3] else (array[replies[1], replies[2], replies[4]])[1 + seed % 3] end, replied_at = now() - make_interval(days => greatest(0, days - 2)) where id = rid;
       end if;
       insert into public.reviews (order_id, product_id, seller_id, user_id, rating, comment, reviewer_name, created_at, updated_at)
       values (oid, null, p.seller_id, buyers[1 + (i + j) % 8], sr, shopc[1 + seed % array_length(shopc, 1)], short[1 + (i + j) % 8],

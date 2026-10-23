@@ -5,7 +5,7 @@
 #   FTP_PASSWORD  that account's password
 # Optional repository variable FTP_DIR: the folder on the server, relative to the FTP account's
 # home. Leave it unset when the FTP account's home IS public_html/rgbkartdemo.
-# Optional repository variable SITE_URL: the site's address, e.g. https://www.rgbkart.com (default: the demo subdomain).
+# Optional repository variable SITE_URL: the site's address, e.g. https://www.rgbkart.com (default: https://rgbkart.com).
 # It is put into link previews, robots.txt and sitemap.xml.
 name: Deploy to Hostinger
 

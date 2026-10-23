@@ -8,7 +8,7 @@ import json, os, re, sys, urllib.request
 from datetime import datetime, timezone
 from xml.sax.saxutils import escape
 
-SITE = (os.environ.get('SITE_URL') or 'https://rgbkartdemo.hkmanik.com').rstrip('/')
+SITE = (os.environ.get('SITE_URL') or 'https://rgbkart.com').rstrip('/')
 SB = 'https://qrzlsomuluglbslricaf.supabase.co'
 KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY'
 ROOT = os.path.join(os.path.dirname(__file__), '..', 'site')

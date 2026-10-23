@@ -2,15 +2,15 @@
 // Paste this whole file into Supabase → Edge Functions → Deploy a new function → "send-alerts".
 // Supabase Cron calls it every 5 minutes. It needs three secrets (Edge Functions → Secrets):
 //   RESEND_API_KEY  your Resend API key (starts with re_)
-//   ALERT_FROM      e.g.  RGBKart <alerts@hkmanik.com>
-//   SITE_URL        e.g.  https://rgbkartdemo.hkmanik.com
+//   ALERT_FROM      e.g.  RGBKart <alerts@rgbkart.com>
+//   SITE_URL        e.g.  https://rgbkart.com
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase automatically.
 
 const SB = Deno.env.get("SUPABASE_URL")!;
 const KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("ALERT_FROM") ?? "RGBKart <onboarding@resend.dev>";
-const SITE = (Deno.env.get("SITE_URL") ?? "https://rgbkartdemo.hkmanik.com").replace(/\/+$/, "");
+const SITE = (Deno.env.get("SITE_URL") ?? "https://rgbkart.com").replace(/\/+$/, "");
 
 type Alert = { id: number; email: string; kind: string; title: string; body: string | null; link: string | null };
 

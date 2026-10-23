@@ -45,7 +45,7 @@
     'Condition': 'অবস্থা', 'Any': 'যেকোনো', 'District': 'জেলা', "Seller's district": 'বিক্রেতার জেলা', 'Anywhere in Bangladesh': 'বাংলাদেশের যেকোনো জায়গা',
     'Price (৳)': 'দাম (৳)', 'Min': 'সর্বনিম্ন', 'Max': 'সর্বোচ্চ', 'Minimum price': 'সর্বনিম্ন দাম', 'Maximum price': 'সর্বোচ্চ দাম', 'Apply price': 'দাম প্রয়োগ করুন',
     'On sale': 'অফারে আছে', 'Featured only': 'শুধু ফিচার্ড', '★ Featured only': '★ শুধু ফিচার্ড', '★ Featured products': '★ ফিচার্ড পণ্য', 'Clear all filters': 'সব ফিল্টার মুছুন',
-    'Sort by': 'সাজান', 'Best match': 'সবচেয়ে মিল', 'Newest first': 'নতুন আগে', 'Price: low to high': 'দাম: কম থেকে বেশি', 'Price: high to low': 'দাম: বেশি থেকে কম',
+    'Sort by': 'সাজান', 'Best match': 'সবচেয়ে মিল', 'Featured first, then newest': 'আগে ফিচার্ড, তারপর নতুন', 'Shops': 'দোকান', 'Search products, shops, categories…': 'পণ্য, দোকান, ক্যাটাগরি খুঁজুন…', 'Search products, shops and categories': 'পণ্য, দোকান ও ক্যাটাগরি খুঁজুন', 'Newest first': 'নতুন আগে', 'Price: low to high': 'দাম: কম থেকে বেশি', 'Price: high to low': 'দাম: বেশি থেকে কম',
     'Nothing here yet': 'এখানে এখনো কিছু নেই', 'Be the first to list something in this category.': 'এই ক্যাটাগরিতে প্রথম পণ্যটি আপনিই দিন।',
     'Try removing a filter or searching for something else.': 'একটি ফিল্টার সরিয়ে দেখুন বা অন্য কিছু খুঁজুন।',
     "Products couldn't load. Check your connection and try again.": 'পণ্য লোড হয়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।',

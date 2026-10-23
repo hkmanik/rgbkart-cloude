@@ -66,6 +66,16 @@
   .res-head .count { color: var(--muted); font-size: .9rem; }
   .crumbs { font-size: .86rem; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
   .crumbs a { text-decoration: none; }
+  .shopres { margin: 0 0 14px; }
+  .shopres h2 { font: 600 .95rem var(--display); margin: 0 0 8px; color: var(--muted); }
+  .shoprow { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  .shopcard { flex: 0 0 auto; display: flex; gap: 10px; align-items: center; min-width: 210px; max-width: 280px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--fg); text-decoration: none; }
+  .shopcard:hover { border-color: var(--accent); }
+  .shopcard .sl { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font: 700 1.1rem var(--display); }
+  .shopcard .sl img { width: 100%; height: 100%; object-fit: cover; }
+  .shopcard b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .95rem; }
+  .shopcard small { display: block; color: var(--muted); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .shopcard .vt { color: var(--accent); font-weight: 700; }
   .sortbar { display: flex; gap: 8px; align-items: center; }
   .sortbar select { font: inherit; font-size: .92rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); }
   .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -140,7 +150,7 @@
         <div class="sortbar">
           <button type="button" class="filter-btn" id="filterBtn">☰ Categories &amp; filters</button>
           <select id="sort" aria-label="Sort by">
-            <option value="best">Best match</option>
+            <option value="best">Featured first, then newest</option>
             <option value="newest">Newest first</option>
             <option value="price_asc">Price: low to high</option>
             <option value="price_desc">Price: high to low</option>
@@ -148,6 +158,7 @@
           </select>
         </div>
       </div>
+      <div class="shopres" id="shopRes" hidden></div>
       <div class="subcats" id="subcats" hidden></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="grid"></div>
@@ -161,9 +172,9 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=16"></script>
+<script src="i18n.js?v=17"></script>
 <script src="sync.js?v=1"></script>
-<script src="shop.js?v=17"></script>
+<script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
 <script>
   const PAGE = 24;
@@ -239,7 +250,7 @@
     $('heading').textContent = title;
     document.title = `${title} | RGBKart`;
     const sc = $('subcats'); sc.innerHTML = '';
-    const subs = active ? kids(active.id) : group ? group : (state.q ? cats.filter(c => (c.name + ' ' + (c.name_bn || '')).toLowerCase().includes(state.q.toLowerCase())).slice(0, 8) : []);
+    const subs = active ? kids(active.id) : group ? group : (state.q ? catsFor(state.q).slice(0, 8) : []);
     sc.hidden = !subs.length;
     subs.forEach(c => sc.append(h('a', { href: urlFor({ c: c.slug, q: active ? state.q : '' }), onclick: e => { e.preventDefault(); expandTo(c); apply({ c: c.slug, q: active ? state.q : '' }); }, text: L(c, 'name') })));
     // filter chips
@@ -280,6 +291,40 @@
   $('filterBtn').onclick = openSide; $('scrim').onclick = closeSide; $('sideClose').onclick = closeSide;
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSide(); });
 
+  // ---------- search helpers: words, matching categories and shops ----------
+  let searchShops = [];
+  const norm = t => (t || '').toLowerCase();
+  function searchWords(q) {
+    const t = q.replace(/[%,()*:"'{}\\]/g, ' ').replace(/\s+/g, ' ').trim();
+    const ws = [...new Set(t.split(' ').filter(w => w.length >= 2 || /[^\x00-\x7F]/.test(w)))];
+    return (ws.length ? ws : [t]).filter(Boolean).slice(0, 5);
+  }
+  // a category matches when its English or Bangla name contains the word (or, for the whole search, every word)
+  function catsFor(q) {
+    const ws = searchWords(q).map(norm);
+    return cats.filter(c => { const n = norm(c.name + ' ' + (c.name_bn || '') + ' ' + (c.slug || '').replace(/-/g, ' ')); return ws.length && ws.every(w => n.includes(w)); });
+  }
+  const shopHas = (x, w) => norm(x.shop_name + ' ' + (x.shop_name_bn || '') + ' ' + (x.shop_slug || '')).includes(norm(w));
+  async function shopsMatching(words) {
+    if (!words.length) return [];
+    const ors = words.flatMap(w => [`shop_name.ilike.%${w}%`, `shop_name_bn.ilike.%${w}%`, `shop_slug.ilike.%${w}%`]);
+    const r = await db.from('shops').select('*').or(ors.join(',')).limit(60);
+    return r.error ? [] : r.data;
+  }
+  // shops whose name has every word go in the "Shops" row above the products
+  function drawShops() {
+    const box = $('shopRes'); box.innerHTML = '';
+    const ws = state.q && state.page === 1 ? searchWords(state.q) : [];
+    const list = ws.length ? searchShops.filter(x => ws.every(w => shopHas(x, w))).sort((a, b) => (b.is_verified ? 1 : 0) - (a.is_verified ? 1 : 0) || (b.rating_count || 0) - (a.rating_count || 0)).slice(0, 8) : [];
+    box.hidden = !list.length;
+    if (!list.length) return;
+    box.append(h('h2', { text: T('Shops') }), h('div', { class: 'shoprow' }, list.map(x => h('a', { class: 'shopcard', href: 'store.html?s=' + encodeURIComponent(x.shop_slug || x.user_id) },
+      h('div', { class: 'sl', 'aria-hidden': 'true' }, x.logo_path ? h('img', { src: db.storage.from('shop-assets').getPublicUrl(x.logo_path).data.publicUrl, alt: '', loading: 'lazy' }) : (x.shop_name || '?').charAt(0).toUpperCase()),
+      h('div', { style: 'min-width:0' },
+        h('b', { translate: 'no' }, L(x, 'shop_name'), x.is_verified ? h('span', { class: 'vt', title: T('✓ Verified shop'), text: ' ✓' }) : null),
+        h('small', { text: [x.city, x.rating_count ? '★ ' + N(Number(x.rating_avg).toFixed(1)) + ' (' + N(x.rating_count) + ')' : null].filter(Boolean).join(' · ') || T('Visit shop →') }))))));
+  }
+
   // ---------- results ----------
   let loadToken = 0;
   async function load(reset) {
@@ -297,11 +342,20 @@
     if (active) q = q.in('category_id', descendants(active.id));
     else { const g = groupCats(); if (g && g.length) q = q.in('category_id', g.flatMap(c => descendants(c.id))); }
     if (state.q) {
-      const t = state.q.replace(/[%,()*]/g, ' ').replace(/\s+/g, ' ').trim();
-      const ors = [`title.ilike.%${t}%`, `title_bn.ilike.%${t}%`, `description.ilike.%${t}%`, `description_bn.ilike.%${t}%`, `short_description.ilike.%${t}%`];
-      if (/^[\w-]+$/.test(t)) ors.push(`tags.cs.{${t.toLowerCase()}}`);
-      q = q.or(ors.join(','));
-    }
+      // every word must match the product name, description, code or tag, OR its category, OR its shop's name
+      const words = searchWords(state.q);
+      if (reset) searchShops = await shopsMatching(words);
+      for (const w of words) {
+        const ors = [`title.ilike.%${w}%`, `title_bn.ilike.%${w}%`, `description.ilike.%${w}%`, `description_bn.ilike.%${w}%`, `short_description.ilike.%${w}%`, `sku.ilike.%${w}%`];
+        if (/^[\w-]+$/.test(w)) ors.push(`tags.cs.{${w.toLowerCase()}}`);
+        const catIds = [...new Set(catsFor(w).flatMap(c => descendants(c.id)))].slice(0, 300);
+        if (catIds.length) ors.push(`category_id.in.(${catIds.join(',')})`);
+        const shopIds = searchShops.filter(x => shopHas(x, w)).map(x => x.user_id).slice(0, 100);
+        if (shopIds.length) ors.push(`seller_id.in.(${shopIds.join(',')})`);
+        q = q.or(ors.join(','));
+      }
+    } else if (reset) searchShops = [];
+    if (reset) drawShops();
     if (state.condition) q = q.eq('listing_type', state.condition);
     if (state.featured) q = q.eq('is_featured', true);
     if (state.free) q = q.eq('free_delivery', true);
@@ -315,7 +369,7 @@
     else if (state.sort === 'price_asc') q = q.order('price', { ascending: true });
     else if (state.sort === 'price_desc') q = q.order('price', { ascending: false });
     else if (state.sort === 'rating') q = q.order('rating_avg', { ascending: false, nullsFirst: false }).order('rating_count', { ascending: false });
-    else q = q.order('is_featured', { ascending: false }).order('published_at', { ascending: false, nullsFirst: false });
+    else q = q.order('is_featured', { ascending: false }).order('published_at', { ascending: false, nullsFirst: false }).order('id', { ascending: false });   // Featured first, then newest
     const r = await q.range(offset, offset + PAGE - 1);
     show(r.data || [], r.count || 0, reset, token, r.error);
   }

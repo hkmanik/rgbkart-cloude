@@ -32,7 +32,7 @@ let hasSession = false;
 function headerHTML() {
   return `<header class="top"><div class="wrap top-in">
     <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b translate="no"><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
-    <form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search phones, fashion, groceries…" aria-label="Search products" autocomplete="off"><button type="submit">Search</button></form>
+    <form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search products, shops, categories…" aria-label="Search products, shops and categories" autocomplete="off"><button type="submit">Search</button></form>
     <nav class="nav" aria-label="Account">
       <a class="sell hide-sm" href="sell.html">+ Sell</a>
       <a class="icon-link" href="messages.html" id="msgLink" aria-label="Messages" hidden>${CHAT_SVG}<span class="badge" id="msgCount" hidden></span></a>

@@ -732,7 +732,7 @@
       </div>
       <div class="card" style="margin-top:18px">
         <h2>VAT on invoices</h2>
-        <p class="msg muted" style="margin:4px 0 10px">Prices already include VAT. When this is on, each new order records how much of its total is VAT, and the shop's invoice and the buyer's order show "Includes VAT". Orders placed before you switch it on don't change.</p>
+        <p class="msg muted" style="margin:4px 0 10px">Prices already include VAT. When this is on, each new order records how much of each item's price is VAT, and the shop's invoice and the buyer's order show it. Set rates per category (Categories → edit) or per product (Products → % VAT); the default rate below is used when neither has one. Orders placed earlier don't change.</p>
         <div id="vatBox"></div>
       </div>
     </section>
@@ -811,6 +811,8 @@
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="ghost" id="cImageUp">⬆ Upload picture</button><button type="button" class="ghost" id="cImageClear">Remove picture</button><input type="file" id="cImageFile" accept="image/jpeg,image/png,image/webp" hidden></div>
     <img id="cImagePrev" alt="" hidden style="width:160px;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
     <label>Description (optional) <textarea id="cDesc" maxlength="500"></textarea></label>
+    <label id="cVatWrap">VAT rate for this category (%) <input id="cVat" type="number" min="0" max="50" step="0.5" placeholder="Same as the category above (or the default)">
+      <span class="muted" style="font-weight:400;font-size:.8rem" id="cVatHint">Leave empty to use the rate of the category above it, or the default in Orders → VAT. 0 = no VAT. A product can still have its own rate.</span></label>
     <div style="display:grid;gap:8px">
       <h3>Attributes sellers fill in</h3>
       <span class="hint" id="cAttrHint">Tick the attributes this category needs. Required ones must be filled before a product can be listed.</span>
@@ -1780,6 +1782,11 @@
     $('cImage').value = cat ? (cat.image_url || '') : ''; $('cImage').oninput();
     $('cDesc').value = cat ? (cat.description || '') : '';
     $('cActive').checked = cat ? cat.is_active : true;
+    $('cVat').value = cat && cat.vat_rate != null ? Number(cat.vat_rate) : '';
+    $('cVatWrap').hidden = !('vat_rate' in (cat || cats[0] || {}));
+    $('cVat').disabled = !canApprove();
+    const pv = (() => { let c = parentId ? catById(parentId) : cat && cat.parent_id ? catById(cat.parent_id) : null; while (c) { if (c.vat_rate != null) return `${Number(c.vat_rate)}% from "${c.name}"`; c = c.parent_id ? catById(c.parent_id) : null; } return 'the default rate'; })();
+    $('cVat').placeholder = `Empty = ${pv}`;
 
     // "Inside" list: every category except this one and its own sub-categories
     const blocked = cat ? descendantIds(cat.id) : new Set();
@@ -1876,6 +1883,11 @@
     const parentId = Number($('cParent').value) || null;
     const row = { name, name_bn: $('cNameBn').value.trim() || null, slug, parent_id: parentId, icon: $('cIcon').value.trim() || null, ...('image_url' in (editingCat || cats[0] || {}) ? { image_url: $('cImage').value.trim() || null } : {}),
       description: $('cDesc').value.trim() || null, is_active: $('cActive').checked };
+    if (!$('cVatWrap').hidden && canApprove()) {
+      const v = $('cVat').value.trim();
+      if (v !== '' && !(Number(v) >= 0 && Number(v) <= 50)) return setMsg('catMsg', 'VAT rate must be from 0 to 50 (or empty).', true);
+      row.vat_rate = v === '' ? null : Number(v);
+    }
     if (!editingCat) row.sort_order = (childrenOf(parentId).reduce((m, c) => Math.max(m, c.sort_order), -10)) + 10;
 
     $('catSave').disabled = true;
@@ -2395,6 +2407,7 @@
     const rejectBox = h('div', { class: 'reject-box', hidden: true });
     const featBox = freeFeatureBox(p);
     const photoBox = productPhotoBox(p, imgs);
+    const vatBox = productVatBox(p);
     const reasonInput = h('textarea', { rows: 2, maxlength: 300, placeholder: 'Tell the seller what to fix', 'aria-label': 'Reason for rejecting' });
     rejectBox.append(h('div', { class: 'reasons' }, REASONS.map(r => h('button', { type: 'button', text: r, onclick: () => { reasonInput.value = r + '.'; reasonInput.focus(); } }))),
       reasonInput,
@@ -2412,17 +2425,47 @@
           p.is_featured && h('span', { class: 'chip', style: 'background:#FFF4CC;color:#8a5a00', text: '★ Featured' })),
         h('div', { class: 'prod-meta' }, h('span', { class: 'prod-price', text: price }), p.price_negotiable ? ' · negotiable' : '', ' · ', cat ? pathName(cat) : 'No category'),
         h('div', { class: 'prod-meta', text: kinds.join(' · ') }),
+        'vat_rate' in p && h('div', { class: 'prod-meta', text: 'VAT: ' + vatText(p) }),
         h('div', { class: 'prod-meta' }, oneTime ? h('b', { text: 'One-time seller: ' }) : h('b', { text: 'Shop: ' }), (oneTime ? s.name : s.shop) || '—',
           oneTime ? ` · ${s.phone_public || s.phone || ''}` : '', ` · sent ${fmtDate(p.updated_at)}`),
         p.status === 'rejected' && p.review_note && h('div', { class: 'prod-meta', style: 'color:var(--danger)', text: 'Reason given: ' + p.review_note }),
-        more, rejectBox, featBox, photoBox),
+        more, rejectBox, featBox, photoBox, vatBox),
       h('div', { class: 'actions' },
         h('a', { class: 'ghost', href: `product.html?id=${p.id}`, target: '_blank', rel: 'noopener', text: 'View page', style: 'text-decoration:none;font-weight:600;font-size:14px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);color:var(--fg)' }),
         h('button', { type: 'button', class: 'ghost', text: 'Details', onclick: e => { more.hidden = !more.hidden; e.target.textContent = more.hidden ? 'Details' : 'Hide details'; } }),
         canApprove() && h('button', { type: 'button', class: 'ghost', text: '📷 Photos', onclick: () => photoBox.open() }),
+        canApprove() && 'vat_rate' in p && h('button', { type: 'button', class: 'ghost', text: '% VAT', onclick: () => { vatBox.hidden = !vatBox.hidden; } }),
         p.status !== 'approved' && actionBtn('Approve', 'good', () => review(p, 'approved')),
         p.status === 'approved' && canApprove() && h('button', { type: 'button', class: 'ghost', style: 'border-color:#d48806;color:#8a5a00', text: p.is_featured ? '★ Add free days' : '★ Make Featured (free)', onclick: () => { featBox.hidden = !featBox.hidden; } }),
         p.status !== 'rejected' && h('button', { type: 'button', class: 'bad', text: p.status === 'approved' ? 'Take down' : 'Reject', onclick: () => { rejectBox.hidden = false; reasonInput.focus(); } })));
+  }
+
+  // VAT (0044): the product's own rate, else its category's (or one above), else the default
+  function catVat(catId) { let c = catId && catById(catId); while (c) { if (c.vat_rate != null) return { rate: Number(c.vat_rate), from: c.name }; c = c.parent_id ? catById(c.parent_id) : null; } return null; }
+  function vatText(p) {
+    if (p.vat_rate != null) return Number(p.vat_rate) ? `${Number(p.vat_rate)}% (set on this product)` : 'No VAT (set on this product)';
+    const c = catVat(p.category_id);
+    return c ? `${c.rate}% (from category "${c.from}")` : 'default rate (Orders → VAT)';
+  }
+  function productVatBox(p) {
+    const box = h('div', { class: 'reject-box', hidden: true, style: 'background:var(--surface);border-color:var(--accent)' });
+    const c = catVat(p.category_id);
+    const mode = h('select', { 'aria-label': 'VAT for this product', style: 'width:100%;min-width:0' },
+      h('option', { value: 'cat', text: c ? `Use the category rate (${c.rate}%)` : 'Use the default rate', selected: p.vat_rate == null }),
+      h('option', { value: '0', text: 'No VAT (0%)', selected: p.vat_rate != null && !Number(p.vat_rate) }),
+      h('option', { value: 'own', text: 'Own rate…', selected: p.vat_rate != null && Number(p.vat_rate) > 0 }));
+    const rate = h('input', { type: 'number', min: 0.5, max: 50, step: 0.5, value: p.vat_rate != null && Number(p.vat_rate) > 0 ? Number(p.vat_rate) : '', placeholder: 'e.g. 15', 'aria-label': 'VAT rate in percent', style: 'width:110px' });
+    const sync = () => { rate.hidden = mode.value !== 'own'; }; mode.onchange = sync; sync();
+    box.append(h('b', { text: 'VAT for this product' }), h('div', { class: 'actions', style: 'justify-content:start;flex-wrap:wrap' }, mode, rate,
+      actionBtn('Save VAT', 'good', async () => {
+        let v = mode.value === 'cat' ? null : mode.value === '0' ? 0 : Number(rate.value);
+        if (mode.value === 'own' && !(v > 0 && v <= 50)) { rate.focus(); return toast('Enter a VAT rate from 0.5 to 50.'); }
+        const { error } = await db.rpc('admin_set_product_vat', { p_products: [p.id], p_rate: v });
+        if (error) return toast(friendly(error));
+        p.vat_rate = v; toast('VAT saved: ' + vatText(p)); box.hidden = true; loadProducts && loadProducts();
+      })),
+      h('p', { class: 'prod-meta', style: 'margin:0', text: 'Prices include VAT. This only changes how much VAT shows on new orders; the price stays the same.' }));
+    return box;
   }
 
   // Staff edit the photos of any product: add, remove, change order (the first is the main photo)
@@ -2862,7 +2905,7 @@
     const rate = h('input', { type: 'number', min: 0, max: 50, step: 0.5, value: Number(v.rate) || 0, 'aria-label': 'VAT rate in percent', disabled: !edit });
     box.append(h('div', { class: 'rate-row cod-row' },
       h('label', { class: 'check' }, on, 'Show VAT on new orders'),
-      h('label', {}, 'VAT rate (%)', rate), h('span'),
+      h('label', {}, 'Default VAT rate (%)', rate), h('span'),
       edit ? actionBtn('Save', 'good', async () => {
         const n = Number(rate.value);
         if (!(n >= 0 && n <= 50)) return toast('Enter a VAT rate from 0 to 50.');

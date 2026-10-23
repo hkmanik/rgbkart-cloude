@@ -51,7 +51,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=19"></script>
+<script src="i18n.js?v=20"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
@@ -139,7 +139,7 @@
         retHolder,
         h('div', { class: 'srow' }, h('span', { class: 'm', text: T('Delivery: {d} · to {w}', { d: T(({ dhaka: 'Inside Dhaka', outside: 'Outside Dhaka', pickup: 'Store pickup', negotiated: 'Agree with shop' })[o.ship_method] || o.ship_method) + (o.ship_fee > 0 ? ' · ' + money(o.ship_fee) : ''), w: `${o.address}, ${RGBLang.tr(o.district)}` }) }), h('b', { text: T('Total {p}', { p: money(o.total) }) })),
         Number(o.discount) > 0 && h('p', { class: 'm', style: 'color:var(--accent);font-weight:600', text: T('Coupon {c}', { c: o.coupon_code || '' }) + ' −' + money(o.discount) }),
-        Number(o.vat_amount) > 0 && h('p', { class: 'm', style: 'text-align:right', text: T('Includes VAT {n}%: {p}', { n: Number(o.vat_rate), p: money(o.vat_amount) }) }),
+        Number(o.vat_amount) > 0 && h('p', { class: 'm', style: 'text-align:right', text: o.vat_rate != null ? T('Includes VAT {n}%: {p}', { n: Number(o.vat_rate), p: money(o.vat_amount) }) : T('Includes VAT: {p}', { p: money(o.vat_amount) }) }),
         o.ship_method === 'pickup' && shop.pickup_address && h('p', { class: 'm', text: T('Pick up from: ') + shop.pickup_address }),
         h('div', { class: 'oact' },
           shop.phone_public && h('a', { href: 'tel:' + shop.phone_public, text: '📞 Call shop' }),

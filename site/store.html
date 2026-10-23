@@ -86,11 +86,12 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=14"></script>
+<script src="i18n.js?v=15"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=17"></script>
 <script src="reviews.js?v=1"></script>
 <script src="report.js?v=1"></script>
+<script src="share.js?v=1"></script>
 <script src="menu.js?v=5"></script>
 <script>
   const PAGE = 20;
@@ -122,6 +123,8 @@
     }
     const name = L(S, 'shop_name');
     document.title = `${name} | RGBKart`; $('crumb').textContent = name;
+    const md = document.head.querySelector('meta[name=description]'); if (md) md.content = `${name}${S.tagline ? ': ' + S.tagline : ''}. Shop on RGBKart, pay in cash on delivery.`;
+    const ot = document.head.querySelector('meta[property="og:title"]'); if (ot) ot.content = `${name} on RGBKart`;
     const c = await db.from('categories').select('*').eq('is_active', true);
     cats = c.data || [];
     drawHero();
@@ -145,7 +148,8 @@
     const contact = h('div', { class: 'contact' },
       S.phone_public && h('a', { class: 'cbtn call', href: 'tel:+' + intl(S.phone_public), text: T('📞 Call') }),
       wa && h('a', { class: 'cbtn wa', href: `https://wa.me/${intl(wa)}?text=${encodeURIComponent(T('Hi, I found your shop on RGBKart: {u}', { u: location.href }))}`, target: '_blank', rel: 'noopener', text: 'WhatsApp' }),
-      S.email_public && h('a', { class: 'cbtn', href: 'mailto:' + S.email_public, text: T('✉ Email') }));
+      S.email_public && h('a', { class: 'cbtn', href: 'mailto:' + S.email_public, text: T('✉ Email') }),
+      window.RGBShare && RGBShare.button({ shop: S.shop_slug || S.user_id }, L(S, 'shop_name')));
     const links = [['facebook_url', 'Facebook'], ['instagram_url', 'Instagram'], ['youtube_url', 'YouTube'], ['tiktok_url', 'TikTok'], ['website_url', 'Website']].filter(([k]) => /^https?:\/\//i.test(S[k] || ''));
     box.append(h('section', { class: 'hero' }, banner,
       h('div', { class: 'info' }, logo,

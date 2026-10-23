@@ -1,0 +1,15 @@
+# RGBKart: let search engines read the shop pages, not the private ones
+User-agent: *
+Disallow: /admin.html
+Disallow: /seller.html
+Disallow: /account.html
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /orders.html
+Disallow: /messages.html
+Disallow: /alerts.html
+Disallow: /login.html
+Disallow: /prototype/
+Allow: /
+
+Sitemap: %%SITE%%/sitemap.xml

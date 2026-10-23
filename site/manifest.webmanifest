@@ -1,0 +1,15 @@
+{
+  "name": "RGBKart · Red & Green Basket",
+  "short_name": "RGBKart",
+  "description": "Buy and sell across all 64 districts of Bangladesh.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00802B",
+  "lang": "en",
+  "icons": [
+    { "src": "assets/logo/rgb-basket-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/logo/rgb-logo-badge-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -195,6 +195,7 @@
     'RGBKart Categories': 'ক্যাটাগরি | RGBKart', 'RGBKart Sign In': 'সাইন ইন | RGBKart', 'RGBKart Products': 'পণ্য | RGBKart', 'RGBKart Product': 'পণ্য | RGBKart',
     '✓ Verified shop': '✓ যাচাইকৃত দোকান', "RGBKart checked this shop's ID or trade licence": 'RGBKart এই দোকানের পরিচয়পত্র বা ট্রেড লাইসেন্স যাচাই করেছে',
     'Information': 'তথ্য', 'Coming soon': 'শিগগিরই আসছে', 'This page is being prepared.': 'এই পৃষ্ঠা তৈরি হচ্ছে।', 'Page not found': 'পৃষ্ঠা পাওয়া যায়নি',
+    'Share': 'শেয়ার', 'Copy link': 'লিংক কপি করুন', 'Link copied': 'লিংক কপি হয়েছে',
     // returns (0036)
     'Arrived damaged or broken': 'ভাঙা বা ক্ষতিগ্রস্ত অবস্থায় এসেছে', 'Wrong item or wrong size/colour sent': 'ভুল পণ্য বা ভুল সাইজ/রং পাঠানো হয়েছে', 'Not as described or shown': 'বর্ণনা বা ছবির সাথে মিল নেই',
     'Parts or accessories missing': 'যন্ত্রাংশ বা অ্যাকসেসরিজ নেই', 'Size or fit is not right': 'সাইজ বা মাপ ঠিক হয়নি', 'Poor quality or not working': 'মান খারাপ বা কাজ করে না', 'Changed my mind': 'মত বদলেছি',

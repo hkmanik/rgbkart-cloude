@@ -232,6 +232,7 @@
         <div class="chips" id="chips"></div>
         <h1 id="title"></h1>
         <div id="ratingTop" hidden></div>
+        <div id="shareTop" style="margin:2px 0 4px"></div>
         <div class="price-row" id="priceRow"></div>
         <p class="short" id="short" hidden></p>
 
@@ -327,11 +328,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=14"></script>
+<script src="i18n.js?v=15"></script>
 <script src="menu.js?v=5"></script>
 <script src="reviews.js?v=1"></script>
 <script src="report.js?v=1"></script>
 <script src="questions.js?v=1"></script>
+<script src="share.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -418,6 +420,8 @@
     drawFacts();
     drawSeller();
     drawReviews();
+    if (window.RGBShare) $('shareTop').append(RGBShare.button({ id: P.id }, L(P, 'title')));
+    seoProduct();
     if (window.RGBQuestions) $('qaBody').append(RGBQuestions.section(db, P, () => { $('questions').hidden = false; if (location.hash === '#questions') $('questions').scrollIntoView(); }));
     drawTiers();
     setupActions();
@@ -556,6 +560,34 @@
     if (!rows.size) return;
     $('specsWrap').hidden = false;
     for (const [k, v] of rows) $('specs').append(h('tr', {}, h('th', { scope: 'row', text: k }), h('td', { text: v.join(', ') })));
+  }
+
+  // ---------- search engines & link previews (plan 7.6) ----------
+  function setMeta(attr, key, val) {
+    let m = document.head.querySelector(`meta[${attr}="${key}"]`);
+    if (!m) { m = document.createElement('meta'); m.setAttribute(attr, key); document.head.append(m); }
+    m.setAttribute('content', val);
+  }
+  function seoProduct() {
+    const title = L(P, 'title'), desc = (P.short_description || (P.description || '').slice(0, 150)).replace(/\s+/g, ' ').trim();
+    const img = images[0] ? images[0].url : null;
+    setMeta('name', 'description', `${title}${desc ? ': ' + desc : ''}. Order on RGBKart, pay in cash on delivery.`.slice(0, 300));
+    setMeta('property', 'og:title', title + ' | RGBKart'); setMeta('property', 'og:description', desc || 'Order on RGBKart, pay in cash on delivery.');
+    if (img) setMeta('property', 'og:image', img);
+    let canon = document.head.querySelector('link[rel=canonical]');
+    if (!canon) { canon = document.createElement('link'); canon.rel = 'canonical'; document.head.append(canon); }
+    canon.href = location.href.split('#')[0].replace(/[?&](lang|v)=[^&]*/g, '');
+    // Product details for Google (price, stock, stars)
+    const vs = (P.product_variations || []).filter(v => v.is_active);
+    const prices = vs.length ? vs.map(v => Number(v.sale_price || v.price)) : [Number(onSale(P) ? P.sale_price : P.price)];
+    const inStock = P.manage_stock ? (vs.length ? vs.some(v => v.stock > 0) : P.stock > 0) : P.stock_status !== 'out_of_stock';
+    const ld = { '@context': 'https://schema.org', '@type': 'Product', name: P.title, description: desc || undefined, sku: P.sku || undefined,
+      image: images.map(i => i.url).slice(0, 5), itemCondition: P.listing_type === 'pre_owned' ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
+      offers: { '@type': prices.length > 1 ? 'AggregateOffer' : 'Offer', priceCurrency: 'BDT', ...(prices.length > 1 ? { lowPrice: Math.min(...prices), highPrice: Math.max(...prices) } : { price: prices[0] }),
+        availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canon.href,
+        seller: shop ? { '@type': 'Organization', name: shop.shop_name } : undefined } };
+    if (P.rating_count > 0) ld.aggregateRating = { '@type': 'AggregateRating', ratingValue: Number(P.rating_avg).toFixed(1), reviewCount: P.rating_count };
+    const sc = document.createElement('script'); sc.type = 'application/ld+json'; sc.textContent = JSON.stringify(ld); document.head.append(sc);
   }
 
   // ---------- reviews (0029_reviews.sql) ----------

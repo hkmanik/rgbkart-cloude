@@ -1,10 +1,12 @@
 // RGBKart cart helpers: read the device cart, refresh prices / stock from the database, group by shop, work out delivery.
 // Needs shop.js (db, store, CART_KEY, saleActive). The database checks everything again when the order is placed.
-const SHIP_KEY = 'rgbkart-ship';
+const SHIP_KEY = 'rgbkart-ship', COUPON_KEY = 'rgbkart-coupons';
 const CartLib = {
   read() { return store.get(CART_KEY); },
   write(c) { store.set(CART_KEY, c); updateBadges(); },
   shipChoice() { try { return JSON.parse(localStorage.getItem(SHIP_KEY) || '{}'); } catch (_) { return {}; } },
+  coupons() { try { return JSON.parse(localStorage.getItem(COUPON_KEY) || '{}'); } catch (_) { return {}; } },
+  setCoupon(sellerId, code) { const c = CartLib.coupons(); if (code) c[sellerId] = code; else delete c[sellerId]; try { localStorage.setItem(COUPON_KEY, JSON.stringify(c)); } catch (_) {} },
   setShip(sellerId, m) { const s = CartLib.shipChoice(); s[sellerId] = m; try { localStorage.setItem(SHIP_KEY, JSON.stringify(s)); } catch (_) {} },
 
   // Returns { groups: [{ seller, shop, items, subtotal, options, method, fee, total }], methods, problems }
@@ -66,8 +68,15 @@ const CartLib = {
       let method = options.find(o => o.id === choice[sid]) || options[0] || null;
       const subtotal = its.reduce((a, i) => a + i.unit * i.qty, 0);
       const fee = method ? feeOf(method) : 0;
-      groups.push({ seller: sid, shop, items: its, subtotal, options, method, fee, feeOf, allFree, total: subtotal + fee });
+      groups.push({ seller: sid, shop, items: its, subtotal, options, method, fee, feeOf, allFree, total: subtotal + fee, discount: 0, coupon: null });
     }
+    // shop coupons (0033): check each saved code against the shop's items total; place_order checks again
+    const codes = CartLib.coupons();
+    await Promise.all(groups.filter(g => codes[g.seller]).map(async g => {
+      const r = await db.rpc('check_coupon', { p_seller: g.seller, p_code: codes[g.seller], p_subtotal: g.subtotal });
+      if (r.error) g.coupon = { code: codes[g.seller], error: r.error.message };
+      else { g.coupon = r.data; g.discount = Number(r.data.discount) || 0; g.total = g.subtotal + g.fee - g.discount; }
+    }));
     return { groups, methods, items, problems: items.filter(i => i.problem) };
   },
   // Pick a sensible default delivery for a district (Dhaka → Inside Dhaka, others → Outside Dhaka)

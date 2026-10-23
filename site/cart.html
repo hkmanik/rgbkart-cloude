@@ -11,6 +11,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <link rel="stylesheet" href="shop.css?v=14">
 <link rel="stylesheet" href="order.css?v=3">
+<style>
+  .cpn { display: grid; gap: 4px; margin-top: 10px; }
+  .cpn-row { display: flex; gap: 8px; }
+  .cpn-row input { flex: 1; min-width: 0; font: inherit; text-transform: uppercase; padding: 8px 12px; border: 1px dashed var(--accent); border-radius: 10px; background: var(--bg); color: var(--fg); }
+  .cpn-row .btn-line { padding: 8px 16px; }
+  .cpn.ok { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 8px 12px; }
+  .srow.good span { color: var(--accent); font-weight: 600; }
+</style>
 </head>
 <body>
 
@@ -22,11 +30,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=10"></script>
+<script src="i18n.js?v=11"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=16"></script>
 <script src="menu.js?v=5"></script>
-<script src="cartlib.js?v=2"></script>
+<script src="cartlib.js?v=3"></script>
 <script>
   let data = null;
   function setQty(idx, q) {
@@ -52,6 +60,18 @@
         h('button', { type: 'button', class: 'rm', text: 'Remove', onclick: () => remove(i.idx) })));
   }
 
+  // Shop coupon code (0033_shop_coupons.sql)
+  function couponBox(g) {
+    const c = g.coupon;
+    if (c && !c.error) return h('div', { class: 'cpn ok' }, h('span', {}, '🏷 ', h('b', { text: c.code, translate: 'no' }), ' ' + T('applied: you save {p}', { p: money(g.discount) })),
+      h('button', { type: 'button', class: 'rm', text: 'Remove', onclick: () => { CartLib.setCoupon(g.seller, null); draw(); } }));
+    const inp = h('input', { type: 'text', maxlength: 20, placeholder: T('Coupon code'), 'aria-label': T('Coupon code for {s}', { s: L(g.shop, 'shop_name') }), value: c ? c.code : '', autocapitalize: 'characters', spellcheck: 'false' });
+    const apply = () => { const v = inp.value.trim().toUpperCase(); if (!v) return inp.focus(); CartLib.setCoupon(g.seller, v); draw(); };
+    inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); apply(); } };
+    return h('div', { class: 'cpn' }, h('div', { class: 'cpn-row' }, inp, h('button', { type: 'button', class: 'btn-line', text: 'Apply', onclick: apply })),
+      c && c.error && h('p', { class: 'm bad', text: T(c.error) }));
+  }
+
   async function draw() {
     data = await CartLib.load();
     // keep capped quantities
@@ -74,14 +94,15 @@
       left.append(h('section', { class: 'box group' },
         h('div', { class: 'ghead' }, h('span', { class: 'shopic', 'aria-hidden': 'true', text: (g.shop.shop_name || '?').charAt(0).toUpperCase() }), h('b', {}, h('a', { href: 'store.html?s=' + encodeURIComponent(g.shop.shop_slug || g.seller), text: T('From {s}', { s: L(g.shop, 'shop_name') }), style: 'color:inherit;text-decoration:none' })), h('span', { class: 'sub', text: money(g.subtotal) })),
         g.items.map(itemRow),
-        h('div', { class: 'gfoot' }, h('b', { class: 'small', text: 'Delivery' }), opts, g.allFree && h('p', { class: 'm good', text: '✓ Free delivery from this shop' }))));
+        h('div', { class: 'gfoot' }, h('b', { class: 'small', text: 'Delivery' }), opts, g.allFree && h('p', { class: 'm good', text: '✓ Free delivery from this shop' }), couponBox(g))));
     }
     if (data.problems.length) left.append(h('section', { class: 'box group' }, h('div', { class: 'ghead' }, h('b', { text: 'Can\'t be ordered' })), data.problems.map(itemRow)));
     const total = data.groups.reduce((a, g) => a + g.total, 0);
     const sum = h('aside', { class: 'box sum' }, h('h2', { text: 'Order summary' }),
       data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: L(g.shop, 'shop_name'), translate: 'no' }),
         h('div', { class: 'srow' }, h('span', { text: T('Items ({n})', { n: g.items.reduce((a, i) => a + i.qty, 0) }) }), h('span', { text: money(g.subtotal) })),
-        h('div', { class: 'srow' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })))),
+        h('div', { class: 'srow' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
+        g.discount > 0 && h('div', { class: 'srow good' }, h('span', { text: T('Coupon {c}', { c: g.coupon.code }) }), h('span', { text: '−' + money(g.discount) })))),
       h('div', { class: 'srow total' }, h('span', { text: 'Total' }), h('span', { text: money(total) })),
       h('p', { class: 'm', text: 'Pay in cash when your order arrives (Cash on Delivery).' }),
       data.groups.length ? h('a', { class: 'go', href: 'checkout.html', text: 'Checkout →' }) : h('span', { class: 'm bad', text: 'Remove the items that can\'t be ordered to continue.' }),

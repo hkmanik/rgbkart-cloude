@@ -111,6 +111,7 @@
   .rv-card.hid { opacity: .65; }
   .rv-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
   .rv-head b { overflow-wrap: anywhere; }
+  .cp-code { font-family: ui-monospace, Menlo, monospace; font-size: 1.05rem; letter-spacing: .06em; background: var(--accent-soft); color: var(--accent); padding: 2px 10px; border-radius: 6px; border: 1px dashed var(--accent); }
   .rv-stars { color: #F5C400; letter-spacing: 1px; font-size: 1.05rem; }
   .rv-text { margin: 0; overflow-wrap: anywhere; }
   .rv-hid { margin: 0; color: var(--warn, #8a5a00); font-size: .88rem; }
@@ -378,6 +379,7 @@
     <button class="nav" data-view="new" id="navNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add product</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured requests</button>
     <button class="nav tone-red" data-view="ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>Advertise</button>
+    <button class="nav tone-green" data-view="coupons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>Coupons</button>
 
     <div class="nav-group">Selling</div>
     <a class="nav tone-blue" href="messages.html" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/></svg>Messages<span id="navMsg" hidden style="margin-left:auto;background:#E30613;color:#fff;border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 7px"></span></a>
@@ -458,6 +460,34 @@
     </section>
 
     <!-- ===== Advertise ===== -->
+    <section data-page="coupons" hidden>
+      <div class="page-head"><div><h1>Coupons</h1><p>Make discount codes for your shop, e.g. EID10. Buyers type the code in their cart; the discount comes off your items (not delivery) and you collect the lower amount in cash. Share codes on Facebook, WhatsApp or your packing slips.</p></div>
+        <button type="button" class="primary" id="cpNew">+ New coupon</button></div>
+      <div class="card" id="cpForm" hidden style="margin-top:16px">
+        <h2 id="cpFormTitle">New coupon</h2>
+        <div class="grid3">
+          <label><span class="req">Code</span><input id="cpCode" type="text" maxlength="20" placeholder="EID10" style="text-transform:uppercase" autocapitalize="characters"><span class="hint">3–20 letters, numbers or -</span></label>
+          <label>Discount type<select id="cpKind"><option value="amount">Taka off (৳)</option><option value="percent">Percent off (%)</option></select></label>
+          <label><span class="req" id="cpValLbl">Taka off</span><input id="cpValue" type="number" min="1" step="1" inputmode="numeric"></label>
+        </div>
+        <div class="grid3">
+          <label id="cpMaxWrap" hidden>Most a buyer can save (৳)<input id="cpMax" type="number" min="1" step="1" inputmode="numeric" placeholder="No limit"></label>
+          <label>Minimum order (৳, items only)<input id="cpMin" type="number" min="0" step="1" inputmode="numeric" value="0"></label>
+          <label>Uses per buyer<input id="cpPer" type="number" min="1" max="100" step="1" value="1" inputmode="numeric"></label>
+        </div>
+        <div class="grid3">
+          <label>Starts<input id="cpStart" type="date"><span class="hint">Empty = from now</span></label>
+          <label>Ends<input id="cpEnd" type="date"><span class="hint">Empty = no end date (ends at midnight)</span></label>
+          <label>Total uses<input id="cpLimit" type="number" min="1" step="1" inputmode="numeric" placeholder="No limit"></label>
+        </div>
+        <label>Note for yourself<input id="cpNote" type="text" maxlength="120" placeholder="e.g. Eid offer for Facebook followers"></label>
+        <label class="check"><input type="checkbox" id="cpActive" checked> Coupon is on</label>
+        <p class="hint" id="cpPreview"></p>
+        <div class="row-btns"><button type="button" class="primary" id="cpSave">Save coupon</button><button type="button" class="ghost" id="cpCancel">Cancel</button></div>
+      </div>
+      <div class="card" style="margin-top:16px"><div id="cpList" class="rvs"></div></div>
+    </section>
+
     <section data-page="questions" hidden>
       <div class="page-head"><div><h1>Questions</h1><p>Questions buyers asked on your product pages. Your answer is shown to everyone on the product page, so one good answer helps many buyers. The buyer gets an alert when you answer.</p></div></div>
       <div class="card" style="margin-top:16px">
@@ -909,7 +939,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
 <script src="pay.js?v=1"></script>
-<script src="printdocs.js?v=1"></script>
+<script src="printdocs.js?v=2"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -980,6 +1010,7 @@
     else if (start === 'settings') go('settings');
     else if (start === 'reviews') go('reviews');
     else if (start === 'questions') go('questions');
+    else if (start === 'coupons') go('coupons');
     else if (start === 'new' && approved) openEditor(null);
     else go('products');
   }
@@ -1026,6 +1057,79 @@
   }
   const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   const mainPhoto = p => { const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0]; return im ? photoUrl(im.storage_path) : null; };
+
+  // ===================== Coupons (0033_shop_coupons.sql) =====================
+  let coupons = [], cpEditing = null;
+  const dIn = v => v ? new Date(v).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }) : '';
+  const cpStatus = c => {
+    const now = Date.now();
+    if (!c.is_active) return ['Off', 'rejected'];
+    if (c.starts_at && new Date(c.starts_at) > now) return ['Starts ' + new Date(c.starts_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), 'info'];
+    if (c.ends_at && new Date(c.ends_at) < now) return ['Ended', 'rejected'];
+    if (c.usage_limit && c.used_count >= c.usage_limit) return ['Used up', 'rejected'];
+    return ['Active', 'active'];
+  };
+  const cpText = c => (c.kind === 'percent' ? `${Number(c.value)}% off` + (c.max_discount ? ` (up to ${money(c.max_discount)})` : '') : `${money(c.value)} off`)
+    + (Number(c.min_order) > 0 ? ` on orders of ${money(c.min_order)}+` : '');
+  async function loadCoupons() {
+    const r = await db.from('shop_coupons').select('*').eq('seller_id', me.id).order('created_at', { ascending: false });
+    const box = $('cpList'); box.innerHTML = '';
+    if (r.error) { box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Coupons are not switched on yet (0033_shop_coupons.sql).' : friendly(r.error) })); return; }
+    coupons = r.data || [];
+    if (!coupons.length) { box.append(h('p', { class: 'muted', style: 'padding:6px 0', text: 'No coupons yet. Tap "+ New coupon" to make your first one.' })); return; }
+    coupons.forEach(c => {
+      const [st, cls] = cpStatus(c);
+      box.append(h('article', { class: 'rv-card' },
+        h('div', { class: 'rv-head' }, h('b', { class: 'cp-code', text: c.code }), h('span', { class: 'chip ' + cls, text: st }), h('span', { text: cpText(c) })),
+        h('span', { class: 'muted', text: [`Used ${c.used_count}${c.usage_limit ? ' of ' + c.usage_limit : ''} time${c.used_count === 1 ? '' : 's'}`, `${c.per_customer} per buyer`,
+          c.starts_at && 'from ' + new Date(c.starts_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          c.ends_at && 'until ' + new Date(c.ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), c.note].filter(Boolean).join(' · ') }),
+        h('div', { class: 'row-btns' },
+          h('button', { type: 'button', class: 'ghost', text: 'Edit', onclick: () => cpOpen(c) }),
+          h('button', { type: 'button', class: 'ghost', text: c.is_active ? 'Turn off' : 'Turn on', onclick: async () => {
+            const { error } = await db.from('shop_coupons').update({ is_active: !c.is_active }).eq('id', c.id); if (error) return toast(friendly(error)); loadCoupons(); } }),
+          h('button', { type: 'button', class: 'ghost', text: '📋 Copy code', onclick: () => { try { navigator.clipboard.writeText(c.code); toast('Code copied'); } catch (_) {} } }),
+          !c.used_count && h('button', { type: 'button', class: 'ghost', style: 'color:var(--danger)', text: 'Delete', onclick: async () => {
+            const { error } = await db.from('shop_coupons').delete().eq('id', c.id); if (error) return toast(friendly(error)); toast('Coupon deleted'); loadCoupons(); } }))));
+    });
+  }
+  function cpPreview() {
+    const kind = $('cpKind').value, v = Number($('cpValue').value), min = Number($('cpMin').value) || 0, max = Number($('cpMax').value) || 0;
+    $('cpMaxWrap').hidden = kind !== 'percent'; $('cpValLbl').textContent = kind === 'percent' ? 'Percent off' : 'Taka off';
+    if (!v) { $('cpPreview').textContent = ''; return; }
+    const ex = Math.max(min, 1000);
+    let d = kind === 'percent' ? Math.round(ex * v / 100) : v; if (kind === 'percent' && max) d = Math.min(d, max); d = Math.min(d, ex);
+    $('cpPreview').textContent = `Example: an order of ${money(ex)} from your shop becomes ${money(ex - d)} (+ delivery).`;
+  }
+  ['cpKind', 'cpValue', 'cpMin', 'cpMax'].forEach(id => $(id).oninput = cpPreview);
+  function cpOpen(c) {
+    cpEditing = c || null;
+    $('cpFormTitle').textContent = c ? 'Edit coupon ' + c.code : 'New coupon';
+    $('cpCode').value = c ? c.code : ''; $('cpKind').value = c ? c.kind : 'amount'; $('cpValue').value = c ? Number(c.value) : '';
+    $('cpMax').value = c && c.max_discount ? Number(c.max_discount) : ''; $('cpMin').value = c ? Number(c.min_order) : 0; $('cpPer').value = c ? c.per_customer : 1;
+    $('cpStart').value = c ? dIn(c.starts_at) : ''; $('cpEnd').value = c ? dIn(c.ends_at) : ''; $('cpLimit').value = c && c.usage_limit ? c.usage_limit : '';
+    $('cpNote').value = c && c.note || ''; $('cpActive').checked = c ? c.is_active : true;
+    $('cpForm').hidden = false; cpPreview(); $('cpCode').focus();
+  }
+  $('cpNew').onclick = () => cpOpen(null);
+  $('cpCancel').onclick = () => { $('cpForm').hidden = true; };
+  $('cpSave').onclick = async () => {
+    const code = $('cpCode').value.trim().toUpperCase().replace(/\s+/g, '');
+    if (!/^[A-Z0-9-]{3,20}$/.test(code)) return toast('Code: 3–20 letters, numbers or -');
+    const kind = $('cpKind').value, value = Number($('cpValue').value);
+    if (!(value > 0)) return toast('Enter the discount');
+    if (kind === 'percent' && value > 90) return toast('Percent off can be at most 90%');
+    const start = $('cpStart').value, end = $('cpEnd').value;
+    if (start && end && end < start) return toast('The end date is before the start date');
+    const row = { code, kind, value, max_discount: kind === 'percent' && Number($('cpMax').value) > 0 ? Number($('cpMax').value) : null,
+      min_order: Math.max(0, Number($('cpMin').value) || 0), per_customer: Math.min(100, Math.max(1, Number($('cpPer').value) || 1)),
+      starts_at: start ? new Date(start + 'T00:00:00+06:00').toISOString() : null, ends_at: end ? new Date(end + 'T23:59:59+06:00').toISOString() : null,
+      usage_limit: Number($('cpLimit').value) > 0 ? Math.round(Number($('cpLimit').value)) : null, note: $('cpNote').value.trim() || null, is_active: $('cpActive').checked };
+    const q = cpEditing ? db.from('shop_coupons').update(row).eq('id', cpEditing.id) : db.from('shop_coupons').insert({ ...row, seller_id: me.id });
+    const { error } = await q;
+    if (error) return toast(/duplicate|unique/i.test(error.message) ? 'You already have a coupon with this code' : friendly(error));
+    toast('Coupon saved'); $('cpForm').hidden = true; loadCoupons();
+  };
 
   // ===================== Questions (0032_product_questions.sql) =====================
   let myQuestions = [], qFilter = 'open';
@@ -1126,12 +1230,13 @@
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
     document.querySelectorAll('.nav[data-view]').forEach(b => b.dataset.view === (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view) ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions' }[view];
+    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons' }[view];
     if (view === 'orders') loadOrders();
     if (view === 'settings') loadSettings();
     if (view === 'ads') loadSellerAds();
     if (view === 'reviews') loadReviews();
     if (view === 'questions') loadQuestions();
+    if (view === 'coupons') loadCoupons();
     try { history.replaceState(null, '', '#' + (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view)); } catch (_) {}
     setMenu(false); window.scrollTo(0, 0);
   }
@@ -1338,6 +1443,7 @@
           riskBadge(o)),
         h('div', { class: 'ord-items' }, (o.order_items || []).map(i => h('div', { class: 'srow' }, h('span', { text: `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}` }), h('span', { text: money(i.line_total) }))),
           h('div', { class: 'srow pmeta' }, h('span', { text: SHIPN[o.ship_method] || o.ship_method }), h('span', { text: o.ship_fee > 0 ? money(o.ship_fee) : o.ship_method === 'negotiated' ? 'agree' : 'free' })),
+          Number(o.discount) > 0 && h('div', { class: 'srow pmeta' }, h('span', { text: 'Coupon ' + (o.coupon_code || '') }), h('span', { text: '−' + money(o.discount) })),
           h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })))),
       o.status === 'cancelled' && h('p', { class: 'pmeta', style: 'color:var(--danger)', text: `Cancelled by ${o.cancelled_by || '—'}${o.cancel_reason ? ': ' + o.cancel_reason : ''}` }),
       o.tracking_note && h('p', { class: 'pmeta', text: 'Delivery info: ' + o.tracking_note }),

@@ -193,6 +193,9 @@
     "This shop isn't available": 'এই দোকানটি পাওয়া যাচ্ছে না', 'It may be closed or still waiting for approval.': 'হয়তো বন্ধ আছে বা এখনো অনুমোদনের অপেক্ষায়।',
     'Browse all products': 'সব পণ্য দেখুন', 'Visit shop →': 'দোকানে যান →', 'Previous shops': 'আগের দোকানগুলো', 'Next shops': 'পরের দোকানগুলো', 'Top Shops': 'সেরা দোকান', '🏪 Visit shop →': '🏪 দোকানে যান →', 'See all products from this seller →': 'এই বিক্রেতার সব পণ্য দেখুন →', 'Red & Green Basket, RGBKart home': 'রেড অ্যান্ড গ্রিন বাস্কেট, RGBKart হোম', 'Show': 'দেখুন',
     'RGBKart Categories': 'ক্যাটাগরি | RGBKart', 'RGBKart Sign In': 'সাইন ইন | RGBKart', 'RGBKart Products': 'পণ্য | RGBKart', 'RGBKart Product': 'পণ্য | RGBKart',
+    // coupons (0033)
+    'Coupon code': 'কুপন কোড', 'Apply': 'প্রয়োগ করুন', 'This coupon code is not valid for this shop': 'এই কুপন কোডটি এই দোকানে চলবে না', 'This coupon has expired': 'এই কুপনের মেয়াদ শেষ',
+    'This coupon has been fully used': 'এই কুপন আর ব্যবহার করা যাবে না', 'You have already used this coupon': 'আপনি এই কুপন আগেই ব্যবহার করেছেন', 'Type a coupon code': 'কুপন কোড লিখুন',
     // questions (0032)
     'Questions & answers': 'প্রশ্ন ও উত্তর', 'Guest': 'অতিথি', 'Seller': 'বিক্রেতা', 'Waiting for the seller to answer': 'বিক্রেতার উত্তরের অপেক্ষায়',
     'Write your answer. Everyone can see it.': 'উত্তর লিখুন। সবাই দেখতে পাবেন।', 'Your answer': 'আপনার উত্তর', 'Save answer': 'উত্তর সংরক্ষণ করুন', 'Send answer': 'উত্তর পাঠান',
@@ -287,6 +290,8 @@
     ['Page {n}', 'পৃষ্ঠা {n}'], ['Showing {a}–{b} of {n} products', '{n}টি পণ্যের মধ্যে {a}–{b} দেখানো হচ্ছে'],
     ['On RGBKart since {n}', '{n} থেকে RGBKart-এ'], ['Hi, I found your shop on RGBKart: {u}', 'আসসালামু আলাইকুম, RGBKart-এ আপনার দোকান দেখলাম: {u}'],
     ['★ {n} Featured', '★ {n}টি ফিচার্ড'],
+    ['Coupon {c}', 'কুপন {c}'], ['applied: you save {p}', 'প্রয়োগ হয়েছে: আপনি বাঁচালেন {p}'], ['Coupon code for {s}', '{s}-এর কুপন কোড'],
+    ['This coupon needs an order of at least ৳{x} from this shop', 'এই কুপনের জন্য এই দোকান থেকে কমপক্ষে ৳{x}-এর অর্ডার লাগবে'], ['This coupon can be used from {d}', 'এই কুপন {d} থেকে ব্যবহার করা যাবে'],
     ['Waiting for your answer ({n})', 'আপনার উত্তরের অপেক্ষায় ({n})'], ['New question about {t}', '{t} নিয়ে নতুন প্রশ্ন'],
     ['Rated {a} out of 5', '৫-এর মধ্যে {a} রেটিং'], ['{n} stars', '{n} স্টার'], ['({n} review)', '({n}টি রিভিউ)'], ['({n} reviews)', '({n}টি রিভিউ)'], ['{n} review', '{n}টি রিভিউ'], ['{n} reviews', '{n}টি রিভিউ'], ['The shop: {s}', 'দোকান: {s}'],
     ['Customer since {d}', '{d} থেকে ক্রেতা'], ['{n} order', '{n}টি অর্ডার'], ['{n} orders', '{n}টি অর্ডার'], ['{n} item', '{n}টি পণ্য'], ['{n} new', '{n}টি নতুন'], ['You have {n} items in your cart.', 'আপনার কার্টে {n}টি পণ্য আছে।'], ['You have {n} item in your cart.', 'আপনার কার্টে {n}টি পণ্য আছে।'],

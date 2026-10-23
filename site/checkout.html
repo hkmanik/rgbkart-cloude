@@ -20,11 +20,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=10"></script>
+<script src="i18n.js?v=11"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=16"></script>
 <script src="menu.js?v=5"></script>
-<script src="cartlib.js?v=2"></script>
+<script src="cartlib.js?v=3"></script>
 <script>
   const ADDR_KEY = 'rgbkart-address';
   let data = null, session = null, isGuest = true, savedAddrs = [];
@@ -99,7 +99,8 @@
     holder.append(h('aside', { class: 'box sum' }, h('h2', { text: 'Your order' }),
       data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: L(g.shop, 'shop_name'), translate: 'no' }),
         g.items.map(i => h('div', { class: 'srow small' }, h('span', { style: 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: `${N(i.qty)} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}`, translate: 'no' }), h('span', { text: money(i.unit * i.qty) }))),
-        h('div', { class: 'srow small' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })))),
+        h('div', { class: 'srow small' }, h('span', { text: g.method ? g.method.name : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
+        g.discount > 0 && h('div', { class: 'srow small', style: 'color:var(--accent);font-weight:600' }, h('span', { text: T('Coupon {c}', { c: g.coupon.code }) }), h('span', { text: '−' + money(g.discount) })))),
       h('div', { class: 'srow total' }, h('span', { text: 'Total to pay on delivery' }), h('span', { text: money(total) })),
       data.groups.length > 1 && h('p', { class: 'm', text: `This makes ${data.groups.length} orders, one for each shop. Each shop delivers and collects its own amount.` }),
       err, btn, h('a', { class: 'more', href: 'cart.html', text: '← Back to cart (change delivery)' })));
@@ -127,7 +128,8 @@
       try { localStorage.setItem(ADDR_KEY, JSON.stringify({ name: v.name, phone: v.phone, address: v.address, district: v.district, area: v.area, email: v.email })); } catch (_) {}
       const items = data.groups.flatMap(g => g.items.map(i => ({ product_id: i.product_id, variation_id: i.variation_id || null, qty: i.qty })));
       const ship = Object.fromEntries(data.groups.map(g => [g.seller, g.method ? g.method.id : 'negotiated']));
-      const r = await db.rpc('place_order', { p_items: items, p_ship: ship, p_customer: v });
+      const coupons = Object.fromEntries(data.groups.filter(g => g.discount > 0 && g.coupon && !g.coupon.error).map(g => [g.seller, g.coupon.code]));
+      const r = await db.rpc('place_order', Object.keys(coupons).length ? { p_items: items, p_ship: ship, p_customer: v, p_coupons: coupons } : { p_items: items, p_ship: ship, p_customer: v });
       if (r.error) throw r.error;
       // keep the address in My account when asked (skip if it's already saved)
       if ($('coSave') && $('coSave').checked && !savedAddrs.some(a => a.address.trim().toLowerCase() === v.address.toLowerCase() && a.district === v.district)) {
@@ -136,6 +138,7 @@
       // remove ordered items from the cart
       const done = new Set(data.groups.flatMap(g => g.items.map(i => i.idx)));
       CartLib.write(CartLib.read().filter((_, k) => !done.has(k)));
+      data.groups.forEach(g => CartLib.setCoupon(g.seller, null));
       showDone(r.data, v);
     } catch (e) {
       const m = (e && e.message) || '';

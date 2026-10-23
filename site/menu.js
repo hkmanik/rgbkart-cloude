@@ -3,6 +3,10 @@
 (function () {
   const L = window.L || ((r, f) => r ? r[f] : ''), T = window.T || ((s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]));
   const CSS = `
+  /* header + menu stay at the top while scrolling */
+  .rgb-sticky { position: sticky; top: 0; z-index: 30; }
+  html { scroll-padding-top: calc(var(--head-h, 0px) + 8px); }
+  .rgb-sticky .top { position: relative; top: auto; }
   .mmenu { background: var(--surface, #fff); border-bottom: 1px solid var(--line, #D9E2DC); position: relative; z-index: 25; }
   .mmenu .mrow { display: flex; gap: 6px; align-items: center; padding-block: 6px; max-width: 1280px; margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -101,6 +105,10 @@
     const panel = el('div', { class: 'mpanel', id: 'mPanel', hidden: true });
     const nav = el('nav', { class: 'mmenu', id: 'mainMenu', 'aria-label': 'Main menu' }, el('div', { class: 'mrow' }, btn, links, window.RGBLang ? RGBLang.switcher() : null), panel);
     header.after(nav);
+    // keep the header and this menu fixed at the top; pages read --head-h to place their own sticky boxes below it
+    const wrap = el('div', { class: 'rgb-sticky' }); header.before(wrap); wrap.append(header, nav);
+    const setH = () => document.documentElement.style.setProperty('--head-h', wrap.offsetHeight + 'px');
+    setH(); if (window.ResizeObserver) new ResizeObserver(setH).observe(wrap);
 
     const open = on => { panel.hidden = !on; btn.setAttribute('aria-expanded', String(on)); };
     btn.onclick = () => open(panel.hidden);

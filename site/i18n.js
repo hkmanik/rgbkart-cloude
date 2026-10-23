@@ -49,7 +49,7 @@
     'Nothing here yet': 'এখানে এখনো কিছু নেই', 'Be the first to list something in this category.': 'এই ক্যাটাগরিতে প্রথম পণ্যটি আপনিই দিন।',
     'Try removing a filter or searching for something else.': 'একটি ফিল্টার সরিয়ে দেখুন বা অন্য কিছু খুঁজুন।',
     "Products couldn't load. Check your connection and try again.": 'পণ্য লোড হয়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।',
-    '♥ Saved items': '♥ সংরক্ষিত পণ্য', 'Tap the ♡ on any product to save it here.': 'যেকোনো পণ্যের ♡ চাপুন, এখানে সংরক্ষিত থাকবে।', 'Products': 'পণ্য', 'Brand new': 'একদম নতুন', 'any': 'যেকোনো',
+    '♥ Saved items': '♥ সংরক্ষিত পণ্য', 'Tap the ♡ on any product to save it here.': 'যেকোনো পণ্যের ♡ চাপুন, এখানে সংরক্ষিত থাকবে।', 'Products': 'পণ্য', 'Brand new': 'একদম নতুন', '‹ Previous': '‹ আগের পৃষ্ঠা', 'Next ›': 'পরের পৃষ্ঠা ›', 'Previous page': 'আগের পৃষ্ঠা', 'Next page': 'পরের পৃষ্ঠা', 'Pages': 'পৃষ্ঠা', 'any': 'যেকোনো',
     // product
     'Add to cart': 'কার্টে যোগ করুন', 'Buy now': 'এখনই কিনুন', 'Added to cart': 'কার্টে যোগ হয়েছে', 'Quantity': 'পরিমাণ', 'Less': 'কম', 'More': 'বেশি',
     'In stock': 'স্টকে আছে', 'Out of stock': 'স্টকে নেই', 'Available to order': 'অর্ডার করা যাবে', 'Description': 'বিবরণ', 'Details': 'বিস্তারিত',
@@ -228,6 +228,7 @@
     ['{n} days', '{n} দিন'], ['{n} days Featured: ', '{n} দিন ফিচার্ড: '], ['Pay {p}', '{p} পেমেন্ট করুন'], ["Couldn't read {f}.", '{f} পড়া যায়নি।'],
     ['Price {p}. After you send the listing, pay by bKash, Nagad, Upay or Rocket from Your listings (Pay button) and enter the Transaction ID. Featured starts as soon as we confirm your payment (and approve the listing). Until then it shows as a free listing.',
      'দাম {p}। লিস্টিং পাঠানোর পর "আপনার লিস্টিং" থেকে (পেমেন্ট বাটন) বিকাশ, নগদ, উপায় বা রকেটে পেমেন্ট করে ট্রানজেকশন আইডি দিন। পেমেন্ট নিশ্চিত হলে (এবং লিস্টিং অনুমোদিত হলে) ফিচার্ড শুরু হবে। ততদিন এটি ফ্রি লিস্টিং হিসেবে দেখাবে।'],
+    ['Page {n}', 'পৃষ্ঠা {n}'], ['Showing {a}–{b} of {n} products', '{n}টি পণ্যের মধ্যে {a}–{b} দেখানো হচ্ছে'],
     ['Up to {n} photos.', 'সর্বোচ্চ {n}টি ছবি।'], ['Pick from {n} areas or type a new one', '{n}টি এলাকা থেকে বাছুন অথবা নতুন লিখুন'], ['I have paid {p}', 'আমি {p} পেমেন্ট করেছি'],
     ['Your {meth} number (you paid from)', 'আপনার {meth} নম্বর (যেটি থেকে পেমেন্ট করেছেন)'],
     ['✓ Payment sent ({meth}, TrxID {t}). Our team will check it soon, usually within a few hours.', '✓ পেমেন্ট পাঠানো হয়েছে ({meth}, TrxID {t})। আমাদের টিম শিগগিরই, সাধারণত কয়েক ঘণ্টার মধ্যে, যাচাই করবে।'],

@@ -59,7 +59,7 @@
   @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
 
   /* Gallery */
-  .gallery { display: grid; gap: 10px; position: sticky; top: 16px; }
+  .gallery { display: grid; gap: 10px; position: sticky; top: calc(var(--head-h, 0px) + 16px); }
   @media (max-width: 860px) { .gallery { position: static; } }
   .main-img { aspect-ratio: 1; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; place-items: center; position: relative; }
   .main-img img { width: 100%; height: 100%; object-fit: contain; }
@@ -297,8 +297,8 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=2"></script>
-<script src="menu.js?v=3"></script>
+<script src="i18n.js?v=3"></script>
+<script src="menu.js?v=4"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';

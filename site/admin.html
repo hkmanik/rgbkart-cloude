@@ -394,6 +394,7 @@
     <button class="nav tone-blue" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Products<span class="count" id="navProducts" hidden></span></button>
     <button class="nav tone-green" data-view="orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Orders</button>
     <button class="nav tone-amber" data-view="reviews"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Reviews</button>
+    <button class="nav tone-blue" data-view="questions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>Questions</button>
     <button class="nav tone-red" data-view="complaints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>Complaints<span class="count" id="navComplaints" hidden></span></button>
 
     <div class="nav-group tone-green">People</div>
@@ -609,6 +610,17 @@
           <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
           <input type="search" id="arSearch" placeholder="Search words, buyer, shop or product" aria-label="Search reviews" style="flex:1;min-width:220px"></div>
         <div id="arList" class="ar-list"></div>
+      </div>
+    </section>
+
+    <section data-page="questions" hidden>
+      <div class="page-head"><div><h1>Questions</h1><p>Buyers' questions on product pages and the sellers' answers. Hide a question or answer that is rude, spam or shares contact details it should not.</p></div></div>
+      <div class="card" style="margin-top:18px">
+        <div class="toolbar"><div class="filters" id="aqFilter">
+          <button type="button" data-f="all" aria-pressed="true">All</button><button type="button" data-f="open" aria-pressed="false">Not answered</button>
+          <button type="button" data-f="hidden" aria-pressed="false">Hidden</button></div>
+          <input type="search" id="aqSearch" placeholder="Search words, buyer, shop or product" aria-label="Search questions" style="flex:1;min-width:220px"></div>
+        <div id="aqList" class="ar-list"></div>
       </div>
     </section>
 
@@ -1128,6 +1140,50 @@
     loadComplaints(true);
   }
 
+  // ===================== Questions (0032_product_questions.sql) =====================
+  let adminQs = [], aqShops = new Map(), aqFilter = 'all';
+  async function loadAdminQuestions() {
+    const r = await db.from('product_questions').select('*, products(title)').order('created_at', { ascending: false }).limit(1000);
+    if (r.error) { $('aqList').innerHTML = ''; $('aqList').append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Questions are not switched on yet: run 0032_product_questions.sql.' : friendly(r.error) })); return; }
+    adminQs = r.data || [];
+    const ids = [...new Set(adminQs.map(x => x.seller_id))];
+    const sd = ids.length ? await db.from('seller_details').select('user_id, shop_name').in('user_id', ids) : { data: [] };
+    aqShops = new Map((sd.data || []).map(x => [x.user_id, x.shop_name]));
+    drawAdminQuestions();
+  }
+  $('aqFilter').querySelectorAll('button').forEach(b => b.onclick = () => { aqFilter = b.dataset.f; $('aqFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawAdminQuestions(); });
+  $('aqSearch').oninput = () => drawAdminQuestions();
+  function drawAdminQuestions() {
+    const q = $('aqSearch').value.trim().toLowerCase();
+    let list = adminQs;
+    if (aqFilter === 'open') list = list.filter(x => !x.answer && !x.is_hidden);
+    if (aqFilter === 'hidden') list = list.filter(x => x.is_hidden);
+    if (q) list = list.filter(x => [x.question, x.answer, x.asker_name, aqShops.get(x.seller_id), x.products && x.products.title].join(' ').toLowerCase().includes(q));
+    const box = $('aqList'); box.innerHTML = '';
+    if (!list.length) { box.append(h('p', { class: 'muted', style: 'padding:12px 0', text: adminQs.length ? 'Nothing here.' : 'No questions yet.' })); return; }
+    list.slice(0, 300).forEach(x => {
+      const reason = h('input', { type: 'text', maxlength: 200, placeholder: 'Reason (optional)', 'aria-label': 'Reason for hiding', style: 'flex:1;min-width:180px' });
+      const hideRow = h('div', { class: 'ar-act', hidden: true }, reason,
+        h('button', { type: 'button', class: 'bad', text: 'Hide question', onclick: () => hideQ(x, true, reason.value) }),
+        h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => hideRow.hidden = true }));
+      box.append(h('article', { class: 'ar' + (x.is_hidden ? ' hid' : '') },
+        h('div', { class: 'ar-head' }, h('b', { text: x.products ? x.products.title : 'Product' }),
+          h('span', { class: 'muted', text: [aqShops.get(x.seller_id), x.asker_name, new Date(x.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })].filter(Boolean).join(' · ') }),
+          x.is_hidden && h('span', { class: 'pill', text: 'Hidden' }), !x.answer && !x.is_hidden && h('span', { class: 'pill cp-reviewing', text: 'Not answered' })),
+        h('p', { style: 'margin:0;font-weight:600;overflow-wrap:anywhere', text: 'Q: ' + x.question }),
+        x.answer && h('p', { class: 'muted', style: 'margin:0;overflow-wrap:anywhere', text: 'A: ' + x.answer }),
+        h('div', { class: 'ar-act' }, h('a', { href: 'product.html?id=' + x.product_id + '#questions', target: '_blank', rel: 'noopener', text: 'Open product ↗' }),
+          x.is_hidden ? h('button', { type: 'button', class: 'ghost', text: 'Show again', onclick: () => hideQ(x, false) })
+                      : h('button', { type: 'button', class: 'ghost', text: 'Hide…', onclick: () => { hideRow.hidden = false; reason.focus(); } })),
+        hideRow));
+    });
+  }
+  async function hideQ(x, hide, reason) {
+    const { error } = await db.rpc('admin_hide_question', { p_question: x.id, p_hide: hide, p_reason: reason || null });
+    if (error) return toast(friendly(error));
+    toast(hide ? 'Question hidden' : 'Question shown again'); loadAdminQuestions();
+  }
+
   // ===================== Complaints (0030_reports_fraud.sql) =====================
   const CP_REASON = { fake: 'Fake or copy product', scam: 'Scam or fraud', no_delivery: 'Ordered but never delivered', wrong_info: 'Wrong price, photos or information',
     prohibited: 'Item not allowed for sale', offensive: 'Rude or offensive', spam: 'Spam or repeated listing', other: 'Something else' };
@@ -1231,8 +1287,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'reviews', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', reviews: 'Reviews', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1251,6 +1307,7 @@
     if (view === 'orders') loadAdminOrders();
     if (view === 'reviews') loadAdminReviews();
     if (view === 'complaints') loadComplaints();
+    if (view === 'questions') loadAdminQuestions();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => go(b.dataset.view));

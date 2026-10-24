@@ -627,6 +627,7 @@
           <div class="card">
             <h2>Contact</h2>
             <p class="hint" style="margin:0">Shown on your shop page. Leave blank to keep private.</p>
+            <p class="hint" id="sContactFill" hidden style="margin:4px 0 0;color:var(--accent);font-weight:600">Filled in from your sign-up details. Check them and press Save settings, or clear a box to keep it private.</p>
             <div class="grid3">
               <label>Phone<input id="sPhone" type="text" inputmode="tel" placeholder="01XXXXXXXXX"></label>
               <label>WhatsApp<input id="sWhatsapp" type="text" inputmode="tel" placeholder="01XXXXXXXXX"></label>
@@ -1022,7 +1023,7 @@
   const PLACE = { home: 'Home page', category: 'Top of category', home_and_category: 'Home page + top of category' };
   let plans = [];   // Featured plans set by the admin
 
-  let me = null, shop = null;
+  let me = null, shop = null, myProfile = null;
   let cats = [], catAttrs = [], attrs = [], attrById = new Map();
   let products = [], featured = [];
   let statusFilter = 'all';
@@ -1039,6 +1040,7 @@
     if (profile && profile.role === 'individual') { location.href = 'sell.html'; return; }
     if (!profile || profile.role !== 'seller') return gate('Seller Center is for seller accounts. You are signed in as a customer.', true);
     shop = Array.isArray(profile.seller_details) ? profile.seller_details[0] : profile.seller_details;
+    myProfile = profile;
     $('gate').hidden = true; $('shell').hidden = false;
     $('meEmail').textContent = me.email;
     $('shopName').innerHTML = '';
@@ -2631,7 +2633,14 @@
     shopImgRemoved = { logo: null, banner: null };
     const v = (id, x) => $(id).value = x || '';
     v('sName', shop.shop_name); $('sNameBnWrap').hidden = !('shop_name_bn' in shop); $('sNameBn').value = shop.shop_name_bn || ''; v('sTagline', shop.tagline); v('sSlug', shop.shop_slug); v('sAbout', shop.shop_description);
-    v('sPhone', shop.phone_public); v('sWhatsapp', shop.whatsapp); v('sEmail', shop.email_public); v('sAddress', shop.business_address); v('sLicence', shop.trade_license);
+    v('sPhone', shop.phone_public); v('sWhatsapp', shop.whatsapp); v('sEmail', shop.email_public); v('sAddress', shop.business_address);
+    // Empty contact boxes start with the details given at sign-up (account phone and email); nothing is shown to shoppers until Save
+    const signupPhone = (myProfile && myProfile.phone) || '';
+    const filled = [];
+    if (!shop.phone_public && signupPhone) { $('sPhone').value = RGBPhone.clean(signupPhone); filled.push(1); }
+    if (!shop.whatsapp && ($('sPhone').value || signupPhone)) { $('sWhatsapp').value = RGBPhone.clean($('sPhone').value || signupPhone); filled.push(1); }
+    if (!shop.email_public && me && me.email) { $('sEmail').value = me.email; filled.push(1); }
+    $('sContactFill').hidden = !filled.length; v('sLicence', shop.trade_license);
     v('sFacebook', shop.facebook_url); v('sInstagram', shop.instagram_url); v('sYoutube', shop.youtube_url); v('sTiktok', shop.tiktok_url); v('sWebsite', shop.website_url);
     $('sVacation').checked = !!shop.vacation_mode; v('sVacMsg', shop.vacation_message);
     $('pickupCard').hidden = !('allow_pickup' in shop); $('sPickup').checked = !!shop.allow_pickup;

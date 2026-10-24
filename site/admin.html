@@ -453,13 +453,20 @@
 
     <section data-page="dashboard">
       <div class="page-head"><div><h1>Dashboard</h1><p>What needs your attention today.</p></div></div>
-      <div class="tiles" style="margin-top:18px">
+      <h2 style="margin:18px 0 8px;font-size:1rem;color:var(--muted)">Needs your attention</h2>
+      <div class="tiles">
         <button class="tile tone-amber" data-go="sellers" id="tilePending"><b id="dPending">–</b><span>Sellers waiting for approval</span></button>
-        <button class="tile tone-green" data-go="customers"><b id="dCustomers">–</b><span>Customers</span></button>
-        <button class="tile tone-blue" data-go="categories"><b id="dCategories">–</b><span>Categories &amp; sub-categories</span></button>
-        <button class="tile tone-violet" data-go="attributes"><b id="dAttributes">–</b><span>Attributes</span></button>
         <button class="tile tone-amber" data-go="products" id="tileProducts"><b id="dProducts">–</b><span>Products waiting for review</span></button>
         <button class="tile tone-green" data-go="payments" id="tilePayments"><b id="dPayments">–</b><span>Payments to check</span></button>
+        <button class="tile tone-red" data-go="orders" id="tileOrders"><b id="dOrders">–</b><span>Orders on the way</span></button>
+      </div>
+      <h2 style="margin:22px 0 8px;font-size:1rem;color:var(--muted)">Your marketplace</h2>
+      <div class="tiles">
+        <button class="tile tone-green" data-go="sellers"><b id="dShops">–</b><span>Shops (approved)</span><small id="dShopsMore" class="muted" style="font-size:.8rem"></small></button>
+        <button class="tile tone-green" data-go="customers"><b id="dCustomers">–</b><span>Customers</span></button>
+        <button class="tile tone-blue" data-go="products"><b id="dLive">–</b><span>Live products</span><small id="dLiveMore" class="muted" style="font-size:.8rem"></small></button>
+        <button class="tile tone-blue" data-go="categories"><b id="dCategories">–</b><span>Categories &amp; sub-categories</span></button>
+        <button class="tile tone-violet" data-go="attributes"><b id="dAttributes">–</b><span>Attributes</span></button>
       </div>
       <p id="alertStatus" class="muted" style="margin:14px 2px 0;font-size:.88rem" hidden></p>
     </section>
@@ -1658,6 +1665,20 @@
     $('dPending').textContent = pending;
     $('tilePending').classList.toggle('alert', pending > 0);
     $('dCustomers').textContent = customers.length;
+    const shops = sellers.filter(s => s.seller_status === 'approved').length, notOk = sellers.filter(s => s.seller_status === 'rejected').length;
+    $('dShops').textContent = shops;
+    $('dShopsMore').textContent = [pending && `${pending} waiting`, notOk && `${notOk} rejected`].filter(Boolean).join(' · ');
+    // Live products, Featured, orders on the way (counts only, nothing downloaded)
+    const cnt = q => q.then(r => r.error ? null : r.count, () => null);
+    Promise.all([
+      cnt(db.from('products').select('id', { count: 'exact', head: true }).eq('status', 'approved')),
+      cnt(db.from('products').select('id', { count: 'exact', head: true }).eq('status', 'approved').eq('is_featured', true)),
+      cnt(db.from('orders').select('id', { count: 'exact', head: true }).in('status', ['pending', 'confirmed', 'packed', 'shipped'])),
+    ]).then(([live, feat, open]) => {
+      $('dLive').textContent = live ?? '–';
+      $('dLiveMore').textContent = feat ? `${feat} Featured` : '';
+      $('dOrders').textContent = open ?? '–';
+    });
     $('dCategories').textContent = cats.length;
     $('dAttributes').textContent = attrs.length;
     db.rpc('admin_alert_stats').then(({ data: a, error }) => {

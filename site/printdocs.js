@@ -24,12 +24,12 @@
     return `<div class="hd"><div class="from">${s.showLogo && logoUrl ? `<img class="logo" src="${esc(logoUrl)}" alt="">` : ''}<div><div class="shop">${esc(shop.shop_name || 'RGBKart seller')}</div>
       <div class="sm">${esc([shop.business_address, shop.area, shop.city].filter(Boolean).join(', '))}</div><div class="sm">${esc([shop.phone_public, shop.email_public].filter(Boolean).join(' · '))}</div>
       <div class="sm muted">Sold on RGBKart · Red &amp; Green Basket</div></div></div>
-      <div class="meta"><div class="ttl">${title}</div><div><b>${esc(o.order_no)}</b></div><div class="sm">${day(o.created_at)}</div>${s.barcode ? `<svg class="bc" data-code="${esc(o.order_no)}"></svg>` : ''}</div></div>`;
+      <div class="meta"><div class="ttl">${title}</div>${title === 'INVOICE' && o.invoice_no ? `<div>Invoice no. <b>${esc(o.invoice_no)}</b></div><div class="sm">Order ${esc(o.order_no)}</div>` : `<div><b>${esc(o.order_no)}</b></div>${o.invoice_no ? `<div class="sm">Invoice ${esc(o.invoice_no)}</div>` : ''}`}<div class="sm">${day(o.created_at)}</div>${s.barcode ? `<svg class="bc" data-code="${esc(o.order_no)}"></svg>` : ''}</div></div>`;
   }
   function invoice(o, shop, s, logoUrl) {
     const mixed = o.vat_rate == null && (o.order_items || []).some(i => i.vat_rate != null);
     const rows = (o.order_items || []).map((i, k) => `<tr><td class="c">${k + 1}</td><td>${esc(i.title)}${i.variant_label ? `<div class="sm">${esc(i.variant_label)}</div>` : ''}${mixed && i.vat_rate != null ? `<div class="sm">${Number(i.vat_rate) ? `VAT ${Number(i.vat_rate)}%: ${tk(i.vat_amount)}` : 'No VAT'}</div>` : ''}</td><td class="n">${i.qty}</td><td class="n">${tk(i.unit_price)}</td><td class="n">${tk(i.line_total)}</td></tr>`).join('');
-    return `<section class="pg">${head(o, shop, 'INVOICE', s, logoUrl)}
+    return `<section class="pg">${head(o, shop, 'INVOICE', s, logoUrl)}${o.status === 'cancelled' ? '<div class="void">CANCELLED: this order was cancelled. Nothing to collect.</div>' : ''}
       <div class="two"><div class="box"><div class="lb">Bill / deliver to</div><b>${esc(o.customer_name)}</b><div>${esc(o.phone)}</div><div>${esc(addr(o))}</div>${o.email ? `<div class="sm">${esc(o.email)}</div>` : ''}</div>
       <div class="box"><div class="lb">Payment</div><b>Cash on Delivery</b><div>Delivery: ${esc(SHIP[o.ship_method] || o.ship_name || o.ship_method)}</div>${o.tracking_note ? `<div class="sm">${esc(o.tracking_note)}</div>` : ''}</div></div>
       <table><thead><tr><th class="c">#</th><th>Item</th><th class="n">Qty</th><th class="n">Price</th><th class="n">Amount</th></tr></thead><tbody>${rows}</tbody>
@@ -69,7 +69,7 @@
     if (isLabel) {
       for (let k = 0; k < many.length; k += perSheet) body += `<section class="sheet n${perSheet}">${many.slice(k, k + perSheet).map(o => label(o, shop, s)).join('')}</section>`;
     } else body = many.map(o => (kind === 'invoice' ? invoice : packing)(o, shop, s, logoUrl)).join('');
-    const title = (isLabel ? 'Shipping labels' : kind === 'invoice' ? 'Invoices' : 'Packing lists') + (list.length === 1 ? ' ' + list[0].order_no : ` (${list.length} orders)`);
+    const title = (isLabel ? 'Shipping labels' : kind === 'invoice' ? 'Invoices' : 'Packing lists') + (list.length === 1 ? ' ' + (kind === 'invoice' && list[0].invoice_no ? list[0].invoice_no : list[0].order_no) : ` (${list.length} orders)`);
     const css = `@page { size: ${size[1]}; margin: ${isLabel || thermal ? '4mm' : '12mm'}; }
       * { box-sizing: border-box; } body { margin: 0; font: ${thermal ? '11px' : '13px'}/1.4 Arial, Helvetica, sans-serif; color: #000; background: #fff; }
       .bar { position: sticky; top: 0; background: #00802B; color: #fff; padding: 10px 14px; display: flex; gap: 10px; align-items: center; font: 600 14px Arial; z-index: 2; }
@@ -86,6 +86,7 @@
       table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; } th, td { border-bottom: 1px solid #999; padding: 6px 4px; text-align: left; vertical-align: top; }
       th { border-bottom: 2px solid #000; font-size: .85em; text-transform: uppercase; } .n { text-align: right; white-space: nowrap; } .c { text-align: center; width: 28px; }
       .big { font-size: 1.2em; font-weight: 700; } .chk { font-size: 1.3em; } tfoot td { border: 0; padding: 3px 4px; } .tot td { font-weight: 800; font-size: 1.15em; border-top: 2px solid #000; padding-top: 6px; }
+      .void { border: 2px solid #E30613; color: #E30613; font-weight: 700; text-align: center; padding: 6px; margin: 0 0 10px; }
       .foot { border-top: 1px dashed #777; padding-top: 6px; font-size: .9em; } .sign { display: flex; justify-content: space-between; gap: 20px; margin-top: 34px; }
       .sign span { flex: 1; border-top: 1px solid #000; padding-top: 4px; font-size: .85em; text-align: center; }
       .sheet { page-break-after: always; break-after: page; display: grid; height: ${perSheet > 1 ? '273mm' : 'auto'}; gap: 4mm; grid-template-columns: ${perSheet === 4 ? '1fr 1fr' : '1fr'}; grid-template-rows: ${perSheet > 1 ? `repeat(${perSheet === 4 ? 2 : 2}, 1fr)` : 'auto'}; }

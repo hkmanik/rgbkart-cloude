@@ -728,7 +728,7 @@
         <div class="toolbar"><div class="filters" id="aoFilter">
           <button type="button" data-s="open" aria-pressed="true">Open</button><button type="button" data-s="delivered" aria-pressed="false">Delivered</button>
           <button type="button" data-s="cancelled" aria-pressed="false">Cancelled</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
-          <input type="search" id="aoSearch" placeholder="Search order no., customer, phone or shop" aria-label="Search orders" style="flex:1;min-width:220px"></div>
+          <input type="search" id="aoSearch" placeholder="Search order or invoice no., customer, phone or shop" aria-label="Search orders" style="flex:1;min-width:220px"></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Order</th><th>Shop</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
           <tbody id="aoRows"></tbody></table></div>
@@ -1076,7 +1076,7 @@
   const HAS_OPTIONS = t => t === 'select' || t === 'multiselect' || t === 'color';
 
   let mode = 'signin', recovering = false, myRole = null, myId = null;
-  let sellers = [], customers = [], sellerFilter = 'pending';
+  let sellers = [], customers = [], sellerFilter = 'pending', invCodes = new Map();
   let cats = [], catAttrs = [], attrs = [];
   const collapsed = new Set();
   let catalogLoaded = false;
@@ -2089,6 +2089,16 @@
     const { data, error } = await db.rpc('admin_list_users', { p_role: 'seller' });
     if (error) return setMsg('dashMsg', friendly(error), true);
     sellers = data; drawSellers();
+    const ic = await db.from('seller_details').select('user_id, invoice_code');   // 0050_invoice_numbers.sql
+    if (!ic.error) { invCodes = new Map((ic.data || []).map(x => [x.user_id, x.invoice_code])); drawSellers(); }
+  }
+  async function changeInvCode(s) {
+    const now = invCodes.get(s.id) || '';
+    const v = window.prompt(`Invoice code for ${s.shop_name || 'this shop'} (2–8 letters or digits). New invoices will start with it; old invoices keep their numbers.`, now);
+    if (v == null || v.trim().toUpperCase() === now) return;
+    const { data, error } = await db.rpc('admin_set_invoice_code', { p_seller: s.id, p_code: v });
+    if (error) return toast(friendly(error));
+    invCodes.set(s.id, data); drawSellers(); toast(`Invoice code is now ${data}`);
   }
   $('sellerFilter').querySelectorAll('button').forEach(b => b.onclick = () => {
     sellerFilter = b.dataset.status;
@@ -2111,7 +2121,9 @@
           h('div', { class: 'seller-meta', text: [s.full_name, s.phone, s.email].filter(Boolean).join(' · ') }),
           h('div', { class: 'seller-meta', text: [s.business_address, s.city].filter(Boolean).join(', ') }),
           s.shop_description && h('div', { class: 'seller-meta', text: s.shop_description }),
-          h('div', { class: 'seller-meta', text: `Trade license: ${s.trade_license || 'not given'} · Joined ${fmtDate(s.created_at)}` })),
+          h('div', { class: 'seller-meta', text: `Trade license: ${s.trade_license || 'not given'} · Joined ${fmtDate(s.created_at)}` }),
+          invCodes.get(s.id) && h('div', { class: 'seller-meta' }, `Invoice numbers: ${invCodes.get(s.id)}-${new Date().getFullYear()}-00001 … `,
+            canApprove() && h('button', { type: 'button', class: 'ghost', style: 'padding:2px 8px;font-size:.8rem', text: 'Change code', onclick: () => changeInvCode(s) }))),
         canApprove() ? h('div', { class: 'actions' },
           s.seller_status !== 'approved' && actionBtn('Approve', 'good', () => setStatus(s, 'approved')),
           s.seller_status !== 'rejected' && actionBtn('Reject', 'bad', () => setStatus(s, 'rejected')),
@@ -2905,14 +2917,14 @@
   function drawAdminOrders() {
     const q = $('aoSearch').value.trim().toLowerCase();
     const rows = aOrders.filter(o => (aoFilter === 'all' || (aoFilter === 'open' ? !['delivered', 'cancelled'].includes(o.status) : o.status === aoFilter))
-      && (!q || [o.order_no, o.customer_name, o.phone, (aoShops.get(o.seller_id) || {}).shop_name].some(v => (v || '').toLowerCase().includes(q))));
+      && (!q || [o.order_no, o.invoice_no, o.customer_name, o.phone, (aoShops.get(o.seller_id) || {}).shop_name].some(v => (v || '').toLowerCase().includes(q))));
     const body = $('aoRows'); body.innerHTML = '';
     if (!rows.length) { body.append(h('tr', {}, h('td', { colspan: 7, class: 'empty', text: aOrders.length ? 'No orders match.' : 'No orders yet.' }))); return; }
     for (const o of rows) {
       const sh = aoShops.get(o.seller_id) || {};
       const cls = { pending: 'pending', delivered: 'approved', cancelled: 'rejected' }[o.status] || 'plain';
       body.append(h('tr', {},
-        h('td', {}, h('b', { text: o.order_no, style: 'font-family:ui-monospace,monospace' }), h('div', { class: 'date', text: fmtDate(o.created_at) })),
+        h('td', {}, h('b', { text: o.order_no, style: 'font-family:ui-monospace,monospace' }), o.invoice_no && h('div', { class: 'date', text: 'Invoice ' + o.invoice_no }), h('div', { class: 'date', text: fmtDate(o.created_at) })),
         h('td', {}, h('div', { text: sh.shop_name || '—' }), sh.phone_public && h('div', { class: 'date', text: sh.phone_public })),
         h('td', {}, h('div', { text: o.customer_name }), h('div', { class: 'date', text: `${o.phone} · ${o.district}` })),
         h('td', { class: 'date', text: (o.order_items || []).map(i => `${i.qty} × ${i.title}`).join(', ') }),
@@ -3203,8 +3215,8 @@
         ['Visitors', d.visitors], ['Page visits', d.page_views], ['Messages', d.messages], ['New customers', d.new_customers], ['New shops', d.new_shops], ['New one-time sellers', d.new_one_time],
         ['New listings', d.new_listings], ['Listings that went live', d.approved_listings], ['Live products now', d.live_products], [],
         ['Period from', 'Period to', 'Visitors', 'New sign-ups', 'New listings', 'Income (BDT)'], ...(d.series || []).map(r => [r.from, r.to, r.visitors, r.signups, r.listings, Number(r.income)])],
-      Orders: [['Order no.', 'Placed', 'Shop', 'Customer', 'Phone', 'District', 'Delivery', 'Status', 'Items', 'Items value', 'Delivery fee', 'Coupon', 'Discount', 'Total (BDT)', 'VAT included (BDT)', 'Cancelled by', 'Cancel reason', 'Delivered']]
-        .concat(x.orders.map(o => [o.order_no, dt(o.created_at), shop(o.seller_id), o.customer_name, o.phone, o.district, o.ship_method, o.status,
+      Orders: [['Order no.', 'Invoice no.', 'Placed', 'Shop', 'Customer', 'Phone', 'District', 'Delivery', 'Status', 'Items', 'Items value', 'Delivery fee', 'Coupon', 'Discount', 'Total (BDT)', 'VAT included (BDT)', 'Cancelled by', 'Cancel reason', 'Delivered']]
+        .concat(x.orders.map(o => [o.order_no, o.invoice_no || '', dt(o.created_at), shop(o.seller_id), o.customer_name, o.phone, o.district, o.ship_method, o.status,
           (o.order_items || []).map(i => `${i.qty} × ${i.title}${i.variant_label ? ' (' + i.variant_label + ')' : ''}`).join('; '),
           Number(o.subtotal), Number(o.ship_fee), o.coupon_code || '', Number(o.discount || 0), Number(o.total), o.vat_amount == null ? '' : Number(o.vat_amount), o.cancelled_by || '', o.cancel_reason || '', dt(o.delivered_at)])),
       'Payments received': [['Checked', 'Shop', 'For', 'Item', 'Method', 'Sender no.', 'TrxID', 'Amount (BDT)']]

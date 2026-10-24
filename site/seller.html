@@ -453,14 +453,14 @@
 
     <!-- ===== Orders ===== -->
     <section data-page="orders">
-      <div class="page-head"><div><h1>Orders</h1><p>Orders from customers, paid in cash on delivery. Call the customer, confirm, pack and send it, then mark each step so the customer can follow along.</p></div></div>
+      <div class="page-head"><div><h1>Orders</h1><p>Orders from customers, paid in cash on delivery. Call the customer, confirm, pack and send it, then mark each step so the customer can follow along.</p><p class="pmeta" id="invCodeNote" hidden></p></div></div>
       <div class="card" style="margin-top:16px">
         <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap">
           <div class="ord-tabs" id="ordTabs" role="group" aria-label="Show orders"></div>
           <button type="button" class="ghost" id="prSetupBtn">🖨 Printer setup</button>
         </div>
         <div class="card" id="prSetup" hidden style="margin-top:12px;background:var(--bg)"></div>
-        <input type="search" id="ordSearch" placeholder="Search order number, name or phone" aria-label="Search orders" style="margin:10px 0">
+        <input type="search" id="ordSearch" placeholder="Search order or invoice number, name or phone" aria-label="Search orders" style="margin:10px 0">
         <div class="pr-bulk" id="prBulk">
           <label class="check" style="margin:0"><input type="checkbox" id="ordAll"> Select all</label>
           <span class="pmeta" id="prCount">Tick orders to print several at once</span>
@@ -990,7 +990,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
 <script src="pay.js?v=1"></script>
-<script src="printdocs.js?v=5"></script>
+<script src="printdocs.js?v=6"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -1581,7 +1581,7 @@
   async function loadOrders() {
     const r = await db.from('orders').select('*, order_items(*)').eq('seller_id', me.id).order('created_at', { ascending: false }).limit(300);
     if (r.error) { $('ordList').innerHTML = ''; $('ordList').append(h('div', { class: 'empty' }, h('span', { text: /does not exist|Could not find/i.test(r.error.message) ? 'Orders aren\'t switched on yet.' : friendly(r.error) }))); return; }
-    orders = r.data; drawOrderCount(); drawOrders();
+    orders = r.data; drawOrderCount(); drawOrders(); drawInvCode();
     // buyer history for open orders (0030_reports_fraud.sql): delivered / refused / cancelled before, on all shops
     const ids = orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).map(o => o.id);
     if (ids.length) {
@@ -1605,6 +1605,11 @@
   }
   function drawOrderCount() { const n = orders.filter(o => o.status === 'pending').length; $('navOrders').hidden = !n; $('navOrders').textContent = n; }
   $('ordSearch').oninput = () => drawOrders();
+  function drawInvCode() {
+    const n = $('invCodeNote'); if (!n || !shop || !shop.invoice_code) return;
+    n.hidden = false;
+    n.textContent = `Every order also gets your shop's own invoice number, in order: ${shop.invoice_code}-${new Date().getFullYear()}-00001, -00002 … Your invoice code ${shop.invoice_code} is set by RGBKart; ask RGBKart to change it.`;
+  }
   function drawOrders() {
     const tabs = $('ordTabs'); tabs.innerHTML = '';
     const inProg = o => ['confirmed', 'packed', 'shipped'].includes(o.status);
@@ -1613,7 +1618,7 @@
       tabs.append(h('button', { type: 'button', 'aria-pressed': String(ordTab === k), onclick: () => { ordTab = k; drawOrders(); } }, t, h('span', { class: 'n', text: count(k) }))));
     const q = $('ordSearch').value.trim().toLowerCase();
     const rows = orders.filter(o => (ordTab === 'all' || (ordTab === 'open' ? inProg(o) : o.status === ordTab))
-      && (!q || [o.order_no, o.customer_name, o.phone].some(v => (v || '').toLowerCase().includes(q))));
+      && (!q || [o.order_no, o.invoice_no, o.customer_name, o.phone].some(v => (v || '').toLowerCase().includes(q))));
     const box = $('ordList'); box.innerHTML = '';
     if (!rows.length) { box.append(h('div', { class: 'empty' }, h('span', { text: ordTab === 'pending' ? 'No new orders. New orders appear here.' : 'No orders here.' }))); drawPrBulk(); return; }
     for (const o of rows) box.append(orderCard(o));
@@ -1631,7 +1636,7 @@
     const at = O_STEPS.indexOf(o.status);
     return h('div', { class: 'ord' },
       h('div', { class: 'ord-head' },
-        h('div', {}, h('input', { type: 'checkbox', class: 'ord-sel', 'aria-label': 'Select ' + o.order_no, checked: ordSel.has(o.id), onchange: e => { e.target.checked ? ordSel.add(o.id) : ordSel.delete(o.id); drawPrBulk(); } }), h('b', { class: 'ord-no', text: o.order_no }), h('span', { class: 'pmeta', text: ' · ' + ofmt(o.created_at) })),
+        h('div', {}, h('input', { type: 'checkbox', class: 'ord-sel', 'aria-label': 'Select ' + o.order_no, checked: ordSel.has(o.id), onchange: e => { e.target.checked ? ordSel.add(o.id) : ordSel.delete(o.id); drawPrBulk(); } }), h('b', { class: 'ord-no', text: o.order_no }), o.invoice_no && h('span', { class: 'pmeta', text: ' · Invoice ' + o.invoice_no }), h('span', { class: 'pmeta', text: ' · ' + ofmt(o.created_at) })),
         h('span', { class: 'chip ' + ({ pending: 'awaiting_payment', delivered: 'active', cancelled: 'rejected' }[o.status] || 'info'), text: O_LABEL[o.status] })),
       o.status !== 'cancelled' && h('div', { class: 'ord-track' }, O_STEPS.map((k, i) => h('span', { class: i <= at ? 'on' : '', text: k === 'pending' ? 'Placed' : O_LABEL[k] }))),
       h('div', { class: 'ord-grid' },
@@ -1707,7 +1712,7 @@
     const s = RGBPrint.settings(), box = $('prSetup'); box.innerHTML = '';
     const sel = (id, opts, val) => h('select', { id }, Object.entries(opts).map(([k, v]) => h('option', { value: k, text: v[0], selected: k === val })));
     const chk = (id, label, on) => h('label', { class: 'check' }, h('input', { type: 'checkbox', id, checked: on }), label);
-    const sample = { id: 0, order_no: 'RGB-SAMPLE-0001', created_at: new Date().toISOString(), customer_name: 'Sample Customer', phone: '01711000000', email: 'customer@example.com',
+    const sample = { id: 0, order_no: 'RGB-SAMPLE-0001', invoice_no: ((shop && shop.invoice_code) || 'SHOP') + '-' + new Date().getFullYear() + '-00001', created_at: new Date().toISOString(), customer_name: 'Sample Customer', phone: '01711000000', email: 'customer@example.com',
       address: 'House 12, Road 5, Block C', area: 'Mirpur 10', district: 'Dhaka', note: 'Please call before delivery', ship_method: 'dhaka', ship_fee: 70, subtotal: 2990, total: 3060,
       order_items: [{ title: 'Sample product', variant_label: 'Black / M', qty: 1, unit_price: 2490, line_total: 2490 }, { title: 'Another product', qty: 2, unit_price: 250, line_total: 500 }] };
     const read = () => ({ docSize: $('prDoc').value, labelSize: $('prLabel').value, copies: Number($('prCopies').value) || 1, showLogo: $('prLogo').checked, barcode: $('prBarcode').checked,

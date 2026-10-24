@@ -280,7 +280,7 @@
 
   // ---------------- texts with values: [English pattern, Bangla] — {x} is a value, numbers in it become Bangla digits ----------------
   const P = [
-    ['{t} | RGBKart', '{t} | RGBKart'],
+    ['{t} | RGBKart', '{t} | RGBKart'], ['Invoice {i}', 'ইনভয়েস {i}'],
     ['Sale -{n}%', 'ছাড় -{n}%'], ['from {p}', '{p} থেকে'], ['All {n} →', 'সব {n}টি →'], ['{n} products', '{n}টি পণ্য'], ['{n} product', '{n}টি পণ্য'], ['{n} items', '{n}টি পণ্য'],
     ['Show more ({n} left)', 'আরও দেখুন ({n}টি বাকি)'], ['Results for “{q}”', '“{q}”-এর ফলাফল'], ['Results for “{q}” in {w}', '{w}-এ “{q}”-এর ফলাফল'], ['Search: {q}', 'খোঁজ: {q}'], ['Hide {c} sub-categories', '{c}-এর উপ-ক্যাটাগরি লুকান'], ['Show {c} sub-categories', '{c}-এর উপ-ক্যাটাগরি দেখুন'], ['Save: {t}', 'সংরক্ষণ করুন: {t}'], ['Remove from saved: {t}', 'সংরক্ষিত থেকে সরান: {t}'],
     ['Cart, {n} items', 'কার্ট, {n}টি পণ্য'], ['Cart, {n} item', 'কার্ট, {n}টি পণ্য'], ['Messages, {n} new', 'মেসেজ, {n}টি নতুন'], ['Alerts, {n} new', 'নোটিফিকেশন, {n}টি নতুন'],

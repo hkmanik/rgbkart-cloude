@@ -51,7 +51,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=23"></script>
+<script src="i18n.js?v=24"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
@@ -124,7 +124,7 @@
       const at = STEPS.findIndex(x => x[0] === o.status);
       const cx = cancelBits(o);
       list.append(h('article', { class: 'box ocard' },
-        h('div', { class: 'ohead' }, h('div', {}, h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || o.seller_id), style: 'color:inherit;text-decoration:none' }, h('b', { text: L(shop, 'shop_name') || T('Shop'), translate: 'no' })), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), ' · ' + fmt(o.created_at))),
+        h('div', { class: 'ohead' }, h('div', {}, h('a', { href: 'store.html?s=' + encodeURIComponent(shop.shop_slug || o.seller_id), style: 'color:inherit;text-decoration:none' }, h('b', { text: L(shop, 'shop_name') || T('Shop'), translate: 'no' })), h('div', { class: 'm' }, h('span', { class: 'ono', text: o.order_no }), o.invoice_no ? ' · ' + T('Invoice {i}', { i: o.invoice_no }) : '', ' · ' + fmt(o.created_at))),
           h('span', { class: 'ost ' + o.status, text: LABEL[o.status] })),
         o.status !== 'cancelled' && h('div', { class: 'track', 'aria-label': 'Order progress' }, STEPS.map(([k, t], i) => h('span', { class: i <= at ? 'on' : '', text: t }))),
         o.status === 'cancelled' && h('p', { class: 'm bad', text: T(o.cancelled_by === 'customer' ? 'Cancelled by you' : o.cancelled_by === 'seller' ? 'Cancelled by the shop' : 'Cancelled') + (o.cancel_reason ? ': ' + o.cancel_reason : '') }),

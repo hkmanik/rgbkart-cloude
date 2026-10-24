@@ -73,8 +73,8 @@
       list.forEach(m => choose.append(el('button', { type: 'button', class: 'rp-m', 'data-id': m.id, onclick: () => { pick = m; drawTo(); } }, el('i', { style: `background:${m.color}` }), m.name)));
       send.onclick = async () => {
         err.hidden = true;
-        const s = sender.value.replace(/[^0-9+]/g, ''), t = trx.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-        if (!/^(\+?880)?01[3-9][0-9]{8}$/.test(s)) { err.textContent = 'Enter the mobile number you paid from, like 01711000000.'; err.hidden = false; return sender.focus(); }
+        const s0 = sender.value.replace(/\D/g, ''), s = /^8801[3-9]\d{8}$/.test(s0) ? '0' + s0.slice(3) : /^1[3-9]\d{8}$/.test(s0) ? '0' + s0 : s0, t = trx.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+        if (!/^01[3-9][0-9]{8}$/.test(s)) { err.textContent = 'Enter the mobile number you paid from, like 01711000000.'; err.hidden = false; return sender.focus(); }
         if (!/^[A-Z0-9]{6,20}$/.test(t)) { err.textContent = 'Enter the Transaction ID (TrxID) from your payment message. It has 6 to 20 letters and numbers.'; err.hidden = false; return trx.focus(); }
         send.disabled = true; send.textContent = 'Sending…';
         const r = await db.rpc('submit_payment', { p_kind: kind, p_ref: ref, p_method: pick.id, p_sender: s, p_trx: t });

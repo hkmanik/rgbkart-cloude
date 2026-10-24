@@ -12,6 +12,8 @@ ErrorDocument 404 /404.html
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # Short shop address shown in Seller Center: rgbkart.com/shop/<shop-web-address> → the shop page
+  RewriteRule ^shop/([a-z0-9-]+)/?$ /store.html?s=$1 [L,R=302]
 </IfModule>
 
 # Smaller downloads

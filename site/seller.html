@@ -988,9 +988,10 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="session.js?v=1"></script>
+<script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="pay.js?v=1"></script>
+<script src="pay.js?v=2"></script>
 <script src="printdocs.js?v=6"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -2715,7 +2716,7 @@
       }
       const row = {
         shop_name: val('sName'), tagline: val('sTagline'), shop_slug: slug, shop_description: val('sAbout'),
-        phone_public: val('sPhone'), whatsapp: val('sWhatsapp'), email_public: val('sEmail'), business_address: val('sAddress'), city: $('sDistrict').value, trade_license: val('sLicence'),
+        phone_public: RGBPhone.clean(val('sPhone')) || null, whatsapp: RGBPhone.clean(val('sWhatsapp')) || null, email_public: val('sEmail'), business_address: val('sAddress'), city: $('sDistrict').value, trade_license: val('sLicence'),
         facebook_url: val('sFacebook'), instagram_url: val('sInstagram'), youtube_url: val('sYoutube'), tiktok_url: val('sTiktok'), website_url: val('sWebsite'),
         vacation_mode: $('sVacation').checked, vacation_message: $('sVacation').checked ? val('sVacMsg') : null,
         logo_path: paths.logo, banner_path: paths.banner,

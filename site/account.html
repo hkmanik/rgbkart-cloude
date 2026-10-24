@@ -58,7 +58,7 @@
 
 <script src="session.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=24"></script>
+<script src="i18n.js?v=25"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=18"></script>
 <script src="menu.js?v=5"></script>
@@ -66,7 +66,7 @@
 <script>
   let me = null, prof = null, addrs = [], tableReady = true;
   const LABEL = { pending: 'Waiting for shop', confirmed: 'Confirmed', packed: 'Packed', shipped: 'On the way', delivered: 'Delivered', cancelled: 'Cancelled' };
-  const PHONE_RE = /^(\+?880)?01[3-9][0-9]{8}$/;
+  const PHONE_RE = { test: v => RGBPhone.ok(v) };   // phone.js: 01… / +8801… / 8801…
 
   async function start() {
     await initShell();
@@ -172,7 +172,7 @@
     const err = h('p', { class: 'err', hidden: true });
     const f = h('form', { class: 'form', style: 'margin-bottom:14px;padding:14px;border:1.5px solid var(--accent);border-radius:12px;background:var(--accent-soft)', onsubmit: async e => {
       e.preventDefault();
-      const v = { label: $('adLabel').value.trim() || null, full_name: $('adName').value.trim(), phone: $('adPhone').value.replace(/[^0-9+]/g, '') || null,
+      const v = { label: $('adLabel').value.trim() || null, full_name: $('adName').value.trim(), phone: RGBPhone.clean($('adPhone').value) || null,
         address: $('adAddr').value.trim(), district: dist.value, area: $('adArea').value.trim() || null, is_default: $('adDef').checked };
       const bad = [];
       if (v.full_name.length < 2) bad.push(T('your name'));
@@ -203,7 +203,7 @@
 
   async function saveProfile(e) {
     e.preventDefault();
-    const name = $('pfName').value.trim(), phone = $('pfPhone').value.replace(/[^0-9+]/g, '');
+    const name = $('pfName').value.trim(), phone = RGBPhone.clean($('pfPhone').value);
     const err = $('pfErr');
     if (name.length < 2 || (phone && !PHONE_RE.test(phone))) { err.textContent = T('Please enter {x}.', { x: name.length < 2 ? T('your name') : T('a valid mobile number like 01711000000') }); err.hidden = false; return; }
     const r = await db.from('profiles').update({ full_name: name, phone: phone || null }).eq('id', me.id);

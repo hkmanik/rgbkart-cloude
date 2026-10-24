@@ -3483,6 +3483,17 @@
     $('planDrawer').hidden = $('planScrim').hidden = false;
     $('plName').focus();
   }
+  // Changing Days also changes "N days" in the plan name and benefits (e.g. "Featured 7 days" → "Featured 10 days")
+  let plDaysWas = null;
+  $('plDays').onfocus = () => { plDaysWas = $('plDays').value; };
+  $('plDays').oninput = () => {
+    const was = plDaysWas || '', now = $('plDays').value;
+    if (!/^\d+$/.test(was) || !/^\d+$/.test(now) || was === now) return;
+    const re = new RegExp('\\b' + was + '(\\s*)(days?)\\b', 'gi');
+    const fix = t => t.replace(re, (m, sp, w) => now + sp + (now === '1' ? 'day' : 'days'));
+    $('plName').value = fix($('plName').value); $('plBenefits').value = fix($('plBenefits').value);
+    plDaysWas = now;
+  };
   function closePlan() { $('planDrawer').hidden = $('planScrim').hidden = true; editingPlan = null; }
   $('planClose').onclick = $('planCancel').onclick = $('planScrim').onclick = closePlan;
   $('planDrawer').onsubmit = async e => {

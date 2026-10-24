@@ -111,6 +111,9 @@ function card(p, shops) {
     const vs = (p.product_variations || []).filter(v => v.is_active);
     const now = vs.map(v => v.sale_price || v.price);
     price = now.length ? (new Set(now).size > 1 ? T('from {p}', { p: money(Math.min(...now)) }) : money(Math.min(...now))) : money(p.price);
+    // the cheapest version on sale → show its normal price crossed out
+    const cheap = vs.slice().sort((a, b) => (a.sale_price || a.price) - (b.sale_price || b.price))[0];
+    if (cheap && cheap.sale_price && Number(cheap.sale_price) < Number(cheap.price)) was = money(cheap.price);
     const best = vs.filter(v => v.sale_price).map(v => Math.round((1 - v.sale_price / v.price) * 100));
     if (best.length) off = Math.max(...best);
   } else if (saleActive(p)) { price = money(p.sale_price); was = money(p.price); off = Math.round((1 - p.sale_price / p.price) * 100); }

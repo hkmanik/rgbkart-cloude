@@ -278,6 +278,16 @@
   .ap-box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 0; display: grid; gap: 10px; }
   .ap-box legend, .ap-lbl { font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 4px; }
   .ap-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media (max-width: 480px) { .ap-2 { grid-template-columns: 1fr; } }
+  .ap-opt { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; background: var(--surface); }
+  .ap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ap-chips button { font: 600 .85rem var(--body); padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .ap-chips button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .ap-chips i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgb(0 0 0 / .2); display: inline-block; }
+  .ap-vers { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .ap-vers th { text-align: left; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 4px; }
+  .ap-vers td { padding: 4px; border-top: 1px solid var(--line); vertical-align: middle; }
+  .ap-vers input[type=number] { width: 100%; min-width: 64px; padding: 6px 8px; }
+  .ap-vers tr.off td:not(:last-child) { opacity: .45; }
   .ap-photos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
   .ap-ph { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
   .ap-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -914,8 +924,10 @@
     <label>Product name in Bangla (optional) <input id="apTitleBn" type="text" maxlength="120" lang="bn"></label>
     <label>Category <select id="apCat"></select></label>
     <div style="display:grid;gap:6px"><span class="ap-lbl">Condition</span><div class="ap-seg" id="apCond" role="group" aria-label="Condition"><button type="button" data-v="new" aria-pressed="true">New</button><button type="button" data-v="pre_owned" aria-pressed="false">Pre-owned</button></div></div>
-    <div class="ap-2"><label>Price (৳) <input id="apPrice" type="number" min="1" step="1" inputmode="numeric"></label><label>Sale price (optional) <input id="apSale" type="number" min="1" step="1" inputmode="numeric"></label></div>
-    <div class="ap-2"><label>Stock <input id="apStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label><div style="display:grid;gap:8px;align-content:end"><label class="check"><input id="apNeg" type="checkbox"> Price is negotiable</label><label class="check"><input id="apFree" type="checkbox"> Free delivery</label></div></div>
+    <div style="display:grid;gap:6px"><span class="ap-lbl">Product type</span><div class="ap-seg" id="apType" role="group" aria-label="Product type"><button type="button" data-v="simple" aria-pressed="true">Simple<br><small style="font-weight:400">one price</small></button><button type="button" data-v="variable" aria-pressed="false">With options<br><small style="font-weight:400">sizes, colours…</small></button></div></div>
+    <div id="apOpts" hidden style="display:grid;gap:10px"></div>
+    <div class="ap-2" id="apPriceRow"><label>Price (৳) <input id="apPrice" type="number" min="1" step="1" inputmode="numeric"></label><label>Sale price (optional) <input id="apSale" type="number" min="1" step="1" inputmode="numeric"></label></div>
+    <div class="ap-2"><label id="apStockWrap">Stock <input id="apStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label><div style="display:grid;gap:8px;align-content:end"><label class="check"><input id="apNeg" type="checkbox"> Price is negotiable</label><label class="check"><input id="apFree" type="checkbox"> Free delivery</label></div></div>
     <label>Description (optional) <textarea id="apDesc" rows="4" maxlength="5000"></textarea></label>
     <label>Description in Bangla (optional) <textarea id="apDescBn" rows="3" maxlength="5000" lang="bn"></textarea></label>
     <div style="display:grid;gap:6px"><span class="ap-lbl">Listing</span><div class="ap-seg" id="apListing" role="group" aria-label="Listing"><button type="button" data-v="free" aria-pressed="true">Free listing</button><button type="button" data-v="featured" aria-pressed="false">★ Featured (no charge)</button></div>
@@ -3297,11 +3309,102 @@
     $('apFeatDaysWrap').hidden = b.dataset.v !== 'featured';
   });
   $('apCond').querySelectorAll('button').forEach(b => b.onclick = () => $('apCond').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))));
+
+  // ---------- Products with options (0055): pick 1–3 single-choice / colour attributes of the category, tick values, set price + stock per version
+  let apUse = new Map();          // attribute id → Set of option ids ticked
+  let apVers = new Map();         // options key → { options: {attrId: optId}, label, price, sale, stock, active }
+  const apIsVar = () => $('apType').querySelector('[aria-pressed="true"]').dataset.v === 'variable';
+  function apVarAttrs(catId) {
+    const out = [], seen = new Set();
+    let c = cats.find(x => x.id === catId);
+    while (c) {
+      catAttrs.filter(x => x.category_id === c.id).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).forEach(x => {
+        if (seen.has(x.attribute_id)) return; seen.add(x.attribute_id);
+        const a = attrs.find(t => t.id === x.attribute_id);
+        if (a && (a.input_type === 'select' || a.input_type === 'color') && (a.attribute_options || []).length) out.push(a);
+      });
+      c = c.parent_id ? cats.find(x => x.id === c.parent_id) : null;
+    }
+    return out;
+  }
+  function apSyncType() {
+    const v = apIsVar();
+    $('apOpts').hidden = !v; $('apPriceRow').hidden = v; $('apStockWrap').hidden = v;
+    if (v) apDrawOpts();
+  }
+  $('apType').querySelectorAll('button').forEach(b => b.onclick = () => {
+    $('apType').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); apSyncType();
+  });
+  $('apCat').addEventListener('change', () => { apUse = new Map(); apVers = new Map(); if (apIsVar()) apDrawOpts(); });
+  function apRebuild() {
+    // every combination of the ticked values; keep what was typed for combinations that still exist
+    const used = [...apUse.entries()].filter(([, set]) => set.size).sort((a, b) => a[0] - b[0]);
+    let combos = [{}];
+    for (const [aid, set] of used) {
+      const a = attrs.find(t => t.id === aid);
+      const opts = (a.attribute_options || []).filter(o => set.has(o.id)).sort((x, y) => (x.sort_order || 0) - (y.sort_order || 0) || x.value.localeCompare(y.value));
+      combos = combos.flatMap(c => opts.map(o => ({ ...c, [aid]: o.id })));
+    }
+    const next = new Map();
+    if (used.length) for (const c of combos.slice(0, 100)) {
+      const key = Object.keys(c).sort((x, y) => x - y).map(k => c[k]).join('-');
+      const label = Object.keys(c).sort((x, y) => x - y).map(k => { const a = attrs.find(t => t.id === Number(k)); return (a.attribute_options.find(o => o.id === c[k]) || {}).value; }).join(' / ');
+      next.set(key, apVers.get(key) || { options: c, label, price: $('apAllPrice') ? $('apAllPrice').value : '', sale: '', stock: $('apAllStock') ? $('apAllStock').value : '', active: true });
+    }
+    apVers = next;
+  }
+  function apDrawOpts() {
+    const box = $('apOpts'); box.innerHTML = '';
+    const catId = Number($('apCat').value) || null;
+    if (!catId) { box.append(h('p', { class: 'attr-meta', text: 'Choose the category first. Its size, colour and other choice attributes appear here.' })); return; }
+    const list = apVarAttrs(catId);
+    if (!list.length) { box.append(h('p', { class: 'attr-meta', text: 'This category has no choice attributes (like Size or Colour) yet. Add one to the category in Categories, or its values in Attributes, then come back.' })); return; }
+    box.append(h('span', { class: 'ap-lbl', text: 'Options (up to 3): tick the values this product comes in' }));
+    for (const a of list) {
+      const on = apUse.has(a.id);
+      const opts = [...a.attribute_options].sort((x, y) => (x.sort_order || 0) - (y.sort_order || 0) || x.value.localeCompare(y.value));
+      box.append(h('div', { class: 'ap-opt' },
+        h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: on, onchange: e => {
+          if (e.target.checked && apUse.size >= 3) { e.target.checked = false; return toast('Up to 3 options per product.'); }
+          if (e.target.checked) apUse.set(a.id, new Set()); else apUse.delete(a.id);
+          apRebuild(); apDrawOpts();
+        } }), h('b', { text: a.name + (a.unit ? ` (${a.unit})` : '') })),
+        on && h('div', { class: 'ap-chips' }, opts.map(o => h('button', { type: 'button', 'aria-pressed': String(apUse.get(a.id).has(o.id)), onclick: () => {
+          const set = apUse.get(a.id); set.has(o.id) ? set.delete(o.id) : set.add(o.id); apRebuild(); apDrawOpts();
+        } }, o.color_hex && h('i', { style: `background:${o.color_hex}` }), o.value)))));
+    }
+    if (!apVers.size) { box.append(h('p', { class: 'attr-meta', text: 'Tick an option and some of its values to make the versions.' })); return; }
+    // quick fill
+    const allP = h('input', { id: 'apAllPrice', type: 'number', min: 1, step: 1, placeholder: 'e.g. 450' });
+    const allS = h('input', { id: 'apAllStock', type: 'number', min: 0, step: 1, placeholder: 'e.g. 5' });
+    box.append(h('div', { class: 'ap-2' }, h('label', {}, 'Same price for all (৳)', allP), h('label', {}, 'Stock for each', allS)),
+      h('button', { type: 'button', class: 'ghost', text: 'Fill all versions', onclick: () => {
+        apVers.forEach(v => { if (allP.value) v.price = allP.value; if (allS.value !== '') v.stock = allS.value; }); apDrawOpts();
+      } }));
+    const rows = [...apVers.values()];
+    box.append(h('p', { class: 'attr-meta', text: `${rows.length} version${rows.length === 1 ? '' : 's'}${rows.length >= 100 ? ' (100 is the most)' : ''}. Switch off a version the product doesn't come in.` }),
+      h('div', { style: 'overflow-x:auto' }, h('table', { class: 'ap-vers' },
+        h('thead', {}, h('tr', {}, ['Version', 'Price ৳', 'Sale ৳', 'Stock', 'On'].map(t => h('th', { text: t })))),
+        h('tbody', {}, rows.map(v => {
+          const tr = h('tr', { class: v.active ? '' : 'off' },
+            h('td', { text: v.label }),
+            h('td', {}, h('input', { type: 'number', min: 1, step: 1, value: v.price, oninput: e => v.price = e.target.value, 'aria-label': 'Price of ' + v.label })),
+            h('td', {}, h('input', { type: 'number', min: 1, step: 1, value: v.sale, placeholder: '–', oninput: e => v.sale = e.target.value, 'aria-label': 'Sale price of ' + v.label })),
+            h('td', {}, h('input', { type: 'number', min: 0, step: 1, value: v.stock, oninput: e => v.stock = e.target.value, 'aria-label': 'Stock of ' + v.label })),
+            h('td', {}, h('input', { type: 'checkbox', checked: v.active, onchange: e => { v.active = e.target.checked; tr.className = v.active ? '' : 'off'; }, 'aria-label': v.label + ' is available' })));
+          return tr;
+        })))));
+  }
+  function apVariations() {
+    return [...apVers.values()].map(v => ({ options: v.options, price: Number(v.price), sale_price: v.sale === '' || v.sale == null ? null : Number(v.sale), stock: Number(v.stock || 0), active: v.active }));
+  }
+
   async function openAddProduct() {
     apPhotos = []; apDrawPhotos();
     ['apTitle', 'apTitleBn', 'apDescBn', 'apPrice', 'apSale', 'apDesc', 'apSellerSearch', 'apOffPhone', 'apOffWa', 'apOffArea'].forEach(id => $(id).value = '');
     $('apStock').value = 1; $('apNeg').checked = false; $('apFree').checked = false; $('apOffName').value = 'RGBKart Official'; $('apOffCity').value = 'Dhaka';
     $('apCond').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
+    $('apType').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); apUse = new Map(); apVers = new Map(); apSyncType();
     $('apListing').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); $('apFeatDaysWrap').hidden = true;
     const sel = $('apCat'); sel.innerHTML = ''; sel.append(h('option', { value: '', text: 'Choose a category' }));
     childrenOf(null).forEach(top => {
@@ -3343,8 +3446,16 @@
     if (!apPhotos.length) errs.push('Add at least one photo.');
     if (v.title.length < 3) errs.push('Write the product name.');
     if (!v.cat) errs.push('Choose a category.');
-    if (!(v.price > 0)) errs.push('Enter a price.');
-    if (v.sale != null && !(v.sale > 0 && v.sale < v.price)) errs.push('The sale price must be lower than the price.');
+    const variable = apIsVar(), vars = variable ? apVariations() : [];
+    if (variable) {
+      if (!vars.length) errs.push('Tick the options and values this product comes in.');
+      else if (!vars.some(x => x.active)) errs.push('Switch on at least one version.');
+      else if (vars.some(x => x.active && !(x.price > 0))) errs.push('Enter a price for every version that is on.');
+      else if (vars.some(x => x.active && x.sale_price != null && !(x.sale_price > 0 && x.sale_price < x.price))) errs.push('A version\'s sale price must be lower than its price.');
+    } else {
+      if (!(v.price > 0)) errs.push('Enter a price.');
+      if (v.sale != null && !(v.sale > 0 && v.sale < v.price)) errs.push('The sale price must be lower than the price.');
+    }
     if (who === 'seller' && !$('apSeller').value) errs.push('Choose the seller.');
     if (who === 'official' && !apOfficial && myRole !== 'master_admin') errs.push('The RGBKart Official shop isn\'t set up yet.');
     if (errs.length) return setMsg('apMsg', errs.join(' '), true);
@@ -3365,7 +3476,8 @@
         paths.push(path);
       }
       const r = await db.rpc('admin_create_product', { p: { seller_id: sellerId, title: v.title, category_id: v.cat, price: v.price, sale_price: v.sale, stock: v.stock,
-        description: v.desc, listing_type: v.cond, price_negotiable: $('apNeg').checked, free_delivery: $('apFree').checked }, p_images: paths });
+        description: v.desc, listing_type: v.cond, price_negotiable: $('apNeg').checked, free_delivery: $('apFree').checked,
+        ...(variable ? { variations: vars.map(x => x.active ? x : { ...x, price: x.price > 0 ? x.price : 1, sale_price: null }) } : {}) }, p_images: paths });
       if (r.error) throw r.error;
       const tBn = $('apTitleBn').value.trim(), dBn = $('apDescBn').value.trim();
       if (tBn || dBn) { const b = await db.rpc('admin_set_product_bangla', { p_product: r.data, p_title_bn: tBn || null, p_description_bn: dBn || null }); if (b.error) toast('Product added, but the Bangla name couldn\'t be saved: ' + friendly(b.error)); }
@@ -3379,9 +3491,12 @@
       loadProducts();
     } catch (err) {
       const m = (err && err.message) || '';
-      setMsg('apMsg', /Could not find the function|admin_create_product|admin_setup_official_shop/i.test(m) ? 'Run 0018_admin_tools.sql in Supabase first.' : /row-level security|Unauthorized|403/i.test(m) ? 'Photo upload was refused. Run 0018_admin_tools.sql in Supabase first.' : friendly(err), true);
+      setMsg('apMsg', variable_ok_hint(m) ? 'To add products with options, run 0055_admin_product_options.sql in Supabase first.' : /Could not find the function|admin_create_product|admin_setup_official_shop/i.test(m) ? 'Run 0018_admin_tools.sql in Supabase first.' : /row-level security|Unauthorized|403/i.test(m) ? 'Photo upload was refused. Run 0018_admin_tools.sql in Supabase first.' : friendly(err), true);
     } finally { $('apSave').disabled = false; $('apSave').textContent = 'Add product'; }
   };
+
+  // Before 0055 the old function ignores "variations" and makes a simple product; catch the tell-tale messages
+  function variable_ok_hint(m) { return /Enter a price$/.test(m || '') && apIsVar(); }
 
   async function review(p, status, note) {
     const { error } = await db.rpc('review_product', { p_product: p.id, p_status: status, p_note: note || null });

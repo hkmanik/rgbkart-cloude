@@ -27,6 +27,25 @@
 <style>
   /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
   main { padding-block: 20px 60px; display: grid; gap: 36px; }
+  /* Each home section sits on its own light colour (hue per section type; category sections take turns) */
+  .band { --h: 145; --s: 55%; background: linear-gradient(180deg, hsl(var(--h) var(--s) 95%), hsl(var(--h) var(--s) 97.5%));
+    border: 1px solid hsl(var(--h) 40% 86%); border-top: 4px solid hsl(var(--h) 60% 45%); border-radius: 18px; padding: 18px 18px 20px; }
+  .band .sec-head h2 { color: hsl(var(--h) 60% 24%); }
+  .band .sec-head a { border-color: hsl(var(--h) 55% 38%); color: hsl(var(--h) 60% 28%); background: rgb(255 255 255 / .7); }
+  .band .sec-head a:hover { background: hsl(var(--h) 55% 38%); color: #fff; }
+  .b-featured { --h: 45; --s: 95%; } .b-deals { --h: 355; --s: 85%; } .b-newest { --h: 145; } .b-pre_owned { --h: 205; --s: 70%; }
+  .b-free_delivery { --h: 175; --s: 55%; } .b-variable { --h: 265; --s: 60%; } .b-brand_new { --h: 125; --s: 45%; } .b-negotiable { --h: 25; --s: 90%; }
+  .b-top_shops { --h: 95; --s: 40%; }
+  .b-cat0 { --h: 190; --s: 60%; } .b-cat1 { --h: 320; --s: 55%; } .b-cat2 { --h: 60; --s: 70%; } .b-cat3 { --h: 230; --s: 55%; } .b-cat4 { --h: 15; --s: 70%; } .b-cat5 { --h: 160; --s: 45%; }
+  @media (max-width: 640px) { .band { padding: 14px 12px 16px; border-radius: 14px; } }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .band { background: linear-gradient(180deg, hsl(var(--h) 30% 14%), hsl(var(--h) 25% 11%)); border-color: hsl(var(--h) 25% 24%); border-top-color: hsl(var(--h) 55% 45%); }
+    :root:not([data-theme="light"]) .band .sec-head h2 { color: hsl(var(--h) 70% 80%); }
+    :root:not([data-theme="light"]) .band .sec-head a { background: transparent; color: hsl(var(--h) 70% 78%); border-color: hsl(var(--h) 50% 50%); }
+  }
+  :root[data-theme="dark"] .band { background: linear-gradient(180deg, hsl(var(--h) 30% 14%), hsl(var(--h) 25% 11%)); border-color: hsl(var(--h) 25% 24%); border-top-color: hsl(var(--h) 55% 45%); }
+  :root[data-theme="dark"] .band .sec-head h2 { color: hsl(var(--h) 70% 80%); }
+  :root[data-theme="dark"] .band .sec-head a { background: transparent; color: hsl(var(--h) 70% 78%); border-color: hsl(var(--h) 50% 50%); }
   .hero { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 14px; }
   @media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); } }
   .hero-main { border-radius: 18px; padding: 32px; color: #fff; display: grid; gap: 14px; align-content: center; min-height: 240px; overflow: hidden;
@@ -173,7 +192,7 @@
     const arrows = h('div', { class: 'arrows' },
       h('button', { type: 'button', 'aria-label': T('Previous shops'), text: '‹', onclick: () => step(-1) }),
       h('button', { type: 'button', 'aria-label': T('Next shops'), text: '›', onclick: () => step(1) }));
-    holder.append(h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), arrows), row));
+    holder.append(h('section', { class: 'band b-top_shops' }, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), arrows), row));
     requestAnimationFrame(() => {
       const more = row.scrollWidth > row.clientWidth + 4;
       arrows.hidden = !more;
@@ -200,10 +219,12 @@
     });
   }
 
+  let catBand = 0;
   async function renderSection(s, holder) {
     if (s.section_type === 'top_shops') return renderTopShops(s, holder);
     const grid = h('div', { class: 'grid6' });
-    const sec = h('section', {}, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), h('a', { href: seeAllLink(s), text: 'View all' })), grid);
+    const tone = s.section_type === 'category' ? 'b-cat' + (catBand++ % 6) : 'b-' + s.section_type;
+    const sec = h('section', { class: 'band ' + tone }, h('div', { class: 'sec-head' }, h('div', {}, h('h2', { text: L(s, 'title') }), s.subtitle && h('p', { text: L(s, 'subtitle') })), h('a', { href: seeAllLink(s), text: 'View all' })), grid);
     holder.append(sec);
     skeletons(grid, Math.min(s.item_count, 6));
     let q = db.from('products').select(CARD_FIELDS).eq('status', 'approved');

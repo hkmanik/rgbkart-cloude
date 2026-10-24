@@ -71,11 +71,23 @@
   .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
   /* Customer / Seller switch */
-  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
-  .seg button { background: transparent; color: var(--muted); padding: 10px 8px; display: grid; gap: 2px; }
-  .seg button small { font-weight: 400; font-size: .78rem; }
-  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
-  .seg button[aria-pressed="true"] small { color: var(--muted); }
+  /* Customer / Seller choice: green = buy, red = sell (logo colours); the chosen one is filled */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .seg button { --c: #00802B; --soft: #E8F4EC; position: relative; background: var(--surface); color: var(--c); border: 2px solid color-mix(in srgb, var(--c) 35%, transparent);
+    border-radius: 12px; padding: 12px 8px 11px; display: grid; justify-items: center; gap: 3px; font-weight: 700; font-size: .98rem; cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s, box-shadow .15s, transform .1s; }
+  .seg button[data-role="seller"] { --c: #E30613; --soft: #FDECEC; }
+  .seg button::before { content: ''; width: 26px; height: 26px; background: currentColor;
+    -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
+  .seg button[data-role="customer"] { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='20' r='1.6'/%3E%3Ccircle cx='18' cy='20' r='1.6'/%3E%3Cpath d='M2 3h3l2.6 12.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2'/%3E%3C/svg%3E"); }
+  .seg button[data-role="seller"] { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9l1.6-5h14.8L21 9'/%3E%3Cpath d='M3 9h18v1.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z'/%3E%3Cpath d='M5 13.5V21h14v-7.5M10 21v-5h4v5'/%3E%3C/svg%3E"); }
+  .seg button small { font-weight: 500; font-size: .78rem; color: var(--muted); }
+  .seg button:hover { background: var(--soft); border-color: var(--c); }
+  .seg button:active { transform: scale(.98); }
+  .seg button[aria-pressed="true"] { background: var(--c); color: #fff; border-color: var(--c); box-shadow: 0 6px 16px color-mix(in srgb, var(--c) 35%, transparent); }
+  .seg button[aria-pressed="true"] small { color: rgb(255 255 255 / .9); }
+  .seg button[aria-pressed="true"]::after { content: '✓'; position: absolute; top: 6px; right: 8px; width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; color: var(--c); font-size: .75rem; line-height: 20px; text-align: center; font-weight: 800; }
   .agree { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #FFFBEA; display: grid; gap: 4px; }
   .agree-row { display: flex; gap: 10px; align-items: flex-start; text-transform: none; letter-spacing: 0; font-size: .92rem; font-weight: 500; color: var(--fg); }
   .agree-row input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }

@@ -3407,8 +3407,9 @@
     $('apType').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); apUse = new Map(); apVers = new Map(); apSyncType();
     $('apListing').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); $('apFeatDaysWrap').hidden = true;
     const sel = $('apCat'); sel.innerHTML = ''; sel.append(h('option', { value: '', text: 'Choose a category' }));
-    childrenOf(null).forEach(top => {
-      const subs = childrenOf(top.id);
+    const abc = list => list.slice().sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));   // A–Z in Add product
+    abc(childrenOf(null)).forEach(top => {
+      const subs = abc(childrenOf(top.id));
       if (!subs.length) sel.append(h('option', { value: top.id, text: top.name }));
       else sel.append(h('optgroup', { label: top.name }, subs.map(c => h('option', { value: c.id, text: c.name }))));
     });

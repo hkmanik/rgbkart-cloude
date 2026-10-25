@@ -1937,11 +1937,12 @@
     // category select: grouped by top-level category
     const sel = $('fCategory'); sel.innerHTML = '';
     sel.append(h('option', { value: '', text: 'Choose a category…' }));
-    for (const top of childrenOf(null)) {
-      const kids = childrenOf(top.id);
+    const abc = id => childrenOf(id).slice().sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));   // A–Z
+    for (const top of abc(null)) {
+      const kids = abc(top.id);
       if (!kids.length) { sel.append(h('option', { value: top.id, text: top.name })); continue; }
       const g = h('optgroup', { label: top.name });
-      const walk = (pid, depth) => childrenOf(pid).forEach(c => { g.append(h('option', { value: c.id, text: ' '.repeat(depth * 3) + c.name })); walk(c.id, depth + 1); });
+      const walk = (pid, depth) => abc(pid).forEach(c => { g.append(h('option', { value: c.id, text: ' '.repeat(depth * 3) + c.name })); walk(c.id, depth + 1); });
       walk(top.id, 0);
       sel.append(g);
     }

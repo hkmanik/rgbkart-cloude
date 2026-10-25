@@ -301,7 +301,7 @@
   function fillSelects(cats) {
     const sel = $('category'); sel.innerHTML = '';
     sel.append(h('option', { value: '', text: 'Choose a category' }));
-    const kids = id => cats.filter(c => c.parent_id === id).sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+    const kids = id => cats.filter(c => c.parent_id === id).sort((a, b) => L(a, 'name').localeCompare(L(b, 'name'), undefined, { sensitivity: 'base' }));   // A–Z
     for (const top of kids(null)) {
       const subs = kids(top.id);
       if (!subs.length) { sel.append(h('option', { value: top.id, text: L(top, 'name') })); continue; }

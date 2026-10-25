@@ -330,7 +330,8 @@
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=25"></script>
+<script src="i18n.js?v=26"></script>
+<script src="wa-chat.js?v=1"></script>
 <script src="menu.js?v=5"></script>
 <script src="reviews.js?v=1"></script>
 <script src="report.js?v=1"></script>
@@ -385,6 +386,7 @@
     (a.data || []).forEach(x => attrs.set(x.id, x));
     await loadContact();
     render(c.data || []);
+    drawWaBubble();
   }
 
   function render(cats) {
@@ -630,6 +632,11 @@
     contact = (r.data || [])[0] || null;
   }
   const phoneOf = () => contact && (contact.phone || contact.whatsapp);
+  function drawWaBubble() {   // same rule as the Contact box: only numbers the buyer may see (listing_contact)
+    const wa = contact && (contact.whatsapp || contact.phone);
+    if (!wa || P.seller_id === myId) return;
+    waBubble(wa, T('Hi, I\'m interested in "{t}" on RGBKart: {u}', { t: L(P, 'title'), u: location.href }), shop ? L(shop, 'shop_name') : '');
+  }
   const hasDirect = () => !!(contact && (contact.phone || contact.whatsapp || contact.email));
   const canMessage = () => contactRpcOk && P.status === 'approved' && P.seller_id !== myId;
   function toIntl(n) { const d = (n || '').replace(/[^0-9]/g, ''); return d.startsWith('880') ? d : d.startsWith('0') ? '88' + d : '880' + d; }
@@ -710,7 +717,7 @@
 
   // ---------- phone action bar ----------
   function drawBar() {
-    const bar = $('mbar'); bar.innerHTML = ''; bar.hidden = false;
+    const bar = $('mbar'); bar.innerHTML = ''; bar.hidden = false; document.body.classList.add('has-mbar');
     const direct = hasDirect() && $('contactBox').hidden;
     if (P.contact_only) {
       if (canMessage()) bar.append(h('button', { type: 'button', class: 'btn ' + (direct ? 'btn-contact' : 'btn-call'), style: 'grid-column:auto', text: '💬 Message', onclick: openMsg }));
@@ -770,6 +777,7 @@
       const { data: { session } } = await db.auth.getSession();
       if (session) {
         myId = session.user.id; myIsGuest = !!session.user.is_anonymous;
+        if (typeof P !== 'undefined' && P && P.seller_id === myId) waBubble(null);   // no chat button on your own listing
         if (!myIsGuest) { $('acctLink').textContent = T('My account'); $('acctLink').href = 'account.html'; }
         $('msgTop').hidden = false;
         db.rpc('my_unread_count').then(r => { if (!r.error && r.data) { $('msgTopN').hidden = false; $('msgTopN').textContent = r.data; } });

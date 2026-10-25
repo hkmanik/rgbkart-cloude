@@ -19,6 +19,7 @@
     // header, menu, footer
     'Search phones, fashion, groceries…': 'ফোন, ফ্যাশন, মুদি বাজার খুঁজুন…', 'Search products': 'পণ্য খুঁজুন', 'Search': 'খুঁজুন', 'Search RGBKart': 'RGBKart-এ খুঁজুন',
     'Enter a valid Bangladesh mobile number: 01 and 9 more digits, like 01711000000.': 'সঠিক বাংলাদেশি মোবাইল নম্বর দিন: ০১ এবং আরও ৯টি সংখ্যা, যেমন 01711000000।',
+    'Chat on WhatsApp': 'হোয়াটসঅ্যাপে চ্যাট করুন',
     '+ Sell': '+ বিক্রি করুন', 'Sell': 'বিক্রি', 'Messages': 'মেসেজ', 'Alerts': 'নোটিফিকেশন', 'Saved items': 'সংরক্ষিত পণ্য', 'Sign in': 'সাইন ইন', 'My account': 'আমার অ্যাকাউন্ট',
     'Cart': 'কার্ট', 'Account': 'অ্যাকাউন্ট', 'All categories': 'সব ক্যাটাগরি', 'Main menu': 'প্রধান মেনু', 'Home': 'হোম', 'Shop': 'শপ',
     'Deals of the Day': 'আজকের ডিল', 'Featured': 'ফিচার্ড', 'New Arrivals': 'নতুন পণ্য', 'Pre-Owned': 'ব্যবহৃত পণ্য', 'Free delivery': 'ফ্রি ডেলিভারি',
@@ -281,7 +282,7 @@
 
   // ---------------- texts with values: [English pattern, Bangla] — {x} is a value, numbers in it become Bangla digits ----------------
   const P = [
-    ['{t} | RGBKart', '{t} | RGBKart'], ['Invoice {i}', 'ইনভয়েস {i}'],
+    ['{t} | RGBKart', '{t} | RGBKart'], ['Chat on WhatsApp with {s}', '{s}-এর সাথে হোয়াটসঅ্যাপে চ্যাট করুন'], ['Invoice {i}', 'ইনভয়েস {i}'],
     ['Sale -{n}%', 'ছাড় -{n}%'], ['from {p}', '{p} থেকে'], ['All {n} →', 'সব {n}টি →'], ['{n} products', '{n}টি পণ্য'], ['{n} product', '{n}টি পণ্য'], ['{n} items', '{n}টি পণ্য'],
     ['Show more ({n} left)', 'আরও দেখুন ({n}টি বাকি)'], ['Results for “{q}”', '“{q}”-এর ফলাফল'], ['Results for “{q}” in {w}', '{w}-এ “{q}”-এর ফলাফল'], ['Search: {q}', 'খোঁজ: {q}'], ['Hide {c} sub-categories', '{c}-এর উপ-ক্যাটাগরি লুকান'], ['Show {c} sub-categories', '{c}-এর উপ-ক্যাটাগরি দেখুন'], ['Save: {t}', 'সংরক্ষণ করুন: {t}'], ['Remove from saved: {t}', 'সংরক্ষিত থেকে সরান: {t}'],
     ['Cart, {n} items', 'কার্ট, {n}টি পণ্য'], ['Cart, {n} item', 'কার্ট, {n}টি পণ্য'], ['Messages, {n} new', 'মেসেজ, {n}টি নতুন'], ['Alerts, {n} new', 'নোটিফিকেশন, {n}টি নতুন'],

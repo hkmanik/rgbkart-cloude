@@ -2203,7 +2203,8 @@
   }
 
   // ---------- category details (attributes) ----------
-  const varCandidates = () => effectiveAttrs(editing.category_id).filter(x => ['select', 'color'].includes(x.attr.input_type));
+  // brands (Phone Brand, Fashion Brand…) and Condition are product details, never a version choice
+  const varCandidates = () => effectiveAttrs(editing.category_id).filter(x => ['select', 'color'].includes(x.attr.input_type) && !/\bbrand\b|^condition$/i.test(x.attr.name));
   const isVariable = () => $('fProductType').value === 'variable' && editing.listing_type !== 'free';
 
   function syncCondition() {

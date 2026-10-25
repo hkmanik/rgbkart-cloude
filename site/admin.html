@@ -3321,7 +3321,7 @@
       catAttrs.filter(x => x.category_id === c.id).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).forEach(x => {
         if (seen.has(x.attribute_id)) return; seen.add(x.attribute_id);
         const a = attrs.find(t => t.id === x.attribute_id);
-        if (a && (a.input_type === 'select' || a.input_type === 'color') && (a.attribute_options || []).length) out.push(a);
+        if (a && (a.input_type === 'select' || a.input_type === 'color') && (a.attribute_options || []).length && !/\bbrand\b|^condition$/i.test(a.name)) out.push(a);   // brands and Condition aren't version choices
       });
       c = c.parent_id ? cats.find(x => x.id === c.parent_id) : null;
     }

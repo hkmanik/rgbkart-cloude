@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <link rel="stylesheet" href="shop.css?v=17">
-<link rel="stylesheet" href="order.css?v=3">
+<link rel="stylesheet" href="order.css?v=4">
 </head>
 <body>
 
@@ -110,7 +110,7 @@
     if (data.groups.some(overMax)) btn.disabled = true;
     holder.append(h('aside', { class: 'box sum' }, h('h2', { text: 'Your order' }),
       data.groups.map(g => h('div', { class: 'srow-g' }, h('b', { class: 'small', text: L(g.shop, 'shop_name'), translate: 'no' }),
-        g.items.map(i => h('div', { class: 'srow small' }, h('span', { style: 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', text: `${N(i.qty)} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}`, translate: 'no' }), h('span', { text: money(i.unit * i.qty) }))),
+        g.items.map(i => h('div', { class: 'srow small' }, h('span', { text: `${N(i.qty)} × ${i.title}${i.variant ? ' (' + i.variant + ')' : ''}`, translate: 'no' }), h('span', { text: money(i.unit * i.qty) }))),
         h('div', { class: 'srow small' }, h('span', { text: g.method ? L(g.method, 'name') : 'Delivery' }), h('span', { text: g.method && g.method.id === 'negotiated' ? 'Agree with shop' : g.fee ? money(g.fee) : 'Free' })),
         g.discount > 0 && h('div', { class: 'srow small', style: 'color:var(--accent);font-weight:600' }, h('span', { text: T('Coupon {c}', { c: g.coupon.code }) }), h('span', { text: '−' + money(g.discount) })),
         overMax(g) ? h('p', { class: 'err small', style: 'margin:4px 0 0', text: T('Cash on Delivery limit: {p} per shop. Please remove some items from {s}.', { p: money(cod.max_order), s: L(g.shop, 'shop_name') }) })

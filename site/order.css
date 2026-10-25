@@ -36,10 +36,13 @@
 .ship-o input { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; flex: none; }
 .ship-o .grow { flex: 1; min-width: 0; display: grid; } .ship-o small { color: var(--muted); font-size: .8rem; }
 .ship-o .fee { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.sum { display: grid; gap: 10px; position: sticky; top: calc(var(--head-h, 84px) + 12px); }
+.sum { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; text-align: left; position: sticky; top: calc(var(--head-h, 84px) + 12px); min-width: 0; }
+.cartgrid > * { min-width: 0; }
 .sum h2 { font: 600 1.15rem var(--display); margin: 0; }
-.srow-g { display: grid; gap: 3px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
-.srow { display: flex; justify-content: space-between; gap: 10px; font-size: .92rem; } .srow span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.srow-g { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); min-width: 0; }
+.srow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: .92rem; min-width: 0; }
+.srow span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.srow span:last-child { flex: none; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 .srow.total { font-size: 1.2rem; font-weight: 700; padding-top: 4px; }
 .go { display: block; text-align: center; background: #E30613; color: #fff; text-decoration: none; font: 700 1.02rem var(--body); padding: 14px; border-radius: 10px; border: 0; cursor: pointer; width: 100%; transition: background-color .15s; }
 .go:hover { background: #B8000C; } .go:disabled { opacity: .6; cursor: wait; }

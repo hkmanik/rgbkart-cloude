@@ -94,6 +94,7 @@
   .nav-group { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--side-muted); padding: 14px 10px 4px; }
   .nav { --tone: var(--t-teal); display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: var(--side-fg); padding: 8px 10px; border-radius: 7px; font-weight: 500; }
   .nav svg { width: 17px; height: 17px; flex: none; color: var(--tone); }
+  .nav .count { margin-left: auto; background: #E30613; color: #fff; font-size: .72rem; font-weight: 700; min-width: 20px; height: 20px; border-radius: 999px; display: inline-grid; place-items: center; padding: 0 6px; }
   .nav:hover:not(:disabled) { background: rgb(255 255 255 / .07); color: #fff; }
   .nav[aria-current="page"] { background: color-mix(in srgb, var(--tone) 22%, transparent); color: #fff; box-shadow: inset 3px 0 0 var(--tone); font-weight: 600; }
   .nav:disabled { color: var(--side-muted); cursor: default; opacity: 1; }
@@ -388,7 +389,7 @@
     <div class="nav-group">Catalog</div>
     <button class="nav" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>My products</button>
     <button class="nav" data-view="new" id="navNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add product</button>
-    <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured requests</button>
+    <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payment requests<span class="count" id="navPay" hidden></span></button>
     <button class="nav tone-red" data-view="ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>Advertise</button>
     <button class="nav tone-blue" data-view="delivery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M1 4h13v11H1zM14 8h4l3 4v3h-7"/><circle cx="5.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>Delivery</button>
     <button class="nav tone-green" data-view="coupons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>Coupons</button>
@@ -447,8 +448,10 @@
 
     <!-- ===== Featured requests ===== -->
     <section data-page="featured">
-      <div class="page-head"><div><h1>Featured requests</h1><p>Products you asked to feature on the home page or at the top of their category. Pay by bKash, Nagad, Upay or Rocket and enter the Transaction ID. Featured starts when we confirm the payment.</p></div></div>
-      <div class="card" style="margin-top:16px"><div class="plist" id="flist"></div></div>
+      <div class="page-head"><div><h1>Payment requests</h1><p>Everything you have asked RGBKart for that needs a payment: Featured listings and advertisements. Pay by bKash, Nagad, Upay or Rocket and enter the Transaction ID. Each one starts when we confirm the payment.</p></div></div>
+      <div class="card" style="margin-top:16px"><h2 style="margin:0 0 8px;font-size:1.05rem">★ Featured listings</h2><div class="plist" id="flist"></div></div>
+      <div class="card" style="margin-top:16px"><h2 style="margin:0 0 8px;font-size:1.05rem">📣 Advertisements</h2><div class="plist" id="payAds"></div>
+        <p class="pmeta" style="margin:8px 0 0">To book a new ad, go to <a href="#ads" onclick="event.preventDefault(); document.querySelector('.nav[data-view=ads]').click()">Advertise</a>.</p></div>
     </section>
 
     <!-- ===== Orders ===== -->
@@ -1113,7 +1116,7 @@
     ]);
     if (p.error) return toast(friendly(p.error));
     products = p.data; featured = f.data || []; myPays = pay && !pay.error ? pay.data : [];
-    drawList(); drawFeatured();
+    drawList(); drawFeatured(); drawPayCount();
   }
   const photoUrl = path => db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   const mainPhoto = p => { const im = [...(p.product_images || [])].sort((a, b) => a.sort_order - b.sort_order)[0]; return im ? photoUrl(im.storage_path) : null; };
@@ -1430,10 +1433,11 @@
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
     document.querySelectorAll('.nav[data-view]').forEach(b => b.dataset.view === (view === 'editor' ? (editing && editing.id ? 'products' : 'new') : view) ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Featured requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons', returns: 'Returns', verify: 'Get verified', delivery: 'Delivery' }[view];
+    $('mobileTitle').textContent = { products: 'My products', orders: 'Orders', featured: 'Payment requests', ads: 'Advertise', editor: 'Product', settings: 'Shop settings', reviews: 'Reviews', questions: 'Questions', coupons: 'Coupons', returns: 'Returns', verify: 'Get verified', delivery: 'Delivery' }[view];
     if (view === 'orders') loadOrders();
     if (view === 'settings') loadSettings();
     if (view === 'ads') loadSellerAds();
+    if (view === 'featured') loadPayAds();
     if (view === 'reviews') loadReviews();
     if (view === 'questions') loadQuestions();
     if (view === 'coupons') loadCoupons();
@@ -1549,7 +1553,7 @@
 
   function drawFeatured() {
     const box = $('flist'); box.innerHTML = '';
-    if (!featured.length) { box.append(h('div', { class: 'empty' }, h('b', { text: 'No requests yet', style: 'color:var(--fg)' }), h('span', { text: 'Tick "Request Featured listing" when editing a product.' }))); return; }
+    if (!featured.length) { box.append(h('div', { class: 'empty' }, h('b', { text: 'No Featured requests', style: 'color:var(--fg)' }), h('span', { text: 'Choose "Featured listing" when editing a product.' }))); return; }
     for (const f of featured) {
       const p = products.find(x => x.id === f.product_id);
       const payBox = h('div', { hidden: true });
@@ -1797,6 +1801,43 @@
           }))));
     }
   }
+  // Payment requests page: adverts that need paying (or are being checked), with the same Pay form as Advertise
+  async function loadPayAds() {
+    const box = $('payAds'); if (!box) return;
+    const [r, a, pay] = await Promise.all([
+      db.from('ad_rates').select('placement, name'),
+      db.from('ads').select('*').eq('seller_id', me.id).order('created_at', { ascending: false }),
+      db.from('payments').select('ad_id, status, reject_reason, created_at').eq('seller_id', me.id).not('ad_id', 'is', null).order('created_at', { ascending: false }),
+    ]);
+    box.innerHTML = '';
+    if (a.error) { box.append(h('div', { class: 'empty' }, h('span', { text: 'Advertising isn\'t open yet.' }))); return; }
+    const names = new Map((r.data || []).map(x => [x.placement, x.name])), pays = pay.error ? [] : pay.data, today = dhakaDay();
+    const rows = a.data.map(ad => { const lp = pays.find(x => x.ad_id === ad.id); return { ad, lp, st: ad.payment_status === 'unpaid' ? (lp && lp.status === 'review' ? 'check' : 'wait') : ad.ends_on < today ? 'ended' : !ad.is_active ? 'paused' : ad.starts_on > today ? 'soon' : 'live' }; })
+      .filter(x => x.st !== 'ended').slice(0, 30);
+    if (!rows.length) { box.append(h('div', { class: 'empty' }, h('span', { text: 'No ads waiting for payment.' }))); }
+    for (const { ad, lp, st } of rows) {
+      const payBox = h('div', { hidden: true });
+      box.append(h('div', { class: 'prow' },
+        h('div', { class: 'thumb' }, ad.image_path ? h('img', { src: photoUrl(ad.image_path), alt: '' }) : '📣'),
+        h('div', { style: 'min-width:0;display:grid;gap:3px' },
+          h('div', { class: 'ptitle' }, names.get(ad.placement) || ad.placement, h('span', { class: 'chip ' + ({ wait: 'awaiting_payment', check: 'info', live: 'active', soon: 'active' }[st] || 'draft'), text: AD_STATE[st] })),
+          h('div', { class: 'pmeta', text: `${money(ad.amount)} · ${dmy(ad.starts_on)} – ${dmy(ad.ends_on)}${ad.title ? ' · ' + ad.title : ''}` }),
+          st === 'wait' && lp && lp.status === 'rejected' && h('div', { class: 'pmeta', style: 'color:var(--danger)', text: `Payment not accepted: ${lp.reject_reason || ''} Please check and pay again.` }),
+          st === 'check' && h('div', { class: 'pmeta', text: 'We received your payment details and will confirm them soon.' }),
+          payBox),
+        h('div', { class: 'actions' },
+          st === 'wait' && window.RGBPay && h('button', { type: 'button', class: 'primary', text: `Pay ${money(ad.amount)}`,
+            onclick: () => { payBox.hidden = !payBox.hidden; if (!payBox.firstChild) payBox.append(RGBPay.form({ kind: 'ad', ref: ad.id, amount: ad.amount, title: ad.title, onDone: () => setTimeout(loadPayAds, 2500) })); } }))));
+    }
+    drawPayCount(rows.filter(x => x.st === 'wait').length);
+  }
+  let payAdsWaiting = 0;
+  function drawPayCount(adsWaiting) {
+    if (adsWaiting != null) payAdsWaiting = adsWaiting;
+    const n = featured.filter(f => f.status === 'awaiting_payment' && f.price > 0).length + payAdsWaiting;
+    const el = $('navPay'); if (el) { el.hidden = !n; el.textContent = n; }
+  }
+
   function loadSellerAdsDraw() {
     $('adSpaces').querySelectorAll('.adsp-o').forEach((b, i) => b.setAttribute('aria-pressed', String(adRatesS[i] && adRatesS[i].placement === sadPlace)));
     const r = adRatesS.find(x => x.placement === sadPlace); if (!r) return;
@@ -2385,7 +2426,7 @@
     ((plan && plan.benefits) || []).forEach(b => ul.append(h('li', { text: b })));
     $('featNote').textContent = openFeat
       ? `Status: ${FEAT[openFeat.status]}.` + (openFeat.status === 'awaiting_payment' ? ' Choose "Free listing" to cancel the request.' : '')
-      : 'The fee is set by RGBKart. After you save, pay from the Featured requests page. Featuring starts once your product is approved and the payment is confirmed.';
+      : 'The fee is set by RGBKart. After you save, pay from the Payment requests page. Featuring starts once your product is approved and the payment is confirmed.';
   }
 
   // ---------- summary ----------

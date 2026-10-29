@@ -48,13 +48,15 @@
     try { const r = await d.from('live_ads').select('*').eq('placement', placement); return r.error ? [] : (r.data || []); } catch (_) { return []; }
   }
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  // Show a pop-up only after its picture has loaded: a box that grows while its picture loads makes the page "jump" (PageSpeed CLS)
+  const ready = node => Promise.all([...node.querySelectorAll('img')].map(i => i.decode ? i.decode().catch(() => {}) : null));
   function linkAttrs(ad) {
     const ext = /^https:\/\//i.test(ad.link_url);
     return { href: ad.link_url, target: ext ? '_blank' : null, rel: ext ? 'noopener sponsored' : 'sponsored' };
   }
   function picture(ad, placement) {
     return el('a', { class: 'adimg ' + placement, ...linkAttrs(ad), 'aria-label': ad.title },
-      el('img', { src: pub(ad.image_path), alt: ad.title || '', loading: placement.startsWith('popup') ? null : 'lazy' }), el('span', { class: 'adtag', text: 'Ad' }));
+      el('img', { src: pub(ad.image_path), alt: ad.title || '', loading: placement.startsWith('popup') ? null : 'lazy', width: placement === 'popup_side' ? 300 : null, height: placement === 'popup_side' ? 250 : null }), el('span', { class: 'adtag', text: 'Ad' }));
   }
   function textBanner(ad, placement) {   // older ads made without a picture (styles in shop.css)
     return el('a', { class: `adb ${ad.color} ${placement}`, ...linkAttrs(ad) },
@@ -83,8 +85,9 @@
     const close = () => { scrim.remove(); document.removeEventListener('keydown', onKey); };
     const onKey = e => { if (e.key === 'Escape') close(); };
     const x = el('button', { type: 'button', class: 'adx', 'aria-label': 'Close ad', text: '✕', onclick: close });
+    const pic = picture(ad, 'popup_main'); await ready(pic);
     const scrim = el('div', { class: 'adpop-scrim', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Advertisement', onclick: e => { if (e.target === scrim) close(); } },
-      el('div', { class: 'adpop' }, x, picture(ad, 'popup_main')));
+      el('div', { class: 'adpop' }, x, pic));
     document.body.append(scrim); document.addEventListener('keydown', onKey); x.focus();
     try { store.setItem('rgbkart-popup-seen', '1'); } catch (_) {}
   }
@@ -98,6 +101,7 @@
       one.append(el('button', { type: 'button', class: 'adx', 'aria-label': 'Close ad', text: '✕', onclick: () => { remember('rgbkart-ad-closed', ad.id); one.remove(); if (!box.children.length) box.remove(); } }), picture(ad, 'popup_side'));
       box.append(one);
     });
+    await ready(box);
     document.body.append(box);
   }
   function startPopups() {

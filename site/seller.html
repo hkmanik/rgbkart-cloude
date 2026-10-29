@@ -1100,7 +1100,7 @@
 
 <script src="session.js?v=1"></script>
 <script src="phone.js?v=1"></script>
-<script src="thumbs.js?v=1"></script>
+<script src="thumbs.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
 <script src="pay.js?v=2"></script>
@@ -2789,6 +2789,7 @@
           const ins = await db.from('product_images').insert({ product_id: id, storage_path: path, sort_order: i * 10 }).select().single();
           if (ins.error) throw ins.error;
           Object.assign(ph, { id: ins.data.id, storage_path: path });
+          if (window.RGBThumb) await RGBThumb.flush(db);
         } else {
           const r = await db.from('product_images').update({ sort_order: i * 10 }).eq('id', ph.id);
           if (r.error) throw r.error;

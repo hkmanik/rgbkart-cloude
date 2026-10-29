@@ -23,7 +23,7 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=23">
+<link rel="stylesheet" href="shop.css?v=24">
 <style>
   /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
   main { padding-block: 20px 60px; display: grid; gap: 36px; }
@@ -96,7 +96,7 @@
   .shopcard .rt { justify-content: center; min-height: 20px; }
   .shopcard .sbadges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
   .shopcard .sbadges span { font-size: .74rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: #FFF4CC; color: #7A5A00; }
-  .shopcard .sbadges span + span { background: var(--accent-soft); color: var(--accent); }
+  .shopcard .sbadges span + span { background: var(--accent-soft); color: var(--accent-hover); }
   .shopcard .go { margin-top: 2px; font-size: .82rem; font-weight: 700; color: #fff; background: #00802B; border-radius: 999px; padding: 5px 12px; }
   .shopcard:hover .go { background: #E30613; }
   .arrows { display: flex; gap: 6px; align-items: center; }
@@ -143,8 +143,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="i18n.js?v=35"></script>
 <script src="sync.js?v=1"></script>
-<script src="shop.js?v=29"></script>
-<script src="menu.js?v=6"></script>
+<script src="shop.js?v=30"></script>
+<script src="menu.js?v=7"></script>
 <script src="ads.js?v=1"></script>
 <script>
   // Used when the home_sections table hasn't been set up yet
@@ -178,10 +178,10 @@
     const r = await db.rpc('top_shops', { p_limit: s.item_count || 12 });
     const list = r.error ? [] : (r.data || []);
     if (!list.length) return;
-    const row = h('div', { class: 'shoprow', role: 'list' });
+    const row = h('div', { class: 'shoprow' });
     list.forEach((sh, i) => {
       const href = 'store.html?s=' + encodeURIComponent(sh.shop_slug || sh.user_id);
-      row.append(h('a', { class: 'shopcard', href, role: 'listitem', style: `--hue:${(i * 67 + 130) % 360}` },
+      row.append(h('a', { class: 'shopcard', href, style: `--hue:${(i * 67 + 130) % 360}` },
         h('div', { class: 'sb' }, sh.banner_path && h('img', { src: shopPic(sh.banner_path), alt: '', loading: 'lazy' })),
         h('div', { class: 'sbody' },
           h('div', { class: 'sl', 'aria-hidden': 'true' }, sh.logo_path ? h('img', { src: shopPic(sh.logo_path), alt: '', loading: 'lazy' }) : (sh.shop_name || '?').charAt(0).toUpperCase()),

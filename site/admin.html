@@ -604,7 +604,8 @@
     <!-- Products review -->
     <section data-page="products">
       <div class="page-head"><div><h1>Products</h1><p>Check new listings before shoppers see them. Approve, or reject with a reason the seller will see. Products you add here go live straight away.</p></div>
-        <button class="primary" type="button" id="addProduct">+ Add product</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" type="button" id="makeThumbs" title="Make small copies of older product photos so pages load faster">⚡ Make small photos</button>
+        <button class="primary" type="button" id="addProduct">+ Add product</button></div></div>
       <div class="card" style="margin-top:18px">
         <div class="toolbar">
           <div class="filters ctabs" id="prodFilter">
@@ -1130,7 +1131,7 @@
 
 <script src="xlsx-lite.js?v=1"></script>
 <script src="session.js?v=1"></script>
-<script src="thumbs.js?v=1"></script>
+<script src="thumbs.js?v=2"></script>
 <script src="captcha.js?v=2"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -1311,6 +1312,18 @@
   }
 
   const canApprove = () => myRole === 'master_admin' || myRole === 'co_admin';
+  // Small photo copies for older products (audit Part B; needs 0068_photo_thumbs.sql)
+  $('makeThumbs').onclick = async () => {
+    const btn = $('makeThumbs');
+    if (!canApprove()) return toast('Only Master admin or Co-admin can do this.');
+    if (!window.RGBThumb) return toast('Please reload the page and try again.');
+    btn.disabled = true; const old = btn.textContent;
+    try {
+      const res = await RGBThumb.backfill(db, (i, n) => { btn.textContent = `Working… ${i} / ${n}`; });
+      toast(res.total ? `Small photos made: ${res.ok} of ${res.total}` + (res.bad ? ` (${res.bad} could not be made)` : '') : 'All photos already have small copies.');
+    } catch (e) { toast(/has_thumb|mark_thumbs/i.test(e.message || '') ? 'Run 0068_photo_thumbs.sql in Supabase first.' : friendly(e)); }
+    btn.disabled = false; btn.textContent = old;
+  };
   const canCatalog = canApprove;
 
   async function loadAll() {
@@ -2728,6 +2741,7 @@
         }
         const { error } = await db.rpc('admin_set_product_photos', { p_product: p.id, p_paths: paths });
         if (error) throw error;
+        if (window.RGBThumb) await RGBThumb.flush(db);
         toast(`Photos saved for ${p.title}`); loadProducts();
       } catch (e) { toast(/Could not find the function/i.test(e.message || '') ? 'Run 0025_category_pictures.sql in Supabase first.' : friendly(e)); }
     });
@@ -3592,6 +3606,7 @@
         description: v.desc, listing_type: v.cond, price_negotiable: $('apNeg').checked, free_delivery: $('apFree').checked,
         ...(variable ? { variations: vars.map(x => x.active ? x : { ...x, price: x.price > 0 ? x.price : 1, sale_price: null }) } : {}) }, p_images: paths });
       if (r.error) throw r.error;
+      if (window.RGBThumb) await RGBThumb.flush(db);
       const tBn = $('apTitleBn').value.trim(), dBn = $('apDescBn').value.trim();
       if (tBn || dBn) { const b = await db.rpc('admin_set_product_bangla', { p_product: r.data, p_title_bn: tBn || null, p_description_bn: dBn || null }); if (b.error) toast('Product added, but the Bangla name couldn\'t be saved: ' + friendly(b.error)); }
       if (v.featured) {

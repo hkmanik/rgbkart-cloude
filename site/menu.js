@@ -24,7 +24,7 @@
   .mmenu .mlinks a.feat { background: #FFF4CC; color: #7a5200; font-weight: 700; box-shadow: inset 0 0 0 1.5px #F5C400; }
   .mmenu .mlinks a.feat::before { content: "★ "; color: #d4a000; }
   .mmenu .mlinks a.feat:hover, .mmenu .mlinks a.feat[aria-current="page"] { background: #F5C400; color: #2a1a00; box-shadow: inset 0 0 0 1.5px #d4a000; }
-  .mmenu .mlinks a[aria-current="page"] { background: var(--accent-soft, #E5F4EA); color: var(--accent, #00802B); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent, #00802B); }
+  .mmenu .mlinks a[aria-current="page"] { background: var(--accent-soft, #E5F4EA); color: var(--accent-hover, #006622); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent, #00802B); }
   .mmenu .mpanel { position: absolute; left: 0; right: 0; top: 100%; background: var(--surface, #fff); border-bottom: 3px solid #00802B;
     box-shadow: 0 18px 30px rgb(8 40 18 / .18); max-height: min(70vh, 640px); overflow: auto; }
   .mmenu .mpanel-in { max-width: 1280px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-left, 0px)) 20px;

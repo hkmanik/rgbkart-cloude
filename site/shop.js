@@ -16,7 +16,7 @@ function h(tag, props, ...kids) {
 const money = n => '৳' + N(Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 }));
 const imgUrl = path => db.storage.from('product-images').getPublicUrl(path).data.publicUrl;
 const thumbOf = p => String(p || '').replace(/\.[A-Za-z0-9]+$/, '') + '-t.webp';   // small copy made at upload (thumbs.js)
-const CARD_FIELDS = 'id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, rating_avg, rating_count, product_images(storage_path, sort_order), product_variations(price, sale_price, is_active)';
+const CARD_FIELDS = 'id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, rating_avg, rating_count, product_images(*), product_variations(price, sale_price, is_active)';   // images(*): includes has_thumb once 0068 is run
 const CART_KEY = 'rgbkart-cart', WISH_KEY = 'rgbkart-wishlist';
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (_) { return []; } },
@@ -42,7 +42,7 @@ function headerHTML() {
       <a class="dash-link" href="seller.html" id="dashLink" hidden aria-label="Seller dashboard"><span aria-hidden="true">📊</span> <span class="lbl-full">Seller dashboard</span><span class="lbl-short" style="display:none">Dashboard</span></a>
       <a class="dash-link admin" href="admin.html" id="adminLink" hidden aria-label="Admin dashboard"><span aria-hidden="true">⚙</span> <span class="lbl-full">Admin</span></a>
       <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short" style="display:none">Open shop</span><span class="lbl-tiny" style="display:none">Shop</span></a>
-      <a class="icon-link acct" href="login.html" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
+      <a class="icon-link acct" href="login.html" id="acctLink" aria-label="Sign in">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;
 }
@@ -98,7 +98,7 @@ function footerPages() {
     icons.innerHTML = '';
     SOCIAL.forEach(([k, name, svg]) => {
       const url = links && /^https:\/\//i.test(links[k] || '') ? links[k] : '';
-      const el = url ? h('a', { href: url, target: '_blank', rel: 'noopener', title: name, 'aria-label': name }) : h('span', { class: 'off', title: name + ' · ' + T('coming soon'), 'aria-label': name + ' · ' + T('coming soon') });
+      const el = url ? h('a', { href: url, target: '_blank', rel: 'noopener', title: name, 'aria-label': name }) : h('span', { class: 'off', role: 'img', title: name + ' · ' + T('coming soon'), 'aria-label': name + ' · ' + T('coming soon') });
       el.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>`;
       icons.append(el);
     });
@@ -122,7 +122,7 @@ async function initShell() {
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session && !session.user.is_anonymous) {
-      $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true;
+      $('acctLbl').textContent = T('My account'); $('acctLink').setAttribute('aria-label', T('My account')); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true;
       // shops and RGBKart staff get a way back to their dashboard from every page (owner, 29 Oct 2026)
       db.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(r => { if (r.data && r.data.role === 'seller' && $('dashLink')) $('dashLink').hidden = false; }, () => {});
       db.rpc('my_staff_role').then(r => { if (!r.error && r.data && $('adminLink')) $('adminLink').hidden = false; }, () => {});
@@ -165,7 +165,7 @@ function card(p, shops) {
   heart.innerHTML = HEART_SVG;
   heart.onclick = e => { e.preventDefault(); e.stopPropagation(); const on = toggleWish(p.id); heart.setAttribute('aria-pressed', String(on)); heart.setAttribute('aria-label', T(on ? 'Remove from saved: {t}' : 'Save: {t}', { t: title })); toast(on ? 'Saved ♥' : 'Removed from saved'); };
   return h('a', { class: 'card', href: `product.html?id=${p.id}` },
-    h('div', { class: 'img' }, im ? h('img', { src: imgUrl(thumbOf(im.storage_path)), alt: '', loading: 'lazy', decoding: 'async', onerror: e => { const full = imgUrl(im.storage_path); if (e.target.src !== full) e.target.src = full; } }) : 'No photo',
+    h('div', { class: 'img' }, im ? h('img', { src: imgUrl(im.has_thumb ? thumbOf(im.storage_path) : im.storage_path), alt: '', loading: 'lazy', decoding: 'async', onerror: e => { const full = imgUrl(im.storage_path); if (e.target.src !== full) e.target.src = full; } }) : 'No photo',
       h('div', { class: 'labels' },
         p.is_featured && h('span', { class: 'lab feat', text: '★ Featured' }),
         p.listing_type === 'pre_owned' ? h('span', { class: 'lab used', text: 'Pre-owned' }) : h('span', { class: 'lab new', text: 'New' }),

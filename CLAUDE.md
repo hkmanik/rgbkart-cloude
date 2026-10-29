@@ -88,3 +88,4 @@ Owner: hkmanik@gmail.com (the person). Master Admin account on the site since 23
 - 0067_ads_admin_only.sql: only master_admin / co_admin can write `ads`; editors read only.
 - Passwords: minimum 8 in login.html / account.html (owner must also set 8 in Supabase Auth).
 - .htaccess: HSTS + Permissions-Policy. Contrast: --faint #667A71, footer #006B24, checkout steps muted.
+- Part B (PageSpeed mobile 88/90/96/100, Observatory B 75): 0068_photo_thumbs.sql adds product_images.has_thumb + mark_thumbs(paths) + admin storage rules for `*-t.webp`. Cards use the small copy only when has_thumb (CARD_FIELDS uses product_images(*) so it works before 0068 too). RGBThumb.flush(db) after photo rows are saved; Admin → Products "⚡ Make small photos" = RGBThumb.backfill. A11y: acctLink aria-label, social .off role=img, shopcard roles removed, contrast (lab.used #4F46E5, ccard cname 24% L, foot-credit no opacity, menu current + shop badge use accent-hover).

@@ -4,6 +4,8 @@
 // fall back to the full photo when there is none (older photos).
 //   RGBThumb.path(path)                     small-copy path for a photo path
 //   RGBThumb.upload(db, bucket, path, blob)  make and upload the small copy (never throws; the photo itself is what matters)
+//   RGBThumb.flush(db)                      after the photo rows are saved: mark them has_thumb (0068_photo_thumbs.sql)
+//   RGBThumb.backfill(db, onProgress)        admin: make copies for older photos that have none
 (function () {
   const path = p => String(p || '').replace(/\.[A-Za-z0-9]+$/, '') + '-t.webp';
   function make(blob, max = 480) {
@@ -21,7 +23,36 @@
     });
   }
   async function upload(db, bucket, p, blob) {
-    try { const t = await make(blob); await db.storage.from(bucket).upload(path(p), t, { contentType: t.type || 'image/webp', cacheControl: '31536000', upsert: true }); } catch (_) {}
+    try {
+      const t = await make(blob);
+      const r = await db.storage.from(bucket).upload(path(p), t, { contentType: t.type || 'image/webp', cacheControl: '31536000', upsert: true });
+      if (r.error) return false;
+      pending.push(p); return true;
+    } catch (_) { return false; }
   }
-  window.RGBThumb = { path, make, upload };
+  const pending = [];
+  async function flush(db) {
+    if (!pending.length) return;
+    const paths = pending.splice(0);
+    try { await db.rpc('mark_thumbs', { p_paths: paths }); } catch (_) {}
+  }
+  // Older photos: download each full photo, make the copy, save it next to the photo, mark it. Admin only (storage rules).
+  async function backfill(db, onProgress) {
+    const r = await db.from('product_images').select('storage_path').eq('has_thumb', false).limit(2000);
+    if (r.error) throw r.error;
+    const list = r.data || []; let ok = 0, bad = 0;
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i].storage_path;
+      try {
+        const url = db.storage.from('product-images').getPublicUrl(p).data.publicUrl;
+        const res = await fetch(url); if (!res.ok) throw new Error('no photo');
+        if (await upload(db, 'product-images', p, await res.blob())) ok++; else bad++;
+      } catch (_) { bad++; }
+      if (pending.length >= 20) await flush(db);
+      if (onProgress) onProgress(i + 1, list.length, ok, bad);
+    }
+    await flush(db);
+    return { total: list.length, ok, bad };
+  }
+  window.RGBThumb = { path, make, upload, flush, backfill };
 })();

@@ -10,7 +10,7 @@
 
 alter table public.products add column if not exists buyer_choice_ids bigint[] not null default '{}';
 alter table public.products drop constraint if exists products_buyer_choices;
-alter table public.products add constraint products_buyer_choices check (cardinality(buyer_choice_ids) <= 2);
+alter table public.products add constraint products_buyer_choices check (cardinality(buyer_choice_ids) <= 3);
 grant insert (buyer_choice_ids), update (buyer_choice_ids) on public.products to authenticated;
 
 create or replace function public.pav_check()

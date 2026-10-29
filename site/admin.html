@@ -358,6 +358,8 @@
   #prodFilter [data-s=pending] { --tc: #d97706; } #prodFilter [data-s=approved] { --tc: #1f9d55; } #prodFilter [data-s=featured] { --tc: #b8860b; }
   #prodFilter [data-s=rejected] { --tc: #dc2626; } #prodFilter [data-s=all] { --tc: #2f6fdb; }
   #prodWho [data-w=all] { --tc: #4b5563; } #prodWho [data-w=seller] { --tc: #0f8f8f; } #prodWho [data-w=individual] { --tc: #7c4dcc; }
+  #adTabs [data-t=list] { --tc: #c2410c; } #adTabs [data-t=pay] { --tc: #1f9d55; } #adTabs [data-t=rates] { --tc: #2f6fdb; }
+  #adTabs .count { margin-left: 6px; }
   .ad-size { color: #b45309; font-weight: 700; text-transform: none; letter-spacing: 0; }
   .ad-pic { width: 100%; max-height: 260px; object-fit: contain; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); display: block; }
   .ad-pic.small { max-height: 110px; }
@@ -443,6 +445,7 @@
     <button class="nav tone-amber" data-view="mainmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Main menu</button>
     <button class="nav tone-amber" data-view="pages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>Pages &amp; policies</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Payment requests<span class="count" id="navFeatured" hidden></span></button>
+    <button class="nav tone-red" data-view="ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>Advertisements<span class="count" id="navAds" hidden></span></button>
     <button class="nav tone-green" data-view="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments<span class="count" id="navPayments" hidden></span></button>
 
     <div class="nav-group tone-violet" id="settingsGroup">Settings</div>
@@ -624,7 +627,7 @@
 
     <!-- Payment requests: sellers' Featured and ad requests (rates are in Payments) -->
     <section data-page="featured">
-      <div class="page-head"><div><h1>Payment requests</h1><p>What sellers have asked for, in two parts: <b>Featured listings</b> and <b>Advertisements</b>. When a seller pays, the payment comes to <b>Payments</b> for you to check. Rates are set in Payments → <b>Rates</b>.</p></div></div>
+      <div class="page-head"><div><h1>Payment requests</h1><p>Sellers' requests for <b>Featured listings</b>. When a seller pays, the payment comes to <b>Payments</b> for you to check. Featured rates are in Payments → <b>Rates</b>. Advertisements have their own menu.</p></div></div>
       <div class="card" style="margin-top:18px">
         <div class="page-head" style="align-items:center"><h2>★ Featured listing requests</h2>
           <div class="filters" id="reqFilter">
@@ -637,11 +640,38 @@
           <tbody id="reqRows"></tbody>
         </table></div>
       </div>
-      <div class="card" style="margin-top:18px">
-        <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>📣 Advertisements</h2>
+    </section>
+
+    <!-- Advertisements: create, spaces & prices, payments (owner, 29 Oct 2026) -->
+    <section data-page="ads" hidden>
+      <div class="page-head"><div><h1>Advertisements</h1><p>Everything about ads in one place: create an ad (yours or for a seller, paid or free), set the ad spaces and prices per day, and check sellers' ad payments. An ad goes live on its dates once it is paid or made free.</p></div></div>
+      <div class="filters ctabs" id="adTabs" style="margin-top:14px">
+        <button type="button" data-t="list" aria-pressed="true">📣 Advertisements</button>
+        <button type="button" data-t="pay" aria-pressed="false">💳 Ad payments<span class="count" id="adPayCount" hidden></span></button>
+        <button type="button" data-t="rates" aria-pressed="false">💲 Ad spaces &amp; prices</button>
+      </div>
+      <div data-adtab="list" style="margin-top:14px">
+      <div class="card">
+        <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>📣 All advertisements</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="filters" id="adFilter"><button type="button" data-s="running" aria-pressed="true">Running &amp; upcoming</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
-          <button class="primary" type="button" id="addAd">+ New ad</button></div></div>
+          <button class="primary" type="button" id="addAd">+ Create advertisement</button></div></div>
         <div id="adList"></div>
+      </div>
+      </div>
+      <div data-adtab="pay" style="margin-top:14px" hidden>
+        <div class="card">
+          <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>💳 Payments for advertisements</h2>
+            <div class="filters" id="adPayFilter"><button type="button" data-s="review" aria-pressed="true">To check</button><button type="button" data-s="verified" aria-pressed="false">Verified</button><button type="button" data-s="rejected" aria-pressed="false">Rejected</button><button type="button" data-s="all" aria-pressed="false">All</button></div></div>
+          <p class="msg muted" style="margin:0 0 8px">Sellers pay by bKash / Nagad / Upay / Rocket and send the TrxID. Check your app: if the money arrived press <b>Verify &amp; start</b> and the ad goes live on its dates. To publish a seller's ad without payment, use <b>Publish free</b> on the Advertisements tab.</p>
+          <div id="adPayList"></div>
+        </div>
+      </div>
+      <div data-adtab="rates" style="margin-top:14px" hidden>
+      <div class="card">
+        <h2>Ad spaces, picture sizes &amp; prices</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Price per day for each ad space. The ad price is worked out as price per day × number of days (you can still change it on each ad).</p>
+        <div id="adRateList"></div>
+      </div>
       </div>
     </section>
 
@@ -794,11 +824,6 @@
         <p class="msg muted" style="margin:4px 0 0">Sellers choose one of these durations. Add, change or hide a rate any time. To give Featured for free, go to Products → <b>Make Featured (free)</b>.</p>
         <p class="readonly-note catalog-ro" hidden>You can view plans. Only the Master Admin and Co-admins can change them.</p>
         <div id="planList"></div>
-      </div>
-      <div class="card" style="margin-top:18px">
-        <h2>Advertisement rates</h2>
-        <p class="msg muted" style="margin:4px 0 10px">Price per day for each ad space. The ad price is worked out as price per day × number of days (you can still change it on each ad).</p>
-        <div id="adRateList"></div>
       </div>
     </section>
 
@@ -1681,8 +1706,8 @@
   }
 
   // ===================== Navigation =====================
-  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify', 'pages', 'users'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', users: 'Users', featured: 'Payment requests', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
+  const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'ads', 'team', 'activity', 'verify', 'pages', 'users'];
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', users: 'Users', featured: 'Payment requests', ads: 'Advertisements', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1697,6 +1722,7 @@
     if (view === 'verify') loadVerifications();
     if (view === 'pages') loadPages();
     if (view === 'featured') loadFeatured();
+    if (view === 'ads') { loadAds(); loadPayments(); }
     if (view === 'products') loadProducts();
     if (view === 'homepage') loadSections();
     if (view === 'mainmenu') loadMenu();
@@ -2736,6 +2762,10 @@
   const daysBetween = (a, b) => Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400e3);
   const fmtDay = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
+  $('adTabs').querySelectorAll('button').forEach(b => b.onclick = () => {
+    $('adTabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    document.querySelectorAll('[data-adtab]').forEach(p => p.hidden = p.dataset.adtab !== b.dataset.t);
+  });
   async function loadAds() {
     const [r, a] = await Promise.all([db.from('ad_rates').select('*').order('sort_order'), db.from('ads').select('*').order('starts_on', { ascending: false }).limit(500)]);
     if (r.error) {
@@ -2793,8 +2823,11 @@
           h('div', { class: 'prod-meta', text: `${a.seller_id ? 'Seller: ' + ((reqSellers.get(a.seller_id) || {}).shop_name || '—') : 'RGBKart (own promotion)'} · ${fmtDay(a.starts_on)} – ${fmtDay(a.ends_on)} (${days} days)` }),
           h('div', { class: 'prod-meta' }, h('b', { text: taka(a.amount) }), ` · ${AD_PAY[a.payment_status]}`, a.paid_at ? ` on ${fmtDate(a.paid_at)}` : '', ` · opens ${a.link_url}`)),
         h('div', { class: 'actions' },
-          a.payment_status === 'unpaid' && canApprove() && actionBtn('Mark paid', 'good', async () => {
-            const { error } = await db.from('ads').update({ payment_status: 'paid' }).eq('id', a.id); if (error) return toast(friendly(error)); toast('Marked as paid'); loadAds();
+          a.payment_status === 'unpaid' && canApprove() && actionBtn('Paid: publish', 'good', async () => {
+            const { error } = await db.from('ads').update({ payment_status: 'paid', paid_at: new Date().toISOString(), is_active: true }).eq('id', a.id); if (error) return toast(friendly(error)); toast('Marked as paid. The ad goes live on its dates.'); loadAds();
+          }),
+          a.payment_status === 'unpaid' && canApprove() && actionBtn('Publish free', 'ghost', async () => {
+            const { error } = await db.from('ads').update({ payment_status: 'complimentary', amount: 0, is_active: true }).eq('id', a.id); if (error) return toast(friendly(error)); toast('Published free of charge.'); loadAds();
           }),
           actionBtn(a.is_active ? 'Pause' : 'Show', 'ghost', async () => {
             const { error } = await db.from('ads').update({ is_active: !a.is_active }).eq('id', a.id); if (error) return toast(friendly(error)); loadAds();
@@ -2923,7 +2956,7 @@
     const ids = [...new Set(pays.map(x => x.seller_id))];
     paySellers = new Map();
     if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public, profiles(role)').in('user_id', ids); (sd.data || []).forEach(x => paySellers.set(x.user_id, x)); }
-    drawPayCount(); drawPayments(); drawMethods();
+    drawPayCount(); drawPayments(); drawAdPays(); drawMethods();
   }
   function drawPayCount() {
     const n = pays.filter(x => x.status === 'review').length;
@@ -2938,7 +2971,9 @@
       (!q || [x.trx_id, x.sender_no, x.item_title, (paySellers.get(x.seller_id) || {}).shop_name].some(v => (v || '').toLowerCase().includes(q))));
     const box = $('payList'); box.innerHTML = '';
     if (!rows.length) { box.append(h('p', { class: 'empty', text: payFilter === 'review' ? 'Nothing to check. New payments appear here.' : 'No payments match.' })); return; }
-    for (const x of rows) {
+    for (const x of rows) box.append(payRow(x));
+  }
+  function payRow(x) {
       const sd = paySellers.get(x.seller_id) || {};
       const m = payMethods.find(k => k.id === x.method_id) || { name: x.method_id, color: '#888' };
       const reason = h('input', { type: 'text', maxlength: 200, placeholder: 'Reason the seller will see', 'aria-label': 'Reason for rejecting' });
@@ -2948,10 +2983,10 @@
           actionBtn('Reject payment', 'bad', async () => {
             if (!reason.value.trim()) { reason.focus(); return toast('Write a reason the seller will see.'); }
             const { error } = await db.rpc('admin_verify_payment', { p_payment: x.id, p_ok: false, p_reason: reason.value.trim() });
-            if (error) return toast(friendly(error)); toast('Payment rejected. The seller can pay again.'); loadPayments(); loadFeatured();
+            if (error) return toast(friendly(error)); toast('Payment rejected. The seller can pay again.'); loadPayments(); loadFeatured(); if (x.kind === 'ad') loadAds();
           }),
           h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => rej.hidden = true })));
-      box.append(h('div', { class: 'pay-row' },
+      return h('div', { class: 'pay-row' },
         h('div', { class: 'pay-amt' }, h('b', { text: taka(x.amount) }), h('span', { class: 'pay-m' }, h('i', { style: `background:${m.color}` }), m.name)),
         h('div', { style: 'min-width:0;display:grid;gap:3px' },
           h('div', { class: 'attr-title' }, h('b', { text: x.kind === 'ad' ? 'Ad: ' + (x.item_title || '') : 'Featured: ' + (x.item_title || '') }),
@@ -2965,10 +3000,20 @@
           x.status === 'review' && canApprove() && actionBtn('Verify & start', 'good', async () => {
             const { error } = await db.rpc('admin_verify_payment', { p_payment: x.id, p_ok: true });
             if (error) return toast(friendly(error));
-            toast(x.kind === 'ad' ? 'Verified. The ad is live on its dates.' : 'Verified. Featured has started.'); loadPayments(); loadFeatured(); loadProducts();
+            toast(x.kind === 'ad' ? 'Verified. The ad is live on its dates.' : 'Verified. Featured has started.'); loadPayments(); loadFeatured(); loadProducts(); if (x.kind === 'ad') loadAds();
           }),
-          x.status === 'review' && canApprove() && h('button', { type: 'button', class: 'bad', text: 'Reject', onclick: () => { rej.hidden = false; reason.focus(); } }))));
-    }
+          x.status === 'review' && canApprove() && h('button', { type: 'button', class: 'bad', text: 'Reject', onclick: () => { rej.hidden = false; reason.focus(); } })));
+  }
+  // Advertisements → Ad payments tab: the same rows, ads only
+  let adPayFilter = 'review';
+  $('adPayFilter').querySelectorAll('button').forEach(b => b.onclick = () => { adPayFilter = b.dataset.s; $('adPayFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAdPays(); });
+  function drawAdPays() {
+    const all = pays.filter(x => x.kind === 'ad'), box = $('adPayList'); box.innerHTML = '';
+    const n = all.filter(x => x.status === 'review').length;
+    $('adPayCount').hidden = $('navAds').hidden = !n; $('adPayCount').textContent = $('navAds').textContent = n;
+    const rows = all.filter(x => adPayFilter === 'all' || x.status === adPayFilter);
+    if (!rows.length) { box.append(h('p', { class: 'empty', text: adPayFilter === 'review' ? 'No ad payments to check.' : 'No ad payments here.' })); return; }
+    rows.forEach(x => box.append(payRow(x)));
   }
   function drawMethods() {
     const box = $('methodList'); box.innerHTML = '';

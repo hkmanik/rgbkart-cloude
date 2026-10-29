@@ -157,8 +157,11 @@
       showDone(r.data, v);
     } catch (e) {
       const m = (e && e.message) || '';
-      show(/Failed to fetch/i.test(m) ? 'No internet connection. Please try again.' : /Could not find the function/i.test(m) ? 'Ordering isn\'t switched on yet. Please try again later.' : m || 'Something went wrong. Please try again.');
+      const text = /Failed to fetch/i.test(m) ? 'No internet connection. Please try again.' : /Could not find the function/i.test(m) ? 'Ordering isn\'t switched on yet. Please try again later.' : m || 'Something went wrong. Please try again.';
       btn.disabled = false; drawSum();
+      // drawSum makes a fresh box, so show the message in the new one (before 29 Oct it was wiped and nothing seemed to happen)
+      const e2 = document.querySelector('#sumBox .err'); if (e2) { e2.textContent = text; e2.hidden = false; e2.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      console.warn('[RGBKart] order not placed:', m);
     }
   }
 

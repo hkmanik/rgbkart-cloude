@@ -430,7 +430,7 @@
     <button class="nav tone-amber" data-view="homepage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 9v12h14V9"/></svg>Home page</button>
     <button class="nav tone-amber" data-view="mainmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Main menu</button>
     <button class="nav tone-amber" data-view="pages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>Pages &amp; policies</button>
-    <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Featured &amp; ads<span class="count" id="navFeatured" hidden></span></button>
+    <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>Payment requests<span class="count" id="navFeatured" hidden></span></button>
     <button class="nav tone-green" data-view="payments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payments<span class="count" id="navPayments" hidden></span></button>
 
     <div class="nav-group tone-violet" id="settingsGroup">Settings</div>
@@ -610,20 +610,11 @@
       </div>
     </section>
 
-    <!-- Featured & ads -->
+    <!-- Payment requests: sellers' Featured and ad requests (rates are in Payments) -->
     <section data-page="featured">
-      <div class="page-head">
-        <div><h1>Featured &amp; ads</h1><p>Your rates for Featured listings and advertisements. Sellers see the Featured rates when they list a product. Price changes apply to new requests only.</p></div>
-        <button class="primary catalog-edit" type="button" id="addPlan">+ Add Featured rate</button>
-      </div>
+      <div class="page-head"><div><h1>Payment requests</h1><p>What sellers have asked for, in two parts: <b>Featured listings</b> and <b>Advertisements</b>. When a seller pays, the payment comes to <b>Payments</b> for you to check. Rates are set in Payments → <b>Rates</b>.</p></div></div>
       <div class="card" style="margin-top:18px">
-        <h2>Featured listing rates</h2>
-        <p class="msg muted" style="margin:4px 0 0">Sellers choose one of these durations. Add, change or hide a rate any time. To give Featured for free, go to Products → <b>Make Featured (free)</b>.</p>
-        <p class="readonly-note catalog-ro" hidden>You can view plans. Only the Master Admin and Co-admins can change them.</p>
-        <div id="planList"></div>
-      </div>
-      <div class="card" style="margin-top:18px">
-        <div class="page-head" style="align-items:center"><h2>Requests from sellers</h2>
+        <div class="page-head" style="align-items:center"><h2>★ Featured listing requests</h2>
           <div class="filters" id="reqFilter">
             <button type="button" data-s="open" aria-pressed="true">Open</button>
             <button type="button" data-s="all" aria-pressed="false">All</button>
@@ -634,17 +625,8 @@
           <tbody id="reqRows"></tbody>
         </table></div>
       </div>
-    </section>
-
-    <!-- Advertisement (inside the Featured & ads page) -->
-    <section data-page="featured" data-extra="ads" class="ads-sec">
       <div class="card" style="margin-top:18px">
-        <h2>Advertisement rates</h2>
-        <p class="msg muted" style="margin:4px 0 10px">Price per day for each ad space. The ad price is worked out as price per day × number of days (you can still change it on each ad).</p>
-        <div id="adRateList"></div>
-      </div>
-      <div class="card" style="margin-top:18px">
-        <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>Ads</h2>
+        <div class="page-head" style="align-items:center;margin-bottom:6px"><h2>📣 Advertisements</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="filters" id="adFilter"><button type="button" data-s="running" aria-pressed="true">Running &amp; upcoming</button><button type="button" data-s="all" aria-pressed="false">All</button></div>
           <button class="primary" type="button" id="addAd">+ New ad</button></div></div>
         <div id="adList"></div>
@@ -783,8 +765,21 @@
       </div>
       <div class="card" style="margin-top:18px">
         <h2>Where sellers send money</h2>
-        <p class="msg muted" style="margin:4px 0 10px">Your RGBKart account numbers. Only methods that are switched on (with a number) are shown to sellers.</p>
+        <p class="msg muted" style="margin:4px 0 10px">Your RGBKart account numbers (bKash, Nagad, Upay, Rocket). Only methods that are switched on (with a number) are shown to sellers.</p>
         <div id="methodList"></div>
+      </div>
+      <h2 style="margin:26px 0 0">Rates</h2>
+      <p class="msg muted" style="margin:2px 0 0">What sellers pay. Sellers see the Featured rates when they list a product. Price changes apply to new requests only.</p>
+      <div class="card" style="margin-top:18px">
+        <div class="page-head" style="align-items:center;margin:0"><h2>Featured listing rates</h2><button class="primary catalog-edit" type="button" id="addPlan">+ Add Featured rate</button></div>
+        <p class="msg muted" style="margin:4px 0 0">Sellers choose one of these durations. Add, change or hide a rate any time. To give Featured for free, go to Products → <b>Make Featured (free)</b>.</p>
+        <p class="readonly-note catalog-ro" hidden>You can view plans. Only the Master Admin and Co-admins can change them.</p>
+        <div id="planList"></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h2>Advertisement rates</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Price per day for each ad space. The ad price is worked out as price per day × number of days (you can still change it on each ad).</p>
+        <div id="adRateList"></div>
       </div>
     </section>
 
@@ -1635,7 +1630,7 @@
 
   // ===================== Navigation =====================
   const VIEWS = ['dashboard', 'reports', 'payments', 'orders', 'returns', 'reviews', 'questions', 'complaints', 'categories', 'attributes', 'products', 'sellers', 'customers', 'homepage', 'mainmenu', 'featured', 'team', 'activity', 'verify', 'pages', 'users'];
-  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', users: 'Users', featured: 'Featured & ads', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
+  const TITLES = { dashboard: 'Dashboard', reports: 'Reports', payments: 'Payments', orders: 'Orders', returns: 'Returns', reviews: 'Reviews', questions: 'Questions', complaints: 'Complaints', categories: 'Categories', attributes: 'Attributes', sellers: 'Sellers', customers: 'Customers', users: 'Users', featured: 'Payment requests', products: 'Products', homepage: 'Home page', mainmenu: 'Main menu', team: 'Team', activity: 'Activity log', verify: 'Verification', pages: 'Pages & policies' };
 
   function go(view) {
     document.querySelectorAll('[data-page]').forEach(s => s.hidden = s.dataset.page !== view);
@@ -1654,7 +1649,7 @@
     if (view === 'homepage') loadSections();
     if (view === 'mainmenu') loadMenu();
     if (view === 'reports') loadReport();
-    if (view === 'payments') loadPayments();
+    if (view === 'payments') { loadPayments(); loadFeatured(); }
     if (view === 'orders') loadAdminOrders();
     if (view === 'reviews') loadAdminReviews();
     if (view === 'returns') loadReturns();

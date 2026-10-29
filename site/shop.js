@@ -38,7 +38,7 @@ function headerHTML() {
       <a class="icon-link" href="messages.html" id="msgLink" aria-label="Messages" hidden>${CHAT_SVG}<span class="badge" id="msgCount" hidden></span></a>
       <a class="icon-link" href="alerts.html" id="bellLink" aria-label="Alerts" hidden>${BELL_SVG}<span class="badge" id="bellCount"></span></a>
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
-      <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short">Open shop</span><span class="lbl-tiny">Shop</span></a>
+      <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short" style="display:none">Open shop</span><span class="lbl-tiny" style="display:none">Shop</span></a>
       <a class="icon-link acct" href="login.html?as=customer" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Buy · Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;

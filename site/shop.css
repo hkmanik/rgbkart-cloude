@@ -47,8 +47,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav .open-shop:hover { background: #ffd633; }
 .nav .open-shop .lbl-short, .nav .open-shop .lbl-tiny { display: none; }
 .nav .open-shop[hidden] { display: none; }
-@media (max-width: 760px) { .nav .open-shop { padding: 6px 9px; } .nav .open-shop .lbl-full { display: none; } .nav .open-shop .lbl-short { display: inline; } }
-@media (max-width: 440px) { .nav .open-shop .lbl-short { display: none; } .nav .open-shop .lbl-tiny { display: inline; } }
+@media (max-width: 760px) { .nav .open-shop { padding: 6px 9px; } .nav .open-shop .lbl-full { display: none; } .nav .open-shop .lbl-short { display: inline !important; } }
+@media (max-width: 440px) { .nav .open-shop .lbl-short { display: none !important; } .nav .open-shop .lbl-tiny { display: inline !important; } }
 .nav .icon-link { position: relative; padding: 7px 10px; display: inline-flex; align-items: center; gap: 6px; }
 .nav .icon-link svg { width: 22px; height: 22px; }
 .badge { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--buy); color: #fff; font: 700 .72rem/20px var(--body); text-align: center; border: 2px solid var(--head); }

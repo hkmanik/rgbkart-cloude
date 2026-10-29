@@ -103,6 +103,9 @@
   .arrows button { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--accent); background: var(--surface); color: var(--accent); font-size: 1.1rem; cursor: pointer; }
   .arrows button:hover { background: var(--accent); color: var(--accent-fg); }
   @media (prefers-reduced-motion: reduce) { .shoprow { scroll-behavior: auto; } .shopcard { transition: none; } .shopcard:hover { transform: none; } }
+  @media (max-width: 640px) { .hide-m { display: none !important; } }
+  @media (min-width: 641px) and (max-width: 1024px) { .hide-t { display: none !important; } }
+  @media (min-width: 1025px) { .hide-d { display: none !important; } }
 </style>
 </head>
 <body>
@@ -262,7 +265,8 @@
     const list = r.error ? DEFAULT_SECTIONS : r.data;
     const holder = $('sections');
     // keep the page order stable while sections load in parallel
-    const slots = list.map(() => { const d = h('div'); holder.append(d); return d; });
+    // each section can be hidden on computers, tablets or phones (0066_section_devices.sql)
+    const slots = list.map(sec => { const d = h('div', { class: [sec.on_desktop === false && 'hide-d', sec.on_tablet === false && 'hide-t', sec.on_mobile === false && 'hide-m'].filter(Boolean).join(' ') || null }); holder.append(d); return d; });
     const mid = h('div', { id: 'adMid', hidden: true }); holder.insertBefore(mid, slots[Math.min(2, slots.length)] || null); adSlot('home_mid', mid);
     await Promise.all(list.map((s, i) => renderSection(s, slots[i])));
     if (!holder.querySelector('section')) holder.append(h('div', { class: 'empty', text: 'No products yet. Be the first to sell something!' }));

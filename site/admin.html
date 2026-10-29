@@ -1052,6 +1052,12 @@
     <label>Subtitle in Bangla (optional) <input id="sxSubBn" type="text" maxlength="120" lang="bn"></label>
     <label>How many products
       <select id="sxCount"><option value="6">6 (one row)</option><option value="12" selected>12 (two rows)</option><option value="18">18 (three rows)</option><option value="24">24 (four rows)</option></select></label>
+    <fieldset id="sxDevWrap" style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;gap:16px;flex-wrap:wrap">
+      <legend style="font-weight:700;padding:0 6px">Show on</legend>
+      <label class="check"><input type="checkbox" id="sxOnD" checked> 💻 Computer / laptop</label>
+      <label class="check"><input type="checkbox" id="sxOnT" checked> 📟 Tablet</label>
+      <label class="check"><input type="checkbox" id="sxOnM" checked> 📱 Phone</label>
+    </fieldset>
     <fieldset id="sxMotionWrap" hidden style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:10px">
       <legend style="font-weight:700;padding:0 6px">How the shop row moves</legend>
       <label>Movement <select id="sxMotion"><option value="continuous">Glides all the time (continuous)</option><option value="step">Moves one shop every few seconds</option><option value="off">Doesn't move (arrows only)</option></select></label>
@@ -2370,7 +2376,8 @@
       box.append(h('div', { class: 'hs' + (s.is_active ? '' : ' off') },
         h('span', { class: 'hs-n', text: i + 1 }),
         h('div', { style: 'min-width:0' }, h('div', { class: 'attr-title' }, h('b', { text: s.title }), h('span', { class: 'chip plain', text: SX_TYPES[s.section_type] + (cat ? ': ' + cat.name : '') }),
-            h('span', { class: 'chip plain', text: `${s.item_count} products` }), !s.is_active && h('span', { class: 'chip off', text: 'Hidden' })),
+            h('span', { class: 'chip plain', text: `${s.item_count} products` }), !s.is_active && h('span', { class: 'chip off', text: 'Hidden' }),
+            'on_desktop' in s && !(s.on_desktop && s.on_tablet && s.on_mobile) && h('span', { class: 'chip pending', text: 'Only on: ' + [s.on_desktop && '💻 computer', s.on_tablet && '📟 tablet', s.on_mobile && '📱 phone'].filter(Boolean).join(', ') })),
           s.subtitle && h('div', { class: 'attr-meta', text: s.subtitle })),
         h('div', { class: 'actions' },
           h('button', { type: 'button', class: 'icon-btn', text: '↑', 'aria-label': 'Move up', disabled: i === 0, onclick: () => moveSec(i, -1) }),
@@ -2406,6 +2413,9 @@
     $('sxSubBn').value = s ? (s.subtitle_bn || '') : '';
     $('sxCount').value = String(s ? s.item_count : 12);
     $('sxActive').checked = s ? s.is_active : true;
+    const devOk = 'on_desktop' in (s || homeSections[0] || {});
+    $('sxDevWrap').hidden = !devOk;
+    $('sxOnD').checked = s ? s.on_desktop !== false : true; $('sxOnT').checked = s ? s.on_tablet !== false : true; $('sxOnM').checked = s ? s.on_mobile !== false : true;
     $('sxCatWrap').hidden = $('sxType').value !== 'category';
     const st = (s && s.settings) || {}; $('sxMotion').value = st.motion || 'continuous'; $('sxSpeed').value = st.speed || 'normal'; $('sxDir').value = st.direction || 'left';
     $('sxMotionWrap').hidden = $('sxType').value !== 'top_shops'; $('sxMotion').onchange();
@@ -2428,8 +2438,10 @@
     const t = $('sxType').value;
     const row = { section_type: t, category_id: t === 'category' ? Number($('sxCat').value) : null, title: $('sxTitle').value.trim(), subtitle: $('sxSub').value.trim() || null, title_bn: $('sxTitleBn').value.trim() || null, subtitle_bn: $('sxSubBn').value.trim() || null,
       item_count: Number($('sxCount').value), is_active: $('sxActive').checked, updated_at: new Date().toISOString(),
+      ...(!$('sxDevWrap').hidden ? { on_desktop: $('sxOnD').checked, on_tablet: $('sxOnT').checked, on_mobile: $('sxOnM').checked } : {}),
       ...('settings' in (editingSec || homeSections[0] || {}) && t === 'top_shops' ? { settings: { motion: $('sxMotion').value, speed: $('sxSpeed').value, direction: $('sxDir').value } } : {}) };
     if (row.title.length < 2) return setMsg('secMsg', 'Give the section a title.', true);
+    if ('on_desktop' in row && !row.on_desktop && !row.on_tablet && !row.on_mobile) return setMsg('secMsg', 'Tick at least one device, or use Hide instead.', true);
     if (!editingSec) row.sort_order = (homeSections.reduce((m, s) => Math.max(m, s.sort_order), 0)) + 10;
     $('secSave').disabled = true;
     const r = editingSec ? await db.from('home_sections').update(row).eq('id', editingSec.id) : await db.from('home_sections').insert(row);

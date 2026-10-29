@@ -39,13 +39,13 @@ function headerHTML() {
       <a class="icon-link" href="alerts.html" id="bellLink" aria-label="Alerts" hidden>${BELL_SVG}<span class="badge" id="bellCount"></span></a>
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
       <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short" style="display:none">Open shop</span><span class="lbl-tiny" style="display:none">Shop</span></a>
-      <a class="icon-link acct" href="login.html?as=customer" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Buy · Sign in</span></a>
+      <a class="icon-link acct" href="login.html" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;
 }
 function footerHTML() {
   return `<footer><div class="wrap"><div><b>RGBKart</b><div>Buy and sell across all 64 districts.</div></div>
-    <div><span data-lang-switch="on-dark"></span><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html">Open a shop</a></div></div></footer>
+    <div><span data-lang-switch="on-dark"></span><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html?as=seller">Open a shop</a></div></div></footer>
     <a class="fab" href="sell.html">+ Sell</a>`;
 }
 function updateBadges() {

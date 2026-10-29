@@ -129,6 +129,8 @@
   .pw .eye svg { width: 22px; height: 22px; }
   .pw-hint { font-size: .8rem; font-weight: 500; letter-spacing: 0; text-transform: none; margin-top: -2px; }
   .pw-hint.ok { color: var(--good, #1f7a5a); } .pw-hint.bad { color: var(--danger); }
+  .home-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--accent); color: var(--accent); font-weight: 700; text-decoration: none; background: var(--surface); }
+  .home-btn:hover { background: var(--accent); color: var(--accent-fg, #fff); }
 </style>
 </head>
 <body>
@@ -137,7 +139,7 @@
   <header>
     <h1 style="margin:0"><a href="index.html" class="lbrand" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="64" height="64"><span><b translate="no"><span style="color:#E30613">Red</span> <span style="color:var(--fg)">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Your Online Marketplace</small></span></a></h1>
     <p class="sub" id="tagline">Sign in, or create an account to shop or sell.</p>
-    <div data-lang-switch style="margin-top:10px"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"><a class="home-btn" href="index.html">← Home</a><div data-lang-switch></div></div>
   </header>
 
   <a class="sell-cta" href="sell.html">
@@ -228,7 +230,7 @@
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=28"></script>
+<script src="i18n.js?v=29"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -244,7 +246,9 @@
   const isFile = location.protocol === 'file:';
 
   let mode = 'signin';
-  let signupRole = 'customer';
+  // "Open a shop" in the header opens login.html?as=seller: a shop-only sign-up form (owner, 29 Oct 2026)
+  const SHOP_ONLY = new URLSearchParams(location.search).get('as') === 'seller';
+  let signupRole = SHOP_ONLY ? 'seller' : 'customer';
   let onboardRole = 'customer';
   let recovering = false;
   let todos = [];
@@ -412,7 +416,7 @@
   function setMode(next) {
     mode = next;
     const signup = mode === 'signup', forgot = mode === 'forgot';
-    $('signupRole').hidden = !signup;
+    $('signupRole').hidden = !signup || SHOP_ONLY;
     $('signupFields').hidden = !signup;
     $('signupFields').disabled = !signup;
     $('loginLabel').hidden = !signup;
@@ -424,8 +428,8 @@
     $('forgotBtn').hidden = mode !== 'signin';
     $('authBtn').textContent = { signin: 'Sign in', signup: '', forgot: 'Send reset link' }[mode];
     updateSignupButton();
-    $('switchText').textContent = signup ? 'Already have an account?' : forgot ? 'Remembered it?' : 'No account yet?';
-    $('switchBtn').textContent = mode === 'signin' ? 'Create one' : 'Sign in';
+    $('switchText').textContent = SHOP_ONLY ? (signup ? 'Already have a shop?' : forgot ? 'Remembered it?' : 'No shop yet?') : signup ? 'Already have an account?' : forgot ? 'Remembered it?' : 'No account yet?';
+    $('switchBtn').textContent = mode === 'signin' ? (SHOP_ONLY ? 'Open a shop' : 'Create one') : 'Sign in';
     $('password').autocomplete = signup ? 'new-password' : 'current-password';
     $('pw2Label').hidden = !signup; $('password2').required = signup;
     if (!signup) { $('password2').value = ''; pw2Check(); }
@@ -443,7 +447,7 @@
   document.querySelectorAll('.oauth').forEach(btn => {
     btn.onclick = async () => {
       if (needsServer()) return;
-      if (mode === 'signup') {
+      if (mode === 'signup' || SHOP_ONLY) {
         try { sessionStorage.setItem('rgbkart-role', signupRole); } catch (_) {}
       }
       const { error } = await db.auth.signInWithOAuth({
@@ -661,12 +665,11 @@
     if (id !== 'appMsg') $(id).classList.toggle('error', !!isError);
   }
 
-  // Header "Open a shop" (login.html?as=seller): start on Create account with Seller chosen; "Buy / Sign in" stays on Sign in.
-  const AS = new URLSearchParams(location.search).get('as');
-  if (AS === 'seller' || AS === 'customer') {
-    signupRole = AS;
-    $('signupRole').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === AS)));
-    setMode(AS === 'seller' ? 'signup' : 'signin');
+  if (SHOP_ONLY) {
+    $('signupRole').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === 'seller')));
+    $('tagline').textContent = 'Open your shop on RGBKart. Create your seller account below; we check and approve new shops quickly.';
+    const cta = document.querySelector('.sell-cta'); if (cta) cta.hidden = true;
+    setMode('signup');
   } else setMode('signin');
 </script>
 </body>

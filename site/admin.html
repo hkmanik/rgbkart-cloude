@@ -361,6 +361,7 @@
   .ad-size { color: #b45309; font-weight: 700; text-transform: none; letter-spacing: 0; }
   .ad-pic { width: 100%; max-height: 260px; object-fit: contain; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); display: block; }
   .ad-pic.small { max-height: 110px; }
+  .social-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px 14px; }
 </style>
 </head>
 <body>
@@ -660,6 +661,13 @@
       <div class="page-head"><div><h1>Pages &amp; policies</h1><p>About, Contact, Terms, Privacy, Return &amp; refund and Seller rules, shown in the footer of every page in English and Bangla. They start as drafts: fill in the parts in [square brackets] and have a lawyer check Terms and Privacy before launch. Format: "## " for a heading, "- " for a bullet, "1. " for a numbered step, an empty line between paragraphs, **bold**.</p></div>
         <button type="button" class="primary" id="pgNew">+ New page</button></div>
       <div class="card" style="margin-top:18px"><div id="pgList" class="ar-list"></div></div>
+      <div class="card" style="margin-top:18px">
+        <h2>Social media links</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Icons on the right of the footer on every page. Paste the full address (starting with https://). An icon without a link shows faded and can't be clicked.</p>
+        <div id="socialForm" class="social-form"></div>
+        <p class="readonly-note" id="socialRo" hidden>Only the Master Admin and Co-admins can change these links.</p>
+        <div style="margin-top:10px"><button type="button" class="primary" id="socialSave">Save links</button></div>
+      </div>
       <div class="card" id="pgForm" hidden style="margin-top:18px">
         <h2 id="pgFormTitle">Edit page</h2>
         <div class="pg-grid">
@@ -1283,7 +1291,30 @@
 
   // ===================== Pages & policies (0039_site_pages.sql) =====================
   let sitePages = [], pgEditing = null;
+  // ---------- Social media links (0062_social_links.sql: site_settings 'social') ----------
+  const SOCIAL_A = [['facebook', 'Facebook', 'https://www.facebook.com/…'], ['instagram', 'Instagram', 'https://www.instagram.com/…'], ['youtube', 'YouTube', 'https://www.youtube.com/@…'],
+    ['tiktok', 'TikTok', 'https://www.tiktok.com/@…'], ['x', 'X (Twitter)', 'https://x.com/…'], ['pinterest', 'Pinterest', 'https://www.pinterest.com/…']];
+  async function loadSocial() {
+    const r = await db.from('site_settings').select('value').eq('key', 'social').maybeSingle();
+    const v = (r.data && r.data.value) || {};
+    const box = $('socialForm'); box.innerHTML = '';
+    const edit = canApprove();
+    SOCIAL_A.forEach(([k, name, ph]) => box.append(h('label', {}, name, h('input', { type: 'url', id: 'soc-' + k, value: v[k] || '', placeholder: ph, maxlength: 300, disabled: !edit }))));
+    $('socialSave').hidden = !edit; $('socialRo').hidden = edit;
+  }
+  $('socialSave').onclick = async () => {
+    const val = {}, bad = [];
+    SOCIAL_A.forEach(([k, name]) => { const x = $('soc-' + k).value.trim(); if (x && !/^https:\/\/\S+$/i.test(x)) bad.push(name); val[k] = x; });
+    if (bad.length) return toast('Check the link for ' + bad.join(', ') + ': it must start with https://');
+    $('socialSave').disabled = true;
+    const { error } = await db.from('site_settings').upsert({ key: 'social', value: val, updated_at: new Date().toISOString() });
+    $('socialSave').disabled = false;
+    if (error) return toast(friendly(error));
+    toast('Social media links saved. The footer shows them now.');
+  };
+
   async function loadPages() {
+    loadSocial();
     const r = await db.from('site_pages').select('*').order('sort_order');
     const box = $('pgList'); box.innerHTML = '';
     if (r.error) { box.append(h('p', { class: 'muted', text: /does not exist|Could not find/i.test(r.error.message) ? 'Pages are not switched on yet: run 0039_site_pages.sql.' : friendly(r.error) })); return; }

@@ -75,12 +75,36 @@ function updateBadges() {
   });
 }
 // Policy / info pages in the footer (0039_site_pages.sql, edited in Admin → Pages)
+// Footer row: policy pages (0039_site_pages.sql, Admin → Pages) on the left, social icons on the right
+// (0062_social_links.sql: site_settings 'social', Admin → Pages & policies → Social media links). Icons without a link are faded.
+const SOCIAL = [
+  ['facebook', 'Facebook', '<path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H8v4h2v6h4v-6h3l1-4h-4V8z" fill="currentColor"/>'],
+  ['instagram', 'Instagram', '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>'],
+  ['youtube', 'YouTube', '<path d="M22 8.2a3 3 0 0 0-2.1-2.1C18 5.6 12 5.6 12 5.6s-6 0-7.9.5A3 3 0 0 0 2 8.2 31 31 0 0 0 1.6 12 31 31 0 0 0 2 15.8a3 3 0 0 0 2.1 2.1c1.9.5 7.9.5 7.9.5s6 0 7.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .4-3.8 31 31 0 0 0-.4-3.8zM10 15V9l5.2 3L10 15z" fill="currentColor"/>'],
+  ['tiktok', 'TikTok', '<path d="M16.5 3a5 5 0 0 0 4 4.4v3.2a8 8 0 0 1-4-1.2V15a6 6 0 1 1-6-6h.5v3.3a2.8 2.8 0 1 0 2.3 2.7V3h3.2z" fill="currentColor"/>'],
+  ['x', 'X', '<path d="M17.8 3h3.3l-7.2 8.2L22.4 21h-6.6l-5.2-6.8L4.7 21H1.4l7.7-8.8L1 3h6.8l4.7 6.2L17.8 3zm-1.2 16h1.8L7.5 4.9H5.6L16.6 19z" fill="currentColor"/>'],
+  ['pinterest', 'Pinterest', '<path d="M12 2a10 10 0 0 0-3.6 19.3c-.1-.8-.2-2 0-2.9l1.2-5s-.3-.6-.3-1.5c0-1.4.8-2.5 1.8-2.5.9 0 1.3.6 1.3 1.4 0 .9-.5 2.1-.8 3.3-.2 1 .5 1.8 1.5 1.8 1.8 0 3.1-1.9 3.1-4.6 0-2.4-1.7-4.1-4.2-4.1-2.9 0-4.5 2.1-4.5 4.4 0 .9.3 1.8.8 2.3l.1.4-.3 1.1c0 .2-.2.3-.4.2-1.3-.6-2-2.4-2-3.9 0-3.2 2.3-6.1 6.7-6.1 3.5 0 6.2 2.5 6.2 5.8 0 3.5-2.2 6.3-5.2 6.3-1 0-2-.5-2.3-1.1l-.6 2.4c-.2.9-.9 2-1.3 2.7A10 10 0 1 0 12 2z" fill="currentColor"/>'],
+];
 function footerPages() {
   const ft = document.querySelector('footer .wrap'); if (!ft) return;
+  const row = h('div', { class: 'foot-pages' });
+  const pages = h('nav', { class: 'fp-links', 'aria-label': T('Information') });
+  const icons = h('div', { class: 'social', 'aria-label': T('Follow us') });
+  row.append(pages, icons); ft.after(row);
+  const draw = links => {
+    icons.innerHTML = '';
+    SOCIAL.forEach(([k, name, svg]) => {
+      const url = links && /^https:\/\//i.test(links[k] || '') ? links[k] : '';
+      const el = url ? h('a', { href: url, target: '_blank', rel: 'noopener', title: name, 'aria-label': name }) : h('span', { class: 'off', title: name + ' · ' + T('coming soon'), 'aria-label': name + ' · ' + T('coming soon') });
+      el.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>`;
+      icons.append(el);
+    });
+  };
+  draw({ facebook: 'https://www.facebook.com/profile.php?id=61595909253406' });   // shown at once; replaced by the saved links
+  db.from('site_settings').select('value').eq('key', 'social').maybeSingle().then(r => { if (!r.error && r.data) draw(r.data.value); }, () => {});
   db.from('site_pages').select('slug, title, title_bn').eq('in_footer', true).eq('is_active', true).order('sort_order').then(r => {
-    if (r.error || !r.data || !r.data.length) return;
-    const row = h('nav', { class: 'foot-pages', 'aria-label': T('Information') }, r.data.map(p => h('a', { href: 'page.html?p=' + encodeURIComponent(p.slug), text: L(p, 'title') })));
-    ft.after(row);
+    if (r.error || !r.data) return;
+    r.data.forEach(p => pages.append(h('a', { href: 'page.html?p=' + encodeURIComponent(p.slug), text: L(p, 'title') })));
   }, () => {});
 }
 async function initShell() {

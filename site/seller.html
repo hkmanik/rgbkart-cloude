@@ -638,6 +638,8 @@
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="primary" id="sadImgBtn">⬆ Upload banner picture</button><button type="button" class="ghost" id="sadImgClear" hidden>Remove picture</button><span class="pmeta" id="sadImgName"></span>
             <input type="file" id="sadImg" accept="image/jpeg,image/png,image/webp" hidden></div>
           <label>When people tap it, open <select id="sadLink"></select></label>
+          <label id="sadUrlWrap" hidden>Website address <input type="url" id="sadUrl" maxlength="300" placeholder="https://www.manufacturer.com/product">
+            <span class="pmeta">Must start with https://. It opens in a new tab. Only link to pages about your product or brand.</span></label>
           <label>Name of the ad <input type="text" id="sadTitle" maxlength="80" placeholder="e.g. Eid offers at Rahim Tech"></label>
           <fieldset id="sadTextBox" style="border:1px dashed var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:10px"><legend class="pmeta">No picture? A simple text banner instead</legend>
             <label>Small text (optional) <input type="text" id="sadSub" maxlength="140"></label>
@@ -1825,7 +1827,11 @@
     $('sadStart').min = dhakaDay();
     const ls = $('sadLink'); const keep = ls.value; ls.innerHTML = '';
     products.filter(p => p.status === 'approved').forEach(p => ls.append(h('option', { value: `product.html?id=${p.id}`, text: 'My product: ' + p.title })));
+    if (shop && shop.shop_slug) ls.append(h('option', { value: `store.html?s=${shop.shop_slug}`, text: 'My shop page' }));
     [['browse.html?deals=1', 'Deals of the Day'], ['browse.html', 'All products']].forEach(([v, t]) => ls.append(h('option', { value: v, text: t })));
+    ls.append(h('option', { value: '__url', text: 'Another website (e.g. the maker of the product)…' }));
+    ls.onchange = () => { $('sadUrlWrap').hidden = ls.value !== '__url'; if (!$('sadUrlWrap').hidden) $('sadUrl').focus(); };
+    $('sadUrlWrap').hidden = ls.value !== '__url';
     if (keep && [...ls.options].some(o => o.value === keep)) ls.value = keep;
     loadSellerAdsDraw();
     // my ads
@@ -1930,6 +1936,8 @@
     if ($('sadTitle').value.trim().length < 2) { $('sadTitle').focus(); return msg('Write a name for the ad.'); }
     if (r.kind === 'popup' && !sadBlob) return msg('Pop-ups need a picture.');
     if (!$('sadStart').value || $('sadStart').value < dhakaDay()) return msg('Choose a start date from today.');
+    const link = $('sadLink').value === '__url' ? $('sadUrl').value.trim() : $('sadLink').value;
+    if ($('sadLink').value === '__url' && !/^https:\/\/[^\s]+\.[^\s]+$/i.test(link)) { $('sadUrl').focus(); return msg('Enter the full website address, starting with https://'); }
     $('sadBook').disabled = true; $('sadBook').textContent = 'Booking…';
     try {
       let path = null;
@@ -1939,10 +1947,10 @@
         if (up.error) throw up.error;
       }
       const res = await db.rpc('seller_book_ad', { p_placement: r.placement, p_title: $('sadTitle').value.trim(), p_subtitle: $('sadSub').value.trim() || null, p_cta: $('sadCta').value.trim() || null,
-        p_link: $('sadLink').value || null, p_color: $('sadColor').value, p_image: path, p_start: $('sadStart').value, p_days: days });
+        p_link: link || null, p_color: $('sadColor').value, p_image: path, p_start: $('sadStart').value, p_days: days });
       if (res.error) throw res.error;
       toast('Ad booked. Pay now to put it live.');
-      ['sadTitle', 'sadSub'].forEach(id => $(id).value = ''); sadBlob = null; $('sadImgName').textContent = ''; $('sadImgClear').hidden = true;
+      ['sadTitle', 'sadSub', 'sadUrl'].forEach(id => $(id).value = ''); sadBlob = null; $('sadImgName').textContent = ''; $('sadImgClear').hidden = true;
       await loadSellerAds();
       const first = $('adMine').querySelector('.sad-row .primary'); if (first) { first.click(); first.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
     } catch (err) { msg(/Could not find the function/i.test(err.message || '') ? 'Advertising isn\'t switched on yet. Please try again later.' : friendly(err)); }

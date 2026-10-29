@@ -46,7 +46,7 @@ function headerHTML() {
 function footerHTML() {
   return `<footer><div class="wrap"><div><b>RGBKart</b><div>Buy and sell across all 64 districts.</div></div>
     <div><span data-lang-switch="on-dark"></span><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html?as=seller">Open a shop</a></div></div>
-    <div class="foot-credit"><span>© ${new Date().getFullYear()} <span translate="no">Red &amp; Green Basket (RGBKart)</span>. ${(window.T || (x => x))('All rights reserved.')}</span><span>${(window.T || (x => x))('Designed & developed by')} <a href="https://hkmanik.com" target="_blank" rel="noopener" translate="no">HKMANI</a></span></div></footer>
+    <div class="foot-credit"><span>© ${new Date().getFullYear()} <span translate="no">Red &amp; Green Basket (RGBKart)</span>. ${(window.T || (x => x))('All rights reserved.')}</span><span>${(window.T || (x => x))('Designed & developed by')} <a href="https://hkmanik.com" target="_blank" rel="noopener" translate="no">HKMANIK</a></span></div></footer>
     <a class="fab" href="sell.html">+ Sell</a>`;
 }
 function updateBadges() {

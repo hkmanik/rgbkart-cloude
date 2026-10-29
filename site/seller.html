@@ -430,6 +430,15 @@
   .buyer-sw[aria-pressed="true"] { border-style: solid; background: #7c4dcc; color: #fff; }
   .attr-var { border: 1.5px solid #7c4dcc; border-radius: 10px; padding: 10px 12px; background: color-mix(in srgb, #7c4dcc 6%, var(--surface)); }
   #priceCard .sub-block .lbl:first-child, #priceCard .choice > .lbl { font-size: .95rem; color: var(--fg); font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .opt-pick[aria-pressed="true"] { background: #7c4dcc; border-color: #7c4dcc; color: #fff; }
+  .opt-box { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; background: var(--surface); }
+  .opt-box.priced { border-color: #7c4dcc; background: color-mix(in srgb, #7c4dcc 6%, var(--surface)); }
+  .opt-head { display: flex; align-items: center; gap: 10px; } .opt-head .icon-btn { margin-left: auto; }
+  .opt-q { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: .88rem; font-weight: 600; }
+  .price-seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .price-seg button { border: 0; border-radius: 0; background: var(--surface); padding: 6px 14px; font-size: .84rem; font-weight: 600; color: var(--muted); }
+  .price-seg button[aria-pressed="true"] { background: #1f9d55; color: #fff; }
+  .price-seg button + button { border-left: 1.5px solid var(--line); }
 </style>
 </head>
 <body>
@@ -847,6 +856,12 @@
             <!-- internal state driven by the buttons above -->
             <select id="fProductType" hidden><option value="simple">Simple</option><option value="variable">Variable</option></select>
             <input id="kDownload" type="checkbox" hidden><input id="kService" type="checkbox" hidden><input id="kGift" type="checkbox" hidden>
+            <div class="sub-block" id="optBlock" style="display:grid;gap:12px" hidden>
+              <span class="lbl">2. What does the buyer choose?</span>
+              <p class="hint" style="margin:0">Tap each detail the buyer picks when ordering, for example <b>Processor</b>, <b>RAM</b>, <b>Storage</b>, <b>Colour</b>. Then tick the values you sell and answer <b>Does the price change?</b> <i>Yes</i> = each choice gets its own price and stock (versions). <i>No</i> = the buyer just picks, the price stays the same (for example Colour).</p>
+              <div class="chips" id="optPick"></div>
+              <div id="optBoxes" style="display:grid;gap:10px"></div>
+            </div>
             <div class="sub-block" id="detailsBlock" style="display:grid;gap:12px">
               <span class="lbl" id="detailsLbl">2. Details</span>
               <p class="hint" style="margin:0" id="detailsHint">Choose a category first.</p>
@@ -867,10 +882,10 @@
             <p class="hint" id="basicVarNote" hidden style="margin:-4px 0 0">Price and stock are set for each version under Product data → Variations.</p>
             </div>
             <div id="varBlock" class="sub-block" style="display:grid;gap:14px" hidden>
-              <span class="lbl">3. Price and stock for each choice</span>
-              <p class="hint" style="margin:0" id="varIntro">Every combination you picked above is listed here. Set a price and stock for each (or use "Same for all"). Switch off any combination you don't sell.</p>
+              <span class="lbl" id="varLbl">4. Price and stock for each version</span>
+              <p class="hint" style="margin:0" id="varIntro">Each combination of the "price changes" choices is one version (for example 2 processors × 3 RAM × 2 storage = 12 versions). They are made for you; press the button after changing choices if a row is missing. Set a price and stock for each, or use "Same for all". Switch off any combination you don't sell.</p>
               <div id="varAttrs" hidden></div>
-              <div class="toolbar" hidden><button type="button" class="ghost" id="genVars">Create combinations</button></div><span class="hint" id="varCount"></span>
+              <div class="toolbar"><button type="button" class="primary" id="genVars">↻ Create / update versions</button></div><span class="hint" id="varCount"></span>
               <div class="bulk" id="bulkBar" hidden>
                 <label>Same price for all<span class="taka"><input id="bulkPrice" type="number" min="1" step="1"></span></label>
                 <label>Same stock for all<input id="bulkStock" type="number" min="0" step="1"></label>
@@ -1976,7 +1991,8 @@
   let values = new Map();   // attribute_id -> Set(option ids) | true | false
   let photos = [];          // { id?, storage_path?, url, file?, blob? }
   let removedPhotos = [];
-  let varAttrIds = [];      // attributes used for variations
+  let varAttrIds = [];      // attributes used for variations (price changes)
+  let choiceIds = [];       // buyer picks, price stays the same (0063_buyer_choices.sql)
   let varPicked = new Map();// attribute_id -> Set(option ids)
   let variations = [];      // { id?, options: {attrId: optId}, price, sale_price, stock, sku, image_id, is_active }
   let links = { upsell: new Set(), cross_sell: new Set() };
@@ -2004,7 +2020,7 @@
   async function openEditor(id, errorText) {
     if (!shop || shop.status !== 'approved') return toast('You can add products once your shop is approved.');
     setMsg('');
-    editing = blank(); values = new Map(); photos = []; removedPhotos = []; varAttrIds = []; varPicked = new Map(); variations = [];
+    editing = blank(); values = new Map(); photos = []; removedPhotos = []; varAttrIds = []; choiceIds = []; varPicked = new Map(); variations = [];
     downloads = []; removedDownloads = []; tiers = [];
     links = { upsell: new Set(), cross_sell: new Set() }; openFeat = null; wantFeatured = false; planId = plans[0] ? plans[0].id : null;
 
@@ -2030,6 +2046,7 @@
       }
       variations = vr.data.map(v => ({ id: v.id, options: Object.fromEntries(v.product_variation_options.map(o => [o.attribute_id, o.option_id])),
         price: v.price, sale_price: v.sale_price, stock: v.stock, sku: v.sku || '', image_id: v.image_id, is_active: v.is_active }));
+      choiceIds = (p.data.buyer_choice_ids || []).map(Number);
       for (const v of variations) for (const [a, o] of Object.entries(v.options)) {
         const aid = Number(a); if (!varAttrIds.includes(aid)) varAttrIds.push(aid);
         if (!varPicked.has(aid)) varPicked.set(aid, new Set()); varPicked.get(aid).add(o);
@@ -2088,7 +2105,7 @@
     $('fReturn').value = p.return_policy; $('fNote').value = p.purchase_note || '';
     $('fProductType').value = p.product_type;
     $('kDownload').checked = !!p.is_downloadable; $('kService').checked = !!p.is_service; $('kGift').checked = !!p.is_gift_card;
-    $('fProductType').value = currentKind() === 'variable' ? 'variable' : 'simple';
+    $('fProductType').value = currentKind() === 'variable' || choiceIds.length ? 'variable' : 'simple';
     // Downloadable and Gift card are hidden until buyers can order them (owner, 29 Oct 2026); old products of that kind still show theirs
     $('ptypes').querySelector('[data-kind=downloadable]').hidden = !p.is_downloadable;
     $('ptypes').querySelector('[data-kind=gift]').hidden = !p.is_gift_card;
@@ -2128,6 +2145,10 @@
     return $('fProductType').value === 'variable' ? 'variable' : 'simple';
   }
   function setKind(kind) {
+    if (kind !== 'variable') {   // back to one value per detail
+      choiceIds.forEach(a => { const v = values.get(a); if (v instanceof Set && v.size > 1) values.set(a, new Set([[...v][0]])); });
+      choiceIds = [];
+    }
     $('fProductType').value = kind === 'variable' ? 'variable' : 'simple';
     $('kDownload').checked = kind === 'downloadable';
     $('kService').checked = kind === 'service';
@@ -2139,7 +2160,10 @@
 
   function syncType() {
     const free = editing.listing_type === 'free';
-    const variable = $('fProductType').value === 'variable' && !free;
+    const variable = isVariable();
+    $('optBlock').hidden = !withOptions();
+    $('detailsLbl').textContent = withOptions() ? '3. Other details (one value each)' : '2. Details';
+    $('priceLbl').textContent = withOptions() ? '4. Price and stock' : '3. Price and stock';
     $('typeCards').querySelectorAll('.type-card').forEach(b => b.setAttribute('aria-pressed', b.dataset.type === editing.listing_type));
     $('freeNote').hidden = !free;
     $('varPriceNote').hidden = !variable;
@@ -2347,7 +2371,8 @@
   // ---------- category details (attributes) ----------
   // brands (Phone Brand, Fashion Brand…) and Condition are product details, never a version choice
   const varCandidates = () => effectiveAttrs(editing.category_id).filter(x => ['select', 'color'].includes(x.attr.input_type) && !/\bbrand\b|^condition$/i.test(x.attr.name));
-  const isVariable = () => $('fProductType').value === 'variable' && editing.listing_type !== 'free';
+  const withOptions = () => $('fProductType').value === 'variable' && editing.listing_type !== 'free';
+  const isVariable = () => withOptions() && varAttrIds.length > 0;   // versions only when a choice changes the price
 
   function syncCondition() {
     const cond = attrs.find(a => a.name === 'Condition');
@@ -2362,35 +2387,19 @@
   function drawAttrFields() {
     const box = $('attrFields'); box.innerHTML = '';
     if (!editing.category_id) { $('detailsHint').hidden = false; $('detailsHint').textContent = 'Choose a category first (under Basic information).'; return; }
-    const variable = isVariable();
-    const list = effectiveAttrs(editing.category_id);
-    const candIds = new Set(variable ? varCandidates().map(x => x.attr.id) : []);
+    const variable = withOptions();
+    const list = effectiveAttrs(editing.category_id).filter(x => !(variable && [...varAttrIds, ...choiceIds].includes(x.attr.id)));
+    drawOptions();
     $('detailsHint').hidden = false;
     $('detailsHint').innerHTML = !list.length ? 'This category has no extra details.'
-      : variable ? 'For the details the buyer picks when ordering (for example <b>Size</b>), press <b>Buyer chooses</b> and tick every value you sell. Each choice gets its own price and stock in step 3. Fill the other details once. Fields marked * are needed before you send for review.'
+      : variable ? 'Everything the buyer does not choose: fill in once. Fields marked * are needed before you send for review.'
       : 'Fill in what applies. Fields marked * are needed before you send for review. <b>Sold in several sizes or colours that the buyer must choose?</b> Pick <b>With options</b> above.';
     const cond = attrs.find(a => a.name === 'Condition');
     for (const { attr: a, required, from } of list) {
       const id = 'attr-' + a.id;
       const name = a.name + (a.unit ? ` (${a.unit})` : '');
-      const isCand = candIds.has(a.id), varOn = isCand && varAttrIds.includes(a.id);
-      const sw = isCand && h('button', { type: 'button', class: 'buyer-sw', 'aria-pressed': String(varOn), title: 'The buyer picks this when ordering; each value gets its own price and stock',
-        onclick: e => { e.preventDefault();
-          if (!varOn) { if (varAttrIds.length >= 3) return toast('Up to 3 "Buyer chooses" details per product.'); varAttrIds.push(a.id); if (!varPicked.has(a.id)) varPicked.set(a.id, new Set()); values.delete(a.id); }
-          else varAttrIds = varAttrIds.filter(x => x !== a.id);
-          buildVersions(false); drawAttrFields(); dirty = true; } }, varOn ? '✓ Buyer chooses' : '+ Buyer chooses');
+      const sw = null;
       const fromTag = from && h('span', { class: 'from', text: ' · from ' + from });
-      if (varOn) {   // pick every value the buyer can choose from
-        const set = varPicked.get(a.id) || new Set(); varPicked.set(a.id, set);
-        const chips = h('div', { class: 'chips', role: 'group', 'aria-label': name });
-        a.attribute_options.forEach(o => {
-          const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) }, o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''));
-          b.onclick = () => { set.has(o.id) ? set.delete(o.id) : set.add(o.id); b.setAttribute('aria-pressed', String(set.has(o.id))); buildVersions(false); dirty = true; };
-          chips.append(b);
-        });
-        box.append(h('div', { class: 'lbl wide attr-var', style: 'display:grid;gap:6px' }, h('span', { class: 'attr-head' }, h('span', { text: name }), h('span', { class: 'from', text: ' · tick every value you sell' }), sw), chips));
-        continue;
-      }
       const head = h('span', { class: 'attr-head' }, h('span', { class: required ? 'req' : '', text: name }), fromTag, sw);
       const cur = values.get(a.id);
       let control;
@@ -2428,6 +2437,48 @@
         if (multi) head.insertBefore(h('span', { class: 'from', text: ' · choose any' }), sw || null);
         box.append(h('div', { class: 'lbl wide', style: 'display:grid;gap:6px' }, head, chips));
       }
+    }
+  }
+
+
+  // ---------- "What does the buyer choose?" (With options) ----------
+  function drawOptions() {
+    const pick = $('optPick'), boxes = $('optBoxes'); pick.innerHTML = ''; boxes.innerHTML = '';
+    if (!withOptions() || !editing.category_id) return;
+    const cands = varCandidates();
+    if (!cands.length) { pick.append(h('p', { class: 'hint', text: 'This category has no details a buyer can choose (like Size or Colour). Use Simple instead.' })); return; }
+    const isOn = id => varAttrIds.includes(id) || choiceIds.includes(id);
+    cands.forEach(({ attr: a }) => pick.append(h('button', { type: 'button', class: 'opt opt-pick', 'aria-pressed': String(isOn(a.id)), onclick: () => {
+      if (isOn(a.id)) {   // remove
+        varAttrIds = varAttrIds.filter(x => x !== a.id); choiceIds = choiceIds.filter(x => x !== a.id); values.delete(a.id);
+      } else if (varAttrIds.length < 3) { varAttrIds.push(a.id); if (!varPicked.has(a.id)) varPicked.set(a.id, new Set()); values.delete(a.id); }
+      else if (choiceIds.length < 2) { choiceIds.push(a.id); values.set(a.id, new Set()); }
+      else return toast('Up to 3 choices with their own price and 2 with the same price.');
+      buildVersions(false); syncType(); dirty = true;
+    } }, (isOn(a.id) ? '✓ ' : '+ ') + a.name)));
+    for (const aid of [...varAttrIds, ...choiceIds]) {
+      const a = attrById.get(aid); if (!a) continue;
+      const priced = varAttrIds.includes(aid);
+      const set = priced ? (varPicked.get(aid) || new Set()) : (values.get(aid) instanceof Set ? values.get(aid) : new Set());
+      if (priced) varPicked.set(aid, set); else values.set(aid, set);
+      const chips = h('div', { class: 'chips' }, a.attribute_options.map(o => {
+        const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) }, o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''));
+        b.onclick = () => { set.has(o.id) ? set.delete(o.id) : set.add(o.id); b.setAttribute('aria-pressed', String(set.has(o.id))); if (priced) buildVersions(false); dirty = true; drawSummary(); };
+        return b;
+      }));
+      const seg = h('div', { class: 'price-seg', role: 'group', 'aria-label': 'Does the price change with ' + a.name + '?' },
+        h('button', { type: 'button', 'aria-pressed': String(priced), onclick: () => {
+          if (priced) return; if (varAttrIds.length >= 3) return toast('Up to 3 choices can change the price.');
+          choiceIds = choiceIds.filter(x => x !== aid); varAttrIds.push(aid); varPicked.set(aid, new Set(set)); values.delete(aid);
+          buildVersions(false); syncType(); dirty = true; } }, 'Yes, each has its own price'),
+        h('button', { type: 'button', 'aria-pressed': String(!priced), onclick: () => {
+          if (!priced) return; if (choiceIds.length >= 2) return toast('Up to 2 choices can keep the same price.');
+          varAttrIds = varAttrIds.filter(x => x !== aid); choiceIds.push(aid); values.set(aid, new Set(set)); varPicked.delete(aid);
+          buildVersions(false); syncType(); dirty = true; } }, 'No, same price'));
+      boxes.append(h('div', { class: 'opt-box' + (priced ? ' priced' : '') },
+        h('div', { class: 'opt-head' }, h('b', { text: a.name + (a.unit ? ` (${a.unit})` : '') }), h('span', { class: 'hint', text: 'tick every value you sell' }),
+          h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Remove ' + a.name, text: '✕', onclick: () => { varAttrIds = varAttrIds.filter(x => x !== aid); choiceIds = choiceIds.filter(x => x !== aid); values.delete(aid); buildVersions(false); syncType(); dirty = true; } })),
+        chips, h('div', { class: 'opt-q' }, h('span', { text: 'Does the price change?' }), seg)));
     }
   }
 
@@ -2553,12 +2604,14 @@
 
   function collect() {
     const free = editing.listing_type === 'free', variable = isVariable();
+    const buyerChoices = withOptions() ? choiceIds.filter(a => (values.get(a) || new Set()).size) : [];
     const num = id => $(id).value === '' ? null : Number($(id).value);
     const row = {
       category_id: editing.category_id, title: $('fTitle').value.trim(), title_bn: $('fTitleBn').value.trim() || null, description_bn: $('fDescBn').value.trim() || null, listing_type: editing.listing_type, product_type: variable ? 'variable' : 'simple',
       short_description: $('fShort').value.trim() || null, description: $('fDesc').value.trim() || null,
       tags: $('fTags').value.split(',').map(t => t.trim()).filter(Boolean).slice(0, 20), video_url: $('fVideo').value.trim() || null,
       sku: $('fSku').value.trim() || null, sold_individually: $('fSoldInd').checked, price_negotiable: $('fNegotiable').checked,
+      ...(buyerChoices.length || (editing.buyer_choice_ids || []).length ? { buyer_choice_ids: buyerChoices } : {}),
       weight_kg: num('fWeight') || null, length_cm: num('fLen') || null, width_cm: num('fWid') || null, height_cm: num('fHei') || null,
       shipping_class: $('fShipClass').value, delivery_time: $('fDelivery').value, ships_to: $('fShipsTo').value, free_delivery: $('fFreeDel').checked,
       return_policy: $('fReturn').value, purchase_note: $('fNote').value.trim() || null,
@@ -2596,9 +2649,13 @@
       if (row.sale_starts_at && row.sale_ends_at && row.sale_ends_at <= row.sale_starts_at) errs.push('The sale must end after it starts.');
     }
     if (row.product_type === 'variable') {
-      if (!variations.length) errs.push('Under Price & details, turn on "Buyer chooses" for a detail (for example Size) and pick its values.');
+      if (!variations.length) errs.push('Press "Create / update versions" under Price & details, then set the prices.');
       if (row.listing_type !== 'free' && variations.some(v => v.is_active && !(Number(v.price) > 0))) errs.push('Every version that is on sale needs a price.');
       if (variations.some(v => v.sale_price && Number(v.sale_price) >= Number(v.price))) errs.push('A version\'s sale price must be lower than its price.');
+    }
+    if (withOptions()) {
+      const bad = choiceIds.filter(a => !(values.get(a) || new Set()).size).concat(varAttrIds.filter(a => !(varPicked.get(a) || new Set()).size));
+      if (bad.length) errs.push('Tick the values you sell for: ' + bad.map(a => (attrById.get(a) || {}).name).join(', ') + '.');
     }
     if (row.video_url && !/^https?:\/\//i.test(row.video_url)) errs.push('The video link must start with https://');
     if (row.is_preorder) {
@@ -2918,6 +2975,7 @@
   function toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, Math.max(3200, text.length * 55)); }
   function friendly(error) {
     const m = (error && (error.message || error.error || String(error))) || 'Something went wrong.';
+    if (/buyer_choice_ids|products_buyer_choices/.test(m)) return 'Buyer choices need a database update: run 0063_buyer_choices.sql in Supabase.';
     if (/products_options_rules/.test(m)) return 'Some option values aren\'t allowed. Check the pre-order date, gift card and download settings.';
     if (/product_price_tiers|product_downloads|is_downloadable|cod_allowed/.test(m) && /does not exist|Could not find|column/i.test(m)) return 'Run product_options.sql in Supabase to use these product options, then reload.';
     if (/products_rules/.test(m)) return 'Some values aren\'t allowed. Check the price, sale price, dates and video link.';

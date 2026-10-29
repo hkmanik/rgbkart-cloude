@@ -181,7 +181,7 @@
   <!-- First sign-in with Google/Facebook: choose account type -->
   <form id="onboard" class="card" hidden>
     <h2>Finish setting up your account</h2>
-    <p class="msg">Tell us how you'll use RGBKart. You can't change this later.</p>
+    <p class="msg" id="onboardIntro">Tell us how you'll use RGBKart. You can't change this later.</p>
     <div class="seg" id="onboardRole" role="group" aria-label="Account type">
       <button type="button" data-role="customer" aria-pressed="true">As Customer<small>I want to buy</small></button>
       <button type="button" data-role="seller" aria-pressed="false">As Seller<small>I want to sell</small></button>
@@ -562,6 +562,9 @@
       if (staffRole) { location.href = 'admin.html'; return; }
       let picked = 'customer';
       try { picked = sessionStorage.getItem('rgbkart-role') || 'customer'; } catch (_) {}
+      if (SHOP_ONLY) picked = 'seller';
+      $('onboardRole').hidden = SHOP_ONLY;   // Open a shop: shop details only
+      if (SHOP_ONLY) $('onboardIntro').textContent = 'Add your shop details to open your shop.';
       onboardRole = picked;
       $('onboardRole').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.role === picked));
       $('onboardFields').innerHTML = '';

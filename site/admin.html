@@ -3411,7 +3411,7 @@
     if (!catId) { box.append(h('p', { class: 'attr-meta', text: 'Choose the category first. Its size, colour and other choice attributes appear here.' })); return; }
     const list = apVarAttrs(catId);
     if (!list.length) { box.append(h('p', { class: 'attr-meta', text: 'This category has no choice attributes (like Size or Colour) yet. Add one to the category in Categories, or its values in Attributes, then come back.' })); return; }
-    box.append(h('span', { class: 'ap-lbl', text: 'Options (up to 3): tick the values this product comes in' }));
+    box.append(h('span', { class: 'ap-lbl', text: 'Options (up to 3): tick only what changes between versions (e.g. Size), then the values it comes in. Leave the rest unticked.' }));
     for (const a of list) {
       const on = apUse.has(a.id);
       const opts = [...a.attribute_options].sort((x, y) => (x.sort_order || 0) - (y.sort_order || 0) || x.value.localeCompare(y.value));

@@ -419,6 +419,11 @@
   .agree-bar:has(input:checked) { background: color-mix(in srgb, var(--t-green) 12%, var(--surface)); border-color: var(--t-green); }
   @keyframes agreePulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(245 196 0 / .0); background: #FFFBEA; } 50% { box-shadow: 0 0 0 4px rgb(245 196 0 / .45); background: #FFF1B8; } }
   @media (prefers-reduced-motion: reduce) { .agree-bar:not(:has(input:checked)) { animation: none; box-shadow: 0 0 0 3px rgb(245 196 0 / .45); } }
+  .var-attr { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 8px; background: var(--surface); }
+  .var-attr.on { border-color: #7c4dcc; background: color-mix(in srgb, #7c4dcc 7%, var(--surface)); }
+  .var-attr .check { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .var-attr .va-tag { font-size: .78rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--bg); color: var(--muted); }
+  .var-attr.on .va-tag { background: #7c4dcc; color: #fff; }
 </style>
 </head>
 <body>
@@ -920,7 +925,7 @@
             </div>
 
             <div data-panel="variations" style="display:grid;gap:14px" hidden>
-              <p class="hint" style="margin:0" id="varIntro">Choose what changes between versions (for example Colour and Storage), tick the options you sell, then create the combinations. <b>Missing an option</b> (a size, colour or storage)? Send RGBKart a message and we add it for everyone.</p>
+              <p class="hint" style="margin:0" id="varIntro"><b>Tick only the details that change between versions</b> (for example Size), then tick the values you sell and press Create combinations. Leave a detail unticked (for example Colour, when every version is the same colour): it stays one value that you choose under <b>Product details</b>. <b>Missing an option</b> (a size, colour or storage)? Send RGBKart a message and we add it for everyone.</p>
               <div id="varAttrs" style="display:grid;gap:10px"></div>
               <div class="toolbar"><button type="button" class="ghost" id="genVars">Create combinations</button><span class="hint" id="varCount"></span></div>
               <div class="bulk" id="bulkBar" hidden>
@@ -2412,7 +2417,8 @@
         else varAttrIds = varAttrIds.filter(x => x !== a.id);
         drawVarAttrs(); drawAttrFields(); dirty = true;
       };
-      const wrap = h('div', { class: 'var-attr' }, h('label', { class: 'check', for: 'va-' + a.id }, cb, a.name + (a.unit ? ` (${a.unit})` : '')));
+      const wrap = h('div', { class: 'var-attr' + (on ? ' on' : '') }, h('label', { class: 'check', for: 'va-' + a.id }, cb, h('b', { text: a.name + (a.unit ? ` (${a.unit})` : '') }),
+        h('span', { class: 'va-tag', text: on ? 'Makes versions: tick the values below' : 'Not a version: one value, set under Product details' })));
       if (on) {
         const set = varPicked.get(a.id) || new Set(); varPicked.set(a.id, set);
         const chips = h('div', { class: 'chips' });

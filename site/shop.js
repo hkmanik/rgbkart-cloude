@@ -54,10 +54,17 @@ function updateBadges() {
   const w = store.get(WISH_KEY).length;
   const wc = $('wishCount'); if (wc) { wc.hidden = !w; wc.textContent = w; }
   const cl = $('cartLink'); if (cl) cl.setAttribute('aria-label', n ? `Cart, ${n} item${n === 1 ? '' : 's'}` : 'Cart');
-  if (hasSession && $('msgCount')) db.rpc('my_unread_count').then(r => {
+  // Messages icon only for people who have chats (owner, 29 Oct 2026: gives the search box more room).
+  // Chats are private: each person sees only their own. Also reachable from My account and Seller Center.
+  if (hasSession && $('msgCount')) db.rpc('my_unread_count').then(async r => {
     const m = r.error ? 0 : r.data, el = $('msgCount');
     el.hidden = !m; el.textContent = m > 99 ? '99+' : m;
     $('msgLink').setAttribute('aria-label', m ? `Messages, ${m} new` : 'Messages');
+    let has = !!m;
+    try { has = has || sessionStorage.getItem('rgbkart-has-chats') === '1'; } catch (_) {}
+    if (!has) { const c = await db.from('conversations').select('id', { count: 'exact', head: true }); has = !c.error && c.count > 0; }
+    if (has) try { sessionStorage.setItem('rgbkart-has-chats', '1'); } catch (_) {}
+    $('msgLink').hidden = !has;
   });
   // the bell shows only while there are new alerts
   if (hasSession && $('bellLink')) db.rpc('my_alert_count').then(r => {
@@ -87,7 +94,7 @@ async function initShell() {
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session && !session.user.is_anonymous) { $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true; }
-    if (session) { hasSession = true; $('msgLink').hidden = false; updateBadges(); }
+    if (session) { hasSession = true; updateBadges(); }
   } catch (_) {}
 }
 window.addEventListener('storage', updateBadges);

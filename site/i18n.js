@@ -20,6 +20,8 @@
     'Search phones, fashion, groceries…': 'ফোন, ফ্যাশন, মুদি বাজার খুঁজুন…', 'Search products': 'পণ্য খুঁজুন', 'Search': 'খুঁজুন', 'Search RGBKart': 'RGBKart-এ খুঁজুন',
     'Enter a valid Bangladesh mobile number: 01 and 9 more digits, like 01711000000.': 'সঠিক বাংলাদেশি মোবাইল নম্বর দিন: ০১ এবং আরও ৯টি সংখ্যা, যেমন 01711000000।',
     'Chat on WhatsApp': 'হোয়াটসঅ্যাপে চ্যাট করুন',
+    'Beta version:': 'বেটা সংস্করণ:', "RGBKart is new and we're still improving it. Your feedback is welcome!": 'RGBKart নতুন, আমরা এখনও এটি উন্নত করছি। আপনার মতামত জানাতে ভুলবেন না!',
+    'Send feedback': 'মতামত পাঠান', 'Close this message': 'বার্তাটি বন্ধ করুন',
     '+ Sell': '+ বিক্রি করুন', 'Sell': 'বিক্রি', 'Messages': 'মেসেজ', 'Alerts': 'নোটিফিকেশন', 'Saved items': 'সংরক্ষিত পণ্য', 'Sign in': 'সাইন ইন', 'My account': 'আমার অ্যাকাউন্ট',
     'Cart': 'কার্ট', 'Account': 'অ্যাকাউন্ট', 'All categories': 'সব ক্যাটাগরি', 'Main menu': 'প্রধান মেনু', 'Home': 'হোম', 'Shop': 'শপ',
     'Deals of the Day': 'আজকের ডিল', 'Featured': 'ফিচার্ড', 'New Arrivals': 'নতুন পণ্য', 'Pre-Owned': 'ব্যবহৃত পণ্য', 'Free delivery': 'ফ্রি ডেলিভারি',

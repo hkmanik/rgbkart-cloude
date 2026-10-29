@@ -27,6 +27,15 @@
 <style>
   /* Layout: full-width home — hero, 6×2 category cards, then admin-managed product sections (6×2 each) */
   main { padding-block: 20px 60px; display: grid; gap: 36px; }
+  /* Beta notice above the hero (owner, 29 Oct) — can be closed; comes back after 7 days */
+  .beta { justify-self: start; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: -22px;
+    background: #FFF8DB; border: 1px solid #F5C400; color: #5c4400; border-radius: 999px; padding: 6px 8px 6px 14px; font-size: .9rem; max-width: 100%; }
+  .beta b { color: #8a5a00; } .beta a { color: #00802B; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+  .beta button { border: 0; background: rgb(0 0 0 / .06); color: inherit; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: .95rem; line-height: 1; flex: none; }
+  .beta button:hover { background: rgb(0 0 0 / .12); }
+  @media (max-width: 640px) { .beta { border-radius: 14px; font-size: .85rem; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .beta { background: #3a3110; border-color: #8a6d00; color: #f3e3a6; } :root:not([data-theme="light"]) .beta b { color: #ffd84d; } :root:not([data-theme="light"]) .beta a { color: #6fdc8f; } }
+  :root[data-theme="dark"] .beta { background: #3a3110; border-color: #8a6d00; color: #f3e3a6; }
   /* Each home section sits on its own light colour (hue per section type; category sections take turns) */
   .band { --h: 145; --s: 55%; background: linear-gradient(180deg, hsl(var(--h) var(--s) 95%), hsl(var(--h) var(--s) 97.5%));
     border: 1px solid hsl(var(--h) 40% 86%); border-top: 4px solid hsl(var(--h) 60% 45%); border-radius: 18px; padding: 18px 18px 20px; }
@@ -98,6 +107,7 @@
 </head>
 <body>
 <main class="wrap">
+  <div class="beta" id="betaNote" role="note" hidden><span>🚧 <b>Beta version:</b> RGBKart is new and we're still improving it. Your feedback is welcome!</span> <a href="page.html?p=contact">Send feedback</a><button type="button" id="betaClose" aria-label="Close this message">✕</button></div>
   <section class="hero">
     <div class="hero-main">
       <h1>Buy and sell anything, anywhere in Bangladesh</h1>
@@ -128,7 +138,7 @@
 <script src="session.js?v=1"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=26"></script>
+<script src="i18n.js?v=27"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=20"></script>
 <script src="menu.js?v=5"></script>
@@ -257,6 +267,9 @@
     if (!holder.querySelector('section')) holder.append(h('div', { class: 'empty', text: 'No products yet. Be the first to sell something!' }));
   }
 
+  // beta notice: hidden for 7 days after the visitor closes it
+  try { const t = Number(localStorage.getItem('rgbkart-beta-closed') || 0); $('betaNote').hidden = Date.now() - t < 7 * 864e5; } catch (_) { $('betaNote').hidden = false; }
+  $('betaClose').onclick = () => { $('betaNote').hidden = true; try { localStorage.setItem('rgbkart-beta-closed', String(Date.now())); } catch (_) {} };
   (async () => { adSlot('home_top', $('adTop')); try { db.rpc('expire_featured').then(() => {}, () => {}); } catch (_) {} await initShell(); await loadCats(); loadSections(); })();
 </script>
 </body>

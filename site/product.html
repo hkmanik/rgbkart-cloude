@@ -461,7 +461,7 @@
       box.append(h('div', { style: 'display:grid;gap:8px', id: 'choice-' + aid },
         h('span', { class: 'lbl' }, a.name, chosen ? h('span', { style: 'text-transform:none;letter-spacing:0;color:var(--fg);font-weight:600', text: ': ' + chosen.value }) : h('span', { style: 'text-transform:none;letter-spacing:0;color:var(--accent);font-weight:600', text: ' · ' + T('choose one') })),
         h('div', { class: 'opts', role: 'group', 'aria-label': a.name }, opts.map(o => h('button', { type: 'button', class: 'opt', 'aria-pressed': String(choicePick[aid] === o.id),
-          onclick: () => { choicePick[aid] = o.id; drawVariants(); } }, o.color_hex && h('span', { class: 'sw', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''))))));
+          onclick: () => { choicePick[aid] = o.id; drawVariants(); const pos = (P.choice_photos || {})[o.id]; if (pos != null && images[pos]) drawGallery(images[pos].id); } }, o.color_hex && h('span', { class: 'sw', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''))))));
     }
   }
   function drawVariants() {

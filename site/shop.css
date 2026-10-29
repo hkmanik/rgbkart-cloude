@@ -47,6 +47,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav .open-shop:hover { background: #ffd633; }
 .nav .open-shop .lbl-short, .nav .open-shop .lbl-tiny { display: none; }
 .nav .open-shop[hidden] { display: none; }
+/* back to the dashboard for shops and staff (owner, 29 Oct 2026) */
+.nav .dash-link { background: #fff; border-color: #fff; color: #00802B; font-weight: 700; }
+.nav .dash-link:hover { background: #F5C400; border-color: #F5C400; color: #2a1a00; }
+.nav .dash-link.admin { background: #14211C; border-color: #14211C; color: #fff; }
+.nav .dash-link[hidden] { display: none; }
+@media (max-width: 760px) { .nav .dash-link { padding: 6px 9px; } .nav .dash-link .lbl-full { display: none; } .nav .dash-link .lbl-short { display: inline !important; } .nav .dash-link.admin .lbl-full { display: none; } }
+@media (max-width: 440px) { .nav .dash-link .lbl-short { display: none !important; } .nav .dash-link { font-size: 1.05rem; } }
 @media (max-width: 760px) { .nav .open-shop { padding: 6px 9px; } .nav .open-shop .lbl-full { display: none; } .nav .open-shop .lbl-short { display: inline !important; } }
 @media (max-width: 440px) { .nav .open-shop .lbl-short { display: none !important; } .nav .open-shop .lbl-tiny { display: inline !important; } }
 .nav .icon-link { position: relative; padding: 7px 10px; display: inline-flex; align-items: center; gap: 6px; }

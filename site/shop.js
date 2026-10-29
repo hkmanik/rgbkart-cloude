@@ -38,6 +38,8 @@ function headerHTML() {
       <a class="icon-link" href="messages.html" id="msgLink" aria-label="Messages" hidden>${CHAT_SVG}<span class="badge" id="msgCount" hidden></span></a>
       <a class="icon-link" href="alerts.html" id="bellLink" aria-label="Alerts" hidden>${BELL_SVG}<span class="badge" id="bellCount"></span></a>
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
+      <a class="dash-link" href="seller.html" id="dashLink" hidden aria-label="Seller dashboard"><span aria-hidden="true">📊</span> <span class="lbl-full">Seller dashboard</span><span class="lbl-short" style="display:none">Dashboard</span></a>
+      <a class="dash-link admin" href="admin.html" id="adminLink" hidden aria-label="Admin dashboard"><span aria-hidden="true">⚙</span> <span class="lbl-full">Admin</span></a>
       <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short" style="display:none">Open shop</span><span class="lbl-tiny" style="display:none">Shop</span></a>
       <a class="icon-link acct" href="login.html" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
@@ -118,7 +120,12 @@ async function initShell() {
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();
-    if (session && !session.user.is_anonymous) { $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true; }
+    if (session && !session.user.is_anonymous) {
+      $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true;
+      // shops and RGBKart staff get a way back to their dashboard from every page (owner, 29 Oct 2026)
+      db.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(r => { if (r.data && r.data.role === 'seller' && $('dashLink')) $('dashLink').hidden = false; }, () => {});
+      db.rpc('my_staff_role').then(r => { if (!r.error && r.data && $('adminLink')) $('adminLink').hidden = false; }, () => {});
+    }
     if (session) { hasSession = true; updateBadges(); }
   } catch (_) {}
 }

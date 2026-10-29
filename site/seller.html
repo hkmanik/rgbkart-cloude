@@ -439,6 +439,8 @@
   .price-seg button { border: 0; border-radius: 0; background: var(--surface); padding: 6px 14px; font-size: .84rem; font-weight: 600; color: var(--muted); }
   .price-seg button[aria-pressed="true"] { background: #1f9d55; color: #fff; }
   .price-seg button + button { border-left: 1.5px solid var(--line); }
+  .attr-one { align-content: start; }
+  .brand-add { display: flex; gap: 8px; flex-wrap: wrap; } .brand-add input { flex: 1; min-width: 160px; }
   .lbl-note { font-weight: 600; color: #7c4dcc; display: inline; }
   #optBlock > .lbl, #freeBlock > .lbl { display: block; }
   #freeBlock .lbl-note { color: #1f9d55; }
@@ -855,8 +857,8 @@
             <div class="choice">
               <span class="lbl">1. What kind of product is it?</span>
               <div class="ptypes" id="ptypes" role="radiogroup" aria-label="Product type">
-                <button type="button" role="radio" class="ptype" data-kind="simple"><b>Simple</b><span>One price. Example: one size, or a single item</span></button>
-                <button type="button" role="radio" class="ptype" data-kind="variable"><b>With options</b><span>Buyer picks a size, colour… Price can differ</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="simple"><b>Simple</b><span>One price. The buyer can still pick a size or colour</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="variable"><b>With options</b><span>The price changes with the choice (RAM, storage, size…)</span></button>
                 <button type="button" role="radio" class="ptype" data-kind="downloadable"><b>Downloadable</b><span>Digital file: eBook, software</span></button>
                 <button type="button" role="radio" class="ptype" data-kind="service"><b>Service</b><span>Repair, installation, tuition</span></button>
                 <button type="button" role="radio" class="ptype" data-kind="gift"><b>Gift card</b><span>Voucher worth ৳X in your shop</span></button>
@@ -872,8 +874,8 @@
               <div id="optBoxes" style="display:grid;gap:10px"></div>
             </div>
             <div class="sub-block" id="freeBlock" style="display:grid;gap:12px" hidden>
-              <span class="lbl">3. Buyer also chooses <span class="lbl-note">(same price)</span></span>
-              <p class="hint" style="margin:0">For example <b>Colour</b>: tick every colour you sell, the price does not change (up to 3 details). Pick a photo for each colour and the product page shows it when the buyer chooses that colour.</p>
+              <span class="lbl" id="freeLbl">3. Buyer also chooses <span class="lbl-note">(same price)</span></span>
+              <p class="hint" style="margin:0">For example <b>Size</b> and <b>Colour</b>: tap them, then tick every size and colour you sell. The price does not change (up to 3 details). Leave it empty if the buyer doesn't choose anything. For colours you can pick a photo for each, and the product page shows it when the buyer chooses that colour.</p>
               <div class="chips" id="freePick"></div>
               <div id="freeBoxes" style="display:grid;gap:10px"></div>
             </div>
@@ -2124,7 +2126,7 @@
     $('fReturn').value = p.return_policy; $('fNote').value = p.purchase_note || '';
     $('fProductType').value = p.product_type;
     $('kDownload').checked = !!p.is_downloadable; $('kService').checked = !!p.is_service; $('kGift').checked = !!p.is_gift_card;
-    $('fProductType').value = currentKind() === 'variable' || choiceIds.length ? 'variable' : 'simple';
+    $('fProductType').value = currentKind() === 'variable' ? 'variable' : 'simple';
     // Downloadable and Gift card are hidden until buyers can order them (owner, 29 Oct 2026); old products of that kind still show theirs
     $('ptypes').querySelector('[data-kind=downloadable]').hidden = !p.is_downloadable;
     $('ptypes').querySelector('[data-kind=gift]').hidden = !p.is_gift_card;
@@ -2164,7 +2166,7 @@
     return $('fProductType').value === 'variable' ? 'variable' : 'simple';
   }
   function setKind(kind) {
-    if (kind !== 'variable') {   // back to one value per detail
+    if (!['variable', 'simple'].includes(kind)) {   // service, download, gift: one value per detail
       choiceIds.forEach(a => { const v = values.get(a); if (v instanceof Set && v.size > 1) values.set(a, new Set([[...v][0]])); });
       choiceIds = [];
     }
@@ -2180,9 +2182,11 @@
   function syncType() {
     const free = editing.listing_type === 'free';
     const variable = isVariable();
-    $('optBlock').hidden = $('freeBlock').hidden = !withOptions();
-    $('detailsLbl').textContent = withOptions() ? '4. Other details (one value each)' : '2. Details';
-    $('priceLbl').textContent = withOptions() ? '5. Price and stock' : '3. Price and stock';
+    const wo = withOptions(), ch = allowsChoices();
+    $('optBlock').hidden = !wo; $('freeBlock').hidden = !ch;
+    $('freeLbl').innerHTML = (wo ? '3. Buyer also chooses' : '2. Does the buyer choose a size, colour…?') + ' <span class="lbl-note">(same price)</span>';
+    $('detailsLbl').textContent = wo ? '4. Other details (one value each)' : ch ? '3. Details (one value each)' : '2. Details';
+    $('priceLbl').textContent = wo ? '5. Price and stock' : ch ? '4. Price and stock' : '3. Price and stock';
     $('typeCards').querySelectorAll('.type-card').forEach(b => b.setAttribute('aria-pressed', b.dataset.type === editing.listing_type));
     $('freeNote').hidden = !free;
     $('varPriceNote').hidden = !variable;
@@ -2348,7 +2352,7 @@
     photos.forEach((ph, k) => box.append(photoTile(ph, k, k === 0)));
     if (photos.length < MAX_PHOTOS) box.append(dropZone(photos.length ? 'Add more photos' : 'Add photos', fl => addFiles(fl), () => $('fileInput').click()));
     $('photoCount').textContent = `${photos.length} / ${MAX_PHOTOS}`;
-    if (editing && withOptions() && choiceIds.length) drawOptions();
+    if (editing && allowsChoices() && choiceIds.length) drawOptions();
     drawSummary();
   }
   $('mainInput').onchange = () => { setMain($('mainInput').files); $('mainInput').value = ''; };
@@ -2399,6 +2403,7 @@
   // brands (Phone Brand, Fashion Brand…) and Condition are product details, never a version choice
   const varCandidates = () => effectiveAttrs(editing.category_id).filter(x => ['select', 'color'].includes(x.attr.input_type) && !/\bbrand\b|^condition$/i.test(x.attr.name));
   const withOptions = () => $('fProductType').value === 'variable' && editing.listing_type !== 'free';
+  const allowsChoices = () => ['simple', 'variable'].includes(currentKind()) && editing.listing_type !== 'free';   // same-price choices: Simple and With options
   const isVariable = () => withOptions() && varAttrIds.length > 0;   // versions only when a choice changes the price
 
   function syncCondition() {
@@ -2415,12 +2420,13 @@
     const box = $('attrFields'); box.innerHTML = '';
     if (!editing.category_id) { $('detailsHint').hidden = false; $('detailsHint').textContent = 'Choose a category first (under Basic information).'; return; }
     const variable = withOptions();
-    const list = effectiveAttrs(editing.category_id).filter(x => !(variable && [...varAttrIds, ...choiceIds].includes(x.attr.id)));
+    const list = effectiveAttrs(editing.category_id).filter(x => !((variable && varAttrIds.includes(x.attr.id)) || (allowsChoices() && choiceIds.includes(x.attr.id))));
     drawOptions();
     $('detailsHint').hidden = false;
     $('detailsHint').innerHTML = !list.length ? 'This category has no extra details.'
       : variable ? 'Everything the buyer does not choose: fill in once. Fields marked * are needed before you send for review.'
-      : 'Fill in what applies. Fields marked * are needed before you send for review. <b>Sold in several sizes or colours that the buyer must choose?</b> Pick <b>With options</b> above.';
+      : allowsChoices() ? 'Fill in what applies, one value each. Fields marked * are needed before you send for review. Several sizes or colours for the buyer to pick? Tap them in step 2 above.'
+      : 'Fill in what applies. Fields marked * are needed before you send for review.';
     const cond = attrs.find(a => a.name === 'Condition');
     for (const { attr: a, required, from } of list) {
       const id = 'attr-' + a.id;
@@ -2441,8 +2447,28 @@
         control = h('select', { id, 'aria-label': name }, h('option', { value: '', text: 'Choose…' }), opts.map(o => h('option', { value: o.id, text: o.value + (a.unit ? ' ' + a.unit : '') })));
         control.value = cur && cur.size ? [...cur][0] : '';
         control.disabled = !!(cond && a.id === cond.id && editing.listing_type === 'new');
-        control.onchange = () => { control.value ? values.set(a.id, new Set([Number(control.value)])) : values.delete(a.id); dirty = true; };
-        box.append(h('div', { class: 'lbl attr-one', style: 'display:grid;gap:6px' }, head, control, control.disabled && h('span', { class: 'hint', text: 'Set by "New" above.' })));
+        const isBrand = /\bbrand\b/i.test(a.name);
+        let addRow = null;
+        if (isBrand) {   // a brand that isn't in the list: the shop adds it (0065_seller_add_brand.sql)
+          control.append(h('option', { value: '__new', text: '＋ Brand not in the list? Add it…' }));
+          const inp = h('input', { type: 'text', maxlength: 40, placeholder: 'Brand name, e.g. Easy Fashion', 'aria-label': 'New brand name' });
+          const add = h('button', { type: 'button', class: 'primary', text: 'Add brand', onclick: async () => {
+            const nm = inp.value.trim(); if (nm.length < 2) { inp.focus(); return toast('Write the brand name.'); }
+            add.disabled = true;
+            const r = await db.rpc('seller_add_brand', { p_attribute: a.id, p_name: nm });
+            add.disabled = false;
+            if (r.error) return toast(/Could not find the function/i.test(r.error.message) ? 'Adding brands needs a database update (0065_seller_add_brand.sql).' : friendly(r.error));
+            if (!a.attribute_options.some(o => o.id === r.data)) { a.attribute_options.push({ id: r.data, value: nm.replace(/\s+/g, ' '), sort_order: 0 }); a.attribute_options.sort((x, y) => x.value.localeCompare(y.value, 'en', { sensitivity: 'base' })); }
+            values.set(a.id, new Set([r.data])); dirty = true; drawAttrFields(); toast('Brand added and chosen.');
+          } });
+          addRow = h('div', { class: 'brand-add', hidden: true }, inp, add, h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => { addRow.hidden = true; control.value = cur && cur.size ? [...cur][0] : ''; } }));
+        }
+        control.onchange = () => {
+          if (control.value === '__new') { addRow.hidden = false; addRow.querySelector('input').focus(); return; }
+          if (addRow) addRow.hidden = true;
+          control.value ? values.set(a.id, new Set([Number(control.value)])) : values.delete(a.id); dirty = true;
+        };
+        box.append(h('div', { class: 'lbl attr-one', style: 'display:grid;gap:6px' }, head, control, addRow, control.disabled && h('span', { class: 'hint', text: 'Set by "New" above.' })));
       } else {
         // colour (one) or several options: chips
         const multi = a.input_type === 'multiselect';
@@ -2462,7 +2488,7 @@
           chips.append(b);
         }
         if (multi) head.insertBefore(h('span', { class: 'from', text: ' · choose any' }), sw || null);
-        if (a.input_type === 'color') head.append(h('span', { class: 'from', text: withOptions() ? ' · several colours? Tap it in step 3 above' : ' · several colours for the buyer to choose? Pick "With options" above' }));
+        if (a.input_type === 'color') head.append(h('span', { class: 'from', text: withOptions() ? ' · several colours? Tap it in step 3 above' : allowsChoices() ? ' · several colours? Tap Colour in step 2 above' : '' }));
         box.append(h('div', { class: 'lbl wide', style: 'display:grid;gap:6px' }, head, chips));
       }
     }
@@ -2473,13 +2499,14 @@
   const MAX_PRICED = 5, MAX_FREE = 3;
   function drawOptions() {
     ['optPick', 'optBoxes', 'freePick', 'freeBoxes'].forEach(id => $(id).innerHTML = '');
-    if (!withOptions() || !editing.category_id) return;
+    if (!allowsChoices() || !editing.category_id) return;
+    const wo = withOptions();
     const cands = varCandidates();
-    if (!cands.length) { $('optPick').append(h('p', { class: 'hint', text: 'This category has no details a buyer can choose (like Size or Colour). Use Simple instead.' })); return; }
+    if (!cands.length) { $(wo ? 'optPick' : 'freePick').append(h('p', { class: 'hint', text: 'This category has no details a buyer can choose (like Size or Colour). Use Simple instead.' })); return; }
     const redraw = () => { buildVersions(false); syncType(); dirty = true; };
     cands.forEach(({ attr: a }) => {
-      const inP = varAttrIds.includes(a.id), inF = choiceIds.includes(a.id);
-      $('optPick').append(h('button', { type: 'button', class: 'opt opt-pick', 'aria-pressed': String(inP), disabled: inF, title: inF ? 'Already chosen in step 3 (same price)' : '', onclick: () => {
+      const inP = wo && varAttrIds.includes(a.id), inF = choiceIds.includes(a.id);
+      if (wo) $('optPick').append(h('button', { type: 'button', class: 'opt opt-pick', 'aria-pressed': String(inP), disabled: inF, title: inF ? 'Already chosen in step 3 (same price)' : '', onclick: () => {
         if (inP) varAttrIds = varAttrIds.filter(x => x !== a.id);
         else { if (varAttrIds.length >= MAX_PRICED) return toast(`Up to ${MAX_PRICED} details can change the price.`); varAttrIds.push(a.id); if (!varPicked.has(a.id)) varPicked.set(a.id, new Set()); values.delete(a.id); }
         redraw(); } }, (inP ? '✓ ' : '+ ') + a.name));
@@ -2496,7 +2523,7 @@
     const box = (a, cls, kids, onRemove) => h('div', { class: 'opt-box ' + cls },
       h('div', { class: 'opt-head' }, h('b', { text: a.name + (a.unit ? ` (${a.unit})` : '') }), h('span', { class: 'hint', text: 'tick every value you sell' }),
         h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Remove ' + a.name, text: '✕', onclick: onRemove })), ...kids);
-    for (const aid of varAttrIds) {
+    for (const aid of wo ? varAttrIds : []) {
       const a = attrById.get(aid); if (!a) continue;
       const set = varPicked.get(aid) || new Set(); varPicked.set(aid, set);
       $('optBoxes').append(box(a, 'priced', [valueChips(a, set, () => { buildVersions(false); dirty = true; })], () => { varAttrIds = varAttrIds.filter(x => x !== aid); redraw(); }));
@@ -2508,6 +2535,7 @@
       const drawPics = () => {
         pics.innerHTML = '';
         const ticked = a.attribute_options.filter(o => set.has(o.id));
+        if (a.input_type !== 'color') return;   // photos follow colours only
         if (!ticked.length || !photos.length) { if (ticked.length) pics.append(h('span', { class: 'hint', text: 'Add photos above to pick a photo for each value.' })); return; }
         pics.append(h('span', { class: 'hint', text: 'Photo shown when the buyer picks:' }));
         ticked.forEach(o => {
@@ -2644,7 +2672,7 @@
 
   function collect() {
     const free = editing.listing_type === 'free', variable = isVariable();
-    const buyerChoices = withOptions() ? choiceIds.filter(a => (values.get(a) || new Set()).size) : [];
+    const buyerChoices = allowsChoices() ? choiceIds.filter(a => (values.get(a) || new Set()).size) : [];
     const num = id => $(id).value === '' ? null : Number($(id).value);
     const row = {
       category_id: editing.category_id, title: $('fTitle').value.trim(), title_bn: $('fTitleBn').value.trim() || null, description_bn: $('fDescBn').value.trim() || null, listing_type: editing.listing_type, product_type: variable ? 'variable' : 'simple',
@@ -2695,8 +2723,8 @@
       if (row.listing_type !== 'free' && variations.some(v => v.is_active && !(Number(v.price) > 0))) errs.push('Every version that is on sale needs a price.');
       if (variations.some(v => v.sale_price && Number(v.sale_price) >= Number(v.price))) errs.push('A version\'s sale price must be lower than its price.');
     }
-    if (withOptions()) {
-      const bad = choiceIds.filter(a => !(values.get(a) || new Set()).size).concat(varAttrIds.filter(a => !(varPicked.get(a) || new Set()).size));
+    if (allowsChoices()) {
+      const bad = choiceIds.filter(a => !(values.get(a) || new Set()).size).concat(withOptions() ? varAttrIds.filter(a => !(varPicked.get(a) || new Set()).size) : []);
       if (bad.length) errs.push('Tick the values you sell for: ' + bad.map(a => (attrById.get(a) || {}).name).join(', ') + '.');
     }
     if (row.video_url && !/^https?:\/\//i.test(row.video_url)) errs.push('The video link must start with https://');

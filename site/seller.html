@@ -424,6 +424,12 @@
   .var-attr .check { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .var-attr .va-tag { font-size: .78rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--bg); color: var(--muted); }
   .var-attr.on .va-tag { background: #7c4dcc; color: #fff; }
+  .attr-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .buyer-sw { margin-left: auto; border: 1.5px dashed #7c4dcc; color: #7c4dcc; background: var(--surface); border-radius: 999px; padding: 2px 10px; font-size: .78rem; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .buyer-sw:hover { background: color-mix(in srgb, #7c4dcc 10%, var(--surface)); }
+  .buyer-sw[aria-pressed="true"] { border-style: solid; background: #7c4dcc; color: #fff; }
+  .attr-var { border: 1.5px solid #7c4dcc; border-radius: 10px; padding: 10px 12px; background: color-mix(in srgb, #7c4dcc 6%, var(--surface)); }
+  #priceCard .sub-block .lbl:first-child, #priceCard .choice > .lbl { font-size: .95rem; color: var(--fg); font-weight: 700; text-transform: none; letter-spacing: 0; }
 </style>
 </head>
 <body>
@@ -807,22 +813,6 @@
             <label>Product name in Bangla <span class="from">(optional, shown on the Bangla site)</span>
               <input id="fTitleBn" type="text" maxlength="200" lang="bn" placeholder="যেমন: স্যামসাং গ্যালাক্সি A55 5G, 8GB/256GB">
             </label>
-            <div class="grid3 price-row">
-              <label id="basicPriceWrap"><span class="req">Price</span><span class="taka"><input id="fPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
-              <label id="basicSaleWrap">Sale price <span class="from">(optional)</span><span class="taka"><input id="fSale" type="number" min="1" step="1" inputmode="numeric" placeholder="Lower price"></span>
-                <span class="hint" id="saleHint"></span></label>
-              <label id="basicStockWrap"><span class="req">Quantity in stock</span><input id="fStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label>
-            </div>
-            <div class="grid2" id="saleDates">
-              <label>Sale starts <span class="from">(optional)</span><input id="fSaleFrom" type="date"></label>
-              <label>Sale ends <span class="from">(optional)</span><input id="fSaleTo" type="date"></label>
-            </div>
-            <p class="hint" id="basicVarNote" hidden style="margin:-4px 0 0">Price and stock are set for each version under Product data → Variations.</p>
-            <div class="grid2 deal-row" id="dealRow">
-              <label class="check deal-box"><input id="fNegotiable" type="checkbox"> <span><b>Price is negotiable</b><span class="hint">Buyers see "Price negotiable" and can ask you for a better price.</span></span></label>
-              <div class="deal-box coupon-box"><span><b>🎟 Coupon</b><span class="hint" id="cpInfo">Coupons work for your whole shop. Buyers type the code in the cart.</span></span>
-                <button type="button" class="ghost" id="addCouponBtn">+ Add coupon</button></div>
-            </div>
             <label>Description <span class="from">(optional)</span>
               <textarea id="fDesc" maxlength="5000" style="min-height:140px" placeholder="Features, what's in the box, size guide, condition notes…"></textarea>
               <span class="hint" id="descCount">0 / 5000</span>
@@ -841,21 +831,14 @@
             <input type="file" id="mainInput" accept="image/jpeg,image/png,image/webp" hidden>
           </div>
 
-          <!-- Category details: brand, model… (not versions) -->
-          <div class="card sec sec-details" id="detailsCard">
-            <h2>Product details</h2>
-            <p class="hint" style="margin:0" id="detailsHint">Choose a category first.</p>
-            <div class="attr-grid" id="attrFields"></div>
-          </div>
-
-          <!-- Product data (WooCommerce-style tabs) -->
-          <div class="card sec sec-data">
-            <h2>Product data</h2>
+          <!-- Price & details: product type → details → price (owner, 29 Oct 2026: one simple section) -->
+          <div class="card sec sec-data" id="priceCard">
+            <h2>Price &amp; details</h2>
             <div class="choice">
-              <span class="lbl">Product type</span>
+              <span class="lbl">1. What kind of product is it?</span>
               <div class="ptypes" id="ptypes" role="radiogroup" aria-label="Product type">
-                <button type="button" role="radio" class="ptype" data-kind="simple"><b>Simple</b><span>One version, one price</span></button>
-                <button type="button" role="radio" class="ptype" data-kind="variable"><b>Variable</b><span>Sizes, colours… each with its own price</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="simple"><b>Simple</b><span>One price. Example: one size, or a single item</span></button>
+                <button type="button" role="radio" class="ptype" data-kind="variable"><b>With options</b><span>Buyer picks a size, colour… Price can differ</span></button>
                 <button type="button" role="radio" class="ptype" data-kind="downloadable"><b>Downloadable</b><span>Digital file: eBook, software</span></button>
                 <button type="button" role="radio" class="ptype" data-kind="service"><b>Service</b><span>Repair, installation, tuition</span></button>
                 <button type="button" role="radio" class="ptype" data-kind="gift"><b>Gift card</b><span>Voucher worth ৳X in your shop</span></button>
@@ -864,23 +847,86 @@
             <!-- internal state driven by the buttons above -->
             <select id="fProductType" hidden><option value="simple">Simple</option><option value="variable">Variable</option></select>
             <input id="kDownload" type="checkbox" hidden><input id="kService" type="checkbox" hidden><input id="kGift" type="checkbox" hidden>
+            <div class="sub-block" id="detailsBlock" style="display:grid;gap:12px">
+              <span class="lbl" id="detailsLbl">2. Details</span>
+              <p class="hint" style="margin:0" id="detailsHint">Choose a category first.</p>
+              <div class="attr-grid" id="attrFields"></div>
+            </div>
+            <div class="sub-block" id="priceBlock" style="display:grid;gap:12px">
+            <span class="lbl" id="priceLbl">3. Price and stock</span>
+            <div class="grid3 price-row">
+              <label id="basicPriceWrap"><span class="req">Price</span><span class="taka"><input id="fPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
+              <label id="basicSaleWrap">Sale price <span class="from">(optional)</span><span class="taka"><input id="fSale" type="number" min="1" step="1" inputmode="numeric" placeholder="Lower price"></span>
+                <span class="hint" id="saleHint"></span></label>
+              <label id="basicStockWrap"><span class="req">Quantity in stock</span><input id="fStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label>
+            </div>
+            <div class="grid2" id="saleDates">
+              <label>Sale starts <span class="from">(optional)</span><input id="fSaleFrom" type="date"></label>
+              <label>Sale ends <span class="from">(optional)</span><input id="fSaleTo" type="date"></label>
+            </div>
+            <p class="hint" id="basicVarNote" hidden style="margin:-4px 0 0">Price and stock are set for each version under Product data → Variations.</p>
+            </div>
+            <div id="varBlock" class="sub-block" style="display:grid;gap:14px" hidden>
+              <span class="lbl">3. Price and stock for each choice</span>
+              <p class="hint" style="margin:0" id="varIntro">Every combination you picked above is listed here. Set a price and stock for each (or use "Same for all"). Switch off any combination you don't sell.</p>
+              <div id="varAttrs" hidden></div>
+              <div class="toolbar" hidden><button type="button" class="ghost" id="genVars">Create combinations</button></div><span class="hint" id="varCount"></span>
+              <div class="bulk" id="bulkBar" hidden>
+                <label>Same price for all<span class="taka"><input id="bulkPrice" type="number" min="1" step="1"></span></label>
+                <label>Same stock for all<input id="bulkStock" type="number" min="0" step="1"></label>
+                <button type="button" class="ghost" id="bulkApply">Apply to all</button>
+              </div>
+              <div class="table-wrap" id="varTableWrap" hidden>
+                <table><thead><tr><th>On</th><th>Version</th><th>Price ৳</th><th>Sale ৳</th><th>Stock</th><th>SKU</th><th>Photo</th></tr></thead><tbody id="varRows"></tbody></table>
+              </div>
+            </div>
+            <div id="svcBlock" class="sub-block" style="display:grid;gap:14px" hidden>
+              <div class="grid3">
+                <label><span class="req">Where</span>
+                  <select id="fSvcMode"><option value="">Choose…</option><option value="at_customer">At the customer's place</option><option value="at_shop">At my shop</option><option value="online">Online / remote</option></select></label>
+                <label>Takes about
+                  <select id="fSvcDur"><option value="">Choose…</option><option value="30_min">30 minutes</option><option value="1_hour">1 hour</option><option value="2_hours">2 hours</option><option value="half_day">Half a day</option><option value="full_day">A full day</option><option value="multi_day">Several days</option></select></label>
+                <label>Service area
+                  <select id="fSvcArea"><option value="all_bangladesh">All of Bangladesh</option><option value="inside_dhaka">Inside Dhaka only</option><option value="outside_dhaka">Outside Dhaka only</option></select></label>
+              </div>
+              <p class="hint" style="margin:0">Buyers book and pay. You contact them to fix the time. Booking slots come later.</p>
+            </div>
+            <div id="dlBlock" class="sub-block" style="display:grid;gap:14px" hidden>
+              <p class="hint" style="margin:0">Files buyers download after paying, such as a PDF, ZIP or MP3. Up to 5 files, 50 MB each. Files stay private: only buyers get a link.</p>
+              <div class="file-list" id="fileList"></div>
+              <div class="toolbar"><button type="button" class="ghost" id="addFileBtn">+ Upload file</button><span class="hint" id="fileCount"></span></div>
+              <input type="file" id="dlInput" multiple hidden>
+              <div class="grid2">
+                <label>Download limit
+                  <select id="fDlLimit"><option value="">Unlimited</option><option value="1">1 time</option><option value="3">3 times</option><option value="5">5 times</option><option value="10">10 times</option></select></label>
+                <label>Link works for
+                  <select id="fDlExpiry"><option value="">Never expires</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label>
+              </div>
+            </div>
+            <div class="grid2 deal-row" id="dealRow">
+              <label class="check deal-box"><input id="fNegotiable" type="checkbox"> <span><b>Price is negotiable</b><span class="hint">Buyers see "Price negotiable" and can ask you for a better price.</span></span></label>
+              <div class="deal-box coupon-box"><span><b>🎟 Coupon</b><span class="hint" id="cpInfo">Coupons work for your whole shop. Buyers type the code in the cart.</span></span>
+                <button type="button" class="ghost" id="addCouponBtn">+ Add coupon</button></div>
+            </div>
+          </div>
+
+          <!-- More settings: all optional -->
+          <div class="card sec sec-extra">
+            <h2>More settings <span class="from">(optional)</span></h2>
+            <p class="hint" style="margin:-6px 0 0">Everything here already has a sensible setting. Open a tab only if you need to change something.</p>
             <div class="tabs" role="tablist" id="dataTabs">
-              <button type="button" role="tab" data-tab="pricing" aria-selected="true">Pricing</button>
-              <button type="button" role="tab" data-tab="inventory" aria-selected="false">Inventory</button>
-              <button type="button" role="tab" data-tab="variations" aria-selected="false" id="tabVariations">Variations</button>
-              <button type="button" role="tab" data-tab="downloads" aria-selected="false" id="tabDownloads" hidden>Downloads</button>
-              <button type="button" role="tab" data-tab="service" aria-selected="false" id="tabService" hidden>Service</button>
-              <button type="button" role="tab" data-tab="shipping" aria-selected="false" id="tabShipping">Shipping</button>
+              <button type="button" role="tab" data-tab="pricing" aria-selected="true">Wholesale &amp; payment</button>
+              <button type="button" role="tab" data-tab="inventory" aria-selected="false">Stock &amp; pre-order</button>
+              <button type="button" role="tab" data-tab="shipping" aria-selected="false" id="tabShipping">Delivery</button>
+              <button type="button" role="tab" data-tab="extras" aria-selected="false">Search &amp; video</button>
               <button type="button" role="tab" data-tab="linked" aria-selected="false">Linked products</button>
-              <button type="button" role="tab" data-tab="advanced" aria-selected="false">Advanced</button>
+              <button type="button" role="tab" data-tab="advanced" aria-selected="false">Returns &amp; note</button>
             </div>
 
             <div data-panel="pricing" style="display:grid;gap:14px">
               <p class="hint" id="freeNote" hidden style="margin:0">Free items are listed at ৳0. Buyers only pay for delivery, unless you offer free delivery.</p>
-              <p class="hint" id="varPriceNote" hidden style="margin:0">Each variation has its own price. Set them on the Variations tab.</p>
-              <div class="grid2" id="priceFields">
-                <label>Sale price <span class="from">(the same as in Basic information)</span><span class="taka"><input id="fSaleMirror" type="number" min="1" step="1" inputmode="numeric" placeholder="Optional"></span></label>
-              </div>
+              <p class="hint" id="varPriceNote" hidden style="margin:0">Each option has its own price: see Price &amp; details.</p>
+              <div id="priceFields" hidden></div>
               <div class="sub-block" id="giftBlock" hidden>
                 <span class="lbl">Gift card</span>
                 <p class="hint" style="margin:0">The price is the card's value. Buyers get a code they can spend in your shop.</p>
@@ -921,47 +967,11 @@
                     <select id="fPreAdv"><option value="0">None (pay on delivery)</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="50">50%</option><option value="100">Full payment</option></select></label>
                 </div>
               </div>
-              <p class="hint" id="varStockNote" hidden style="margin:0">Each variation has its own stock. Set it on the Variations tab.</p>
+              <p class="hint" id="varStockNote" hidden style="margin:0">Each option has its own stock: see Price &amp; details.</p>
             </div>
 
-            <div data-panel="variations" style="display:grid;gap:14px" hidden>
-              <p class="hint" style="margin:0" id="varIntro"><b>Tick only the details that change between versions</b> (for example Size), then tick the values you sell and press Create combinations. Leave a detail unticked (for example Colour, when every version is the same colour): it stays one value that you choose under <b>Product details</b>. <b>Missing an option</b> (a size, colour or storage)? Send RGBKart a message and we add it for everyone.</p>
-              <div id="varAttrs" style="display:grid;gap:10px"></div>
-              <div class="toolbar"><button type="button" class="ghost" id="genVars">Create combinations</button><span class="hint" id="varCount"></span></div>
-              <div class="bulk" id="bulkBar" hidden>
-                <label>Price for all<span class="taka"><input id="bulkPrice" type="number" min="1" step="1"></span></label>
-                <label>Stock for all<input id="bulkStock" type="number" min="0" step="1"></label>
-                <button type="button" class="ghost" id="bulkApply">Apply to all</button>
-              </div>
-              <div class="table-wrap" id="varTableWrap" hidden>
-                <table><thead><tr><th>On</th><th>Version</th><th>Price ৳</th><th>Sale ৳</th><th>Stock</th><th>SKU</th><th>Photo</th></tr></thead><tbody id="varRows"></tbody></table>
-              </div>
-            </div>
 
-            <div data-panel="downloads" style="display:grid;gap:14px" hidden>
-              <p class="hint" style="margin:0">Files buyers download after paying, such as a PDF, ZIP or MP3. Up to 5 files, 50 MB each. Files stay private: only buyers get a link.</p>
-              <div class="file-list" id="fileList"></div>
-              <div class="toolbar"><button type="button" class="ghost" id="addFileBtn">+ Upload file</button><span class="hint" id="fileCount"></span></div>
-              <input type="file" id="dlInput" multiple hidden>
-              <div class="grid2">
-                <label>Download limit
-                  <select id="fDlLimit"><option value="">Unlimited</option><option value="1">1 time</option><option value="3">3 times</option><option value="5">5 times</option><option value="10">10 times</option></select></label>
-                <label>Link works for
-                  <select id="fDlExpiry"><option value="">Never expires</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option><option value="365">1 year</option></select></label>
-              </div>
-            </div>
 
-            <div data-panel="service" style="display:grid;gap:14px" hidden>
-              <div class="grid3">
-                <label><span class="req">Where</span>
-                  <select id="fSvcMode"><option value="">Choose…</option><option value="at_customer">At the customer's place</option><option value="at_shop">At my shop</option><option value="online">Online / remote</option></select></label>
-                <label>Takes about
-                  <select id="fSvcDur"><option value="">Choose…</option><option value="30_min">30 minutes</option><option value="1_hour">1 hour</option><option value="2_hours">2 hours</option><option value="half_day">Half a day</option><option value="full_day">A full day</option><option value="multi_day">Several days</option></select></label>
-                <label>Service area
-                  <select id="fSvcArea"><option value="all_bangladesh">All of Bangladesh</option><option value="inside_dhaka">Inside Dhaka only</option><option value="outside_dhaka">Outside Dhaka only</option></select></label>
-              </div>
-              <p class="hint" style="margin:0">Buyers book and pay. You contact them to fix the time. Booking slots come later.</p>
-            </div>
 
             <div data-panel="shipping" style="display:grid;gap:14px" hidden>
               <div class="grid4">
@@ -988,6 +998,20 @@
               <label class="check"><input id="fFreeDel" type="checkbox"> Free delivery (you pay the delivery charge)</label>
             </div>
 
+            <div data-panel="extras" style="display:grid;gap:14px" hidden>
+            <label>Short description
+              <textarea id="fShort" maxlength="600" style="min-height:64px" placeholder="1–3 lines shown next to the photos"></textarea>
+            </label>
+            <div class="grid2">
+              <label>Tags
+                <input id="fTags" type="text" placeholder="gaming, rgb, wireless">
+                <span class="hint">Separate with commas. Helps shoppers find it in search.</span>
+              </label>
+              <label>Video link (optional)
+                <input id="fVideo" type="url" placeholder="https://youtube.com/…">
+              </label>
+            </div>
+            </div>
             <div data-panel="linked" style="display:grid;gap:14px" hidden>
               <p class="hint" style="margin:0">Suggest your other products to shoppers.</p>
               <div class="grid2">
@@ -1009,21 +1033,6 @@
             </div>
           </div>
 
-          <div class="card sec sec-extra">
-            <h2>Extra details</h2>
-            <label>Short description
-              <textarea id="fShort" maxlength="600" style="min-height:64px" placeholder="1–3 lines shown next to the photos"></textarea>
-            </label>
-            <div class="grid2">
-              <label>Tags
-                <input id="fTags" type="text" placeholder="gaming, rgb, wireless">
-                <span class="hint">Separate with commas. Helps shoppers find it in search.</span>
-              </label>
-              <label>Video link (optional)
-                <input id="fVideo" type="url" placeholder="https://youtube.com/…">
-              </label>
-            </div>
-          </div>
         </div>
 
         <!-- Right column -->
@@ -2066,7 +2075,7 @@
     $('fSku').value = p.sku || ''; $('fManage').checked = p.manage_stock; $('fStock').value = p.stock ?? 0;
     $('fLow').value = p.low_stock_threshold ?? ''; $('fBackorders').value = p.backorders; $('fStockStatus').value = p.stock_status;
     $('fSoldInd').checked = p.sold_individually;
-    $('fNegotiable').checked = !!p.price_negotiable; $('fSaleMirror').value = $('fSale').value; saleHint(); drawCouponInfo();
+    $('fNegotiable').checked = !!p.price_negotiable; saleHint(); drawCouponInfo();
     // Featured products: title, product code and quantity are locked (the database enforces it too, 0040)
     const featLock = !!(p.id && p.is_featured);
     ['fTitle', 'fTitleBn', 'fSku', 'fStock'].forEach(id => { const el = $(id); if (el) { el.disabled = featLock; el.title = featLock ? 'Locked while this product is Featured' : ''; } });
@@ -2124,10 +2133,7 @@
     $('kService').checked = kind === 'service';
     $('kGift').checked = kind === 'gift';
     syncType(); drawSummary();
-    if (kind === 'variable') selectTab('variations');
-    else if (kind === 'downloadable') selectTab('downloads');
-    else if (kind === 'service') selectTab('service');
-    else selectTab('pricing');
+    if (kind === 'variable') buildVersions(false);
   }
   $('ptypes').querySelectorAll('.ptype').forEach(b => b.onclick = () => { setKind(b.dataset.kind); dirty = true; });
 
@@ -2139,7 +2145,8 @@
     $('varPriceNote').hidden = !variable;
     $('priceFields').hidden = free || variable;
     $('saleDates').hidden = free || variable;
-    $('tabVariations').hidden = !variable;
+    $('varBlock').hidden = !variable;
+    $('priceBlock').hidden = variable;
     $('manageWrap').hidden = variable; $('stockFields').hidden = variable || !$('fManage').checked; $('stockStatusWrap').hidden = variable || $('fManage').checked;
     $('varStockNote').hidden = !variable;
     $('basicPriceWrap').hidden = variable;
@@ -2157,8 +2164,8 @@
     $('codBlock').hidden = digital;
     $('preBlock').hidden = digital || svc;
     $('preFields').hidden = !$('fPre').checked;
-    $('tabDownloads').hidden = !dl;
-    $('tabService').hidden = !svc;
+    $('dlBlock').hidden = !dl;
+    $('svcBlock').hidden = !svc;
     $('tabShipping').hidden = dl || svc || gift;
     const cur = document.querySelector('#dataTabs [aria-selected=true]');
     if (cur && cur.hidden) selectTab('pricing');
@@ -2228,8 +2235,7 @@
   FIELDS.forEach(id => $(id).addEventListener('input', () => { dirty = true; if (['fTitle', 'fPrice', 'fSale', 'fStock'].includes(id)) drawSummary(); }));
   $('fDesc').addEventListener('input', syncDesc);
   function syncDesc() { $('descCount').textContent = `${$('fDesc').value.length} / 5000`; }
-  $('fSale').addEventListener('input', () => { $('fSaleMirror').value = $('fSale').value; saleHint(); });
-  $('fSaleMirror').addEventListener('input', () => { $('fSale').value = $('fSaleMirror').value; $('fSale').dispatchEvent(new Event('input')); });
+  $('fSale').addEventListener('input', saleHint);
   $('fPrice').addEventListener('input', saleHint);
   $('fNegotiable').addEventListener('change', () => { dirty = true; });
   // coupons belong to the whole shop: show how many are on, open the Coupons page in a new tab
@@ -2355,98 +2361,94 @@
 
   function drawAttrFields() {
     const box = $('attrFields'); box.innerHTML = '';
-    if (!editing.category_id) { $('detailsHint').hidden = false; $('detailsHint').textContent = 'Choose a category first.'; return; }
-    const list = effectiveAttrs(editing.category_id).filter(x => !(isVariable() && varAttrIds.includes(x.attr.id)));
+    if (!editing.category_id) { $('detailsHint').hidden = false; $('detailsHint').textContent = 'Choose a category first (under Basic information).'; return; }
+    const variable = isVariable();
+    const list = effectiveAttrs(editing.category_id);
+    const candIds = new Set(variable ? varCandidates().map(x => x.attr.id) : []);
     $('detailsHint').hidden = false;
-    $('detailsHint').textContent = list.length ? 'Brand, model and other details shoppers filter by. They don\'t make versions (versions are under Product data → Variations). Fields marked * are needed before you send for review.' : 'This category has no extra details.';
+    $('detailsHint').innerHTML = !list.length ? 'This category has no extra details.'
+      : variable ? 'For the details the buyer picks when ordering (for example <b>Size</b>), press <b>Buyer chooses</b> and tick every value you sell. Each choice gets its own price and stock in step 3. Fill the other details once. Fields marked * are needed before you send for review.'
+      : 'Fill in what applies. Fields marked * are needed before you send for review. <b>Sold in several sizes or colours that the buyer must choose?</b> Pick <b>With options</b> above.';
     const cond = attrs.find(a => a.name === 'Condition');
     for (const { attr: a, required, from } of list) {
       const id = 'attr-' + a.id;
-      const title = h('span', { class: required ? 'req' : '' }, a.name + (a.unit ? ` (${a.unit})` : ''));
+      const name = a.name + (a.unit ? ` (${a.unit})` : '');
+      const isCand = candIds.has(a.id), varOn = isCand && varAttrIds.includes(a.id);
+      const sw = isCand && h('button', { type: 'button', class: 'buyer-sw', 'aria-pressed': String(varOn), title: 'The buyer picks this when ordering; each value gets its own price and stock',
+        onclick: e => { e.preventDefault();
+          if (!varOn) { if (varAttrIds.length >= 3) return toast('Up to 3 "Buyer chooses" details per product.'); varAttrIds.push(a.id); if (!varPicked.has(a.id)) varPicked.set(a.id, new Set()); values.delete(a.id); }
+          else varAttrIds = varAttrIds.filter(x => x !== a.id);
+          buildVersions(false); drawAttrFields(); dirty = true; } }, varOn ? '✓ Buyer chooses' : '+ Buyer chooses');
+      const fromTag = from && h('span', { class: 'from', text: ' · from ' + from });
+      if (varOn) {   // pick every value the buyer can choose from
+        const set = varPicked.get(a.id) || new Set(); varPicked.set(a.id, set);
+        const chips = h('div', { class: 'chips', role: 'group', 'aria-label': name });
+        a.attribute_options.forEach(o => {
+          const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) }, o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''));
+          b.onclick = () => { set.has(o.id) ? set.delete(o.id) : set.add(o.id); b.setAttribute('aria-pressed', String(set.has(o.id))); buildVersions(false); dirty = true; };
+          chips.append(b);
+        });
+        box.append(h('div', { class: 'lbl wide attr-var', style: 'display:grid;gap:6px' }, h('span', { class: 'attr-head' }, h('span', { text: name }), h('span', { class: 'from', text: ' · tick every value you sell' }), sw), chips));
+        continue;
+      }
+      const head = h('span', { class: 'attr-head' }, h('span', { class: required ? 'req' : '', text: name }), fromTag, sw);
       const cur = values.get(a.id);
       let control;
       if (a.input_type === 'boolean') {
         control = h('select', { id }, h('option', { value: '', text: 'Choose…' }), h('option', { value: 'true', text: 'Yes' }), h('option', { value: 'false', text: 'No' }));
         control.value = cur === true ? 'true' : cur === false ? 'false' : '';
         control.onchange = () => { control.value === '' ? values.delete(a.id) : values.set(a.id, control.value === 'true'); dirty = true; };
-        box.append(h('label', { for: id }, title, control));
+        box.append(h('div', { class: 'lbl attr-one', style: 'display:grid;gap:6px' }, head, control));
       } else if (a.input_type === 'select') {
         let opts = a.attribute_options;
         if (cond && a.id === cond.id && editing.listing_type === 'pre_owned') opts = opts.filter(o => o.value !== 'New');
-        control = h('select', { id }, h('option', { value: '', text: 'Choose…' }), opts.map(o => h('option', { value: o.id, text: o.value + (a.unit ? ' ' + a.unit : '') })));
+        control = h('select', { id, 'aria-label': name }, h('option', { value: '', text: 'Choose…' }), opts.map(o => h('option', { value: o.id, text: o.value + (a.unit ? ' ' + a.unit : '') })));
         control.value = cur && cur.size ? [...cur][0] : '';
         control.disabled = !!(cond && a.id === cond.id && editing.listing_type === 'new');
         control.onchange = () => { control.value ? values.set(a.id, new Set([Number(control.value)])) : values.delete(a.id); dirty = true; };
-        box.append(h('label', { for: id }, title, control, control.disabled && h('span', { class: 'hint', text: 'Set by "New" above.' })));
+        box.append(h('div', { class: 'lbl attr-one', style: 'display:grid;gap:6px' }, head, control, control.disabled && h('span', { class: 'hint', text: 'Set by "New" above.' })));
       } else {
         // colour (one) or several options: chips
         const multi = a.input_type === 'multiselect';
         const set = cur instanceof Set ? cur : new Set();
-        const chips = h('div', { class: 'chips', role: 'group', 'aria-label': a.name });
+        const chips = h('div', { class: 'chips', role: 'group', 'aria-label': name });
         for (const o of a.attribute_options) {
           const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) },
             o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value);
           b.onclick = () => {
-            const s = values.get(a.id) instanceof Set ? values.get(a.id) : new Set();
-            if (multi) s.has(o.id) ? s.delete(o.id) : s.add(o.id);
-            else { const was = s.has(o.id); s.clear(); if (!was) s.add(o.id); }
-            s.size ? values.set(a.id, s) : values.delete(a.id);
+            const s2 = values.get(a.id) instanceof Set ? values.get(a.id) : new Set();
+            if (multi) s2.has(o.id) ? s2.delete(o.id) : s2.add(o.id);
+            else { const was = s2.has(o.id); s2.clear(); if (!was) s2.add(o.id); }
+            s2.size ? values.set(a.id, s2) : values.delete(a.id);
             chips.querySelectorAll('.opt').forEach((x, i) => x.setAttribute('aria-pressed', String((values.get(a.id) || new Set()).has(a.attribute_options[i].id))));
             dirty = true;
           };
           chips.append(b);
         }
-        box.append(h('div', { class: 'lbl wide', style: 'display:grid;gap:6px' }, h('span', {}, title, multi && h('span', { class: 'from', text: ' · choose any' }), from && h('span', { class: 'from', text: ' · from ' + from })), chips));
-        continue;
+        if (multi) head.insertBefore(h('span', { class: 'from', text: ' · choose any' }), sw || null);
+        box.append(h('div', { class: 'lbl wide', style: 'display:grid;gap:6px' }, head, chips));
       }
-      if (from) box.lastChild.firstChild.append(h('span', { class: 'from', text: ' · from ' + from }));
     }
   }
 
   // ---------- variations ----------
-  function drawVarAttrs() {
-    const box = $('varAttrs'); box.innerHTML = '';
-    if (!editing.category_id) { box.append(h('p', { class: 'hint', text: 'Choose a category first.' })); return; }
-    const cands = varCandidates();
-    if (!cands.length) { box.append(h('p', { class: 'hint', text: 'This category has no options that can vary.' })); return; }
-    for (const { attr: a } of cands) {
-      const on = varAttrIds.includes(a.id);
-      const cb = h('input', { type: 'checkbox', id: 'va-' + a.id, checked: on });
-      cb.onchange = () => {
-        if (cb.checked) { varAttrIds.push(a.id); if (!varPicked.has(a.id)) varPicked.set(a.id, new Set()); values.delete(a.id); }
-        else varAttrIds = varAttrIds.filter(x => x !== a.id);
-        drawVarAttrs(); drawAttrFields(); dirty = true;
-      };
-      const wrap = h('div', { class: 'var-attr' + (on ? ' on' : '') }, h('label', { class: 'check', for: 'va-' + a.id }, cb, h('b', { text: a.name + (a.unit ? ` (${a.unit})` : '') }),
-        h('span', { class: 'va-tag', text: on ? 'Makes versions: tick the values below' : 'Not a version: one value, set under Product details' })));
-      if (on) {
-        const set = varPicked.get(a.id) || new Set(); varPicked.set(a.id, set);
-        const chips = h('div', { class: 'chips' });
-        a.attribute_options.forEach(o => {
-          const b = h('button', { type: 'button', class: 'opt', 'aria-pressed': String(set.has(o.id)) }, o.color_hex && h('span', { class: 'swatch', style: `background:${o.color_hex}` }), o.value + (a.unit ? ' ' + a.unit : ''));
-          b.onclick = () => { set.has(o.id) ? set.delete(o.id) : set.add(o.id); b.setAttribute('aria-pressed', String(set.has(o.id))); dirty = true; };
-          chips.append(b);
-        });
-        wrap.append(chips);
-      }
-      box.append(wrap);
-    }
-  }
+  function drawVarAttrs() { const box = $('varAttrs'); if (box) box.innerHTML = ''; }   // choices are in the details list now
 
-  $('genVars').onclick = () => {
+  // Versions are made automatically from the details marked "Buyer chooses" (owner, 29 Oct 2026). Prices already typed are kept.
+  function buildVersions(loud) {
     const ids = varAttrIds.filter(a => (varPicked.get(a) || new Set()).size);
-    if (!ids.length) return toast('Tick at least one attribute and choose its options.');
+    if (!ids.length) { if (loud) toast('Turn on "Buyer chooses" for a detail and pick its values.'); variations = []; drawVarRows(); drawSummary(); return; }
     let combos = [{}];
     for (const a of ids) combos = combos.flatMap(c => [...varPicked.get(a)].map(o => ({ ...c, [a]: o })));
-    if (combos.length > 100) return toast(`That makes ${combos.length} versions. The limit is 100, so choose fewer options.`);
+    if (combos.length > 100) return toast(`That makes ${combos.length} versions. The limit is 100, so choose fewer values.`);
     const keyOf = o => Object.keys(o).sort((x, y) => x - y).map(k => o[k]).join('-');
     const old = new Map(variations.map(v => [keyOf(v.options), v]));
     const base = Number($('fPrice').value) || '';
     variations = combos.map(o => old.get(keyOf(o)) || { options: o, price: base, sale_price: '', stock: 0, sku: '', image_id: null, is_active: true });
-    varAttrIds = ids;
-    drawVarAttrs(); drawVarRows(); drawAttrFields(); drawSummary(); dirty = true;
-    toast(`${variations.length} version${variations.length === 1 ? '' : 's'} ready. Set prices and stock below.`);
-  };
+    drawVarRows(); drawSummary(); dirty = true;
+    if (loud) toast(`${variations.length} version${variations.length === 1 ? '' : 's'} ready. Set prices and stock below.`);
+  }
+  $('genVars').onclick = () => buildVersions(true);
 
   function comboLabel(v) {
     return Object.entries(v.options).map(([a, o]) => { const at = attrById.get(Number(a)); const op = at && at.attribute_options.find(x => x.id === o); return op ? op.value + (at.unit ? ' ' + at.unit : '') : '?'; }).join(' / ');
@@ -2536,7 +2538,7 @@
     const rows = [
       ['Product', { new: 'New', pre_owned: 'Pre-owned', free: 'New' }[editing.listing_type]],
       ['Listing', wantFeatured ? 'Featured' + (openFeat ? ` (${money(openFeat.price ?? 0)})` : (plans.find(p => p.id === planId) ? ` (${planText(plans.find(p => p.id === planId))})` : '')) : 'Free listing'],
-      ['Type', { simple: 'Simple', variable: 'Variable', downloadable: 'Downloadable', service: 'Service', gift: 'Gift card' }[currentKind()] + ($('fPre').checked && !$('preBlock').hidden ? ' · Pre-order' : '')],
+      ['Type', { simple: 'Simple', variable: 'With options', downloadable: 'Downloadable', service: 'Service', gift: 'Gift card' }[currentKind()] + ($('fPre').checked && !$('preBlock').hidden ? ' · Pre-order' : '')],
       ['Category', editing.category_id ? catPath(editing.category_id) : 'Not chosen'],
       ['Price', price],
       ['Photos', photos.length ? `${photos.length} (first is the main photo)` : 'No photos yet'],
@@ -2594,7 +2596,7 @@
       if (row.sale_starts_at && row.sale_ends_at && row.sale_ends_at <= row.sale_starts_at) errs.push('The sale must end after it starts.');
     }
     if (row.product_type === 'variable') {
-      if (!variations.length) errs.push('Create your versions on the Variations tab.');
+      if (!variations.length) errs.push('Under Price & details, turn on "Buyer chooses" for a detail (for example Size) and pick its values.');
       if (row.listing_type !== 'free' && variations.some(v => v.is_active && !(Number(v.price) > 0))) errs.push('Every version that is on sale needs a price.');
       if (variations.some(v => v.sale_price && Number(v.sale_price) >= Number(v.price))) errs.push('A version\'s sale price must be lower than its price.');
     }
@@ -2611,8 +2613,8 @@
       else if (new Set(qs).size !== qs.length) errs.push('Two wholesale price breaks have the same quantity.');
       else if (ps.some(p => p >= Number(row.sale_price || row.price))) errs.push('Wholesale prices must be lower than the normal price.');
     }
-    if (forReview && row.is_downloadable && !downloads.length) errs.push('Upload the file buyers will download (Downloads tab).');
-    if (forReview && row.is_service && !row.service_mode) errs.push('Choose where the service happens (Service tab).');
+    if (forReview && row.is_downloadable && !downloads.length) errs.push('Upload the file buyers will download (Price & details).');
+    if (forReview && row.is_service && !row.service_mode) errs.push('Choose where the service happens (Price & details).');
     if (forReview) {
       if (!photos.length) errs.push('Add at least one photo.');
       if (!$('fAgree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and RGBKart\'s seller rules.'); $('agreeWrap').classList.add('need'); }

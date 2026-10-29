@@ -21,6 +21,9 @@
   .mmenu .mlinks a:hover { background: var(--accent-soft, #E5F4EA); color: var(--accent, #00802B); }
   .mmenu .mlinks a.hot { color: #E30613; font-weight: 600; }
   .mmenu .mlinks a.hot:hover { background: #FDE7E8; }
+  .mmenu .mlinks a.feat { background: #FFF4CC; color: #7a5200; font-weight: 700; box-shadow: inset 0 0 0 1.5px #F5C400; }
+  .mmenu .mlinks a.feat::before { content: "★ "; color: #d4a000; }
+  .mmenu .mlinks a.feat:hover, .mmenu .mlinks a.feat[aria-current="page"] { background: #F5C400; color: #2a1a00; box-shadow: inset 0 0 0 1.5px #d4a000; }
   .mmenu .mlinks a[aria-current="page"] { background: var(--accent-soft, #E5F4EA); color: var(--accent, #00802B); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent, #00802B); }
   .mmenu .mpanel { position: absolute; left: 0; right: 0; top: 100%; background: var(--surface, #fff); border-bottom: 3px solid #00802B;
     box-shadow: 0 18px 30px rgb(8 40 18 / .18); max-height: min(70vh, 640px); overflow: auto; }
@@ -48,8 +51,8 @@
 
   // Used when the menu_items table hasn't been set up yet (same as the starting menu)
   const DEFAULT = [
-    { label: 'Home', link_type: 'home' }, { label: 'Shop', link_type: 'shop' }, { label: 'Deals of the Day', link_type: 'deals', is_hot: true },
-    { label: 'Featured', link_type: 'featured' }, { label: 'New Arrivals', link_type: 'newest' }, { label: 'Pre-Owned', link_type: 'pre_owned' },
+    { label: 'Home', link_type: 'home' }, { label: 'Shop', link_type: 'shop' }, { label: 'Featured', link_type: 'featured' },
+    { label: 'Deals of the Day', link_type: 'deals', is_hot: true }, { label: 'New Arrivals', link_type: 'newest' }, { label: 'Pre-Owned', link_type: 'pre_owned' },
   ];
   const GRID = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
 
@@ -129,7 +132,7 @@
     for (const it of items) {
       const href = hrefFor(it, cats); if (!href) continue;
       const ext = /^https:\/\//i.test(href);
-      links.append(el('a', { href, class: it.is_hot ? 'hot' : null, 'aria-current': !ext && isCurrent(href) ? 'page' : null, target: ext ? '_blank' : null, rel: ext ? 'noopener' : null, text: L(it, 'label') }));
+      links.append(el('a', { href, class: it.link_type === 'featured' ? 'feat' : it.is_hot ? 'hot' : null, 'aria-current': !ext && isCurrent(href) ? 'page' : null, target: ext ? '_blank' : null, rel: ext ? 'noopener' : null, text: L(it, 'label') }));
     }
     const cur = links.querySelector('[aria-current="page"]'); if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
 

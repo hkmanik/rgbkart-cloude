@@ -228,7 +228,7 @@
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=27"></script>
+<script src="i18n.js?v=28"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -260,6 +260,7 @@
       { k: 'address', label: 'Delivery address', req: true, ac: 'street-address', ph: 'House, road, area' },
       { k: 'city', label: 'District', req: true, districts: true },
       { k: 'postal_code', label: 'Postal code (optional)', ac: 'postal-code', ph: '1207' },
+      { k: 'email_offers', offers: true },
     ],
     seller: [
       { section: 'Shop details' },
@@ -268,6 +269,7 @@
       { k: 'business_address', label: 'Business address', req: true, ac: 'street-address', ph: 'House, road, area' },
       { k: 'city', label: 'District', req: true, districts: true },
       { k: 'trade_license', label: 'Trade license no. (optional)' },
+      { k: 'email_offers', offers: true },
       { k: 'rules_accepted', agree: true },
     ],
   };
@@ -314,6 +316,12 @@
         box.append(s); continue;
       }
       if (f.agree) { box.append(agreeBox(prefix + '-' + f.k, f.k, keep[f.k] === 'yes')); continue; }
+      if (f.offers) {   // promotional emails: off unless ticked (0059_email_offers.sql)
+        const lab = document.createElement('label'); lab.className = 'agree-row offers-row';
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = prefix + '-' + f.k; cb.name = f.k; cb.checked = keep[f.k] === 'yes';
+        const txt = document.createElement('span'); txt.textContent = role === 'seller' ? 'Send me selling tips, offers and RGBKart news by email (you can stop any time)' : 'Send me offers, discounts and RGBKart news by email (you can stop any time)';
+        lab.append(cb, txt); box.append(lab); continue;
+      }
       const label = document.createElement('label');
       label.textContent = f.label;
       let el;
@@ -501,6 +509,7 @@
     $('onboardBtn').disabled = false;
     if (error) return setMsg('onboardMsg', friendly(error), true);
     if (onboardRole === 'seller' && meta.rules_accepted === 'yes') await db.rpc('accept_seller_rules');
+    if (meta.email_offers === 'yes') await db.rpc('set_email_offers', { p_on: true }).then(() => {}, () => {});
     try { sessionStorage.removeItem('rgbkart-role'); } catch (_) {}
     const { data } = await db.auth.getSession();
     render(data.session);
@@ -652,7 +661,13 @@
     if (id !== 'appMsg') $(id).classList.toggle('error', !!isError);
   }
 
-  setMode('signin');
+  // Header "Open a shop" (login.html?as=seller): start on Create account with Seller chosen; "Buy / Sign in" stays on Sign in.
+  const AS = new URLSearchParams(location.search).get('as');
+  if (AS === 'seller' || AS === 'customer') {
+    signupRole = AS;
+    $('signupRole').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === AS)));
+    setMode(AS === 'seller' ? 'signup' : 'signin');
+  } else setMode('signin');
 </script>
 </body>
 </html>

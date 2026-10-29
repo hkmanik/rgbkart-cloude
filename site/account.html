@@ -58,10 +58,10 @@
 
 <script src="session.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=27"></script>
+<script src="i18n.js?v=28"></script>
 <script src="sync.js?v=1"></script>
-<script src="shop.js?v=20"></script>
-<script src="menu.js?v=5"></script>
+<script src="shop.js?v=21"></script>
+<script src="menu.js?v=6"></script>
 <script src="cartlib.js?v=4"></script>
 <script>
   let me = null, prof = null, addrs = [], tableReady = true;
@@ -137,6 +137,20 @@
           h('span', { class: 'ost ' + x.status, text: T(LABEL[x.status] || x.status) }), h('b', { text: money(x.total) }))))
         : h('p', { class: 'm', text: 'No orders yet. When you place an order, you can track it here.' }),
       cartN > 0 && h('p', { class: 'm', style: 'margin-top:10px' }, T(cartN === 1 ? 'You have {n} item in your cart.' : 'You have {n} items in your cart.', { n: cartN }) + ' ', h('a', { href: 'cart.html', text: 'Go to cart →' }))));
+
+    // promotional emails (0059_email_offers.sql): only shown once the switch exists
+    if ('email_offers' in prof) {
+      const cb = h('input', { type: 'checkbox', checked: !!prof.email_offers, style: 'width:20px;height:20px;flex:none' });
+      cb.onchange = async () => {
+        const r = await db.rpc('set_email_offers', { p_on: cb.checked });
+        if (r.error) { cb.checked = !cb.checked; return toast(T('Could not save. Please try again.')); }
+        toast(cb.checked ? T('You will get offers by email.') : T('No more offer emails.'));
+      };
+      box.append(h('section', { class: 'box sec' }, h('h2', { text: 'Emails' }),
+        h('label', { style: 'display:flex;gap:10px;align-items:flex-start;cursor:pointer' }, cb,
+          h('span', {}, h('b', { text: 'Send me offers, discounts and RGBKart news by email' }), h('br'),
+            h('span', { class: 'm', text: 'Order and account emails are always sent.' })))));
+    }
 
     // password (email accounts only)
     if ((me.app_metadata && me.app_metadata.provider) === 'email' || !me.app_metadata || !me.app_metadata.provider) {

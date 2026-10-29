@@ -28,6 +28,12 @@
     'Electronics': 'ইলেকট্রনিক্স', 'Fashion': 'ফ্যাশন', 'Sell on RGBKart': 'RGBKart-এ বিক্রি করুন',
     'See all categories →': 'সব ক্যাটাগরি দেখুন →', 'Categories are loading. Try again in a moment.': 'ক্যাটাগরি লোড হচ্ছে। একটু পরে আবার চেষ্টা করুন।',
     'Buy and sell across all 64 districts.': '৬৪ জেলা জুড়ে কেনাবেচা করুন।', 'All products': 'সব পণ্য', 'My orders': 'আমার অর্ডার', 'Sell an item': 'একটি পণ্য বিক্রি করুন',
+    'Buy · Sign in': 'কিনুন · সাইন ইন', 'Open shop': 'দোকান খুলুন', '{n} available': '{n}টি আছে', 'Emails': 'ইমেইল', 'Close ad': 'বিজ্ঞাপন বন্ধ করুন', 'Advertisement': 'বিজ্ঞাপন', 'Advertisements': 'বিজ্ঞাপন',
+    'Send me offers, discounts and RGBKart news by email': 'অফার, ছাড় ও RGBKart-এর খবর ইমেইলে পাঠান', 'Order and account emails are always sent.': 'অর্ডার ও অ্যাকাউন্টের ইমেইল সবসময় পাঠানো হয়।',
+    'You will get offers by email.': 'আপনি ইমেইলে অফার পাবেন।', 'No more offer emails.': 'আর অফারের ইমেইল পাঠানো হবে না।', 'Could not save. Please try again.': 'সেভ করা যায়নি। আবার চেষ্টা করুন।',
+    'Send me offers, discounts and RGBKart news by email (you can stop any time)': 'অফার, ছাড় ও RGBKart-এর খবর ইমেইলে পাঠান (যেকোনো সময় বন্ধ করতে পারবেন)',
+    'Send me selling tips, offers and RGBKart news by email (you can stop any time)': 'বিক্রির টিপস, অফার ও RGBKart-এর খবর ইমেইলে পাঠান (যেকোনো সময় বন্ধ করতে পারবেন)',
+    'How many you have to sell': 'কয়টি বিক্রি করবেন', 'Enter how many you have (1 to 999).': 'কয়টি আছে লিখুন (১ থেকে ৯৯৯)।',
     'Open a shop': 'দোকান খুলুন', 'Language': 'ভাষা', 'Ad': 'বিজ্ঞাপন', 'Sponsored': 'বিজ্ঞাপন',
     // cards and labels
     '★ Featured': '★ ফিচার্ড', 'Pre-owned': 'ব্যবহৃত', 'New': 'নতুন', 'Used': 'ব্যবহৃত', 'Negotiable': 'দরদাম করা যাবে', 'No photo': 'ছবি নেই',

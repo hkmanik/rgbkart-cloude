@@ -350,6 +350,17 @@
   .meth-row { display: grid; grid-template-columns: 110px 170px 190px minmax(0, 1fr) auto auto; gap: 10px; align-items: end; padding: 12px 0; border-top: 1px solid var(--line); }
   .meth-row:first-child { border-top: 0; } .meth-row .pay-m { align-self: center; }
   @media (max-width: 1000px) { .meth-row { grid-template-columns: 1fr 1fr; } .meth-row > :first-child { grid-column: 1 / -1; } .pay-row { grid-template-columns: 1fr; } }
+  /* Products: colour tabs, the chosen one filled (owner, 29 Oct 2026) */
+  .ctabs { background: none; border: 0; padding: 0; gap: 6px; }
+  .ctabs button { --tc: #4b5563; border: 1.5px solid color-mix(in srgb, var(--tc) 55%, var(--line)); border-radius: 999px; color: color-mix(in srgb, var(--tc) 80%, var(--fg)); background: color-mix(in srgb, var(--tc) 9%, var(--surface)); padding: 6px 14px; font-weight: 600; }
+  .ctabs button:hover { border-color: var(--tc); color: var(--fg); }
+  .ctabs button[aria-pressed="true"] { background: var(--tc); border-color: var(--tc); color: #fff; box-shadow: 0 2px 6px color-mix(in srgb, var(--tc) 40%, transparent); }
+  #prodFilter [data-s=pending] { --tc: #d97706; } #prodFilter [data-s=approved] { --tc: #1f9d55; } #prodFilter [data-s=featured] { --tc: #b8860b; }
+  #prodFilter [data-s=rejected] { --tc: #dc2626; } #prodFilter [data-s=all] { --tc: #2f6fdb; }
+  #prodWho [data-w=all] { --tc: #4b5563; } #prodWho [data-w=seller] { --tc: #0f8f8f; } #prodWho [data-w=individual] { --tc: #7c4dcc; }
+  .ad-size { color: #b45309; font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .ad-pic { width: 100%; max-height: 260px; object-fit: contain; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); display: block; }
+  .ad-pic.small { max-height: 110px; }
 </style>
 </head>
 <body>
@@ -592,14 +603,14 @@
         <button class="primary" type="button" id="addProduct">+ Add product</button></div>
       <div class="card" style="margin-top:18px">
         <div class="toolbar">
-          <div class="filters" id="prodFilter">
+          <div class="filters ctabs" id="prodFilter">
             <button type="button" data-s="pending" aria-pressed="true">To review</button>
             <button type="button" data-s="approved" aria-pressed="false">Live</button>
             <button type="button" data-s="featured" aria-pressed="false">★ Featured</button>
             <button type="button" data-s="rejected" aria-pressed="false">Rejected</button>
             <button type="button" data-s="all" aria-pressed="false">All</button>
           </div>
-          <div class="filters" id="prodWho">
+          <div class="filters ctabs" id="prodWho">
             <button type="button" data-w="all" aria-pressed="true">All sellers</button>
             <button type="button" data-w="seller" aria-pressed="false">Shops</button>
             <button type="button" data-w="individual" aria-pressed="false">One-time sellers</button>
@@ -946,15 +957,18 @@
       <label class="check"><input type="radio" name="adWho" value="seller"> A seller</label>
       <select id="adSeller" aria-label="Seller" hidden></select>
     </fieldset>
-    <label>Headline <input id="adTitle" type="text" maxlength="80" placeholder="e.g. Eid Sale: up to 40% off"></label>
-    <label>Small text (optional) <input id="adSub" type="text" maxlength="140"></label>
-    <div class="ap-2"><label>Button text <input id="adCta" type="text" maxlength="24" value="Shop now"></label>
-      <label>Colour <select id="adColor"><option value="green">Green</option><option value="red">Red</option><option value="yellow">Yellow</option><option value="dark">Dark</option></select></label></div>
-    <label>Opens <select id="adLinkPick"></select></label>
-    <label id="adLinkWrap" hidden>Address <input id="adLink" type="text" maxlength="300" placeholder="https://… or a page like browse.html?c=groceries"></label>
-    <div style="display:grid;gap:6px"><span class="ap-lbl">Picture (optional, wide works best)</span>
+    <div style="display:grid;gap:6px"><span class="ap-lbl">Ready-made banner picture <span id="adSize" class="ad-size"></span></span>
+      <span class="attr-meta" id="adPicNote">Design the banner (with its text and prices) outside, then upload it here. It is shown exactly as it is.</span>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="ghost" id="adImgBtn">Choose picture</button><button type="button" class="ghost" id="adImgClear" hidden>Remove picture</button><span class="attr-meta" id="adImgName"></span></div>
       <input type="file" id="adImg" accept="image/jpeg,image/png,image/webp" hidden></div>
+    <label>Opens (landing page when someone taps the ad) <select id="adLinkPick"></select></label>
+    <label id="adLinkWrap" hidden>Address <input id="adLink" type="text" maxlength="300" placeholder="https://… or a page like browse.html?c=groceries"></label>
+    <label>Name of the ad <input id="adTitle" type="text" maxlength="80" placeholder="e.g. Eid Sale: up to 40% off"><span class="attr-meta" style="text-transform:none;letter-spacing:0;font-weight:400">For your list, and read out to blind visitors.</span></label>
+    <fieldset class="ap-box" id="adTextBox"><legend>No picture? A simple text banner instead</legend>
+      <label>Small text (optional) <input id="adSub" type="text" maxlength="140"></label>
+      <div class="ap-2"><label>Button text <input id="adCta" type="text" maxlength="24" value="Shop now"></label>
+        <label>Colour <select id="adColor"><option value="green">Green</option><option value="red">Red</option><option value="yellow">Yellow</option><option value="dark">Dark</option></select></label></div>
+    </fieldset>
     <div class="ad-preview" id="adPreview" aria-label="Preview"></div>
     <div class="ap-2"><label>Starts <input id="adStart" type="date"></label><label>Days <input id="adDays" type="number" min="1" max="365" step="1" value="7"></label></div>
     <p class="attr-meta" id="adEnds"></p>
@@ -2699,7 +2713,7 @@
       const min = h('input', { type: 'number', min: 1, max: 365, step: 1, value: r.min_days, 'aria-label': `Minimum days for ${r.name}`, disabled: !edit });
       const on = h('input', { type: 'checkbox', checked: r.is_active, disabled: !edit });
       box.append(h('div', { class: 'rate-row' },
-        h('div', {}, h('b', { text: r.name }), h('div', { class: 'attr-meta', text: r.description || '' })),
+        h('div', {}, h('b', { text: r.name }), h('div', { class: 'attr-meta', text: (r.description || '') + (r.size_hint ? ' · Picture size: ' + r.size_hint : '') })),
         h('label', {}, 'Price per day (৳)', price), h('label', {}, 'Minimum days', min),
         h('label', { class: 'check' }, on, 'On'),
         edit ? actionBtn('Save', 'good', async () => {
@@ -2729,7 +2743,7 @@
       const state = waitPay ? (pays.some(x => x.ad_id === a.id && x.status === 'review') ? 'Payment to check' : 'Waiting for seller payment') : a.ends_on < today ? 'Ended' : a.starts_on > today ? 'Starts ' + fmtDay(a.starts_on) : a.is_active ? 'Running' : 'Paused';
       const days = daysBetween(a.starts_on, a.ends_on) + 1;
       box.append(h('div', { class: 'ad-row' + (a.is_active && a.ends_on >= today ? '' : ' off') },
-        adBanner(a, a.image_path && photoUrlAdmin(a.image_path)),
+        a.image_path ? h('img', { src: photoUrlAdmin(a.image_path), alt: '', class: 'ad-pic small' }) : adBanner(a, null),
         h('div', { style: 'min-width:0;display:grid;gap:3px' },
           h('div', { class: 'attr-title' }, h('b', { text: rate.name || a.placement }), h('span', { class: 'chip ' + (state === 'Running' ? 'approved' : state === 'Ended' ? 'plain' : 'pending'), text: state })),
           h('div', { class: 'prod-meta', text: `${a.seller_id ? 'Seller: ' + ((reqSellers.get(a.seller_id) || {}).shop_name || '—') : 'RGBKart (own promotion)'} · ${fmtDay(a.starts_on)} – ${fmtDay(a.ends_on)} (${days} days)` }),
@@ -2750,7 +2764,17 @@
   function adPreview() {
     const box = $('adPreview'); box.innerHTML = '';
     const url = adImgBlob ? URL.createObjectURL(adImgBlob) : adImgPath ? photoUrlAdmin(adImgPath) : null;
-    box.append(adBanner({ title: $('adTitle').value.trim(), subtitle: $('adSub').value.trim(), cta: $('adCta').value.trim(), color: $('adColor').value }, url));
+    const popup = (adRates.find(r => r.placement === $('adPlace').value) || {}).kind === 'popup';
+    $('adTextBox').hidden = !!url || popup;
+    if (url) box.append(h('img', { src: url, alt: '', class: 'ad-pic' }));
+    else if (popup) box.append(h('p', { class: 'attr-meta', text: 'Upload the pop-up picture to see it here.' }));
+    else box.append(adBanner({ title: $('adTitle').value.trim(), subtitle: $('adSub').value.trim(), cta: $('adCta').value.trim(), color: $('adColor').value }, null));
+  }
+  function adSizeNote() {
+    const rate = adRates.find(r => r.placement === $('adPlace').value) || {};
+    $('adSize').textContent = rate.size_hint ? '· size ' + rate.size_hint : '';
+    $('adPicNote').textContent = rate.kind === 'popup' ? 'Pop-ups need a picture. Design it outside (text, prices, logo), then upload it. Visitors close it with ✕.'
+      : 'Design the banner (with its text and prices) outside, then upload it here. It is shown exactly as it is.';
   }
   function adCalc(fromRate) {
     const rate = adRates.find(r => r.placement === $('adPlace').value);
@@ -2784,12 +2808,12 @@
     $('adPay').value = a ? a.payment_status : 'unpaid'; $('adActive').checked = a ? a.is_active : true;
     if (a) { $('adPpd').value = Number(a.price_per_day); $('adAmount').value = Number(a.amount); adCalc(false); $('adAmount').value = Number(a.amount); } else adCalc(true);
     $('adImgName').textContent = adImgPath ? 'Picture added' : ''; $('adImgClear').hidden = !adImgPath;
-    setMsg('adMsg', ''); adPreview();
+    setMsg('adMsg', ''); adSizeNote(); adPreview();
     $('adDrawer').hidden = $('adScrim').hidden = false; $('adTitle').focus();
   }
   function closeAd() { $('adDrawer').hidden = $('adScrim').hidden = true; editingAd = null; }
   document.querySelectorAll('input[name=adWho]').forEach(r => r.onchange = () => { $('adSeller').hidden = r.value !== 'seller' || !r.checked; if (r.checked && r.value === 'house') $('adSeller').hidden = true; });
-  $('adPlace').onchange = () => adCalc(true);
+  $('adPlace').onchange = () => { adCalc(true); adSizeNote(); adPreview(); };
   $('adDays').oninput = $('adPpd').oninput = $('adStart').oninput = () => adCalc(false);
   $('adLinkPick').onchange = () => { $('adLinkWrap').hidden = $('adLinkPick').value !== '__custom'; if (!$('adLinkWrap').hidden) $('adLink').focus(); };
   ['adTitle', 'adSub', 'adCta', 'adColor'].forEach(id => $(id).addEventListener('input', adPreview));
@@ -2799,7 +2823,7 @@
   $('adImg').onchange = async () => {
     const f = $('adImg').files[0]; $('adImg').value = ''; if (!f) return;
     if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return toast('Use a JPG, PNG or WebP picture.');
-    try { adImgBlob = await apShrink(f, 1400); $('adImgName').textContent = f.name; $('adImgClear').hidden = false; adPreview(); } catch (_) { toast('Couldn\'t read that picture.'); }
+    try { adImgBlob = await apShrink(f, 1600); $('adImgName').textContent = f.name; $('adImgClear').hidden = false; adPreview(); } catch (_) { toast('Couldn\'t read that picture.'); }
   };
   $('addAd').onclick = () => openAd(null);
   $('adClose').onclick = $('adCancel').onclick = $('adScrim').onclick = closeAd;
@@ -2813,7 +2837,8 @@
       cta: $('adCta').value.trim() || 'Shop now', color: $('adColor').value, link_url: link, starts_on: start, ends_on: start ? addDays(start, days - 1) : null,
       price_per_day: Number($('adPpd').value) || 0, amount: Number($('adAmount').value) || 0, payment_status: $('adPay').value, is_active: $('adActive').checked };
     const errs = [];
-    if (row.title.length < 2) errs.push('Write a headline.');
+    if (row.title.length < 2) errs.push('Write a name for the ad.');
+    if ((adRates.find(r => r.placement === row.placement) || {}).kind === 'popup' && !adImgBlob && !adImgPath) errs.push('Pop-ups need a picture.');
     if (who === 'seller' && !row.seller_id) errs.push('Choose the seller.');
     if (!start) errs.push('Choose the start date.');
     if (!(days >= 1 && days <= 365)) errs.push('Days must be 1 to 365.');

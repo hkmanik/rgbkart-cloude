@@ -190,8 +190,9 @@
         </div></div>
       <div class="row2">
         <label><span class="req">Price</span><span class="taka"><input id="price" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
-        <label class="check" style="align-self:end;padding-bottom:12px"><input id="negotiable" type="checkbox"> Price is negotiable</label>
+        <label><span class="req">Quantity</span><input id="qty" type="number" min="1" max="999" step="1" value="1" inputmode="numeric"><span class="hint">How many you have to sell</span></label>
       </div>
+      <label class="check"><input id="negotiable" type="checkbox"> Price is negotiable</label>
       <label>Description <span class="hint">(optional)</span><textarea id="desc" maxlength="2000" placeholder="Condition, how long used, what's included, reason for selling…"></textarea></label>
     </section>
 
@@ -261,7 +262,7 @@
 <script src="session.js?v=1"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=27"></script>
+<script src="i18n.js?v=28"></script>
 <script src="pay.js?v=2"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -515,7 +516,7 @@
     if ($('website').value) return;   // a bot filled the hidden field
     const v = {
       title: $('title').value.trim(), titleBn: $('titleBn').value.trim(), category: Number($('category').value) || null, price: Number($('price').value),
-      negotiable: $('negotiable').checked, desc: $('desc').value.trim(),
+      negotiable: $('negotiable').checked, desc: $('desc').value.trim(), qty: Math.round(Number($('qty').value)),
       name: $('name').value.trim(), phone: cleanPhone($('phone').value), whatsapp: cleanPhone($('whatsapp').value),
       district: $('district').value, area: $('area').value.trim(), email: $('email').value.trim(),
     };
@@ -524,6 +525,7 @@
     if (v.title.length < 3) errs.push('Write what you are selling.');
     if (!v.category) errs.push('Choose a category.');
     if (!(v.price >= 1)) errs.push('Enter a price.');
+    if (!(v.qty >= 1 && v.qty <= 999)) errs.push('Enter how many you have (1 to 999).');
     if (v.name.length < 2) errs.push('Enter your name.');
     if (!BD_MOBILE.test(v.phone)) errs.push('Enter a valid mobile number, like 01711000000.');
     if (v.whatsapp && !BD_MOBILE.test(v.whatsapp)) errs.push('Check the WhatsApp number.');
@@ -548,7 +550,7 @@
       if (r.error && !(/Could not find the function/i.test(r.error.message) && !v.email)) throw r.error;
       // 3. the listing
       const row = { category_id: v.category, title: v.title, title_bn: v.titleBn || null, price: v.price, price_negotiable: v.negotiable, listing_type: condition,
-        description: v.desc || null, stock: 1, manage_stock: true, ships_to: 'all_bangladesh', rules_accepted_at: new Date().toISOString() };
+        description: v.desc || null, stock: v.qty, manage_stock: true, ships_to: 'all_bangladesh', rules_accepted_at: new Date().toISOString() };
       const res = pendingProductId ? await db.from('products').update(row).eq('id', pendingProductId).select().single()
                                    : await db.from('products').insert(row).select().single();
       if (res.error) throw res.error;
@@ -590,7 +592,7 @@
 
   $('againBtn').onclick = () => {
     photos = []; drawPhotos();
-    ['title', 'price', 'desc'].forEach(id => $(id).value = ''); $('negotiable').checked = false; $('category').value = ''; setListing('free');
+    ['title', 'price', 'desc'].forEach(id => $(id).value = ''); $('negotiable').checked = false; $('qty').value = 1; $('category').value = ''; setListing('free');
     $('doneCard').hidden = true; $('sellForm').hidden = false; $('title').focus();
   };
 

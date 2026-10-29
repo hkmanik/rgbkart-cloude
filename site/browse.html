@@ -158,6 +158,7 @@
           </select>
         </div>
       </div>
+      <div id="adCatTop" hidden style="margin:0 0 14px"></div>
       <div class="shopres" id="shopRes" hidden></div>
       <div class="subcats" id="subcats" hidden></div>
       <div class="chips" id="chips"></div>
@@ -174,10 +175,11 @@
 <script src="session.js?v=1"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=27"></script>
+<script src="i18n.js?v=28"></script>
 <script src="sync.js?v=1"></script>
-<script src="shop.js?v=20"></script>
-<script src="menu.js?v=5"></script>
+<script src="shop.js?v=21"></script>
+<script src="menu.js?v=6"></script>
+<script src="ads.js?v=1"></script>
 <script>
   const PAGE = 24;
   const DISTRICTS = ['Dhaka', 'Faridpur', 'Gazipur', 'Gopalganj', 'Kishoreganj', 'Madaripur', 'Manikganj', 'Munshiganj', 'Narayanganj', 'Narsingdi', 'Rajbari', 'Shariatpur', 'Tangail',
@@ -428,7 +430,7 @@
     const active = bySlug(state.c);
     if (active) expandTo(active);
     syncForm(); drawTree(); drawHead(); load(true);
-    adSlot('cat_side', $('adSide'));
+    adSlot('cat_side', $('adSide')); adSlot('cat_top', $('adCatTop'));
   }
   start();
 </script>

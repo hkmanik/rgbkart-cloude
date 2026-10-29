@@ -38,7 +38,8 @@ function headerHTML() {
       <a class="icon-link" href="messages.html" id="msgLink" aria-label="Messages" hidden>${CHAT_SVG}<span class="badge" id="msgCount" hidden></span></a>
       <a class="icon-link" href="alerts.html" id="bellLink" aria-label="Alerts" hidden>${BELL_SVG}<span class="badge" id="bellCount"></span></a>
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
-      <a class="icon-link acct" href="login.html" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
+      <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short">Open shop</span><span class="lbl-tiny">Shop</span></a>
+      <a class="icon-link acct" href="login.html?as=customer" id="acctLink">${USER_SVG}<span class="lbl-acct" id="acctLbl">Buy · Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;
 }
@@ -85,7 +86,7 @@ async function initShell() {
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();
-    if (session && !session.user.is_anonymous) { $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; }
+    if (session && !session.user.is_anonymous) { $('acctLbl').textContent = T('My account'); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true; }
     if (session) { hasSession = true; $('msgLink').hidden = false; updateBadges(); }
   } catch (_) {}
 }
@@ -176,21 +177,7 @@ function categoryCard(c, i, extra) {
   return el;
 }
 
-// ---------- ads (Admin → Featured & ads) and visitor counting ----------
-async function adSlot(placement, holder) {
-  if (!holder) return;
-  try {
-    const r = await db.from('live_ads').select('*').eq('placement', placement);
-    const list = r.data || []; if (!list.length) { holder.hidden = true; return; }
-    const ad = list[Math.floor(Math.random() * list.length)];
-    const ext = /^https:\/\//i.test(ad.link_url);
-    const a = h('a', { class: `adb ${ad.color}${ad.image_path ? ' has-img' : ''} ${placement}`, href: ad.link_url, target: ext ? '_blank' : null, rel: ext ? 'noopener sponsored' : 'sponsored' },
-      ad.image_path && h('img', { src: imgUrl(ad.image_path), alt: '', loading: 'lazy' }),
-      h('div', { class: 'adb-t' }, h('b', { text: ad.title }), ad.subtitle && h('span', { text: ad.subtitle })),
-      h('span', { class: 'adb-cta', text: ad.cta }), h('small', { class: 'adb-tag', text: 'Ad' }));
-    holder.innerHTML = ''; holder.append(a); holder.hidden = false;
-  } catch (_) { holder.hidden = true; }
-}
+// ---------- visitor counting (ads are in ads.js) ----------
 function trackVisit() {
   try {
     let id = localStorage.getItem('rgbkart-visitor');

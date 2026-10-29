@@ -250,6 +250,7 @@
           </div>
           <p class="free-note" id="freeNote" hidden><span aria-hidden="true">🔒</span><span>This seller keeps their number private. Send them a message on RGBKart and they'll reply here.</span></p>
           <p class="feat-note" id="featNote" hidden>★ Featured seller: call, WhatsApp, email or message</p>
+          <div id="adProduct" hidden></div>
           <form class="contact-box msg-form" id="msgBox" hidden novalidate>
             <span class="lbl">Message to <b id="msgTo"></b></span>
             <label id="nameRow">Your name<input id="buyerName" type="text" maxlength="60" autocomplete="name"></label>
@@ -330,9 +331,10 @@
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=27"></script>
+<script src="i18n.js?v=28"></script>
 <script src="wa-chat.js?v=1"></script>
-<script src="menu.js?v=5"></script>
+<script src="menu.js?v=6"></script>
+<script src="ads.js?v=1"></script>
 <script src="reviews.js?v=1"></script>
 <script src="report.js?v=1"></script>
 <script src="questions.js?v=1"></script>
@@ -414,6 +416,7 @@
     if (P.is_service) chips.append(h('span', { class: 'chip', text: 'Service' }));
     if (P.is_gift_card) chips.append(h('span', { class: 'chip', text: 'Gift card' }));
     if (P.free_delivery && !P.contact_only) chips.append(h('span', { class: 'chip', text: 'Free delivery' }));
+    if (P.contact_only && Number(P.stock) > 1) chips.append(h('span', { class: 'chip', text: T('{n} available', { n: P.stock }) }));
     $('title').textContent = L(P, 'title'); $('title').setAttribute('translate', 'no');
     if (P.short_description) { $('short').hidden = false; $('short').textContent = P.short_description; }
     $('desc').textContent = L(P, 'description') || T('The seller hasn\'t added a description.'); $('desc').setAttribute('translate', L(P, 'description') ? 'no' : 'yes'); $('short').setAttribute('translate', 'no');
@@ -785,6 +788,7 @@
     } catch (_) {}
     load();
     if (window.RGBMenu) RGBMenu.mount();
+    if (window.RGBAds) RGBAds.slot('product_side', $('adProduct'));
     try { let vid = localStorage.getItem('rgbkart-visitor'); if (!vid) { vid = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(36).padStart(2, '0')).join('').slice(0, 20); localStorage.setItem('rgbkart-visitor', vid); } db.rpc('track_visit', { p_visitor: vid, p_path: 'product.html' }).then(() => {}, () => {}); } catch (_) {}
   })();
 </script>

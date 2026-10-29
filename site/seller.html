@@ -361,6 +361,55 @@
   .ord-ask { display: grid; gap: 6px; background: #FFF6CC; color: #4A3A00; border: 1px solid #F5C400; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
   .ord-ask input { width: 100%; }
   .ord-cancel { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .ord-cancel input { flex: 1; min-width: 200px; }
+  /* ---- Add product look (owner, 29 Oct 2026): coloured sections, colour tabs, clear choices ---- */
+  .nav-add { background: var(--t-green); color: #fff; font-weight: 700; justify-content: center; margin: 4px 0 6px; padding: 10px; box-shadow: 0 2px 0 rgb(0 0 0 / .18); }
+  .nav-add:hover:not(:disabled) { background: color-mix(in srgb, var(--t-green) 85%, #000); color: #fff; }
+  .nav-add[aria-current="page"] { background: color-mix(in srgb, var(--t-green) 85%, #000); color: #fff; box-shadow: inset 0 0 0 2px #fff; }
+  .nav-add:disabled { opacity: .5; }
+  .sec { --sc: var(--t-blue); background: color-mix(in srgb, var(--sc) 6%, var(--surface)); border-color: color-mix(in srgb, var(--sc) 30%, var(--line)); border-top: 4px solid var(--sc); }
+  .sec > h2:first-child, .sec > div:first-child h2 { color: color-mix(in srgb, var(--sc) 70%, var(--fg)); }
+  .sec-list { --sc: #d48806; } .sec-basic { --sc: #1f9d55; } .sec-photos { --sc: #2f6fdb; } .sec-details { --sc: #7c4dcc; } .sec-data { --sc: #0f8f8f; } .sec-extra { --sc: #c2410c; }
+  .sec input, .sec select, .sec textarea { background: var(--surface); }
+  .price-row input { font-size: 1.05rem; font-weight: 600; }
+  .grid3.price-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 640px) { .price-row .from { display: none; } .price-row label { font-size: .8rem; } .price-row .taka input { padding-left: 22px; } }
+  .deal-box { display: flex; gap: 10px; align-items: center; justify-content: space-between; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); }
+  .deal-box > span { display: grid; gap: 2px; } .deal-box .hint { white-space: normal; }
+  label.deal-box { justify-content: flex-start; cursor: pointer; } label.deal-box:has(input:checked) { border-color: var(--t-green); background: color-mix(in srgb, var(--t-green) 10%, var(--surface)); }
+  .deal-box input[type=checkbox] { width: 20px; height: 20px; flex: none; }
+  .coupon-box button { flex: none; }
+  .date-wrap { display: flex; gap: 8px; align-items: stretch; }
+  .date-wrap input { flex: 1; min-width: 0; font-size: 1rem; }
+  .cal-badge { flex: none; width: 48px; padding: 0; border: 1.5px solid #d93025; border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; background: #fff; color: #222; }
+  .cal-badge i { font-style: normal; font-size: .62rem; font-weight: 700; text-transform: uppercase; background: #d93025; color: #fff; padding: 1px 0; }
+  .cal-badge b { font-size: 1.15rem; line-height: 1.6; }
+  .cal-badge:not(.set) b { color: #999; }
+  .photos .photo.main { grid-column: span 2; grid-row: span 2; border: 2px solid var(--accent); }
+  /* colour tabs in Product data */
+  .tabs { gap: 6px; border-bottom: 0; flex-wrap: wrap; margin: 0; padding: 2px; }
+  .tabs button { --tc: var(--t-blue); border: 1.5px solid color-mix(in srgb, var(--tc) 55%, var(--line)); border-radius: 999px; color: color-mix(in srgb, var(--tc) 75%, var(--fg)); background: color-mix(in srgb, var(--tc) 9%, var(--surface)); padding: 6px 14px; font-weight: 600; }
+  .tabs button:hover { color: var(--fg); border-color: var(--tc); }
+  .tabs button[aria-selected="true"] { background: var(--tc); border-color: var(--tc); color: #fff; box-shadow: 0 2px 6px color-mix(in srgb, var(--tc) 40%, transparent); }
+  .tabs [data-tab=pricing] { --tc: #1f9d55; } .tabs [data-tab=inventory] { --tc: #2f6fdb; } .tabs [data-tab=variations] { --tc: #7c4dcc; } .tabs [data-tab=downloads] { --tc: #0f8f8f; }
+  .tabs [data-tab=service] { --tc: #0f8f8f; } .tabs [data-tab=shipping] { --tc: #c2410c; } .tabs [data-tab=linked] { --tc: #b8327a; } .tabs [data-tab=advanced] { --tc: #4b5563; }
+  /* New / Pre-owned and Free / Featured: tab-like, the chosen one filled */
+  .types .type-card { border-width: 2px; position: relative; }
+  .types .type-card[aria-pressed="true"] { background: #1f9d55; border-color: #1f9d55; box-shadow: 0 3px 10px rgb(31 157 85 / .3); }
+  .types .type-card[aria-pressed="true"] b, .types .type-card[aria-pressed="true"] span:not(.tag) { color: #fff; }
+  .types .type-card[aria-pressed="true"]::after { content: "✓"; position: absolute; top: 8px; right: 12px; color: #fff; font-weight: 800; }
+  .types .type-card.feat { border-color: color-mix(in srgb, var(--t-amber) 70%, var(--line)); background: color-mix(in srgb, var(--t-amber) 10%, var(--surface)); }
+  .types .type-card.feat[aria-pressed="true"] { background: var(--t-amber); border-color: #c99c00; box-shadow: 0 3px 10px rgb(201 156 0 / .35); }
+  .types .type-card.feat[aria-pressed="true"] b, .types .type-card.feat[aria-pressed="true"] span:not(.tag), .types .type-card.feat[aria-pressed="true"]::after { color: #2a1a00; }
+  .types .type-card.feat[aria-pressed="true"] .tag { background: #fff; }
+  .plan-pick .opt { border: 2px solid color-mix(in srgb, var(--t-amber) 60%, var(--line)); border-radius: 999px; padding: 7px 14px; font-weight: 600; background: var(--surface); }
+  .plan-pick .opt[aria-pressed="true"] { background: var(--t-amber); border-color: #c99c00; color: #2a1a00; }
+  /* the rules box asks for attention until it is ticked */
+  .agree-bar { font-size: .9rem; border-width: 2px; }
+  .agree-bar input { width: 20px; height: 20px; flex: none; }
+  .agree-bar:not(:has(input:checked)) { animation: agreePulse 1.6s ease-in-out infinite; border-color: #e0a800; }
+  .agree-bar:has(input:checked) { background: color-mix(in srgb, var(--t-green) 12%, var(--surface)); border-color: var(--t-green); }
+  @keyframes agreePulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(245 196 0 / .0); background: #FFFBEA; } 50% { box-shadow: 0 0 0 4px rgb(245 196 0 / .45); background: #FFF1B8; } }
+  @media (prefers-reduced-motion: reduce) { .agree-bar:not(:has(input:checked)) { animation: none; box-shadow: 0 0 0 3px rgb(245 196 0 / .45); } }
 </style>
 </head>
 <body>
@@ -387,8 +436,8 @@
     <div class="shop-name" id="shopName"></div>
 
     <div class="nav-group">Catalog</div>
+    <button class="nav nav-add" data-view="new" id="navNew">+ Add product</button>
     <button class="nav" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>My products</button>
-    <button class="nav" data-view="new" id="navNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Add product</button>
     <button class="nav tone-amber" data-view="featured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Payment requests<span class="count" id="navPay" hidden></span></button>
     <button class="nav tone-red" data-view="ads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>Advertise</button>
     <button class="nav tone-blue" data-view="delivery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M1 4h13v11H1zM14 8h4l3 4v3h-7"/><circle cx="5.5" cy="17.5" r="2"/><circle cx="17.5" cy="17.5" r="2"/></svg>Delivery</button>
@@ -575,13 +624,17 @@
         <div class="adsp" id="adSpaces" role="group" aria-label="Ad space"></div>
         <div class="ad-form" id="adForm">
           <div class="ad-two"><label>Start date <input type="date" id="sadStart"></label><label>Days <input type="number" id="sadDays" min="1" max="90" step="1" value="7" inputmode="numeric"></label></div>
-          <label>Headline <input type="text" id="sadTitle" maxlength="80" placeholder="e.g. Eid offers at Rahim Tech"></label>
-          <label>Small text (optional) <input type="text" id="sadSub" maxlength="140"></label>
-          <div class="ad-two"><label>Button text <input type="text" id="sadCta" maxlength="24" value="Shop now"></label>
-            <label>Colour <select id="sadColor"><option value="green">Green</option><option value="red">Red</option><option value="yellow">Yellow</option><option value="dark">Dark</option></select></label></div>
-          <label>When people click, open <select id="sadLink"></select></label>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="ghost" id="sadImgBtn">Add a picture (optional)</button><button type="button" class="ghost" id="sadImgClear" hidden>Remove picture</button><span class="pmeta" id="sadImgName"></span>
+          <div style="display:grid;gap:4px"><b>Your banner picture <span id="sadSize" style="color:#b45309"></span></b>
+            <span class="pmeta" id="sadPicNote">Design the banner (text, prices, logo) outside, then upload it. It is shown exactly as it is.</span></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="primary" id="sadImgBtn">⬆ Upload banner picture</button><button type="button" class="ghost" id="sadImgClear" hidden>Remove picture</button><span class="pmeta" id="sadImgName"></span>
             <input type="file" id="sadImg" accept="image/jpeg,image/png,image/webp" hidden></div>
+          <label>When people tap it, open <select id="sadLink"></select></label>
+          <label>Name of the ad <input type="text" id="sadTitle" maxlength="80" placeholder="e.g. Eid offers at Rahim Tech"></label>
+          <fieldset id="sadTextBox" style="border:1px dashed var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:10px"><legend class="pmeta">No picture? A simple text banner instead</legend>
+            <label>Small text (optional) <input type="text" id="sadSub" maxlength="140"></label>
+            <div class="ad-two"><label>Button text <input type="text" id="sadCta" maxlength="24" value="Shop now"></label>
+              <label>Colour <select id="sadColor"><option value="green">Green</option><option value="red">Red</option><option value="yellow">Yellow</option><option value="dark">Dark</option></select></label></div>
+          </fieldset>
           <div id="sadPreview"></div>
           <div class="ad-sum" id="sadSum"></div>
           <p class="msg error" id="sadMsg" role="alert" hidden></p>
@@ -701,7 +754,7 @@
       <div class="editor" style="margin-top:16px">
         <div class="editor-main">
           <!-- Listing type -->
-          <div class="card">
+          <div class="card sec sec-list">
             <h2>What are you listing?</h2>
             <div class="choice">
               <span class="lbl">Product</span>
@@ -726,7 +779,7 @@
           </div>
 
           <!-- Category + basics -->
-          <div class="card">
+          <div class="card sec sec-basic">
             <h2>Basic information</h2>
             <label><span class="req">Category</span>
               <select id="fCategory"></select>
@@ -738,11 +791,22 @@
             <label>Product name in Bangla <span class="from">(optional, shown on the Bangla site)</span>
               <input id="fTitleBn" type="text" maxlength="200" lang="bn" placeholder="যেমন: স্যামসাং গ্যালাক্সি A55 5G, 8GB/256GB">
             </label>
-            <div class="grid2">
+            <div class="grid3 price-row">
               <label id="basicPriceWrap"><span class="req">Price</span><span class="taka"><input id="fPrice" type="number" min="1" step="1" inputmode="numeric" placeholder="0"></span></label>
+              <label id="basicSaleWrap">Sale price <span class="from">(optional)</span><span class="taka"><input id="fSale" type="number" min="1" step="1" inputmode="numeric" placeholder="Lower price"></span>
+                <span class="hint" id="saleHint"></span></label>
               <label id="basicStockWrap"><span class="req">Quantity in stock</span><input id="fStock" type="number" min="0" step="1" value="1" inputmode="numeric"></label>
             </div>
-            <p class="hint" id="basicVarNote" hidden style="margin:-4px 0 0">Price and stock are set for each version under More options → Variations.</p>
+            <div class="grid2" id="saleDates">
+              <label>Sale starts <span class="from">(optional)</span><input id="fSaleFrom" type="date"></label>
+              <label>Sale ends <span class="from">(optional)</span><input id="fSaleTo" type="date"></label>
+            </div>
+            <p class="hint" id="basicVarNote" hidden style="margin:-4px 0 0">Price and stock are set for each version under Product data → Variations.</p>
+            <div class="grid2 deal-row" id="dealRow">
+              <label class="check deal-box"><input id="fNegotiable" type="checkbox"> <span><b>Price is negotiable</b><span class="hint">Buyers see "Price negotiable" and can ask you for a better price.</span></span></label>
+              <div class="deal-box coupon-box"><span><b>🎟 Coupon</b><span class="hint" id="cpInfo">Coupons work for your whole shop. Buyers type the code in the cart.</span></span>
+                <button type="button" class="ghost" id="addCouponBtn">+ Add coupon</button></div>
+            </div>
             <label>Description <span class="from">(optional)</span>
               <textarea id="fDesc" maxlength="5000" style="min-height:140px" placeholder="Features, what's in the box, size guide, condition notes…"></textarea>
               <span class="hint" id="descCount">0 / 5000</span>
@@ -753,47 +817,23 @@
           </div>
 
           <!-- Photos -->
-          <div class="card">
-            <h2>Photos</h2>
-            <p class="hint" style="margin:0">JPG, PNG or WebP. Large photos are resized automatically. Use a clean, bright background.</p>
-            <div class="photo-layout">
-              <div class="photo-col">
-                <span class="lbl"><span class="req">Main image</span></span>
-                <span class="hint">The photo shoppers see first in search and on the product page. Square works best.</span>
-                <div class="main-slot" id="mainPhoto"></div>
-              </div>
-              <div class="photo-col">
-                <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span class="lbl">Gallery images</span><span class="hint" id="photoCount">0 / 7</span></div>
-                <span class="hint">Up to 7 more: other angles, close-ups, size, what's in the box.</span>
-                <div class="photos" id="photos"></div>
-              </div>
-            </div>
+          <div class="card sec sec-photos">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><h2>Photos</h2><span class="hint" id="photoCount">0 / 8</span></div>
+            <p class="hint" style="margin:0">Add up to 8 photos at once. The <b>first photo is the main one</b> shoppers see first (press <b>Make main</b> on any photo to change it). JPG, PNG or WebP; they are made smaller and saved as WebP automatically. Square, bright photos work best.</p>
+            <div class="photos" id="photos"></div>
             <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple hidden>
             <input type="file" id="mainInput" accept="image/jpeg,image/png,image/webp" hidden>
           </div>
 
-          <button type="button" class="more-toggle" id="moreBtn" aria-expanded="false" aria-controls="moreOptions">
-            <span><b>More options</b><span class="hint">Sale price, versions (size/colour), digital files, services, gift cards, wholesale, pre-order, shipping and more</span></span>
-            <span class="chev" aria-hidden="true">▾</span>
-          </button>
-          <div id="moreOptions" hidden style="display:grid;gap:18px">
-          <div class="card">
-            <h2>Extra details</h2>
-            <label>Short description
-              <textarea id="fShort" maxlength="600" style="min-height:64px" placeholder="1–3 lines shown next to the photos"></textarea>
-            </label>
-            <div class="grid2">
-              <label>Tags
-                <input id="fTags" type="text" placeholder="gaming, rgb, wireless">
-                <span class="hint">Separate with commas. Helps shoppers find it in search.</span>
-              </label>
-              <label>Video link (optional)
-                <input id="fVideo" type="url" placeholder="https://youtube.com/…">
-              </label>
-            </div>
+          <!-- Category details: brand, model… (not versions) -->
+          <div class="card sec sec-details" id="detailsCard">
+            <h2>Product details</h2>
+            <p class="hint" style="margin:0" id="detailsHint">Choose a category first.</p>
+            <div class="attr-grid" id="attrFields"></div>
           </div>
+
           <!-- Product data (WooCommerce-style tabs) -->
-          <div class="card">
+          <div class="card sec sec-data">
             <h2>Product data</h2>
             <div class="choice">
               <span class="lbl">Product type</span>
@@ -823,12 +863,7 @@
               <p class="hint" id="freeNote" hidden style="margin:0">Free items are listed at ৳0. Buyers only pay for delivery, unless you offer free delivery.</p>
               <p class="hint" id="varPriceNote" hidden style="margin:0">Each variation has its own price. Set them on the Variations tab.</p>
               <div class="grid2" id="priceFields">
-                <label>Sale price<span class="taka"><input id="fSale" type="number" min="1" step="1" inputmode="numeric" placeholder="Optional"></span>
-                  <span class="hint" id="saleHint"></span></label>
-              </div>
-              <div class="grid2" id="saleDates">
-                <label>Sale starts <input id="fSaleFrom" type="date"></label>
-                <label>Sale ends <input id="fSaleTo" type="date"></label>
+                <label>Sale price <span class="from">(the same as in Basic information)</span><span class="taka"><input id="fSaleMirror" type="number" min="1" step="1" inputmode="numeric" placeholder="Optional"></span></label>
               </div>
               <div class="sub-block" id="giftBlock" hidden>
                 <span class="lbl">Gift card</span>
@@ -874,7 +909,7 @@
             </div>
 
             <div data-panel="variations" style="display:grid;gap:14px" hidden>
-              <p class="hint" style="margin:0" id="varIntro">Choose what changes between versions (for example Colour and Storage), tick the options you sell, then create the combinations.</p>
+              <p class="hint" style="margin:0" id="varIntro">Choose what changes between versions (for example Colour and Storage), tick the options you sell, then create the combinations. <b>Missing an option</b> (a size, colour or storage)? Send RGBKart a message and we add it for everyone.</p>
               <div id="varAttrs" style="display:grid;gap:10px"></div>
               <div class="toolbar"><button type="button" class="ghost" id="genVars">Create combinations</button><span class="hint" id="varCount"></span></div>
               <div class="bulk" id="bulkBar" hidden>
@@ -958,12 +993,20 @@
             </div>
           </div>
 
-          </div>
-          <!-- Category attributes (hidden: kept only so Condition is saved) -->
-          <div class="card" id="detailsCard" hidden>
-            <h2>Product details</h2>
-            <p class="hint" style="margin:0" id="detailsHint">Choose a category first.</p>
-            <div class="attr-grid" id="attrFields"></div>
+          <div class="card sec sec-extra">
+            <h2>Extra details</h2>
+            <label>Short description
+              <textarea id="fShort" maxlength="600" style="min-height:64px" placeholder="1–3 lines shown next to the photos"></textarea>
+            </label>
+            <div class="grid2">
+              <label>Tags
+                <input id="fTags" type="text" placeholder="gaming, rgb, wireless">
+                <span class="hint">Separate with commas. Helps shoppers find it in search.</span>
+              </label>
+              <label>Video link (optional)
+                <input id="fVideo" type="url" placeholder="https://youtube.com/…">
+              </label>
+            </div>
           </div>
         </div>
 
@@ -1768,7 +1811,7 @@
     const box = $('adSpaces'); box.innerHTML = '';
     if (!adRatesS.length) box.append(h('p', { class: 'pmeta', text: 'No ad spaces are open right now.' }));
     adRatesS.forEach(x => box.append(h('button', { type: 'button', class: 'adsp-o', 'aria-pressed': String(x.placement === sadPlace), onclick: () => { sadPlace = x.placement; loadSellerAdsDraw(); } },
-      h('b', { text: x.name }), h('span', { text: x.description || '' }), h('em', { text: `${money(x.price_per_day)} per day` + (x.min_days > 1 ? ` · at least ${x.min_days} days` : '') }))));
+      h('b', { text: x.name }), h('span', { text: (x.description || '') + (x.size_hint ? ' · ' + x.size_hint : '') }), h('em', { text: `${money(x.price_per_day)} per day` + (x.min_days > 1 ? ` · at least ${x.min_days} days` : '') }))));
     if (!$('sadStart').value) $('sadStart').value = dhakaDay();
     $('sadStart').min = dhakaDay();
     const ls = $('sadLink'); const keep = ls.value; ls.innerHTML = '';
@@ -1846,7 +1889,11 @@
     const start = $('sadStart').value || dhakaDay();
     $('sadSum').innerHTML = '';
     $('sadSum').append(h('span', { text: `${r.name} · ${dmy(start)} to ${dmy(plusDays(start, days - 1))}` }), h('b', { text: `${money(r.price_per_day)} × ${days} days = ${money(r.price_per_day * days)}` }));
+    $('sadSize').textContent = r.size_hint ? '· size ' + r.size_hint : '';
+    $('sadPicNote').textContent = r.kind === 'popup' ? 'Pop-ups need a picture. Design it outside (text, prices, logo), then upload it. Visitors close it with ✕.' : 'Design the banner (text, prices, logo) outside, then upload it. It is shown exactly as it is.';
+    $('sadTextBox').hidden = !!sadBlob || r.kind === 'popup';
     $('sadPreview').innerHTML = '';
+    if (sadBlob) { $('sadPreview').append(h('img', { src: URL.createObjectURL(sadBlob), alt: '', style: 'width:100%;max-height:240px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:var(--bg)' })); return; }
     $('sadPreview').append(adBannerS({ title: $('sadTitle').value.trim(), subtitle: $('sadSub').value.trim(), cta: $('sadCta').value.trim(), color: $('sadColor').value }, sadBlob && URL.createObjectURL(sadBlob)));
   }
   ['sadDays', 'sadStart', 'sadTitle', 'sadSub', 'sadCta'].forEach(id => $(id).addEventListener('input', loadSellerAdsDraw));
@@ -1858,7 +1905,7 @@
     if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return toast('Use a JPG, PNG or WebP picture.');
     const img = new Image();
     img.onload = () => {
-      const k = Math.min(1, 1400 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
       const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(img.src);
       c.toBlob(b => { if (!b) return toast('Couldn\'t read that picture.'); sadBlob = b; $('sadImgName').textContent = f.name; $('sadImgClear').hidden = false; loadSellerAdsDraw(); }, 'image/webp', .85);
     };
@@ -1871,7 +1918,8 @@
     const days = Math.round(Number($('sadDays').value));
     if (!r) return msg('Choose an ad space.');
     if (!(days >= r.min_days && days <= 90)) return msg(`Choose between ${r.min_days} and 90 days.`);
-    if ($('sadTitle').value.trim().length < 2) { $('sadTitle').focus(); return msg('Write a headline.'); }
+    if ($('sadTitle').value.trim().length < 2) { $('sadTitle').focus(); return msg('Write a name for the ad.'); }
+    if (r.kind === 'popup' && !sadBlob) return msg('Pop-ups need a picture.');
     if (!$('sadStart').value || $('sadStart').value < dhakaDay()) return msg('Choose a start date from today.');
     $('sadBook').disabled = true; $('sadBook').textContent = 'Booking…';
     try {
@@ -1917,7 +1965,7 @@
       stock_status: 'in_stock', sold_individually: false, weight_kg: '', length_cm: '', width_cm: '', height_cm: '', shipping_class: 'standard',
       delivery_time: '1_2_days', ships_to: 'all_bangladesh', free_delivery: false, purchase_note: '', return_policy: '7_days', status: 'draft', review_note: null,
       is_downloadable: false, download_limit: null, download_expiry_days: null, is_service: false, service_mode: null, service_duration: null,
-      is_gift_card: false, gift_card_validity_days: 365, is_preorder: false, preorder_date: null, preorder_advance_percent: 0, cod_allowed: true };
+      price_negotiable: false, is_gift_card: false, gift_card_validity_days: 365, is_preorder: false, preorder_date: null, preorder_advance_percent: 0, cod_allowed: true };
   }
   const toDateInput = iso => iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }) : '';
   const fromDateInput = (v, end) => v ? new Date(`${v}T${end ? '23:59:59' : '00:00:00'}+06:00`).toISOString() : null;
@@ -1996,6 +2044,7 @@
     $('fSku').value = p.sku || ''; $('fManage').checked = p.manage_stock; $('fStock').value = p.stock ?? 0;
     $('fLow').value = p.low_stock_threshold ?? ''; $('fBackorders').value = p.backorders; $('fStockStatus').value = p.stock_status;
     $('fSoldInd').checked = p.sold_individually;
+    $('fNegotiable').checked = !!p.price_negotiable; $('fSaleMirror').value = $('fSale').value; saleHint(); drawCouponInfo();
     // Featured products: title, product code and quantity are locked (the database enforces it too, 0040)
     const featLock = !!(p.id && p.is_featured);
     ['fTitle', 'fTitleBn', 'fSku', 'fStock'].forEach(id => { const el = $(id); if (el) { el.disabled = featLock; el.title = featLock ? 'Locked while this product is Featured' : ''; } });
@@ -2016,6 +2065,7 @@
     $('fDlLimit').value = p.download_limit ? String(p.download_limit) : ''; $('fDlExpiry').value = p.download_expiry_days ? String(p.download_expiry_days) : '';
     $('fSvcMode').value = p.service_mode || ''; $('fSvcDur').value = p.service_duration || ''; $('fSvcArea').value = p.ships_to || 'all_bangladesh';
     $('fPreDate').min = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
+    ['fSaleFrom', 'fSaleTo', 'fPreDate'].forEach(id => $(id)._drawCal && $(id)._drawCal());
     drawTiers(); drawFiles();
     selectTab('pricing');
     setMore(!!p.id && (currentKind() !== 'simple' || !!p.sale_price || tiers.length > 0 || p.is_preorder || p.cod_allowed === false || !!p.short_description || (p.tags || []).length > 0 || !!p.video_url || links.upsell.size + links.cross_sell.size > 0));
@@ -2034,8 +2084,7 @@
   // ---------- listing type / product type ----------
   $('typeCards').querySelectorAll('.type-card').forEach(b => b.onclick = () => { editing.listing_type = b.dataset.type; syncType(); syncCondition(); drawSummary(); dirty = true; });
   $('listCards').querySelectorAll('.type-card').forEach(b => b.onclick = () => { wantFeatured = b.dataset.list === 'featured'; syncFeat(); drawSummary(); dirty = true; });
-  function setMore(open) { $('moreOptions').hidden = !open; $('moreBtn').setAttribute('aria-expanded', String(open)); }
-  $('moreBtn').onclick = () => setMore($('moreOptions').hidden);
+  function setMore() {}   // all sections are always shown now (owner, 29 Oct 2026)
 
   // One product type at a time: Simple, Variable, Downloadable, Service or Gift card
   function currentKind() {
@@ -2069,6 +2118,7 @@
     $('manageWrap').hidden = variable; $('stockFields').hidden = variable || !$('fManage').checked; $('stockStatusWrap').hidden = variable || $('fManage').checked;
     $('varStockNote').hidden = !variable;
     $('basicPriceWrap').hidden = variable;
+    $('basicSaleWrap').hidden = free || variable;
     $('basicStockWrap').hidden = variable || !$('fManage').checked;
     $('basicVarNote').hidden = !variable;
     const kind = currentKind();
@@ -2153,7 +2203,30 @@
   FIELDS.forEach(id => $(id).addEventListener('input', () => { dirty = true; if (['fTitle', 'fPrice', 'fSale', 'fStock'].includes(id)) drawSummary(); }));
   $('fDesc').addEventListener('input', syncDesc);
   function syncDesc() { $('descCount').textContent = `${$('fDesc').value.length} / 5000`; }
-  $('fSale').addEventListener('input', saleHint); $('fPrice').addEventListener('input', saleHint);
+  $('fSale').addEventListener('input', () => { $('fSaleMirror').value = $('fSale').value; saleHint(); });
+  $('fSaleMirror').addEventListener('input', () => { $('fSale').value = $('fSaleMirror').value; $('fSale').dispatchEvent(new Event('input')); });
+  $('fPrice').addEventListener('input', saleHint);
+  $('fNegotiable').addEventListener('change', () => { dirty = true; });
+  // coupons belong to the whole shop: show how many are on, open the Coupons page in a new tab
+  async function drawCouponInfo() {
+    try {
+      const r = await db.from('shop_coupons').select('code, is_active, ends_at').eq('seller_id', me.id).eq('is_active', true);
+      const on = (r.data || []).filter(c => !c.ends_at || new Date(c.ends_at) > new Date());
+      $('cpInfo').textContent = on.length ? `On now: ${on.slice(0, 3).map(c => c.code).join(', ')}${on.length > 3 ? ' …' : ''}. Coupons work for your whole shop; buyers type the code in the cart.`
+                                          : 'No coupon yet. Coupons work for your whole shop; buyers type the code in the cart.';
+    } catch (_) {}
+  }
+  $('addCouponBtn').onclick = () => window.open('seller.html#coupons', '_blank', 'noopener');
+  // big calendar badge next to each date: shows the chosen day number, opens the calendar when pressed
+  function calBadge(inp) {
+    const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const m = h('i'), d = h('b');
+    const badge = h('button', { type: 'button', class: 'cal-badge', 'aria-label': 'Open calendar', onclick: () => { try { inp.showPicker(); } catch (_) { inp.focus(); } } }, m, d);
+    const wrap = h('span', { class: 'date-wrap' }); inp.replaceWith(wrap); wrap.append(badge, inp);
+    const draw = () => { const v = inp.value; m.textContent = v ? MON[Number(v.slice(5, 7)) - 1] : 'Date'; d.textContent = v ? String(Number(v.slice(8, 10))) : '–'; badge.classList.toggle('set', !!v); };
+    inp.addEventListener('input', draw); inp.addEventListener('change', draw); inp._drawCal = draw; draw();
+  }
+  ['fSaleFrom', 'fSaleTo', 'fPreDate'].forEach(id => calBadge($(id)));
   function saleHint() {
     const p = Number($('fPrice').value), s = Number($('fSale').value);
     $('saleHint').textContent = p && s ? (s < p ? `${Math.round((1 - s / p) * 100)}% off` : 'Must be lower than the regular price') : '';
@@ -2162,7 +2235,7 @@
 
   // ---------- photos ----------
   function photoTile(ph, i, isMain) {
-    const tile = h('div', { class: 'photo' },
+    const tile = h('div', { class: 'photo' + (isMain ? ' main' : '') },
       h('img', { src: ph.url, alt: isMain ? 'Main image' : `Gallery image ${i}` }),
       isMain && h('span', { class: 'main-tag', text: 'Main' }),
       !ph.id && h('span', { class: 'new-tag', text: 'New' }));
@@ -2171,7 +2244,7 @@
       bar.append(h('button', { type: 'button', text: 'Change', onclick: () => $('mainInput').click() }),
                  h('button', { type: 'button', text: '✕', 'aria-label': 'Remove main image', onclick: () => removePhoto(0) }));
     } else {
-      bar.append(h('button', { type: 'button', text: '←', 'aria-label': 'Move left', disabled: i === 1, onclick: () => { [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]]; drawPhotos(); dirty = true; } }),
+      bar.append(h('button', { type: 'button', text: '←', 'aria-label': 'Move left', disabled: i <= 1, onclick: () => { [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]]; drawPhotos(); dirty = true; } }),
                  h('button', { type: 'button', text: 'Make main', onclick: () => { [photos[0], photos[i]] = [photos[i], photos[0]]; drawPhotos(); drawVarRows(); dirty = true; } }),
                  h('button', { type: 'button', text: '✕', 'aria-label': `Remove gallery image ${i}`, onclick: () => removePhoto(i) }));
     }
@@ -2190,13 +2263,10 @@
   function removePhoto(i) { const [r] = photos.splice(i, 1); if (r.id) removedPhotos.push(r); drawPhotos(); drawVarRows(); dirty = true; }
 
   function drawPhotos() {
-    const main = $('mainPhoto'); main.innerHTML = '';
-    main.append(photos[0] ? photoTile(photos[0], 0, true) : dropZone('Add main image', fl => setMain(fl), () => $('mainInput').click()));
     const box = $('photos'); box.innerHTML = '';
-    photos.slice(1).forEach((ph, k) => box.append(photoTile(ph, k + 1, false)));
-    const gallery = Math.max(0, photos.length - 1);
-    if (gallery < MAX_GALLERY) box.append(dropZone(gallery ? 'Add more' : 'Add gallery images', fl => addFiles(fl), () => $('fileInput').click()));
-    $('photoCount').textContent = `${gallery} / ${MAX_GALLERY}`;
+    photos.forEach((ph, k) => box.append(photoTile(ph, k, k === 0)));
+    if (photos.length < MAX_PHOTOS) box.append(dropZone(photos.length ? 'Add more photos' : 'Add photos', fl => addFiles(fl), () => $('fileInput').click()));
+    $('photoCount').textContent = `${photos.length} / ${MAX_PHOTOS}`;
     drawSummary();
   }
   $('mainInput').onchange = () => { setMain($('mainInput').files); $('mainInput').value = ''; };
@@ -2217,7 +2287,7 @@
     const files = [...list].filter(f => /^image\/(jpeg|png|webp)$/.test(f.type));
     if (files.length < list.length) toast('Only JPG, PNG and WebP photos can be added.');
     for (const f of files) {
-      if (photos.length >= MAX_PHOTOS) { toast(`The gallery holds up to ${MAX_GALLERY} images.`); break; }
+      if (photos.length >= MAX_PHOTOS) { toast(`Up to ${MAX_PHOTOS} photos.`); break; }
       try {
         const blob = await shrink(f);
         photos.push({ blob, url: URL.createObjectURL(blob) });
@@ -2263,7 +2333,7 @@
     if (!editing.category_id) { $('detailsHint').hidden = false; $('detailsHint').textContent = 'Choose a category first.'; return; }
     const list = effectiveAttrs(editing.category_id).filter(x => !(isVariable() && varAttrIds.includes(x.attr.id)));
     $('detailsHint').hidden = false;
-    $('detailsHint').textContent = list.length ? 'Pick from the lists. Fields marked * are required before you can send for review.' : 'This category has no extra details.';
+    $('detailsHint').textContent = list.length ? 'Brand, model and other details shoppers filter by. They don\'t make versions (versions are under Product data → Variations). Fields marked * are needed before you send for review.' : 'This category has no extra details.';
     const cond = attrs.find(a => a.name === 'Condition');
     for (const { attr: a, required, from } of list) {
       const id = 'attr-' + a.id;
@@ -2443,7 +2513,7 @@
       ['Type', { simple: 'Simple', variable: 'Variable', downloadable: 'Downloadable', service: 'Service', gift: 'Gift card' }[currentKind()] + ($('fPre').checked && !$('preBlock').hidden ? ' · Pre-order' : '')],
       ['Category', editing.category_id ? catPath(editing.category_id) : 'Not chosen'],
       ['Price', price],
-      ['Photos', photos.length ? `Main + ${photos.length - 1} in gallery` : 'No main image yet'],
+      ['Photos', photos.length ? `${photos.length} (first is the main photo)` : 'No photos yet'],
       isVariable() && ['Versions', `${variations.filter(v => v.is_active).length} on sale`],
     ].filter(Boolean);
     rows.forEach(([k, v]) => box.append(h('div', { style: 'display:flex;justify-content:space-between;gap:10px' }, h('span', { class: 'muted', text: k }), h('b', { text: v, style: 'text-align:right;overflow-wrap:anywhere;font-weight:600' }))));
@@ -2460,7 +2530,7 @@
       category_id: editing.category_id, title: $('fTitle').value.trim(), title_bn: $('fTitleBn').value.trim() || null, description_bn: $('fDescBn').value.trim() || null, listing_type: editing.listing_type, product_type: variable ? 'variable' : 'simple',
       short_description: $('fShort').value.trim() || null, description: $('fDesc').value.trim() || null,
       tags: $('fTags').value.split(',').map(t => t.trim()).filter(Boolean).slice(0, 20), video_url: $('fVideo').value.trim() || null,
-      sku: $('fSku').value.trim() || null, sold_individually: $('fSoldInd').checked,
+      sku: $('fSku').value.trim() || null, sold_individually: $('fSoldInd').checked, price_negotiable: $('fNegotiable').checked,
       weight_kg: num('fWeight') || null, length_cm: num('fLen') || null, width_cm: num('fWid') || null, height_cm: num('fHei') || null,
       shipping_class: $('fShipClass').value, delivery_time: $('fDelivery').value, ships_to: $('fShipsTo').value, free_delivery: $('fFreeDel').checked,
       return_policy: $('fReturn').value, purchase_note: $('fNote').value.trim() || null,
@@ -2518,7 +2588,7 @@
     if (forReview && row.is_downloadable && !downloads.length) errs.push('Upload the file buyers will download (Downloads tab).');
     if (forReview && row.is_service && !row.service_mode) errs.push('Choose where the service happens (Service tab).');
     if (forReview) {
-      if (!photos.length) errs.push('Add a main image.');
+      if (!photos.length) errs.push('Add at least one photo.');
       if (!$('fAgree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and RGBKart\'s seller rules.'); $('agreeWrap').classList.add('need'); }
     }
     return errs;
@@ -2530,6 +2600,7 @@
     const errs = validate(row, forReview);
     if (errs.length) return setMsg(errs.join(' '));
     $('saveBtn').disabled = $('submitBtn').disabled = true;
+    const wasNew = !editing.id;
     try {
       // 1. product
       const res = editing.id ? await db.from('products').update(row).eq('id', editing.id).select().single()
@@ -2641,8 +2712,14 @@
       }
       dirty = false;
       await loadProducts();
-      await openEditor(id);
-      toast(forReview ? 'Sent for review. We usually check within 24 hours.' : 'Saved');
+      if (wasNew || forReview) {   // owner, 29 Oct 2026: after saving, start a fresh form for the next product
+        await openEditor(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        toast(forReview ? 'Sent for review (we usually check within 24 hours). Add your next product, or find this one in My products.' : 'Saved as draft. Add your next product, or find this one in My products.');
+      } else {
+        await openEditor(id);
+        toast('Saved');
+      }
     } catch (e) {
       setMsg(friendly(e));
     } finally {
@@ -2810,7 +2887,7 @@
     return b;
   }
   let toastTimer;
-  function toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3200); }
+  function toast(text) { const t = $('toast'); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, Math.max(3200, text.length * 55)); }
   function friendly(error) {
     const m = (error && (error.message || error.error || String(error))) || 'Something went wrong.';
     if (/products_options_rules/.test(m)) return 'Some option values aren\'t allowed. Check the pre-order date, gift card and download settings.';

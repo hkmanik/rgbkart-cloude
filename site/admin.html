@@ -1091,6 +1091,7 @@
 
 <script src="xlsx-lite.js?v=1"></script>
 <script src="session.js?v=1"></script>
+<script src="captcha.js?v=1"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
@@ -1200,19 +1201,19 @@
     try {
       if (mode === 'forgot') {
         if (needsServer()) return;
-        const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: RETURN_URL });
+        const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: RETURN_URL, captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) });
         if (error) return setMsg('loginMsg', error.message, true);
         return setMsg('loginMsg', 'If that email has an account, a reset link is on its way.');
       }
       if (mode === 'invited') {
         if (password.length < 8) return setMsg('loginMsg', 'Use at least 8 characters for the password.', true);
         if (password !== $('password2').value) { setMsg('loginMsg', 'The two passwords don\'t match. Type the same password in both boxes.', true); $('password2').focus(); return; }
-        const { data, error } = await db.auth.signUp({ email, password, options: isFile ? {} : { emailRedirectTo: RETURN_URL } });
+        const { data, error } = await db.auth.signUp({ email, password, options: isFile ? { captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) } : { emailRedirectTo: RETURN_URL, captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) } });
         if (error) return setMsg('loginMsg', error.message, true);
         if (!data.session) setMsg('loginMsg', 'Account created. Confirm your email using the link we sent, then sign in here.');
         return;
       }
-      const { error } = await db.auth.signInWithPassword({ email, password });
+      const { error } = await db.auth.signInWithPassword({ email, password, options: { captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) } });
       if (error) setMsg('loginMsg', error.message, true);
     } finally { $('loginBtn').disabled = false; }
   };

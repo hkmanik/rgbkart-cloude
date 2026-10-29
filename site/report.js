@@ -66,7 +66,7 @@
       send.disabled = true;
       try {
         const { data: { session } } = await db.auth.getSession();
-        if (!session) { const a = await db.auth.signInAnonymously(); if (a.error) throw a.error; }
+        if (!session) { const a = await db.auth.signInAnonymously({ options: { captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) } }); if (a.error) throw a.error; }
         const { error } = await db.rpc('submit_report', { p_product: opt.product || null, p_seller: opt.product ? null : opt.shop, p_reason: r.value, p_details: details.value.trim() || null, p_contact: contact.value.trim() || null });
         if (error) throw error;
         box.innerHTML = '';

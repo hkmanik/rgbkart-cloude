@@ -223,7 +223,8 @@
   .more-toggle[aria-expanded="true"] { border-style: solid; border-color: var(--accent); background: var(--accent-soft); }
   .more-toggle .chev { font-size: 1.1rem; color: var(--muted); transition: transform .15s; }
   .more-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
-  .ptypes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .ptypes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .ptype[hidden] { display: none; }
   @media (max-width: 1250px) { .ptypes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 560px) { .ptypes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .ptype { text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; font-weight: 500; white-space: normal; }
@@ -2058,6 +2059,9 @@
     $('fProductType').value = p.product_type;
     $('kDownload').checked = !!p.is_downloadable; $('kService').checked = !!p.is_service; $('kGift').checked = !!p.is_gift_card;
     $('fProductType').value = currentKind() === 'variable' ? 'variable' : 'simple';
+    // Downloadable and Gift card are hidden until buyers can order them (owner, 29 Oct 2026); old products of that kind still show theirs
+    $('ptypes').querySelector('[data-kind=downloadable]').hidden = !p.is_downloadable;
+    $('ptypes').querySelector('[data-kind=gift]').hidden = !p.is_gift_card;
     $('fGiftValid').value = String(p.gift_card_validity_days || 365);
     $('fCod').checked = p.cod_allowed !== false;
     $('fAgree').checked = !!p.rules_accepted_at; $('agreeWrap').classList.remove('need');

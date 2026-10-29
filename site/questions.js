@@ -105,7 +105,7 @@
         btn.disabled = true;
         try {
           const { data: { session } } = await db.auth.getSession();
-          if (!session) { const a = await db.auth.signInAnonymously(); if (a.error) throw a.error; }
+          if (!session) { const a = await db.auth.signInAnonymously({ options: { captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) } }); if (a.error) throw a.error; }
           const { error } = await db.rpc('ask_question', { p_product: P.id, p_question: q });
           if (error) throw error;
           ta.value = '';

@@ -227,10 +227,11 @@
 </main>
 
 <script src="session.js?v=1"></script>
+<script src="captcha.js?v=1"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=29"></script>
+<script src="i18n.js?v=30"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -467,13 +468,13 @@
     try {
       if (mode === 'forgot') {
         if (needsServer()) return;
-        const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: RETURN_URL });
+        const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: RETURN_URL, captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) });
         if (error) return setMsg('authMsg', error.message, true);
         return setMsg('authMsg', 'If that email has an account, a reset link is on its way. Open it on this device.');
       }
 
       if (mode === 'signin') {
-        const { error } = await db.auth.signInWithPassword({ email, password });
+        const { error } = await db.auth.signInWithPassword({ email, password, options: { captchaToken: (window.RGBCaptcha ? await RGBCaptcha.token() : undefined) } });
         if (error) setMsg('authMsg', error.message, true);
         return;
       }
@@ -490,6 +491,7 @@
       if (meta.whatsapp) meta.whatsapp = RGBPhone.clean(meta.whatsapp);
       const options = { data: meta };
       if (!isFile) options.emailRedirectTo = RETURN_URL;
+      options.captchaToken = (window.RGBCaptcha ? await RGBCaptcha.token() : undefined);
       const { data, error } = await db.auth.signUp({ email, password, options });
       if (error) return setMsg('authMsg', error.message, true);
       if (!data.session) {

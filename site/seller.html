@@ -440,6 +440,9 @@
   .price-seg button[aria-pressed="true"] { background: #1f9d55; color: #fff; }
   .price-seg button + button { border-left: 1.5px solid var(--line); }
   .attr-one { align-content: start; }
+  .draft-note { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; border: 2px solid #2f6fdb; background: color-mix(in srgb, #2f6fdb 8%, var(--surface)); font-weight: 600; }
+  .draft-note span { flex: 1; min-width: 220px; }
+  #autoSaved { color: var(--accent); }
   .brand-add { display: flex; gap: 8px; flex-wrap: wrap; } .brand-add input { flex: 1; min-width: 160px; }
   .lbl-note { font-weight: 600; color: #7c4dcc; display: inline; }
   #optBlock > .lbl, #freeBlock > .lbl { display: block; }
@@ -792,6 +795,8 @@
         <span class="chip draft" id="edStatus">Draft</span>
       </div>
       <div class="banner bad" id="edRejected" hidden style="margin-top:12px"></div>
+      <div class="draft-note" id="draftNote" hidden role="status"><span id="draftText"></span>
+        <button type="button" class="primary" id="draftRestore">Restore it</button><button type="button" class="ghost" id="draftDiscard">Discard</button></div>
 
       <div class="editor" style="margin-top:16px">
         <div class="editor-main">
@@ -1080,6 +1085,7 @@
       <div class="actionbar" id="actionbar">
         <span class="chip draft" id="barStatus">Draft</span>
         <span class="hint" id="barHint"></span>
+        <span class="hint" id="autoSaved" aria-live="polite"></span>
         <span class="spacer"></span>
         <label class="check agree-bar" id="agreeWrap"><input type="checkbox" id="fAgree"> <span>I confirm this product is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and <a href="page.html?p=seller-rules" target="_blank">RGBKart's seller rules</a>.</span></label>
         <button type="button" class="ghost" id="saveBtn">Save draft</button>
@@ -2082,6 +2088,8 @@
     go('editor');
     if (errorText) setMsg(errorText);
     dirty = false;
+    $('autoSaved').textContent = '';
+    offerDraft();
   }
 
   function fillForm() {
@@ -2866,6 +2874,7 @@
         if (s.error) { await loadProducts(); await openEditor(id, friendly(s.error)); toast('Saved as draft'); return; }
       }
       dirty = false;
+      clearDraft(`rgbkart-draft-${me.id}-${wasNew ? 'new' : id}`); clearDraft(`rgbkart-draft-${me.id}-${id}`);
       await loadProducts();
       if (wasNew || forReview) {   // owner, 29 Oct 2026: after saving, start a fresh form for the next product
         await openEditor(null);
@@ -2882,7 +2891,67 @@
     }
   }
 
-  window.addEventListener('beforeunload', e => { if (dirty && !$('editor').hidden) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', e => { if (dirty && !$('editor').hidden) { saveDraft(); e.preventDefault(); e.returnValue = ''; } });
+
+  // ===================== Auto-save (owner, 29 Oct 2026) =====================
+  // While a product is being added or edited, a copy is kept on this device every few seconds (text and choices in
+  // localStorage, new photos in IndexedDB). If the page closes, the browser crashes or the shop is signed out, opening the
+  // same product again (or "Add product") offers to restore it. Saving or sending for review clears the copy.
+  const draftKey = () => me && editing ? `rgbkart-draft-${me.id}-${editing.id || 'new'}` : null;
+  const IDB = { db: null,
+    open() { if (this.db) return Promise.resolve(this.db); return new Promise((res, rej) => { try { const r = indexedDB.open('rgbkart-drafts', 1); r.onupgradeneeded = () => r.result.createObjectStore('photos'); r.onsuccess = () => res(this.db = r.result); r.onerror = () => rej(r.error); } catch (e) { rej(e); } }); },
+    async put(k, v) { try { const d = await this.open(); await new Promise((res, rej) => { const t = d.transaction('photos', 'readwrite'); t.objectStore('photos').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (_) {} },
+    async get(k) { try { const d = await this.open(); return await new Promise((res, rej) => { const q = d.transaction('photos').objectStore('photos').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); } catch (_) { return null; } },
+    async del(k) { try { const d = await this.open(); d.transaction('photos', 'readwrite').objectStore('photos').delete(k); } catch (_) {} },
+  };
+  const editorFields = () => [...document.querySelectorAll('#editor input[id], #editor select[id], #editor textarea[id]')].filter(el => el.type !== 'file' && /^f[A-Z]/.test(el.id));
+  let lastPhotoSig = '';
+  function saveDraft() {
+    const key = draftKey(); if (!key || $('editor').hidden || !dirty) return;
+    const snap = { v: 1, at: Date.now(), id: editing.id, title: $('fTitle').value.trim(), listing_type: editing.listing_type, category_id: editing.category_id, kind: currentKind(),
+      wantFeatured, planId, fields: Object.fromEntries(editorFields().map(el => [el.id, el.type === 'checkbox' ? el.checked : el.value])),
+      values: [...values].map(([k, v]) => [k, v instanceof Set ? { set: [...v] } : v]), varAttrIds, choiceIds, choicePhotos,
+      varPicked: [...varPicked].map(([k, v]) => [k, [...v]]), variations, tiers };
+    try { localStorage.setItem(key, JSON.stringify(snap)); } catch (_) { return; }
+    const sig = photos.map(p => p.id || (p.blob && p.blob.size)).join(',');
+    if (sig !== lastPhotoSig) { lastPhotoSig = sig; IDB.put(key, photos.map(p => p.id ? { id: p.id, storage_path: p.storage_path } : { blob: p.blob })); }
+    $('autoSaved').textContent = '✓ Auto-saved on this device ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  function clearDraft(key) { if (!key) return; try { localStorage.removeItem(key); } catch (_) {} IDB.del(key); lastPhotoSig = ''; }
+  setInterval(saveDraft, 5000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveDraft(); });
+
+  function offerDraft() {
+    const key = draftKey(); let snap = null;
+    try { snap = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
+    $('draftNote').hidden = true;
+    if (!snap || Date.now() - snap.at > 30 * 864e5) return;
+    if (editing.id && editing.updated_at && new Date(editing.updated_at).getTime() > snap.at) { clearDraft(key); return; }   // saved later elsewhere
+    $('draftText').textContent = `📝 You have unsaved work${snap.title ? ' on "' + snap.title + '"' : ''} from ${new Date(snap.at).toLocaleString([], { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}.`;
+    $('draftNote').hidden = false;
+    $('draftRestore').onclick = () => restoreDraft(key, snap);
+    $('draftDiscard').onclick = () => { clearDraft(key); $('draftNote').hidden = true; toast('Unsaved work discarded.'); };
+  }
+  async function restoreDraft(key, snap) {
+    $('draftNote').hidden = true;
+    editing.listing_type = snap.listing_type || editing.listing_type;
+    editing.category_id = snap.category_id || null; $('fCategory').value = snap.category_id || '';
+    wantFeatured = !!snap.wantFeatured; if (snap.planId) planId = snap.planId;
+    values = new Map((snap.values || []).map(([k, v]) => [Number(k), v && v.set ? new Set(v.set) : v]));
+    varAttrIds = snap.varAttrIds || []; choiceIds = snap.choiceIds || []; choicePhotos = snap.choicePhotos || {};
+    varPicked = new Map((snap.varPicked || []).map(([k, v]) => [Number(k), new Set(v)]));
+    variations = snap.variations || []; tiers = snap.tiers || [];
+    setKind(snap.kind || 'simple');
+    for (const [id, v] of Object.entries(snap.fields || {})) { const el = $(id); if (!el || el.type === 'file') continue; if (el.type === 'checkbox') el.checked = !!v; else el.value = v; }
+    const saved = await IDB.get(key);
+    if (Array.isArray(saved) && saved.length) {
+      photos = saved.map(p => p.blob ? { blob: p.blob, url: URL.createObjectURL(p.blob) } : { id: p.id, storage_path: p.storage_path, url: photoUrl(p.storage_path) });
+    }
+    ['fSaleFrom', 'fSaleTo', 'fPreDate'].forEach(id => $(id)._drawCal && $(id)._drawCal());
+    syncType(); syncCondition(); drawPhotos(); drawAttrFields(); drawVarRows(); drawTiers(); syncFeat(); syncDesc(); saleHint(); drawSummary();
+    dirty = true; saveDraft();
+    toast('Restored. Check it, then Save draft or Send for review.');
+  }
 
   // ===================== Shop settings =====================
   const SHOP_BUCKET = 'shop-assets';

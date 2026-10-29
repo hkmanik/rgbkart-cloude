@@ -1130,6 +1130,7 @@
 
 <script src="xlsx-lite.js?v=1"></script>
 <script src="session.js?v=1"></script>
+<script src="thumbs.js?v=1"></script>
 <script src="captcha.js?v=2"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -2719,6 +2720,7 @@
             const ext = ph.blob.type === 'image/webp' ? 'webp' : 'jpg';
             const path = `admin/${myId}/p${p.id}-${Date.now()}-${i}.${ext}`;
             const up = await db.storage.from('product-images').upload(path, ph.blob, { contentType: ph.blob.type, cacheControl: '31536000' });
+        if (!up.error && window.RGBThumb) await RGBThumb.upload(db, 'product-images', path, ph.blob);
             if (up.error) throw up.error;
             ph.path = path;
           }
@@ -3582,6 +3584,7 @@
         const b = apPhotos[i].blob;
         const path = `admin/${myId}/${Date.now()}-${i}.${b.type === 'image/webp' ? 'webp' : 'jpg'}`;
         const up = await db.storage.from('product-images').upload(path, b, { contentType: b.type, cacheControl: '31536000' });
+        if (!up.error && window.RGBThumb) await RGBThumb.upload(db, 'product-images', path, b);
         if (up.error) throw up.error;
         paths.push(path);
       }

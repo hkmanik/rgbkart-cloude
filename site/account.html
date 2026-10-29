@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
-<link rel="stylesheet" href="shop.css?v=22">
-<link rel="stylesheet" href="order.css?v=4">
+<link rel="stylesheet" href="shop.css?v=23">
+<link rel="stylesheet" href="order.css?v=5">
 <style>
   /* My account: profile, quick links, saved addresses, recent orders, password */
   .acc { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
@@ -58,9 +58,9 @@
 
 <script src="session.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=34"></script>
+<script src="i18n.js?v=35"></script>
 <script src="sync.js?v=1"></script>
-<script src="shop.js?v=28"></script>
+<script src="shop.js?v=29"></script>
 <script src="menu.js?v=6"></script>
 <script src="cartlib.js?v=4"></script>
 <script>
@@ -154,7 +154,7 @@
 
     // password (email accounts only)
     if ((me.app_metadata && me.app_metadata.provider) === 'email' || !me.app_metadata || !me.app_metadata.provider) {
-      const pw = (id, label) => h('label', { class: 'pw-row' }, label, h('input', { id, type: 'password', minlength: 6, autocomplete: 'new-password' }),
+      const pw = (id, label) => h('label', { class: 'pw-row' }, label, h('input', { id, type: 'password', minlength: 8, autocomplete: 'new-password' }),
         h('button', { type: 'button', class: 'eye', 'aria-label': 'Show password', text: '👁', onclick: e => { const i = $(id); i.type = i.type === 'password' ? 'text' : 'password'; e.target.setAttribute('aria-label', i.type === 'password' ? 'Show password' : 'Hide password'); } }));
       const f = h('form', { class: 'form', hidden: true, onsubmit: changePw }, h('div', { class: 'two' }, pw('npw1', T('New password')), pw('npw2', T('Confirm new password'))),
         h('p', { class: 'err', id: 'pwErr', hidden: true }), h('div', {}, h('button', { type: 'submit', class: 'btn-sm solid', text: 'Save password' })));
@@ -227,7 +227,7 @@
   async function changePw(e) {
     e.preventDefault();
     const a = $('npw1').value, b = $('npw2').value, err = $('pwErr');
-    if (a.length < 6) { err.textContent = T('Use at least 6 characters for the password.'); err.hidden = false; return; }
+    if (a.length < 8) { err.textContent = T('Use at least 8 characters for the password.'); err.hidden = false; return; }
     if (a !== b) { err.textContent = T("The two passwords don't match. Type the same password in both boxes."); err.hidden = false; return; }
     const { error } = await db.auth.updateUser({ password: a });
     if (error) { err.textContent = error.message; err.hidden = false; return; }

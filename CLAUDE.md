@@ -82,3 +82,9 @@ Owner: hkmanik@gmail.com (the person). Master Admin account on the site since 23
 - Home sections per device (`0066_section_devices.sql`): home_sections.on_desktop/on_tablet/on_mobile (default true); Admin → Home page → Edit → "Show on" (💻/📟/📱, at least one), list chip "Only on: …"; index.html adds hide-d (≥1025px) / hide-t (641–1024) / hide-m (≤640) to the section's slot.
 - Testing locally: in the folder with the files, open a terminal and run `python -m http.server 5500`, then open `localhost:5500/index.html?v=N`.
 - Project plan spreadsheet: `docs/RGBKart_Project_Plan.xlsx`.
+
+## Audit Part A (29 Oct 2026)
+- Small photo copies: `site/thumbs.js` (RGBThumb). Every product-photo upload (seller, sell, admin) also saves a 480px WebP at `<photo path minus extension>-t.webp`; removals delete both. Cards (shop.js `thumbOf`) load the small copy and fall back to the full photo (older photos have no copy).
+- 0067_ads_admin_only.sql: only master_admin / co_admin can write `ads`; editors read only.
+- Passwords: minimum 8 in login.html / account.html (owner must also set 8 in Supabase Auth).
+- .htaccess: HSTS + Permissions-Policy. Contrast: --faint #667A71, footer #006B24, checkout steps muted.

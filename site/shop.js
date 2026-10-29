@@ -15,6 +15,7 @@ function h(tag, props, ...kids) {
 }
 const money = n => '৳' + N(Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 }));
 const imgUrl = path => db.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+const thumbOf = p => String(p || '').replace(/\.[A-Za-z0-9]+$/, '') + '-t.webp';   // small copy made at upload (thumbs.js)
 const CARD_FIELDS = 'id, title, title_bn, price, sale_price, sale_starts_at, sale_ends_at, product_type, listing_type, is_featured, price_negotiable, free_delivery, seller_id, category_id, published_at, rating_avg, rating_count, product_images(storage_path, sort_order), product_variations(price, sale_price, is_active)';
 const CART_KEY = 'rgbkart-cart', WISH_KEY = 'rgbkart-wishlist';
 const store = {
@@ -164,7 +165,7 @@ function card(p, shops) {
   heart.innerHTML = HEART_SVG;
   heart.onclick = e => { e.preventDefault(); e.stopPropagation(); const on = toggleWish(p.id); heart.setAttribute('aria-pressed', String(on)); heart.setAttribute('aria-label', T(on ? 'Remove from saved: {t}' : 'Save: {t}', { t: title })); toast(on ? 'Saved ♥' : 'Removed from saved'); };
   return h('a', { class: 'card', href: `product.html?id=${p.id}` },
-    h('div', { class: 'img' }, im ? h('img', { src: imgUrl(im.storage_path), alt: '', loading: 'lazy' }) : 'No photo',
+    h('div', { class: 'img' }, im ? h('img', { src: imgUrl(thumbOf(im.storage_path)), alt: '', loading: 'lazy', decoding: 'async', onerror: e => { const full = imgUrl(im.storage_path); if (e.target.src !== full) e.target.src = full; } }) : 'No photo',
       h('div', { class: 'labels' },
         p.is_featured && h('span', { class: 'lab feat', text: '★ Featured' }),
         p.listing_type === 'pre_owned' ? h('span', { class: 'lab used', text: 'Pre-owned' }) : h('span', { class: 'lab new', text: 'New' }),

@@ -1100,6 +1100,7 @@
 
 <script src="session.js?v=1"></script>
 <script src="phone.js?v=1"></script>
+<script src="thumbs.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
 <script src="pay.js?v=2"></script>
@@ -1654,7 +1655,7 @@
     const paths = (p.product_images || []).map(i => i.storage_path);
     const { error } = await db.from('products').delete().eq('id', p.id);
     if (error) return toast(friendly(error));
-    if (paths.length) await db.storage.from(BUCKET).remove(paths);
+    if (paths.length) await db.storage.from(BUCKET).remove(window.RGBThumb ? paths.flatMap(p => [p, RGBThumb.path(p)]) : paths);
     toast('Deleted'); loadProducts();
   }
 
@@ -2774,7 +2775,7 @@
       // 2. photos: remove, upload, reorder
       if (removedPhotos.length) {
         await db.from('product_images').delete().in('id', removedPhotos.map(p => p.id));
-        await db.storage.from(BUCKET).remove(removedPhotos.map(p => p.storage_path));
+        await db.storage.from(BUCKET).remove(removedPhotos.flatMap(p => [p.storage_path, window.RGBThumb ? RGBThumb.path(p.storage_path) : null].filter(Boolean)));
         removedPhotos = [];
       }
       for (let i = 0; i < photos.length; i++) {
@@ -2784,6 +2785,7 @@
           const path = `${me.id}/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
           const up = await db.storage.from(BUCKET).upload(path, ph.blob, { contentType: ph.blob.type, cacheControl: '31536000' });
           if (up.error) throw up.error;
+          if (window.RGBThumb) await RGBThumb.upload(db, BUCKET, path, ph.blob);
           const ins = await db.from('product_images').insert({ product_id: id, storage_path: path, sort_order: i * 10 }).select().single();
           if (ins.error) throw ins.error;
           Object.assign(ph, { id: ins.data.id, storage_path: path });

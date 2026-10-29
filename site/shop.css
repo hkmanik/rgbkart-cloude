@@ -1,6 +1,6 @@
 /* RGBKart shop pages — shared look: header, footer, category cards, product cards (6 per row on desktop) */
 :root {
-  --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92; --line: #D9E2DC;
+  --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #667A71; --line: #D9E2DC;
   --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
   --head: #00802B; --head-line: #3D9A5C; --buy: #E30613; --amber: #F5C400;
   --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff;
@@ -149,7 +149,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (prefers-reduced-motion: reduce) { .skel { animation: none; } .card, .ccard, .card .img img, .ccard .cimg span, .ccard .cimg img, .heart { transition: none; } }
 
 /* ---------- Footer & phone sell button ---------- */
-footer { background: var(--head); color: #c9dcd8; padding-block: 28px max(28px, env(safe-area-inset-bottom, 0px)); font-size: .9rem; margin-top: 30px; }
+footer { background: #006B24; color: #d6e8e2; padding-block: 28px max(28px, env(safe-area-inset-bottom, 0px)); font-size: .9rem; margin-top: 30px; }
 footer .wrap { display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
 footer a { color: #FFE066; text-decoration: none; margin-right: 14px; }
 footer b { font: 600 1.2rem var(--display); color: #fff; }
@@ -219,3 +219,6 @@ footer .foot-pages a:hover { color: #FFE066; }
 .foot-credit a { color: #F5C400; font-weight: 700; text-decoration: none; }
 .foot-credit a:hover { text-decoration: underline; }
 @media (max-width: 640px) { .foot-credit { justify-content: center; text-align: center; padding-bottom: 84px; } }
+
+/* audit 29 Oct 2026: bigger tap targets for footer links on phones */
+@media (max-width: 640px) { footer .wrap a, footer .fp-links a { display: inline-block; padding: 6px 2px; } }

@@ -25,7 +25,7 @@
 <style>
   /* Layout: one friendly mobile-first column; three numbered steps (they are done in order) */
   :root {
-    --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #8A9A92; --line: #D9E2DC;
+    --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #667A71; --line: #D9E2DC;
     --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
     --t-red: #ff5c7a; --t-green: #2fbf71; --t-blue: #4f8cff; --amber: #F5C400;
     --good: #1f7a5a; --good-soft: #e2f1ea; --warn: #8a5a00; --warn-soft: #fbefd5; --gold-soft: #fff4dc; --danger: #b3392f; --danger-soft: #f8e3e0;
@@ -262,8 +262,9 @@
 <script src="session.js?v=1"></script>
 <script src="captcha.js?v=2"></script>
 <script src="phone.js?v=1"></script>
+<script src="thumbs.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=34"></script>
+<script src="i18n.js?v=35"></script>
 <script src="pay.js?v=2"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -443,7 +444,7 @@
               const paths = (p.product_images || []).map(i => i.storage_path);
               const { error } = await db.from('products').delete().eq('id', p.id);
               if (error) return toast(friendly(error));
-              if (paths.length) await db.storage.from(BUCKET).remove(paths);
+              if (paths.length) await db.storage.from(BUCKET).remove(window.RGBThumb ? paths.flatMap(p => [p, RGBThumb.path(p)]) : paths);
               toast('Deleted'); loadMine();
             })),
           payBox)));
@@ -563,6 +564,7 @@
         const path = `${me.id}/${id}/${Date.now()}-${i}.${p.blob.type === 'image/webp' ? 'webp' : 'jpg'}`;
         const up = await db.storage.from(BUCKET).upload(path, p.blob, { contentType: p.blob.type, cacheControl: '31536000' });
         if (up.error) throw up.error;
+        if (window.RGBThumb) await RGBThumb.upload(db, BUCKET, path, p.blob);
         r = await db.from('product_images').insert({ product_id: id, storage_path: path, sort_order: i * 10 });
         if (r.error) throw r.error;
       }

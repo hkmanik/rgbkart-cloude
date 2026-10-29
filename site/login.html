@@ -168,7 +168,7 @@
     <p class="section-label" id="loginLabel" hidden>Login details</p>
     <label>Email <input id="email" type="email" autocomplete="email" required></label>
     <label id="pwLabel">Password <input id="password" type="password" autocomplete="current-password" minlength="6" required></label>
-    <label id="pw2Label" hidden>Confirm password <input id="password2" type="password" autocomplete="new-password" minlength="6"><span class="pw-hint" id="pw2Hint" aria-live="polite"></span></label>
+    <label id="pw2Label" hidden>Confirm password <input id="password2" type="password" autocomplete="new-password" minlength="8"><span class="pw-hint" id="pw2Hint" aria-live="polite"></span></label>
     <button id="forgotBtn" class="link small" type="button">Forgot password?</button>
     <button id="authBtn" class="primary" type="submit">Sign in</button>
     <p class="msg">
@@ -195,8 +195,8 @@
   <!-- Set new password (opened from the reset email link) -->
   <form id="resetForm" class="card" hidden>
     <h2>Set a new password</h2>
-    <label>New password <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required></label>
-    <label>Confirm new password <input id="newPassword2" type="password" autocomplete="new-password" minlength="6" required><span class="pw-hint" id="newPw2Hint" aria-live="polite"></span></label>
+    <label>New password <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+    <label>Confirm new password <input id="newPassword2" type="password" autocomplete="new-password" minlength="8" required><span class="pw-hint" id="newPw2Hint" aria-live="polite"></span></label>
     <button id="resetBtn" class="primary" type="submit">Save password</button>
     <p id="resetMsg" class="msg" role="status"></p>
   </form>
@@ -231,7 +231,7 @@
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=34"></script>
+<script src="i18n.js?v=35"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -480,7 +480,7 @@
       }
 
       // Create account: both password boxes must match
-      if (password.length < 6) return setMsg('authMsg', 'Use at least 6 characters for the password.', true);
+      if (password.length < 8) return setMsg('authMsg', 'Use at least 8 characters for the password.', true);
       if (password !== $('password2').value) { setMsg('authMsg', 'The two passwords don\'t match. Type the same password in both boxes.', true); $('password2').focus(); return; }
 
       // Create account: the role and form fields travel with the sign-up,
@@ -525,6 +525,7 @@
   // ---------- Reset password ----------
   $('resetForm').onsubmit = async e => {
     e.preventDefault();
+    if ($('newPassword').value.length < 8) { setMsg('resetMsg', 'Use at least 8 characters for the password.', true); $('newPassword').focus(); return; }
     if ($('newPassword').value !== $('newPassword2').value) { setMsg('resetMsg', 'The two passwords don\'t match. Type the same password in both boxes.', true); $('newPassword2').focus(); return; }
     $('resetBtn').disabled = true;
     const { error } = await db.auth.updateUser({ password: $('newPassword').value });

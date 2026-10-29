@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bot check test | RGBKart</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; background: #f5f7f6; color: #14211c; }
+  h1 { font-size: 1.4rem; } #out { margin-top: 18px; padding: 14px 16px; border-radius: 10px; background: #fff; border: 1px solid #d9e2dc; white-space: pre-wrap; font-weight: 600; }
+  .ok { color: #00802b; } .bad { color: #c00; }
+</style>
+</head>
+<body>
+<h1>RGBKart bot check test</h1>
+<p>This page only tests Cloudflare's bot check. Wait a few seconds, then send a screenshot of the box below.</p>
+<div id="widget"></div>
+<div id="out">Starting…</div>
+<script>
+  const out = document.getElementById('out');
+  const say = (t, cls) => { out.textContent = t; out.className = cls || ''; };
+  const MEAN = { '110100': 'The site key is not valid (check the letters).', '110110': 'The site key was not found.', '110200': 'This address is not in the widget\'s hostnames.',
+    '110420': 'Invalid action.', '110500': 'Browser is too old.', '200100': 'Computer clock is wrong.', '300030': 'Widget took too long.', '600010': 'Challenge failed: try again.' };
+  window.onTurnstileLoad = () => {
+    const sitekey = window.RGB_TEST_KEY;
+    say('Cloudflare loaded. Checking with site key ' + sitekey + ' on ' + location.hostname + ' …');
+    turnstile.render('#widget', {
+      sitekey,
+      callback: t => say('✅ WORKS. Cloudflare gave a pass (' + t.length + ' characters).\nSite key: ' + sitekey + '\nAddress: ' + location.hostname, 'ok'),
+      'error-callback': code => { say('❌ ERROR ' + code + '\n' + (MEAN[String(code)] || MEAN[String(code).slice(0, 6)] || 'See the code above.') + '\nSite key: ' + sitekey + '\nAddress: ' + location.hostname, 'bad'); return true; },
+    });
+  };
+</script>
+<script>
+  // read the key from captcha.js so this tests exactly what the site uses
+  fetch('captcha.js?v=' + Date.now()).then(r => r.text()).then(t => {
+    const m = t.match(/SITE_KEY = '([^']*)'/); window.RGB_TEST_KEY = m ? m[1] : '';
+    if (!window.RGB_TEST_KEY) return say('No site key in captcha.js', 'bad');
+    const s = document.createElement('script'); s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit';
+    s.onerror = () => say('❌ Could not load Cloudflare (blocked by the browser or network).', 'bad'); document.head.append(s);
+  }, () => say('Could not read captcha.js', 'bad'));
+</script>
+</body>
+</html>

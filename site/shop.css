@@ -24,7 +24,7 @@ a { color: var(--accent); }
 .top { background: var(--head); color: #fff; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--head); z-index: 31; }
 .top-in { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding-block: 12px; }
-.brand { display: inline-flex; align-items: center; gap: 9px; background: #fff; border-radius: 999px; padding: 3px 16px 3px 3px; text-decoration: none; box-shadow: 0 1px 4px rgb(0 0 0 / .22); flex: none; transition: box-shadow .15s, transform .15s; }
+.brand { display: inline-flex; justify-self: start; align-items: center; gap: 9px; background: #fff; border-radius: 999px; padding: 3px 16px 3px 3px; text-decoration: none; box-shadow: 0 1px 4px rgb(0 0 0 / .22); flex: none; transition: box-shadow .15s, transform .15s; }
 .brand:hover { box-shadow: 0 3px 10px rgb(0 0 0 / .28); transform: translateY(-1px); }
 .brand img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; background: #fff; flex: none; }
 .brand .wm { display: grid; line-height: 1.05; min-width: 0; }
@@ -73,10 +73,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .nav .icon-link { padding: 7px 8px; }
 }
 @media (max-width: 420px) {
-  .brand { flex: 0 1 auto; min-width: 0; }
-  .brand b { white-space: normal; font-size: .9rem; line-height: 1.08; }
+  .brand { flex: none; gap: 6px; padding-right: 10px; }
+  .brand img { width: 34px; height: 34px; }
+  .brand b { font-size: .78rem; line-height: 1.12; } .brand .y { display: block; }   /* two whole lines: "Red & Green" / "Basket" (was cut off, 30 Oct) */
   .nav { gap: 4px; }
-  .nav .icon-link { padding: 6px 7px; }
+  .nav .icon-link { padding: 6px 6px; }
+  .nav .open-shop { padding: 6px 8px; }
   #bellLink:not([hidden]) ~ #wishLink { display: none; }
 }
 @media (max-width: 345px) {

@@ -34,7 +34,7 @@
     'Send me offers, discounts and RGBKart news by email (you can stop any time)': 'অফার, ছাড় ও RGBKart-এর খবর ইমেইলে পাঠান (যেকোনো সময় বন্ধ করতে পারবেন)',
     'Send me selling tips, offers and RGBKart news by email (you can stop any time)': 'বিক্রির টিপস, অফার ও RGBKart-এর খবর ইমেইলে পাঠান (যেকোনো সময় বন্ধ করতে পারবেন)',
     'How many you have to sell': 'কয়টি বিক্রি করবেন', 'Enter how many you have (1 to 999).': 'কয়টি আছে লিখুন (১ থেকে ৯৯৯)।',
-    'Open a shop': 'দোকান খুলুন', 'Language': 'ভাষা', 'Ad': 'বিজ্ঞাপন', 'Sponsored': 'বিজ্ঞাপন',
+    'Open a shop': 'দোকান খুলুন', 'Store': 'দোকান', 'Language': 'ভাষা', 'Ad': 'বিজ্ঞাপন', 'Sponsored': 'বিজ্ঞাপন',
     // cards and labels
     '★ Featured': '★ ফিচার্ড', 'Pre-owned': 'ব্যবহৃত', 'New': 'নতুন', 'Used': 'ব্যবহৃত', 'Negotiable': 'দরদাম করা যাবে', 'No photo': 'ছবি নেই',
     'Saved ♥': 'সংরক্ষিত ♥', 'Removed from saved': 'সংরক্ষিত তালিকা থেকে সরানো হয়েছে', 'View all': 'সব দেখুন', 'See all →': 'সব দেখুন →', 'Browse →': 'দেখুন →', 'Show more': 'আরও দেখুন',

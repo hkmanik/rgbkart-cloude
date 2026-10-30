@@ -41,7 +41,7 @@ function headerHTML() {
       <a class="icon-link" href="browse.html?wishlist=1" id="wishLink" aria-label="Saved items">${HEART_SVG}<span class="badge" id="wishCount" hidden></span></a>
       <a class="dash-link" href="seller.html" id="dashLink" hidden aria-label="Seller dashboard"><span aria-hidden="true">📊</span> <span class="lbl-full">Seller dashboard</span><span class="lbl-short" style="display:none">Dashboard</span></a>
       <a class="dash-link admin" href="admin.html" id="adminLink" hidden aria-label="Admin dashboard"><span aria-hidden="true">⚙</span> <span class="lbl-full">Admin</span></a>
-      <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short" style="display:none">Open shop</span><span class="lbl-tiny" style="display:none">Shop</span></a>
+      <a class="open-shop" href="login.html?as=seller" id="openShop" aria-label="Open a shop"><span aria-hidden="true">🏪</span> <span class="lbl-full">Open a shop</span><span class="lbl-short" style="display:none">Open shop</span><span class="lbl-tiny" style="display:none">Store</span></a>
       <a class="icon-link acct" href="login.html" id="acctLink" aria-label="Sign in">${USER_SVG}<span class="lbl-acct" id="acctLbl">Sign in</span></a>
       <a class="icon-link" href="cart.html" id="cartLink" aria-label="Cart">${CART_SVG}<span class="lbl-sm">Cart</span><span class="badge" id="cartCount" hidden></span></a>
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;

@@ -6,6 +6,8 @@
 //   RGBThumb.upload(db, bucket, path, blob)  make and upload the small copy (never throws; the photo itself is what matters)
 //   RGBThumb.flush(db)                      after the photo rows are saved: mark them has_thumb (0068_photo_thumbs.sql)
 //   RGBThumb.backfill(db, onProgress)        admin: make copies for older photos that have none
+//   Shop banners (0073): a banner saved as "…/banner-<time>-s.webp" has a 640 px copy "…-s-t.webp"; RGBThumb.hasBannerCopy(path),
+//   RGBThumb.backfillBanners(db, onProgress) converts banners saved before that (admin).
 (function () {
   const path = p => String(p || '').replace(/\.[A-Za-z0-9]+$/, '') + '-t.webp';
   function make(blob, max = 480) {
@@ -22,12 +24,12 @@
       img.src = URL.createObjectURL(blob);
     });
   }
-  async function upload(db, bucket, p, blob) {
+  async function upload(db, bucket, p, blob, max = 480, mark = true) {
     try {
-      const t = await make(blob);
+      const t = await make(blob, max);
       const r = await db.storage.from(bucket).upload(path(p), t, { contentType: t.type || 'image/webp', cacheControl: '31536000', upsert: true });
       if (r.error) return false;
-      pending.push(p); return true;
+      if (mark) pending.push(p); return true;
     } catch (_) { return false; }
   }
   const pending = [];
@@ -54,5 +56,29 @@
     await flush(db);
     return { total: list.length, ok, bad };
   }
-  window.RGBThumb = { path, make, upload, flush, backfill };
+  const hasBannerCopy = p => /-s\.(webp|jpg)$/.test(String(p || ''));
+  async function backfillBanners(db, onProgress) {
+    const r = await db.from('seller_details').select('user_id, banner_path').not('banner_path', 'is', null).limit(1000);
+    if (r.error) throw r.error;
+    const list = (r.data || []).filter(x => !hasBannerCopy(x.banner_path));
+    let ok = 0, bad = 0;
+    for (let i = 0; i < list.length; i++) {
+      const x = list[i];
+      try {
+        const res = await fetch(db.storage.from('shop-assets').getPublicUrl(x.banner_path).data.publicUrl); if (!res.ok) throw new Error('no banner');
+        const blob = await res.blob();
+        const np = `${x.user_id}/banner-${Date.now()}-s.${blob.type === 'image/webp' ? 'webp' : 'jpg'}`;
+        if (!(await upload(db, 'shop-assets', np, blob, 640, false))) throw new Error('no copy');
+        const up = await db.storage.from('shop-assets').upload(np, blob, { contentType: blob.type || 'image/jpeg', cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        const s = await db.rpc('admin_set_banner', { p_seller: x.user_id, p_path: np });
+        if (s.error) throw s.error;
+        await db.storage.from('shop-assets').remove([x.banner_path]);
+        ok++;
+      } catch (_) { bad++; }
+      if (onProgress) onProgress(i + 1, list.length, ok, bad);
+    }
+    return { total: list.length, ok, bad };
+  }
+  window.RGBThumb = { path, make, upload, flush, backfill, hasBannerCopy, backfillBanners };
 })();

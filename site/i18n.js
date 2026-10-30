@@ -9,7 +9,9 @@
   try {
     const q = new URLSearchParams(location.search).get('lang');
     if (q === 'bn' || q === 'en') localStorage.setItem(KEY, q);
-    lang = localStorage.getItem(KEY) === 'bn' ? 'bn' : 'en';
+    const saved = localStorage.getItem(KEY);
+    // no choice yet: follow the phone or computer's language (owner, 30 Oct 2026). A choice made with the switch always wins.
+    lang = saved ? (saved === 'bn' ? 'bn' : 'en') : (/^bn\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '') ? 'bn' : 'en');
   } catch (_) {}
   const BN = '০১২৩৪৫৬৭৮৯';
   const N = v => lang === 'bn' ? String(v ?? '').replace(/\d/g, d => BN[d]) : String(v ?? '');
@@ -161,7 +163,7 @@
     'What are you selling?': 'আপনি কী বিক্রি করছেন?', 'e.g. iPhone 12, 128GB, Blue': 'যেমন: iPhone 12, 128GB, নীল', 'Choose a category': 'একটি ক্যাটাগরি বাছুন', 'Price': 'দাম',
     'Price is negotiable': 'দরদাম করা যাবে', 'Unused, in its box': 'অব্যবহৃত, বাক্সসহ', 'Pre-owned or refurbished': 'ব্যবহৃত বা রিফার্বিশড', 'About the item': 'পণ্য সম্পর্কে',
     "Condition, how long used, what's included, reason for selling…": 'অবস্থা, কতদিন ব্যবহার করেছেন, সাথে কী কী আছে, বিক্রির কারণ…', 'Photos': 'ছবি', 'Add photos': 'ছবি যোগ করুন', 'Add more': 'আরও যোগ করুন',
-    'Up to 5 clear photos. The first one is the main photo buyers see.': 'সর্বোচ্চ ৫টি পরিষ্কার ছবি। প্রথম ছবিটিই ক্রেতারা প্রধান ছবি হিসেবে দেখবেন।', 'Main photo': 'প্রধান ছবি', 'Main': 'প্রধান', 'Remove photo': 'ছবি সরান',
+    'Up to 5 clear photos. The first one is the main photo buyers see.': 'সর্বোচ্চ ৫টি পরিষ্কার ছবি। প্রথম ছবিটিই ক্রেতারা প্রধান ছবি হিসেবে দেখবেন।', 'Main photo': 'প্রধান ছবি', '📐 Best: square photos in daylight, the item filling most of the picture, on a plain background. Don’t write your phone number on the photo.': '📐 সবচেয়ে ভালো: দিনের আলোয় তোলা বর্গাকার ছবি, পণ্যটি ছবির বেশিরভাগ জুড়ে, সাধারণ ব্যাকগ্রাউন্ডে। ছবির উপর ফোন নম্বর লিখবেন না।', 'Main': 'প্রধান', 'Remove photo': 'ছবি সরান',
     'Your contact': 'আপনার যোগাযোগ', 'Area': 'এলাকা', 'Type your area': 'আপনার এলাকা লিখুন', 'Choose district first': 'আগে জেলা বাছুন', 'Pick from the list or type a new one': 'তালিকা থেকে বাছুন অথবা নতুন লিখুন',
     'Same as mobile': 'মোবাইল নম্বরের মতোই', '(optional)': '(ঐচ্ছিক)', '(optional, kept private)': '(ঐচ্ছিক, গোপন থাকবে)', '(optional, shown to buyers)': '(ঐচ্ছিক, ক্রেতারা দেখবেন)',
     'Your phone number stays private': 'আপনার ফোন নম্বর গোপন থাকবে', 'Your number stays private. Buyers message you on RGBKart; we only use your number to reach you about your listing.': 'আপনার নম্বর গোপন থাকবে। ক্রেতারা RGBKart-এ মেসেজ দেবেন; আমরা শুধু আপনার লিস্টিং নিয়ে যোগাযোগ করতে নম্বরটি ব্যবহার করি।',

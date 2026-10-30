@@ -1136,7 +1136,7 @@
 
 <script src="xlsx-lite.js?v=1"></script>
 <script src="session.js?v=1"></script>
-<script src="thumbs.js?v=2"></script>
+<script src="thumbs.js?v=3"></script>
 <script src="captcha.js?v=2"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -1324,8 +1324,13 @@
     if (!window.RGBThumb) return toast('Please reload the page and try again.');
     btn.disabled = true; const old = btn.textContent;
     try {
-      const res = await RGBThumb.backfill(db, (i, n) => { btn.textContent = `Working… ${i} / ${n}`; });
-      toast(res.total ? `Small photos made: ${res.ok} of ${res.total}` + (res.bad ? ` (${res.bad} could not be made)` : '') : 'All photos already have small copies.');
+      const res = await RGBThumb.backfill(db, (i, n) => { btn.textContent = `Photos… ${i} / ${n}`; });
+      let ban = { total: 0, ok: 0, bad: 0 };
+      try { ban = await RGBThumb.backfillBanners(db, (i, n) => { btn.textContent = `Shop banners… ${i} / ${n}`; }); } catch (_) {}
+      const parts = [];
+      if (res.total) parts.push(`Product photos: ${res.ok} of ${res.total}` + (res.bad ? ` (${res.bad} could not be made)` : ''));
+      if (ban.total) parts.push(`Shop banners: ${ban.ok} of ${ban.total}` + (ban.bad ? ` (${ban.bad} not done; run 0073_banner_thumbs.sql?)` : ''));
+      toast(parts.length ? 'Small copies made. ' + parts.join(' · ') : 'Everything already has small copies.');
     } catch (e) { toast(/has_thumb|mark_thumbs/i.test(e.message || '') ? 'Run 0068_photo_thumbs.sql in Supabase first.' : friendly(e)); }
     btn.disabled = false; btn.textContent = old;
   };
@@ -2871,8 +2876,8 @@
   function adSizeNote() {
     const rate = adRates.find(r => r.placement === $('adPlace').value) || {};
     $('adSize').textContent = rate.size_hint ? '· size ' + rate.size_hint : '';
-    $('adPicNote').textContent = rate.kind === 'popup' ? 'Pop-ups need a picture. Design it outside (text, prices, logo), then upload it. Visitors close it with ✕.'
-      : 'Design the banner (with its text and prices) outside, then upload it here. It is shown exactly as it is.';
+    $('adPicNote').textContent = (rate.kind === 'popup' ? 'Pop-ups need a picture. Design it outside (text, prices, logo), then upload it. Visitors close it with ✕.'
+      : 'Design the banner (with its text and prices) outside, then upload it here. It is shown exactly as it is.') + (m => m ? ` For a sharp picture on phones, upload it twice as big: ${m[1] * 2} × ${m[2] * 2} px (same shape).` : '')(String(rate.size_hint || '').match(/(\d+)\s*[×x]\s*(\d+)/)) + ' Keep important words away from the top-right corner (the ✕ button) and the edges.';
   }
   function adCalc(fromRate) {
     const rate = adRates.find(r => r.placement === $('adPlace').value);

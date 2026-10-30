@@ -141,7 +141,7 @@
 <script src="session.js?v=1"></script>
 <script src="phone.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=37"></script>
+<script src="i18n.js?v=38"></script>
 <script src="sync.js?v=1"></script>
 <script src="shop.js?v=32"></script>
 <script src="menu.js?v=7"></script>
@@ -182,7 +182,7 @@
     list.forEach((sh, i) => {
       const href = 'store.html?s=' + encodeURIComponent(sh.shop_slug || sh.user_id);
       row.append(h('a', { class: 'shopcard', href, style: `--hue:${(i * 67 + 130) % 360}` },
-        h('div', { class: 'sb' }, sh.banner_path && h('img', { src: shopPic(sh.banner_path), alt: '', loading: 'lazy' })),
+        h('div', { class: 'sb' }, sh.banner_path && h('img', { src: shopPic(/-s\.(webp|jpg)$/.test(sh.banner_path) ? sh.banner_path.replace(/\.(webp|jpg)$/, '-t.webp') : sh.banner_path), alt: '', loading: 'lazy', decoding: 'async' })),
         h('div', { class: 'sbody' },
           h('div', { class: 'sl', 'aria-hidden': 'true' }, sh.logo_path ? h('img', { src: shopPic(sh.logo_path), alt: '', loading: 'lazy' }) : (sh.shop_name || '?').charAt(0).toUpperCase()),
           h('b', { text: L(sh, 'shop_name'), translate: 'no' }, sh.is_verified ? h('span', { class: 'vtick', title: T('✓ Verified shop'), 'aria-label': T('✓ Verified shop'), text: ' ✓' }) : null),

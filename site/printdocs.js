@@ -69,11 +69,20 @@
     if (isLabel) {
       for (let k = 0; k < many.length; k += perSheet) body += `<section class="sheet n${perSheet}">${many.slice(k, k + perSheet).map(o => label(o, shop, s)).join('')}</section>`;
     } else body = many.map(o => (kind === 'invoice' ? invoice : packing)(o, shop, s, logoUrl)).join('');
-    const title = (isLabel ? 'Shipping labels' : kind === 'invoice' ? 'Invoices' : 'Packing lists') + (list.length === 1 ? ' ' + (kind === 'invoice' && list[0].invoice_no ? list[0].invoice_no : list[0].order_no) : ` (${list.length} orders)`);
+    const one = list.length === 1;
+    const title = one
+      ? (isLabel ? 'Shipping label' : kind === 'invoice' ? 'Invoice' : 'Packing list') + ' ' + (kind === 'invoice' && list[0].invoice_no ? list[0].invoice_no : list[0].order_no)
+      : (isLabel ? 'Shipping labels' : kind === 'invoice' ? 'Invoices' : 'Packing lists') + ` (${list.length} orders)`;
+    // PDF file name (owner 30 Oct): the invoice / order number, no typing needed
+    const fileName = (one ? title : title.replace(/ \((\d+) orders\)$/, ' $1 orders') + ' ' + new Date().toISOString().slice(0, 10)).replace(/[\\/:*?"<>|]+/g, '-') + '.pdf';
+    const toMm = v => { const m = /^([\d.]+)(mm|in)$/.exec(v); return m ? Number(m[1]) * (m[2] === 'in' ? 25.4 : 1) : null; };
+    const [pw, ph] = size[1].split(' ').map(toMm);
+    const pdfOpt = { file: fileName, w: pw, h: ph, m: isLabel || thermal ? 4 : 12 };
     const css = `@page { size: ${size[1]}; margin: ${isLabel || thermal ? '4mm' : '12mm'}; }
       * { box-sizing: border-box; } body { margin: 0; font: ${thermal ? '11px' : '13px'}/1.4 Arial, Helvetica, sans-serif; color: #000; background: #fff; }
       .bar { position: sticky; top: 0; background: #00802B; color: #fff; padding: 10px 14px; display: flex; gap: 10px; align-items: center; font: 600 14px Arial; z-index: 2; }
       .bar button { font: 700 14px Arial; padding: 8px 16px; border-radius: 8px; border: 0; background: #F5C400; color: #2a1a00; cursor: pointer; }
+      .bar button.sv { background: #fff; color: #00802B; } .bar button:disabled { opacity: .6; cursor: wait; }
       @media print { .bar { display: none; } }
       .pg { page-break-after: always; break-after: page; padding: ${thermal ? '0' : '0 2px'}; max-width: ${thermal ? '72mm' : 'none'}; }
       .pg:last-child { page-break-after: auto; break-after: auto; }
@@ -100,11 +109,31 @@
     const auto = s.autoPrint;
     const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)}</title><style>${css}</style>
       ${s.barcode ? '<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"><\/script>' : ''}</head><body>
-      <div class="bar">${esc(title)} · ${esc(size[0])}${copies > 1 ? ` · ${copies} copies each` : ''}<span style="flex:1"></span><button onclick="print()">🖨 Print</button></div>${body}
+      <div class="bar">${esc(title)} · ${esc(size[0])}${copies > 1 ? ` · ${copies} copies each` : ''}<span style="flex:1"></span><button type="button" class="sv" id="savePdf" onclick="savePdf()">⬇ Save PDF</button><button type="button" onclick="print()">🖨 Print</button></div><div id="doc">${body}</div>
       <script>
         function go() {
           try { if (window.JsBarcode) document.querySelectorAll('svg.bc').forEach(function (e) { JsBarcode(e, e.dataset.code, { format: 'CODE128', displayValue: false, margin: 0, height: e.classList.contains('big') ? 52 : 38, width: e.classList.contains('big') ? 2 : 1.4 }); }); } catch (x) {}
           ${auto ? "setTimeout(function () { window.print(); }, 350);" : ''}
+        }
+        // Save PDF: makes the PDF in the browser and downloads it as "<invoice no>.pdf" (html2pdf.js loads only when clicked)
+        var PDF = ${JSON.stringify(pdfOpt)};
+        function savePdf() {
+          var b = document.getElementById('savePdf'); b.disabled = true; b.textContent = 'Making PDF…';
+          function done() { b.disabled = false; b.textContent = '⬇ Save PDF'; }
+          function make() {
+            var doc = document.getElementById('doc'), m = PDF.m, w = PDF.w - 2 * m;
+            doc.style.width = w + 'mm';
+            var h = PDF.h || Math.max(60, doc.scrollHeight * 25.4 / 96 + 2 * m + 2);   // receipt paper: as long as the content
+            window.html2pdf().set({ margin: m, filename: PDF.file, image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+              jsPDF: { unit: 'mm', format: [PDF.w, h], orientation: PDF.w > h ? 'landscape' : 'portrait' },
+              pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.box', '.lbl'] } })
+              .from(doc).save().then(function () { doc.style.width = ''; done(); }, function () { doc.style.width = ''; done(); alert('Could not make the PDF. Use Print and choose "Save as PDF".'); });
+          }
+          if (window.html2pdf) return make();
+          var sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js';
+          sc.onload = make; sc.onerror = function () { done(); alert('Could not load the PDF maker. Check the internet, or use Print and choose "Save as PDF".'); };
+          document.head.appendChild(sc);
         }
         if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
       <\/script></body></html>`;

@@ -2,7 +2,7 @@
 // the spaces, picture sizes and prices are in Admin → Payments → Rates (0060_ad_spaces.sql).
 //   RGBAds.slot(placement, holder)  banner in a page spot: home_top, home_mid, cat_top, cat_side, product_side
 //   Pop-ups start by themselves on pages that load this file:
-//     popup_main  one big picture in the middle of the page, on every page load (refresh), ✕ / Esc / tap outside to close
+//     popup_main  one big picture in the middle of the HOME page only (owner 30 Oct: elsewhere it disturbs), on every load, ✕ / Esc / tap outside to close
 //     popup_side  up to 3 small pictures in the bottom-right corner (1 on phones), each with ✕; they come back on the next page load
 // An ad with a picture shows only the picture (a ready-made banner). Without a picture, banners show the headline and button.
 // Needs the page's `db` (Supabase). Load after the page's own script setup; it waits for `db` to exist.
@@ -47,6 +47,7 @@
     const d = getDb(); if (!d) return [];
     try { const r = await d.from('live_ads').select('*').eq('placement', placement); return r.error ? [] : (r.data || []); } catch (_) { return []; }
   }
+  const isHome = () => /(^|\/)(index\.html)?$/i.test(location.pathname);
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
   // Show a pop-up only after its picture has loaded: a box that grows while its picture loads makes the page "jump" (PageSpeed CLS)
   const ready = node => Promise.all([...node.querySelectorAll('img')].map(i => i.decode ? i.decode().catch(() => {}) : null));
@@ -76,7 +77,8 @@
   }
 
   async function mainPopup() {
-    // Owner, 30 Oct: show on every page load (refresh) of every shop page that loads ads.js
+    // Owner, 30 Oct: home page only (index.html or the site root), on every page load (refresh)
+    if (!isHome()) return;
     const ads = (await list('popup_main')).filter(a => a.image_path);
     if (!ads.length) return;
     const ad = pick(ads);

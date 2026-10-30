@@ -4,6 +4,10 @@
 //   RESEND_API_KEY  your Resend API key (starts with re_)
 //   ALERT_FROM      e.g.  RGBKart <alerts@rgbkart.com>
 //   SITE_URL        e.g.  https://rgbkart.com
+// SMS (0071_sms.sql, 30 Oct 2026) also go out from here, through BulkSMSBD, when these secrets exist:
+//   BULKSMSBD_API_KEY    your BulkSMSBD API key
+//   BULKSMSBD_SENDER_ID  your approved sender ID (number or name) from BulkSMSBD
+// Nothing is queued while SMS is switched off in Admin → Orders → SMS messages.
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase automatically.
 
 const SB = Deno.env.get("SUPABASE_URL")!;
@@ -11,6 +15,8 @@ const KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("ALERT_FROM") ?? "RGBKart <onboarding@resend.dev>";
 const SITE = (Deno.env.get("SITE_URL") ?? "https://rgbkart.com").replace(/\/+$/, "");
+const SMS_KEY = Deno.env.get("BULKSMSBD_API_KEY") ?? "";
+const SMS_FROM = Deno.env.get("BULKSMSBD_SENDER_ID") ?? "";
 
 type Alert = { id: number; email: string; kind: string; title: string; body: string | null; link: string | null };
 
@@ -63,19 +69,54 @@ async function send(a: Alert) {
   if (!r.ok) throw new Error(`Resend ${r.status}: ${(await r.text()).slice(0, 250)}`);
 }
 
+// ---------- SMS through BulkSMSBD ----------
+type Sms = { id: number; phone: string; body: string };
+const SMS_ERR: Record<string, string> = {
+  "1001": "Invalid number", "1002": "Sender ID not correct or disabled", "1003": "Missing fields", "1005": "BulkSMSBD internal error",
+  "1007": "Not enough SMS balance", "1011": "User not found", "1012": "Masking SMS must be in Bangla", "1013": "No gateway for this sender ID",
+  "1018": "BulkSMSBD account disabled", "1031": "BulkSMSBD account not verified", "1032": "IP not allowed (turn off IP whitelist in BulkSMSBD)",
+};
+async function sendSms(m: Sms) {
+  const p = new URLSearchParams({
+    api_key: SMS_KEY, senderid: SMS_FROM, number: "88" + m.phone, message: m.body,
+    type: /[^\x00-\x7F]/.test(m.body) ? "unicode" : "text",
+  });
+  const r = await fetch(`https://bulksmsbd.net/api/smsapi?${p}`, { method: "GET" });
+  const t = await r.text();
+  let j: Record<string, unknown> = {};
+  try { j = JSON.parse(t); } catch { /* not JSON */ }
+  const code = String(j.response_code ?? "");
+  if (code !== "202") throw new Error(`${code || r.status}: ${SMS_ERR[code] || String(j.error_message || t).slice(0, 200)}`);
+  return String(j.message_id ?? "");
+}
+
 Deno.serve(async () => {
-  if (!RESEND) return Response.json({ error: "RESEND_API_KEY secret is missing" }, { status: 500 });
-  let reminders = 0, sent = 0, failed = 0;
-  try {
-    reminders = await rpc("queue_reminders");
-    const batch: Alert[] = await rpc("take_pending_alerts", { p_limit: 40 });
-    for (const a of batch) {
-      try { await send(a); await rpc("alert_sent", { p_id: a.id, p_ok: true }); sent++; }
-      catch (e) { await rpc("alert_sent", { p_id: a.id, p_ok: false, p_error: String((e as Error).message) }); failed++; }
-      await new Promise((r) => setTimeout(r, 550)); // stay under Resend's 2 emails per second
-    }
-  } catch (e) {
-    return Response.json({ error: String((e as Error).message), reminders, sent, failed }, { status: 500 });
+  if (!RESEND && !SMS_KEY) return Response.json({ error: "RESEND_API_KEY secret is missing" }, { status: 500 });
+  let reminders = 0, sent = 0, failed = 0, sms = 0, smsFailed = 0;
+  const errors: string[] = [];
+  if (RESEND) {
+    try {
+      reminders = await rpc("queue_reminders");
+      const batch: Alert[] = await rpc("take_pending_alerts", { p_limit: 40 });
+      for (const a of batch) {
+        try { await send(a); await rpc("alert_sent", { p_id: a.id, p_ok: true }); sent++; }
+        catch (e) { await rpc("alert_sent", { p_id: a.id, p_ok: false, p_error: String((e as Error).message) }); failed++; }
+        await new Promise((r) => setTimeout(r, 550)); // stay under Resend's 2 emails per second
+      }
+    } catch (e) { errors.push("email: " + String((e as Error).message)); }
   }
-  return Response.json({ reminders, sent, failed });
+  if (SMS_KEY) {
+    try {
+      const batch: Sms[] = await rpc("take_pending_sms", { p_limit: 50 });
+      for (const m of batch) {
+        try { const ref = await sendSms(m); await rpc("sms_sent", { p_id: m.id, p_ok: true, p_ref: ref }); sms++; }
+        catch (e) { await rpc("sms_sent", { p_id: m.id, p_ok: false, p_error: String((e as Error).message) }); smsFailed++; }
+      }
+    } catch (e) {
+      // before 0071_sms.sql is run there is no SMS outbox yet: that is fine
+      if (!/take_pending_sms/.test(String((e as Error).message))) errors.push("sms: " + String((e as Error).message));
+    }
+  }
+  const out = { reminders, sent, failed, sms, smsFailed, errors };
+  return Response.json(out, { status: errors.length ? 500 : 200 });
 });

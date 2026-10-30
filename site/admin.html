@@ -802,6 +802,11 @@
         <p class="msg muted" style="margin:4px 0 10px">Prices already include VAT. When this is on, each new order records how much of each item's price is VAT, and the shop's invoice and the buyer's order show it. Set rates per category (Categories → edit) or per product (Products → % VAT); the default rate below is used when neither has one. Orders placed earlier don't change.</p>
         <div id="vatBox"></div>
       </div>
+      <div class="card" style="margin-top:18px">
+        <h2>SMS messages</h2>
+        <p class="msg muted" style="margin:4px 0 10px">Short text messages to buyers and shops about orders, sent through BulkSMSBD. Each message costs SMS credit from your BulkSMSBD account (Bangla messages count about double). Keep SMS off until real buyers and shops use the site; you can still send a test message while it is off.</p>
+        <div id="smsBox"></div>
+      </div>
     </section>
 
     <!-- Payments -->
@@ -3070,7 +3075,7 @@
     const ids = [...new Set(aOrders.map(x => x.seller_id))];
     aoShops = new Map();
     if (ids.length) { const sd = await db.from('seller_details').select('user_id, shop_name, phone_public').in('user_id', ids); (sd.data || []).forEach(x => aoShops.set(x.user_id, x)); }
-    drawAdminOrders(); drawShip(); drawCod(); drawCancelRules(); drawVat();
+    drawAdminOrders(); drawShip(); drawCod(); drawCancelRules(); drawVat(); drawSms();
   }
   $('aoFilter').querySelectorAll('button').forEach(b => b.onclick = () => { aoFilter = b.dataset.s; $('aoFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAdminOrders(); });
   $('aoSearch').oninput = () => drawAdminOrders();
@@ -3196,6 +3201,63 @@
         const { error } = await db.from('site_settings').upsert({ key: 'vat', value: { on: on.checked, rate: n }, updated_at: new Date().toISOString() });
         if (error) return toast(friendly(error)); toast(on.checked ? `VAT ${n}% is on for new orders` : 'VAT is off'); drawVat();
       }) : h('span')));
+  }
+
+  // SMS order updates (0071_sms.sql, 30 Oct 2026)
+  async function drawSms() {
+    const box = $('smsBox'); box.innerHTML = '';
+    const r = await db.from('site_settings').select('value').eq('key', 'sms').maybeSingle();
+    if (r.error || !r.data) { box.append(h('p', { class: 'msg muted', text: r.error && !/does not exist|Could not find/i.test(r.error.message) ? friendly(r.error) : 'Run 0071_sms.sql in Supabase to add SMS messages.' })); return; }
+    const v = r.data.value || {}, ev = v.events || {}, edit = canApprove();
+    const on = h('input', { type: 'checkbox', checked: !!v.on, disabled: !edit });
+    const lang = h('select', { 'aria-label': 'SMS language', disabled: !edit },
+      [['en', 'English (cheaper: 160 letters per SMS)'], ['bn', 'Bangla (70 letters per SMS)']].map(([k, t]) => h('option', { value: k, text: t, selected: (v.lang || 'en') === k })));
+    const EVENTS = [['placed', 'Buyer: order placed'], ['confirmed', 'Buyer: shop confirmed the order'], ['shipped', 'Buyer: order sent (with courier tracking)'],
+      ['delivered', 'Buyer: order delivered'], ['cancelled', 'Buyer: order cancelled'], ['shop_new', 'Shop: new order received']];
+    const boxes = {};
+    const evWrap = h('div', { style: 'display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px 16px;margin:10px 0' },
+      EVENTS.map(([k, t]) => { boxes[k] = h('input', { type: 'checkbox', checked: !!ev[k], disabled: !edit }); return h('label', { class: 'check' }, boxes[k], t); }));
+    box.append(
+      h('div', { class: 'rate-row cod-row' },
+        h('label', { class: 'check', style: 'font-weight:700' }, on, 'SMS is ON (send messages)'),
+        h('label', { style: 'grid-column:span 2' }, 'Language of the messages', lang), h('span')),
+      h('b', { text: 'Send an SMS when:' }), evWrap,
+      edit ? actionBtn('Save SMS settings', 'good', async () => {
+        const events = {}; EVENTS.forEach(([k]) => { events[k] = boxes[k].checked; });
+        if (on.checked && !confirm('Switch SMS ON? Every new order will use SMS credit from your BulkSMSBD account.')) return;
+        const { error } = await db.from('site_settings').upsert({ key: 'sms', value: { on: on.checked, lang: lang.value, events }, updated_at: new Date().toISOString() });
+        if (error) return toast(friendly(error)); toast(on.checked ? 'SMS is on' : 'SMS settings saved (SMS is off)'); drawSms();
+      }) : h('p', { class: 'msg muted', text: 'Only the Master Admin or a Co-admin can change SMS settings.' }));
+    if (!edit) return;
+    const ph = h('input', { type: 'tel', placeholder: '01XXXXXXXXX', 'aria-label': 'Phone number for the test SMS', style: 'max-width:200px' });
+    const log = h('div', { style: 'margin-top:10px' });
+    const drawLog = async () => {
+      const l = await db.rpc('admin_sms_log', { p_limit: 30 });
+      log.innerHTML = '';
+      if (l.error) { log.append(h('p', { class: 'msg muted', text: friendly(l.error) })); return; }
+      if (!l.data.length) { log.append(h('p', { class: 'msg muted', text: 'No SMS yet.' })); return; }
+      const ST = { sent: '✓ Sent', pending: '⏳ Waiting', failed: '✕ Failed', skipped: '– Not sent' };
+      log.append(h('div', { class: 'table-wrap' }, h('table', {},
+        h('thead', {}, h('tr', {}, ['When', 'To', 'What', 'Status', 'Message'].map(t => h('th', { text: t })))),
+        h('tbody', {}, l.data.map(x => h('tr', {},
+          h('td', { text: new Date(x.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) }),
+          h('td', { text: x.phone }), h('td', { text: x.kind + (x.order_no ? ' · ' + x.order_no : '') }),
+          h('td', { text: (ST[x.status] || x.status) + (x.error ? ' — ' + x.error : '') }),
+          h('td', { text: x.body, style: 'max-width:420px;white-space:normal' })))))));
+    };
+    box.append(h('hr', { style: 'border:0;border-top:1px solid var(--line);margin:16px 0' }),
+      h('b', { text: 'Test' }),
+      h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0' }, ph,
+        actionBtn('Send test SMS', 'ghost', async () => {
+          const { error } = await db.rpc('admin_test_sms', { p_phone: ph.value.trim() });
+          if (error) return toast(friendly(error));
+          // ask the sender to run now instead of waiting up to 5 minutes (no answer is read: fire and forget)
+          fetch(SUPABASE_URL + '/functions/v1/send-alerts', { method: 'POST', mode: 'no-cors', body: '{}' }).catch(() => {});
+          toast('Test SMS queued. It should arrive within a minute.'); setTimeout(drawLog, 8000);
+        }),
+        h('button', { type: 'button', class: 'ghost', text: '↻ Refresh list', onclick: drawLog })),
+      h('p', { class: 'msg muted', text: 'Recent SMS (newest first). If messages fail, the reason from BulkSMSBD is shown, for example "Not enough SMS balance".' }), log);
+    drawLog();
   }
 
   // ===================== Reports =====================

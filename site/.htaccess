@@ -47,6 +47,10 @@ ErrorDocument 404 /404.html
   <FilesMatch "\.(html|json)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
+  # the app service worker must update quickly (install.js / sw.js, 30 Oct 2026)
+  <FilesMatch "^sw\.js$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
 </IfModule>
 
 AddType application/manifest+json .webmanifest

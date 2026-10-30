@@ -365,6 +365,12 @@
   .ord-items .srow { display: flex; justify-content: space-between; gap: 10px; } .ord-items .srow span:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .ord-items .tot { font-weight: 700; border-top: 1px solid var(--line); padding-top: 4px; }
   .dl-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .cr-row { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); } .cr-row:first-child { border-top: 0; }
+  .cr-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; } .cr-head b { font-size: 1.02rem; }
+  .cr-form { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); background: var(--bg); border-radius: 12px; padding: 12px; }
+  .cr-box { display: grid; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 6px 0; }
+  .cr-box .grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .cr-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #EAF5EE; border-radius: 10px; padding: 8px 12px; margin: 6px 0; }
   .dl-row:first-child { border-top: 0; } .dl-row .check { display: flex; gap: 10px; align-items: flex-start; } .dl-row .check input { margin-top: 3px; } .dl-row > label:not(.check) { display: grid; gap: 4px; }
   @media (max-width: 640px) { .dl-row { grid-template-columns: 1fr; } }
   .ord-ask { display: grid; gap: 6px; background: #FFF6CC; color: #4A3A00; border: 1px solid #F5C400; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
@@ -602,6 +608,9 @@
         <label style="max-width:340px">Free delivery when a buyer's order from your shop is at least (৳) <input id="dlFreeOver" type="number" min="1" step="1" placeholder="Leave empty for no free delivery"></label>
         <p class="hint" style="margin:6px 0 0">Applies to normal parcels only. Store pickup is set in Shop settings.</p></div>
       <div class="actions" style="justify-content:flex-start;margin-top:14px"><button type="button" class="primary" id="dlSave">Save delivery settings</button><span id="dlMsg" class="hint"></span></div>
+      <div class="card" style="margin-top:22px"><h2>🚚 Courier accounts</h2>
+        <p class="hint" style="margin:0 0 8px">Connect your own Steadfast, Pathao or RedX merchant account to book parcels straight from your orders. The courier collects the cash from the buyer and pays you as usual. Your keys are kept on RGBKart's server only; nobody can see them, not even you, after saving.</p>
+        <div id="crList"></div></div>
     </section>
 
     <section data-page="coupons" hidden>
@@ -1362,6 +1371,131 @@
     }
     if (!$('dlSpecial').children.length) $('dlSpecial').append(h('p', { class: 'hint', text: 'RGBKart has no special methods switched on yet.' }));
     $('dlFreeOver').value = fd.data && fd.data.free_over ? Number(fd.data.free_over) : '';
+    loadCouriers();
+  }
+  // ===================== Couriers (0072_couriers.sql + "courier" Edge Function) =====================
+  const CR = {
+    steadfast: { name: 'Steadfast', help: 'In the Steadfast merchant panel open API (Settings → API Keys) and copy the API key and Secret key.',
+      fields: [['api_key', 'API key'], ['secret_key', 'Secret key']] },
+    pathao: { name: 'Pathao', help: 'In the Pathao merchant panel open Developer API → Merchant API Credentials for the Client ID and Client Secret; then your Pathao login email and password.',
+      fields: [['client_id', 'Client ID'], ['client_secret', 'Client Secret'], ['username', 'Pathao login email'], ['password', 'Pathao password', 'password']] },
+    redx: { name: 'RedX', help: 'Ask RedX (merchant panel or your RedX account manager) for an API access token and paste it here.',
+      fields: [['token', 'API access token']] },
+  };
+  const crTrackUrl = o => o.courier === 'steadfast' ? 'https://steadfast.com.bd/t/' + encodeURIComponent(o.courier_tracking || o.courier_ref)
+    : o.courier === 'pathao' ? 'https://merchant.pathao.com/tracking?consignment_id=' + encodeURIComponent(o.courier_ref) + '&phone=' + encodeURIComponent(o.phone || '')
+    : o.courier === 'redx' ? 'https://redx.com.bd/track-parcel/?trackingId=' + encodeURIComponent(o.courier_ref) : null;
+  let myCouriers = [];
+  async function courierCall(body) {
+    const { data, error } = await db.functions.invoke('courier', { body });
+    if (error) {
+      let msg = '';
+      try { msg = (await error.context.json()).error; } catch (_) {}
+      if (!msg && /Failed to send|not found|404/i.test(error.message || '')) msg = 'Courier booking is being switched on by RGBKart. Please try again later.';
+      throw new Error(msg || error.message || 'Something went wrong.');
+    }
+    if (data && data.error) throw new Error(data.error);
+    return data;
+  }
+  async function fetchMyCouriers() {
+    const r = await db.rpc('my_couriers');
+    myCouriers = r.error ? [] : (r.data || []);
+    return r;
+  }
+  async function loadCouriers() {
+    const box = $('crList'); if (!box) return; box.innerHTML = '';
+    const r = await fetchMyCouriers();
+    if (r.error) { box.append(h('p', { class: 'hint', text: /does not exist|Could not find/i.test(r.error.message) ? 'Courier booking is being switched on by RGBKart. Please check again later.' : friendly(r.error) })); return; }
+    for (const [key, c] of Object.entries(CR)) {
+      const have = myCouriers.find(x => x.courier === key);
+      const form = h('div', { class: 'cr-form', hidden: true });
+      const inputs = {};
+      c.fields.forEach(([k, label, type]) => { inputs[k] = h('input', { type: type || 'text', autocomplete: 'off', spellcheck: 'false' }); form.append(h('label', {}, label, inputs[k])); });
+      form.append(h('p', { class: 'hint', style: 'grid-column:1/-1;margin:0', text: c.help }),
+        h('div', { style: 'grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap' },
+          actionBtn('Check and connect', 'primary', async () => {
+            const creds = {}; for (const [k] of c.fields) { creds[k] = inputs[k].value.trim(); if (!creds[k]) { inputs[k].focus(); return toast('Fill in every box.'); } }
+            try { await courierCall({ action: 'connect', courier: key, creds }); toast(`${c.name} connected`); loadCouriers(); }
+            catch (e) { toast(e.message); }
+          }),
+          h('button', { type: 'button', class: 'ghost', text: 'Cancel', onclick: () => { form.hidden = true; } })));
+      const row = h('div', { class: 'cr-row' },
+        h('div', { class: 'cr-head' }, h('b', { text: c.name }),
+          have ? h('span', { class: 'chip active', text: '✓ Connected' + (have.store_name ? ' · store: ' + have.store_name : '') }) : h('span', { class: 'chip', text: 'Not connected' }),
+          have ? h('button', { type: 'button', class: 'ghost', style: 'color:var(--danger)', text: 'Disconnect', onclick: async () => {
+              if (!confirm(`Disconnect ${c.name}? Orders already booked keep their tracking numbers.`)) return;
+              const { error } = await db.rpc('disconnect_courier', { p_courier: key }); if (error) return toast(friendly(error)); toast(`${c.name} disconnected`); loadCouriers(); } })
+            : h('button', { type: 'button', class: 'ghost', text: 'Connect…', onclick: () => { form.hidden = false; inputs[c.fields[0][0]].focus(); } }),
+          have && key === 'pathao' && h('button', { type: 'button', class: 'ghost', text: 'Change pickup store', onclick: () => pathaoStores(row) })),
+        form);
+      box.append(row);
+    }
+  }
+  async function pathaoStores(row) {
+    try {
+      const r = await courierCall({ action: 'areas', courier: 'pathao', level: 'store' });
+      const sel = h('select', {}, r.items.map(x => h('option', { value: x.id, text: x.name, selected: String(x.id) === String(r.current) })));
+      const box = h('div', { class: 'cr-form' }, h('label', {}, 'Pickup store (where Pathao collects parcels)', sel),
+        h('div', { style: 'display:flex;gap:8px;align-items:end' }, actionBtn('Save', 'primary', async () => {
+          try { await courierCall({ action: 'set_store', store_id: sel.value }); toast('Pickup store saved'); loadCouriers(); } catch (e) { toast(e.message); } })));
+      row.append(box);
+    } catch (e) { toast(e.message); }
+  }
+  // the "Book courier" box on an order card
+  function courierBox(o) {
+    if (o.courier_ref) {
+      const url = crTrackUrl(o);
+      const st = h('span', { class: 'pmeta', text: o.courier_status ? 'Status: ' + o.courier_status : '' });
+      return h('div', { class: 'cr-line' }, h('b', { text: '🚚 ' + (CR[o.courier] ? CR[o.courier].name : o.courier) }),
+        h('span', { text: 'Tracking ' + (o.courier_tracking || o.courier_ref) }), st,
+        url && h('a', { href: url, target: '_blank', rel: 'noopener', text: 'Track ↗' }),
+        !['delivered', 'cancelled'].includes(o.status) && actionBtn('↻ Check status', 'ghost', async () => {
+          try { const r = await courierCall({ action: 'track', order_id: o.id }); o.courier_status = r.status; st.textContent = 'Status: ' + r.status; toast('Status: ' + r.status); } catch (e) { toast(e.message); } }));
+    }
+    if (!['confirmed', 'packed', 'shipped'].includes(o.status)) return null;
+    if (!myCouriers.length) return h('p', { class: 'hint', style: 'margin:4px 0' }, 'Use Steadfast, Pathao or RedX? Connect it in ', h('a', { href: '#', onclick: e => { e.preventDefault(); go('delivery'); }, text: 'Delivery → Courier accounts' }), ' to book parcels from here.');
+    const panel = h('div', { class: 'cr-box', hidden: true });
+    const btn = h('button', { type: 'button', class: 'ghost', text: '🚚 Book courier', onclick: () => { panel.hidden = !panel.hidden; if (!panel.hidden && !panel.children.length) drawBooking(o, panel); } });
+    return h('div', {}, btn, panel);
+  }
+  function drawBooking(o, panel) {
+    const pick = h('select', { 'aria-label': 'Courier' }, myCouriers.map(c => h('option', { value: c.courier, text: CR[c.courier] ? CR[c.courier].name : c.courier })));
+    const kg = h('input', { type: 'number', min: 0.1, max: 30, step: 0.1, value: 0.5, 'aria-label': 'Parcel weight in kg' });
+    const note = h('input', { type: 'text', maxlength: 200, placeholder: 'e.g. Call before delivery, fragile', 'aria-label': 'Note for the courier' });
+    const extra = h('div', { class: 'grid' });
+    let chosen = {};
+    const sel = (label, onchange) => { const s = h('select', { 'aria-label': label, onchange }, h('option', { value: '', text: 'Loading…' })); extra.append(h('label', {}, label, s)); return s; };
+    const fill = (s, items, ph) => { s.innerHTML = ''; s.append(h('option', { value: '', text: ph })); items.forEach(x => s.append(h('option', { value: x.id, text: x.name }))); };
+    async function drawExtra() {
+      extra.innerHTML = ''; chosen = {};
+      try {
+        if (pick.value === 'pathao') {
+          const zone = () => zoneS, area = () => areaS;
+          const cityS = sel('Buyer’s city', async () => { chosen = { city_id: cityS.value }; fill(zone(), [], 'Choose the zone'); fill(area(), [], 'Choose the area'); if (cityS.value) fill(zone(), (await courierCall({ action: 'areas', courier: 'pathao', level: 'zone', parent: cityS.value })).items, 'Choose the zone'); });
+          const zoneS = sel('Zone', async () => { chosen.zone_id = zoneS.value; fill(area(), [], 'Choose the area'); if (zoneS.value) fill(area(), (await courierCall({ action: 'areas', courier: 'pathao', level: 'area', parent: zoneS.value })).items, 'Choose the area'); });
+          const areaS = sel('Area', () => { chosen.area_id = areaS.value; });
+          fill(zoneS, [], 'Choose the city first'); fill(areaS, [], 'Choose the zone first');
+          const cities = (await courierCall({ action: 'areas', courier: 'pathao', level: 'city' })).items;
+          fill(cityS, cities, 'Choose the city');
+          const guess = cities.find(c => (o.district || '').toLowerCase().includes(String(c.name).toLowerCase()));
+          if (guess) { cityS.value = guess.id; cityS.onchange(); }
+        } else if (pick.value === 'redx') {
+          const areaS = sel('Buyer’s delivery area', () => { chosen = { area_id: areaS.value, area_name: areaS.selectedOptions[0] ? areaS.selectedOptions[0].text.split(',')[0] : '' }; });
+          fill(areaS, (await courierCall({ action: 'areas', courier: 'redx', district: o.district || '' })).items, 'Choose the area');
+        }
+      } catch (e) { extra.append(h('p', { class: 'hint', style: 'color:var(--danger)', text: e.message })); }
+    }
+    pick.onchange = drawExtra;
+    panel.append(h('div', { class: 'grid' }, h('label', {}, 'Courier', pick), h('label', {}, 'Weight (kg)', kg), h('label', { style: 'grid-column:span 2' }, 'Note for the courier (optional)', note)),
+      extra,
+      h('p', { class: 'hint', style: 'margin:0', text: `The courier will collect ${money(o.total)} from ${o.customer_name} (${o.phone}) at: ${[o.address, o.area, o.district].filter(Boolean).join(', ')}.` }),
+      h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, actionBtn('Book now', 'primary', async () => {
+        const body = { action: 'book', order_id: o.id, courier: pick.value, weight_kg: Number(kg.value) || 0.5, note: note.value.trim() };
+        if (pick.value === 'pathao') { if (!chosen.city_id || !chosen.zone_id || !chosen.area_id) return toast('Choose the city, zone and area.'); body.pathao = chosen; }
+        if (pick.value === 'redx') { if (!chosen.area_id) return toast('Choose the delivery area.'); body.redx = chosen; }
+        try { const r = await courierCall(body); toast(`Booked with ${CR[r.courier].name}. Tracking ${r.tracking}`); loadOrders(); } catch (e) { toast(e.message); }
+      }), h('button', { type: 'button', class: 'ghost', text: 'Close', onclick: () => { panel.hidden = true; } })));
+    drawExtra();
   }
   $('dlSave').onclick = async () => {
     $('dlMsg').textContent = '';
@@ -1695,7 +1829,7 @@
   const SHIPN = { dhaka: 'Inside Dhaka', outside: 'Outside Dhaka', pickup: 'Store pickup', negotiated: 'Agree with customer' };
   const ofmt = t => new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   async function loadOrders() {
-    const r = await db.from('orders').select('*, order_items(*)').eq('seller_id', me.id).order('created_at', { ascending: false }).limit(300);
+    const [r] = await Promise.all([db.from('orders').select('*, order_items(*)').eq('seller_id', me.id).order('created_at', { ascending: false }).limit(300), fetchMyCouriers()]);
     if (r.error) { $('ordList').innerHTML = ''; $('ordList').append(h('div', { class: 'empty' }, h('span', { text: /does not exist|Could not find/i.test(r.error.message) ? 'Orders aren\'t switched on yet.' : friendly(r.error) }))); return; }
     orders = r.data; drawOrderCount(); drawOrders(); drawInvCode();
     // buyer history for open orders (0030_reports_fraud.sql): delivered / refused / cancelled before, on all shops
@@ -1768,7 +1902,8 @@
           h('div', { class: 'srow tot' }, h('span', { text: 'Collect in cash' }), h('span', { text: money(o.total) })),
           Number(o.vat_amount) > 0 && h('div', { class: 'srow pmeta' }, h('span', { text: 'Includes VAT' + (o.vat_rate != null ? ` ${Number(o.vat_rate)}%` : '') }), h('span', { text: money(o.vat_amount) })))),
       o.status === 'cancelled' && h('p', { class: 'pmeta', style: 'color:var(--danger)', text: `Cancelled by ${o.cancelled_by || '—'}${o.cancel_reason ? ': ' + o.cancel_reason : ''}` }),
-      o.tracking_note && h('p', { class: 'pmeta', text: 'Delivery info: ' + o.tracking_note }),
+      o.tracking_note && !o.courier_ref && h('p', { class: 'pmeta', text: 'Delivery info: ' + o.tracking_note }),
+      courierBox(o),
       cancelAsk(o),
       next && next[0] === 'shipped' && note,
       h('div', { class: 'actions', style: 'justify-content:flex-start' },

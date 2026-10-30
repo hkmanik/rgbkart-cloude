@@ -118,7 +118,7 @@ async function initShell() {
   if (window.RGBMenu) RGBMenu.mount();
   trackVisit();
   updateBadges();
-  if (!document.getElementById('instJs')) { const s = document.createElement('script'); s.id = 'instJs'; s.src = 'install.js?v=1'; s.defer = true; document.head.append(s); }   // install-as-app card (30 Oct)
+  if (!document.getElementById('instJs')) { const s = document.createElement('script'); s.id = 'instJs'; s.src = 'install.js?v=2'; s.defer = true; document.head.append(s); }   // install-as-app card (30 Oct)
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();

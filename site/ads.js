@@ -2,8 +2,8 @@
 // the spaces, picture sizes and prices are in Admin → Payments → Rates (0060_ad_spaces.sql).
 //   RGBAds.slot(placement, holder)  banner in a page spot: home_top, home_mid, cat_top, cat_side, product_side
 //   Pop-ups start by themselves on pages that load this file:
-//     popup_main  one big picture in the middle of the home page, once per visit, ✕ / Esc / tap outside to close
-//     popup_side  up to 3 small pictures in the bottom-right corner (1 on phones), each with ✕; closed ones stay closed this visit
+//     popup_main  one big picture in the middle of the page, on every page load (refresh), ✕ / Esc / tap outside to close
+//     popup_side  up to 3 small pictures in the bottom-right corner (1 on phones), each with ✕; they come back on the next page load
 // An ad with a picture shows only the picture (a ready-made banner). Without a picture, banners show the headline and button.
 // Needs the page's `db` (Supabase). Load after the page's own script setup; it waits for `db` to exist.
 (function () {
@@ -76,9 +76,7 @@
   }
 
   async function mainPopup() {
-    const page = location.pathname.split('/').pop() || 'index.html';
-    if (page !== 'index.html') return;
-    try { if (store.getItem('rgbkart-popup-seen')) return; } catch (_) {}
+    // Owner, 30 Oct: show on every page load (refresh) of every shop page that loads ads.js
     const ads = (await list('popup_main')).filter(a => a.image_path);
     if (!ads.length) return;
     const ad = pick(ads);
@@ -89,16 +87,14 @@
     const scrim = el('div', { class: 'adpop-scrim', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Advertisement', onclick: e => { if (e.target === scrim) close(); } },
       el('div', { class: 'adpop' }, x, pic));
     document.body.append(scrim); document.addEventListener('keydown', onKey); x.focus();
-    try { store.setItem('rgbkart-popup-seen', '1'); } catch (_) {}
   }
   async function sidePopups() {
-    const closed = seen('rgbkart-ad-closed');
-    const ads = (await list('popup_side')).filter(a => a.image_path && !closed.includes(a.id)).sort(() => Math.random() - .5).slice(0, 3);
+    const ads = (await list('popup_side')).filter(a => a.image_path).sort(() => Math.random() - .5).slice(0, 3);
     if (!ads.length) return;
     const box = el('div', { class: 'adside', role: 'complementary', 'aria-label': 'Advertisements' });
     ads.forEach(ad => {
       const one = el('div', { class: 'adone' });
-      one.append(el('button', { type: 'button', class: 'adx', 'aria-label': 'Close ad', text: '✕', onclick: () => { remember('rgbkart-ad-closed', ad.id); one.remove(); if (!box.children.length) box.remove(); } }), picture(ad, 'popup_side'));
+      one.append(el('button', { type: 'button', class: 'adx', 'aria-label': 'Close ad', text: '✕', onclick: () => { one.remove(); if (!box.children.length) box.remove(); } }), picture(ad, 'popup_side'));
       box.append(one);
     });
     await ready(box);

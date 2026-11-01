@@ -1,6 +1,6 @@
 {
-  "name": "RGBKart · Red & Green Basket",
-  "short_name": "RGBKart",
+  "name": "DeshiBasket",
+  "short_name": "DeshiBasket",
   "description": "Buy and sell across all 64 districts of Bangladesh.",
   "id": "index.html",
   "start_url": "index.html",
@@ -10,7 +10,8 @@
   "theme_color": "#00802B",
   "lang": "en",
   "icons": [
-    { "src": "assets/logo/rgb-basket-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "assets/logo/rgb-logo-badge-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "assets/logo/deshibasket-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/logo/deshibasket-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/logo/deshibasket-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

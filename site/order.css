@@ -1,4 +1,4 @@
-/* RGBKart cart, checkout and orders pages (uses shop.css tokens) */
+/* DeshiBasket cart, checkout and orders pages (uses shop.css tokens) */
 .ord-main { padding-block: 20px 50px; }
 .ord-main h1 { font: 600 1.7rem var(--display); margin: 0 0 4px; }
 .ord-main .lead { color: var(--muted); margin: 0 0 16px; }

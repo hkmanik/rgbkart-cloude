@@ -5,7 +5,7 @@
 // SITE_KEY is the PUBLIC Turnstile site key (safe to be in the page). Empty = bot check off (token() returns undefined).
 // Order: put the site key here and deploy FIRST, then switch captcha on in Supabase with the SECRET key.
 (function () {
-  const SITE_KEY = '0x4AAAAAAFq7jnNaU6llfXtc';   // RGBKart widget (Cloudflare account rgbkart@gmail.com)
+  const SITE_KEY = '0x4AAAAAAFq7jnNaU6llfXtc';   // DeshiBasket widget (Cloudflare account rgbkart@gmail.com)
   let loading = null, widget = null, box = null;
 
   function load() {
@@ -41,7 +41,7 @@
         sitekey: SITE_KEY,
         appearance: 'interaction-only',
         callback: t => finish(resolve, t),
-        'error-callback': code => { console.warn('[RGBKart] bot check error', code); finish(resolve, undefined); return true; },
+        'error-callback': code => { console.warn('[DeshiBasket] bot check error', code); finish(resolve, undefined); return true; },
         'expired-callback': () => {},
       });
     });

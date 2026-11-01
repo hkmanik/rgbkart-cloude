@@ -1,4 +1,4 @@
-/* RGBKart: tiny Excel (.xlsx) writer, no outside library.
+/* DeshiBasket: tiny Excel (.xlsx) writer, no outside library.
    RGBXlsx.download(fileName, { 'Sheet name': [[row1...], [row2...]], ... })
    First row of each sheet is bold and frozen. Numbers stay numbers; text that looks like a formula is made safe. */
 (function () {

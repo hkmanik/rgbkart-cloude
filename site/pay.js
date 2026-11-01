@@ -1,4 +1,4 @@
-// RGBKart pay form: seller pays a Featured or ad fee by bKash / Nagad / Upay / Rocket and sends the TrxID.
+// DeshiBasket pay form: seller pays a Featured or ad fee by bKash / Nagad / Upay / Rocket and sends the TrxID.
 // Needs the page's Supabase client `db`. Usage: RGBPay.form({ kind: 'featured' | 'ad', ref: id, amount, title, onDone })
 (function () {
   const CSS = `

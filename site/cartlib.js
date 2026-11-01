@@ -1,4 +1,4 @@
-// RGBKart cart helpers: read the device cart, refresh prices / stock from the database, group by shop, work out delivery.
+// DeshiBasket cart helpers: read the device cart, refresh prices / stock from the database, group by shop, work out delivery.
 // Needs shop.js (db, store, CART_KEY, saleActive). The database checks everything again when the order is placed.
 const SHIP_KEY = 'rgbkart-ship', COUPON_KEY = 'rgbkart-coupons';
 const CartLib = {

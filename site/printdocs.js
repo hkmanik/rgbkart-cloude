@@ -1,4 +1,4 @@
-// RGBKart order printing: invoice, packing list and shipping label, for one order or many at once.
+// DeshiBasket order printing: invoice, packing list and shipping label, for one order or many at once.
 // Used by Seller Center (and can be used by Admin). Printer setup is kept on this computer (localStorage 'rgbkart-print').
 //   RGBPrint.open(kind, orders, shop)   kind = 'invoice' | 'packing' | 'label'
 //   RGBPrint.settings() / RGBPrint.save(obj) / RGBPrint.SIZES
@@ -21,9 +21,9 @@
   const addr = o => [o.address, o.area, o.district].filter(Boolean).join(', ');
 
   function head(o, shop, title, s, logoUrl) {
-    return `<div class="hd"><div class="from">${s.showLogo && logoUrl ? `<img class="logo" src="${esc(logoUrl)}" alt="">` : ''}<div><div class="shop">${esc(shop.shop_name || 'RGBKart seller')}</div>
+    return `<div class="hd"><div class="from">${s.showLogo && logoUrl ? `<img class="logo" src="${esc(logoUrl)}" alt="">` : ''}<div><div class="shop">${esc(shop.shop_name || 'DeshiBasket seller')}</div>
       <div class="sm">${esc([shop.business_address, shop.area, shop.city].filter(Boolean).join(', '))}</div><div class="sm">${esc([shop.phone_public, shop.email_public].filter(Boolean).join(' · '))}</div>
-      <div class="sm muted">Sold on RGBKart · Red &amp; Green Basket</div></div></div>
+      <div class="sm muted">Sold on DeshiBasket</div></div></div>
       <div class="meta"><div class="ttl">${title}</div>${title === 'INVOICE' && o.invoice_no ? `<div>Invoice no. <b>${esc(o.invoice_no)}</b></div><div class="sm">Order ${esc(o.order_no)}</div>` : `<div><b>${esc(o.order_no)}</b></div>${o.invoice_no ? `<div class="sm">Invoice ${esc(o.invoice_no)}</div>` : ''}`}<div class="sm">${day(o.created_at)}</div>${s.barcode ? `<svg class="bc" data-code="${esc(o.order_no)}"></svg>` : ''}</div></div>`;
   }
   function invoice(o, shop, s, logoUrl) {
@@ -49,7 +49,7 @@
   }
   function label(o, shop, s) {
     const count = (o.order_items || []).reduce((a, i) => a + i.qty, 0);
-    return `<div class="lbl"><div class="lrow"><div class="sm"><b>FROM</b> ${esc([shop.shop_name, shop.phone_public].filter(Boolean).join(' · '))}<br>${esc([shop.area, shop.city].filter(Boolean).join(', '))}</div><div class="brand">RGBKart</div></div>
+    return `<div class="lbl"><div class="lrow"><div class="sm"><b>FROM</b> ${esc([shop.shop_name, shop.phone_public].filter(Boolean).join(' · '))}<br>${esc([shop.area, shop.city].filter(Boolean).join(', '))}</div><div class="brand">DeshiBasket</div></div>
       <div class="to"><div class="lb">DELIVER TO</div><div class="nm">${esc(o.customer_name)}</div><div class="ph">${esc(o.phone)}</div><div class="ad">${esc([o.address, o.area].filter(Boolean).join(', '))}</div><div class="dist">${esc(o.district)}</div></div>
       <div class="lrow cod"><div><div class="lb">CASH ON DELIVERY</div><div class="amt">${tk(o.total)}</div></div><div class="sm r">${esc(SHIP[o.ship_method] || o.ship_name || o.ship_method)}<br>${count} piece${count === 1 ? '' : 's'}<br>${day(o.created_at)}</div></div>
       ${s.barcode ? `<svg class="bc big" data-code="${esc(o.order_no)}"></svg>` : ''}<div class="ono">${esc(o.order_no)}</div>${o.note ? `<div class="sm nt">Note: ${esc(o.note)}</div>` : ''}</div>`;

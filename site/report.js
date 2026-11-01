@@ -1,4 +1,4 @@
-// RGBKart "Report" button and form (0030_reports_fraud.sql).
+// DeshiBasket "Report" button and form (0030_reports_fraud.sql).
 // RGBReport.link(db, { product: id } | { shop: sellerId }) → a small link that opens the report form.
 // Guests are signed in invisibly (like Messages) so the report can be sent. Needs i18n.js (T).
 (function () {
@@ -53,7 +53,7 @@
     const send = el('button', { type: 'button', class: 'send', text: T('Send report') });
     const box = el('div', { class: 'rp-box', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'rpTitle' },
       el('h2', { id: 'rpTitle', text: T(opt.product ? 'Report this product' : 'Report this shop') }),
-      el('p', { text: T('Tell RGBKart staff what is wrong. The seller will not see your name.') }),
+      el('p', { text: T('Tell DeshiBasket staff what is wrong. The seller will not see your name.') }),
       reasons, details, contact, err,
       el('div', { class: 'rp-btns' }, el('button', { type: 'button', text: T('Cancel'), onclick: close }), send));
     reasons.onchange = () => { err.hidden = true; };

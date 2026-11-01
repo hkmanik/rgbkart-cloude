@@ -1,4 +1,4 @@
-// RGBKart shop pages — shared code: connection, header (cart badge, account), product & category cards, wishlist.
+// DeshiBasket shop pages — shared code: connection, header (cart badge, account), product & category cards, wishlist.
 const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -32,7 +32,7 @@ const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 let hasSession = false;
 function headerHTML() {
   return `<header class="top"><div class="wrap top-in">
-    <a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b translate="no"><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a>
+    <a class="brand" href="index.html" aria-label="DeshiBasket home"><img src="assets/logo/deshibasket-icon-96.png" srcset="assets/logo/deshibasket-icon-96.png 1x, assets/logo/deshibasket-icon-192.png 2x" alt="" width="44" height="44"><span class="wm"><img class="word" src="assets/logo/deshibasket-word.png" alt="DeshiBasket" width="172" height="26"><small>Your Online Marketplace</small></span></a>
     <form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search products, shops, categories…" aria-label="Search products, shops and categories" autocomplete="off"><button type="submit">Search</button></form>
     <nav class="nav" aria-label="Account">
       <a class="sell hide-sm" href="sell.html">+ Sell</a>
@@ -47,9 +47,9 @@ function headerHTML() {
     </nav></div><div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div></header>`;
 }
 function footerHTML() {
-  return `<footer><div class="wrap"><div><b>RGBKart</b><div>Buy and sell across all 64 districts.</div></div>
+  return `<footer><div class="wrap"><div><b>DeshiBasket</b><div>Buy and sell across all 64 districts.</div></div>
     <div><span data-lang-switch="on-dark"></span><a href="categories.html">All categories</a><a href="browse.html">All products</a><a href="orders.html">My orders</a><a href="alerts.html">Alerts</a><a href="sell.html">Sell an item</a><a href="login.html?as=seller">Open a shop</a></div></div>
-    <div class="foot-credit"><span>© ${new Date().getFullYear()} <span translate="no">Red &amp; Green Basket (RGBKart)</span>. ${(window.T || (x => x))('All rights reserved.')}</span><span>${(window.T || (x => x))('Designed & developed by')} <a href="https://hkmanik.com" target="_blank" rel="noopener" translate="no">HKMANIK</a></span></div></footer>
+    <div class="foot-credit"><span>© ${new Date().getFullYear()} <span translate="no">DeshiBasket</span>. ${(window.T || (x => x))('All rights reserved.')}</span><span>${(window.T || (x => x))('Designed & developed by')} <a href="https://hkmanik.com" target="_blank" rel="noopener" translate="no">HKMANIK</a></span></div></footer>
     <a class="fab" href="sell.html">+ Sell</a>`;
 }
 function updateBadges() {
@@ -118,13 +118,13 @@ async function initShell() {
   if (window.RGBMenu) RGBMenu.mount();
   trackVisit();
   updateBadges();
-  if (!document.getElementById('instJs')) { const s = document.createElement('script'); s.id = 'instJs'; s.src = 'install.js?v=2'; s.defer = true; document.head.append(s); }   // install-as-app card (30 Oct)
+  if (!document.getElementById('instJs')) { const s = document.createElement('script'); s.id = 'instJs'; s.src = 'install.js?v=3'; s.defer = true; document.head.append(s); }   // install-as-app card (30 Oct)
   const q = new URLSearchParams(location.search).get('q'); if (q) document.querySelector('.search input').value = q;
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session && !session.user.is_anonymous) {
       $('acctLbl').textContent = T('My account'); $('acctLink').setAttribute('aria-label', T('My account')); $('acctLink').href = 'account.html'; if ($('openShop')) $('openShop').hidden = true;
-      // shops and RGBKart staff get a way back to their dashboard from every page (owner, 29 Oct 2026)
+      // shops and DeshiBasket staff get a way back to their dashboard from every page (owner, 29 Oct 2026)
       db.from('profiles').select('role').eq('id', session.user.id).maybeSingle().then(r => { if (r.data && r.data.role === 'seller' && $('dashLink')) $('dashLink').hidden = false; }, () => {});
       db.rpc('my_staff_role').then(r => { if (!r.error && r.data && $('adminLink')) $('adminLink').hidden = false; }, () => {});
     }

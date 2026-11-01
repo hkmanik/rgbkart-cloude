@@ -1,4 +1,4 @@
-// "Install the RGBKart app" (owner, 30 Oct 2026). Loaded by shop.js on every shop page.
+// "Install the DeshiBasket app" (owner, 30 Oct 2026). Loaded by shop.js on every shop page.
 // • Registers sw.js (needed to install; it only shows offline.html when there is no internet, nothing is cached).
 // • Android / computer Chrome & Edge: when the browser says the site can be installed, a small card offers "Install".
 // • iPhone / iPad Safari (no install button exists there): the card explains Share → "Add to Home Screen".
@@ -46,10 +46,10 @@
     if (card || views < 2) return;
     css();
     card = document.createElement('div');
-    card.className = 'inst'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-label', T('Install the RGBKart app'));
-    const img = document.createElement('img'); img.src = 'assets/logo/rgb-basket-192.png'; img.alt = '';
+    card.className = 'inst'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-label', T('Install the DeshiBasket app'));
+    const img = document.createElement('img'); img.src = 'assets/logo/deshibasket-icon-192.png'; img.alt = '';
     const t = document.createElement('div'); t.className = 'inst-t';
-    const b = document.createElement('b'); b.textContent = T('Install the RGBKart app');
+    const b = document.createElement('b'); b.textContent = T('Install the DeshiBasket app');
     const sp = document.createElement('span');
     sp.textContent = kind === 'ios' ? T('Tap Share ⬆ below, then “Add to Home Screen”.') : T('Free and quick: opens like an app, no Play Store needed.');
     t.append(b, sp);

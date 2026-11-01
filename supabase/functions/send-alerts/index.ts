@@ -1,9 +1,9 @@
-// RGBKart "send-alerts": emails new alerts from the notifications outbox through Resend.
+// DeshiBasket "send-alerts": emails new alerts from the notifications outbox through Resend.
 // Paste this whole file into Supabase → Edge Functions → Deploy a new function → "send-alerts".
 // Supabase Cron calls it every 5 minutes. It needs three secrets (Edge Functions → Secrets):
 //   RESEND_API_KEY  your Resend API key (starts with re_)
-//   ALERT_FROM      e.g.  RGBKart <alerts@rgbkart.com>
-//   SITE_URL        e.g.  https://rgbkart.com
+//   ALERT_FROM      e.g.  DeshiBasket <alerts@rgbkart.com>
+//   SITE_URL        e.g.  https://deshibasket.com
 // SMS (0071_sms.sql, 30 Oct 2026) also go out from here, through BulkSMSBD, when these secrets exist:
 //   BULKSMSBD_API_KEY    your BulkSMSBD API key
 //   BULKSMSBD_SENDER_ID  your approved sender ID (number or name) from BulkSMSBD
@@ -13,8 +13,8 @@
 const SB = Deno.env.get("SUPABASE_URL")!;
 const KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
-const FROM = Deno.env.get("ALERT_FROM") ?? "RGBKart <onboarding@resend.dev>";
-const SITE = (Deno.env.get("SITE_URL") ?? "https://rgbkart.com").replace(/\/+$/, "");
+const FROM = Deno.env.get("ALERT_FROM") ?? "DeshiBasket <onboarding@resend.dev>";
+const SITE = (Deno.env.get("SITE_URL") ?? "https://deshibasket.com").replace(/\/+$/, "");
 const SMS_KEY = Deno.env.get("BULKSMSBD_API_KEY") ?? "";
 const SMS_FROM = Deno.env.get("BULKSMSBD_SENDER_ID") ?? "";
 
@@ -42,17 +42,17 @@ const BUTTON: Record<string, string> = {
 
 function html(a: Alert) {
   const link = `${SITE}/${(a.link || "alerts.html").replace(/^\/+/, "")}`;
-  const btn = BUTTON[a.kind] || (a.kind.startsWith("order_") ? "Track my order" : "Open RGBKart");
+  const btn = BUTTON[a.kind] || (a.kind.startsWith("order_") ? "Track my order" : "Open DeshiBasket");
   return `<!doctype html><html><body style="margin:0;background:#f4f6f4;font-family:Roboto,Arial,sans-serif;color:#1d241f">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f4;padding:20px 10px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e3e8e4">
 <tr><td style="background:#00802B;border-bottom:4px solid #F5C400;padding:16px 22px">
-<img src="${SITE}/assets/logo/rgb-basket-96.png" width="36" height="36" alt="" style="vertical-align:middle;background:#fff;border-radius:50%;padding:3px">
-<span style="vertical-align:middle;margin-left:8px;font:700 19px Poppins,Arial,sans-serif;color:#ffffff">Red &amp; Green Basket</span></td></tr>
+<img src="${SITE}/assets/logo/deshibasket-icon-96.png" width="36" height="36" alt="" style="vertical-align:middle;background:#fff;border-radius:50%;padding:3px">
+<span style="vertical-align:middle;margin-left:8px;font:700 19px Poppins,Arial,sans-serif;color:#ffffff">DeshiBasket</span></td></tr>
 <tr><td style="padding:24px 22px 8px"><h1 style="margin:0 0 12px;font:600 20px Poppins,Arial,sans-serif;color:#1d241f">${esc(a.title)}</h1>
 <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#3a453d">${esc(a.body || "")}</p>
 <a href="${link}" style="display:inline-block;background:#E30613;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:12px 22px;border-radius:10px">${btn}</a></td></tr>
-<tr><td style="padding:22px;font-size:12px;line-height:1.5;color:#6b766e">You got this email because of your activity on RGBKart.
+<tr><td style="padding:22px;font-size:12px;line-height:1.5;color:#6b766e">You got this email because of your activity on DeshiBasket.
 <a href="${SITE}/alerts.html" style="color:#00802B">Turn alert emails off</a>.</td></tr>
 </table></td></tr></table></body></html>`;
 }

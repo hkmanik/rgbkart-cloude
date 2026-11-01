@@ -1,4 +1,4 @@
-/* RGBKart shop pages — shared look: header, footer, category cards, product cards (6 per row on desktop) */
+/* DeshiBasket shop pages — shared look: header, footer, category cards, product cards (6 per row on desktop) */
 :root {
   --bg: #F4F7F5; --surface: #ffffff; --fg: #14211C; --muted: #5A6A62; --faint: #667A71; --line: #D9E2DC;
   --accent: #00802B; --accent-hover: #006622; --accent-fg: #ffffff; --accent-soft: #E5F4EA;
@@ -26,13 +26,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .top-in { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding-block: 12px; }
 .brand { display: inline-flex; justify-self: start; align-items: center; gap: 9px; background: #fff; border-radius: 999px; padding: 3px 16px 3px 3px; text-decoration: none; box-shadow: 0 1px 4px rgb(0 0 0 / .22); flex: none; transition: box-shadow .15s, transform .15s; }
 .brand:hover { box-shadow: 0 3px 10px rgb(0 0 0 / .28); transform: translateY(-1px); }
-.brand img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; background: #fff; flex: none; }
+.brand img { width: 44px; height: 44px; flex: none; }   /* DeshiBasket bag (1 Nov) */
+.brand img.word { width: auto; height: 26px; display: block; }
 .brand .wm { display: grid; line-height: 1.05; min-width: 0; }
 .brand b { font: 800 1.12rem/1.1 var(--display); letter-spacing: -.01em; white-space: nowrap; }
 .brand .nw { white-space: nowrap; } .brand .r { color: #E30613; } .brand .a { color: #14211C; } .brand .g { color: #00802B; }
 .brand .y { color: #F5C400; text-shadow: 0 1px 0 #A87400, 0 0 1px #A87400; }
 .brand small { font: 600 .6rem/1.2 var(--body); letter-spacing: .09em; text-transform: uppercase; color: #00802B; margin-top: 3px; white-space: nowrap; }
-@media (max-width: 560px) { .brand { padding-right: 12px; gap: 7px; } .brand img { width: 36px; height: 36px; } .brand b { font-size: .95rem; } .brand small { display: none; } }
+@media (max-width: 560px) { .brand { padding-right: 12px; gap: 6px; } .brand img { width: 36px; height: 36px; } .brand img.word { width: auto; height: 21px; } .brand small { display: none; } }
 .search { display: flex; background: #fff; border-radius: 10px; overflow: hidden; min-width: 0; }
 .search input { flex: 1; min-width: 0; border: 0; padding: 11px 14px; font: inherit; font-size: 15px; color: #14211C; background: #fff; }
 .search input:focus-visible { outline: none; }
@@ -75,7 +76,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (max-width: 420px) {
   .brand { flex: none; gap: 6px; padding-right: 10px; }
   .brand img { width: 34px; height: 34px; }
-  .brand b { font-size: .78rem; line-height: 1.12; } .brand .y { display: block; }   /* two whole lines: "Red & Green" / "Basket" (was cut off, 30 Oct) */
+  .brand img.word { width: auto; height: 17px; }
   .nav { gap: 4px; }
   .nav .icon-link { padding: 6px 6px; }
   .nav .open-shop { padding: 6px 8px; }
@@ -84,7 +85,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (max-width: 345px) {
   .brand { gap: 5px; padding-right: 9px; }
   .brand img { width: 32px; height: 32px; }
-  .brand b { font-size: .8rem; }
+  .brand img.word { width: auto; height: 15px; }
   .nav .icon-link { padding: 5px 6px; }
   .brand { flex: none; }
   #msgLink:not([hidden]) ~ #wishLink { display: none; }

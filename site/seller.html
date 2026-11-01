@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#00802B">
 <meta name="robots" content="noindex">
-<title>RGBKart Seller Center</title>
-<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
-<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<title>DeshiBasket Seller Center</title>
+<link rel="icon" href="assets/favicon/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
@@ -314,7 +314,7 @@
   .gate { min-height: 100%; display: grid; place-content: center; padding: 40px 16px; }
   .gate .card { width: min(440px, calc(100vw - 32px)); }
   .side-logo { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 6px 8px; margin: 0 6px 10px; text-decoration: none; }
-  .side-logo img { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; flex: none; }
+  .side-logo > img { width: 40px; height: 40px; flex: none; }
   .side-logo b { display: block; font: 800 .9rem/1.1 var(--display); letter-spacing: -.015em; white-space: nowrap; }
   .side-logo small { display: block; font: 700 .62rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: #00802B; margin-top: 2px; }
   /* Advertise */
@@ -466,7 +466,7 @@
 <!-- Shown while checking sign-in, or when this page isn't for this account -->
 <div class="gate" id="gate">
   <div class="card">
-    <h1>RGBKart <span style="font:600 .75rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)">Seller Center</span></h1>
+    <h1>DeshiBasket <span style="font:600 .75rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)">Seller Center</span></h1>
     <p class="msg" id="gateMsg">Checking your account…</p>
     <a href="login.html" id="gateLink" hidden>Go to sign in</a>
   </div>
@@ -480,7 +480,7 @@
   <div class="scrim" id="scrim"></div>
 
   <nav class="side" id="side" aria-label="Seller menu">
-    <a class="side-logo" href="index.html" aria-label="Red &amp; Green Basket home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="40" height="40"><span><b><span style="color:#E30613">Red</span> <span style="color:#14211C">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Seller</small></span></a>
+    <a class="side-logo" href="index.html" aria-label="DeshiBasket home"><img src="assets/logo/deshibasket-icon-96.png" srcset="assets/logo/deshibasket-icon-96.png 1x, assets/logo/deshibasket-icon-192.png 2x" alt="" width="40" height="40"><span><img src="assets/logo/deshibasket-word.png" alt="DeshiBasket" width="132" height="20" style="display:block;height:20px;width:auto"><small>Seller</small></span></a>
     <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="shop-name" id="shopName"></div>
 
@@ -513,17 +513,17 @@
   </nav>
 
   <main class="main" id="main">
-    <div class="banner warn" id="pendingBanner" hidden><b>Your shop is waiting for approval.</b>You can add products once the RGBKart team approves your shop. This usually takes 1–2 working days.</div>
-    <div class="banner bad" id="rejectedBanner" hidden><b>Your shop wasn't approved.</b>Contact RGBKart support to find out why and what to change.</div>
+    <div class="banner warn" id="pendingBanner" hidden><b>Your shop is waiting for approval.</b>You can add products once the DeshiBasket team approves your shop. This usually takes 1–2 working days.</div>
+    <div class="banner bad" id="rejectedBanner" hidden><b>Your shop wasn't approved.</b>Contact DeshiBasket support to find out why and what to change.</div>
 
     <!-- ===== Product list ===== -->
     <section data-page="products">
       <div class="page-head">
-        <div><h1>My products</h1><p>Everything you sell on RGBKart. New products are checked by our team before shoppers can see them.</p></div>
+        <div><h1>My products</h1><p>Everything you sell on DeshiBasket. New products are checked by our team before shoppers can see them.</p></div>
         <button class="primary need-approved" type="button" id="addBtn">+ Add product</button>
       </div>
       <div class="tiles" style="margin-top:16px">
-        <div class="tile tone-green"><b id="sLive">0</b><span>Live on RGBKart</span></div>
+        <div class="tile tone-green"><b id="sLive">0</b><span>Live on DeshiBasket</span></div>
         <div class="tile tone-amber"><b id="sPending">0</b><span>Waiting for review</span></div>
         <div class="tile tone-blue"><b id="sDraft">0</b><span>Drafts</span></div>
         <div class="tile tone-red"><b id="sLow">0</b><span>Low or out of stock</span></div>
@@ -546,7 +546,7 @@
 
     <!-- ===== Featured requests ===== -->
     <section data-page="featured">
-      <div class="page-head"><div><h1>Payment requests</h1><p>Everything you have asked RGBKart for that needs a payment: Featured listings and advertisements. Pay by bKash, Nagad, Upay or Rocket and enter the Transaction ID. Each one starts when we confirm the payment.</p></div></div>
+      <div class="page-head"><div><h1>Payment requests</h1><p>Everything you have asked DeshiBasket for that needs a payment: Featured listings and advertisements. Pay by bKash, Nagad, Upay or Rocket and enter the Transaction ID. Each one starts when we confirm the payment.</p></div></div>
       <div class="card" style="margin-top:16px"><h2 style="margin:0 0 8px;font-size:1.05rem">★ Featured listings</h2><div class="plist" id="flist"></div></div>
       <div class="card" style="margin-top:16px"><h2 style="margin:0 0 8px;font-size:1.05rem">📣 Advertisements</h2><div class="plist" id="payAds"></div>
         <p class="pmeta" style="margin:8px 0 0">To book a new ad, go to <a href="#ads" onclick="event.preventDefault(); document.querySelector('.nav[data-view=ads]').click()">Advertise</a>.</p></div>
@@ -576,7 +576,7 @@
 
     <!-- ===== Advertise ===== -->
     <section data-page="verify" hidden>
-      <div class="page-head"><div><h1>Get verified</h1><p>Send a photo of your National ID (front and back) or your trade licence. RGBKart checks it, and buyers then see <b>✓ Verified shop</b> on your shop and products, which helps them trust you. Your documents are private: only you and the RGBKart team can see them.</p></div></div>
+      <div class="page-head"><div><h1>Get verified</h1><p>Send a photo of your National ID (front and back) or your trade licence. DeshiBasket checks it, and buyers then see <b>✓ Verified shop</b> on your shop and products, which helps them trust you. Your documents are private: only you and the DeshiBasket team can see them.</p></div></div>
       <div class="card" id="vfStatus" style="margin-top:16px"></div>
       <div class="card" id="vfForm" hidden style="margin-top:16px">
         <h2>Send your document</h2>
@@ -586,7 +586,7 @@
           <label>Name on the document<input id="vfName" type="text" maxlength="100"></label>
         </div>
         <label>Photos or PDF (up to 4: e.g. NID front and back)<input id="vfFiles" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple><span class="hint">Clear photo, all four corners visible, no glare. Up to 5 MB each.</span></label>
-        <label>Note for RGBKart (optional)<input id="vfNote" type="text" maxlength="500"></label>
+        <label>Note for DeshiBasket (optional)<input id="vfNote" type="text" maxlength="500"></label>
         <div class="row-btns"><button type="button" class="primary" id="vfSend">Send for checking</button></div>
       </div>
     </section>
@@ -601,7 +601,7 @@
     </section>
 
     <section data-page="delivery" hidden>
-      <div class="page-head"><div><h1>Delivery</h1><p>Choose how you deliver and what you charge. Buyers see only the methods you tick, at your fees. Leave a fee empty to use RGBKart's suggested fee. Products marked Heavy, Vehicle, Flammable or Fragile (in the product's "Parcel type") can only be sent with a matching special method, or Store pickup / Agree with buyer.</p></div></div>
+      <div class="page-head"><div><h1>Delivery</h1><p>Choose how you deliver and what you charge. Buyers see only the methods you tick, at your fees. Leave a fee empty to use DeshiBasket's suggested fee. Products marked Heavy, Vehicle, Flammable or Fragile (in the product's "Parcel type") can only be sent with a matching special method, or Store pickup / Agree with buyer.</p></div></div>
       <div class="card" style="margin-top:16px"><h2>Normal parcels</h2><div id="dlNormal"></div></div>
       <div class="card" style="margin-top:16px"><h2>Special items</h2><p class="hint" style="margin:0 0 8px">Only needed if you sell heavy, vehicle, flammable or fragile items.</p><div id="dlSpecial"></div></div>
       <div class="card" style="margin-top:16px"><h2>Free delivery</h2>
@@ -609,7 +609,7 @@
         <p class="hint" style="margin:6px 0 0">Applies to normal parcels only. Store pickup is set in Shop settings.</p></div>
       <div class="actions" style="justify-content:flex-start;margin-top:14px"><button type="button" class="primary" id="dlSave">Save delivery settings</button><span id="dlMsg" class="hint"></span></div>
       <div class="card" style="margin-top:22px"><h2>🚚 Courier accounts</h2>
-        <p class="hint" style="margin:0 0 8px">Connect your own Steadfast, Pathao or RedX merchant account to book parcels straight from your orders. The courier collects the cash from the buyer and pays you as usual. Your keys are kept on RGBKart's server only; nobody can see them, not even you, after saving.</p>
+        <p class="hint" style="margin:0 0 8px">Connect your own Steadfast, Pathao or RedX merchant account to book parcels straight from your orders. The courier collects the cash from the buyer and pays you as usual. Your keys are kept on DeshiBasket's server only; nobody can see them, not even you, after saving.</p>
         <div id="crList"></div></div>
     </section>
 
@@ -670,7 +670,7 @@
     </section>
 
     <section data-page="ads">
-      <div class="page-head"><div><h1>Advertise</h1><p>Put a banner for your shop on RGBKart. Choose a space and the days, pay by bKash, Nagad, Upay or Rocket, and your ad goes live when we confirm the payment.</p></div></div>
+      <div class="page-head"><div><h1>Advertise</h1><p>Put a banner for your shop on DeshiBasket. Choose a space and the days, pay by bKash, Nagad, Upay or Rocket, and your ad goes live when we confirm the payment.</p></div></div>
       <div class="card" style="margin-top:16px">
         <h2>Book an Advertisement</h2>
         <div class="adsp" id="adSpaces" role="group" aria-label="Ad space"></div>
@@ -729,7 +729,7 @@
               <label>Tagline<input id="sTagline" type="text" maxlength="120" placeholder="e.g. Original gadgets with warranty"></label>
             </div>
             <label><span class="req">Shop web address</span>
-              <div class="addr"><span>rgbkart.com/shop/</span><input id="sSlug" type="text" maxlength="60"></div>
+              <div class="addr"><span>deshibasket.com/shop/</span><input id="sSlug" type="text" maxlength="60"></div>
               <span class="hint">Lowercase letters, numbers and dashes. Changing it breaks links you've already shared.</span></label>
             <label>About your shop<textarea id="sAbout" maxlength="1000" placeholder="What you sell, since when, why buy from you"></textarea></label>
           </div>
@@ -747,7 +747,7 @@
               <label><span class="req">Business address</span><input id="sAddress" type="text" maxlength="200"></label>
               <label><span class="req">District</span><select id="sDistrict"></select></label>
             </div>
-            <label>Trade licence no. <span class="from">(only RGBKart sees this)</span><input id="sLicence" type="text" maxlength="60"></label>
+            <label>Trade licence no. <span class="from">(only DeshiBasket sees this)</span><input id="sLicence" type="text" maxlength="60"></label>
           </div>
 
           <div class="card">
@@ -1097,7 +1097,7 @@
         <span class="hint" id="barHint"></span>
         <span class="hint" id="autoSaved" aria-live="polite"></span>
         <span class="spacer"></span>
-        <label class="check agree-bar" id="agreeWrap"><input type="checkbox" id="fAgree"> <span>I confirm this product is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and <a href="page.html?p=seller-rules" target="_blank">RGBKart's seller rules</a>.</span></label>
+        <label class="check agree-bar" id="agreeWrap"><input type="checkbox" id="fAgree"> <span>I confirm this product is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and <a href="page.html?p=seller-rules" target="_blank">DeshiBasket's seller rules</a>.</span></label>
         <button type="button" class="ghost" id="saveBtn">Save draft</button>
         <button type="button" class="primary" id="submitBtn">Send for review</button>
         <p class="msg error" id="edMsg" role="alert" hidden></p>
@@ -1109,12 +1109,12 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="session.js?v=1"></script>
-<script src="phone.js?v=1"></script>
+<script src="phone.js?v=2"></script>
 <script src="thumbs.js?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="pay.js?v=2"></script>
-<script src="printdocs.js?v=7"></script>
+<script src="pay.js?v=3"></script>
+<script src="printdocs.js?v=8"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -1255,7 +1255,7 @@
     box.innerHTML = '';
     if (ok) box.append(h('div', { class: 'vf-ok' }, h('b', { text: '✓ Your shop is verified' }), h('span', { class: 'muted', text: 'Since ' + new Date(sd.data.verified_at || Date.now()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '. Buyers see the Verified shop badge.' })));
     else if (last && last.status === 'pending') box.append(h('div', { class: 'vf-wait' }, h('b', { text: '⏳ Waiting to be checked' }), h('span', { class: 'muted', text: `${VF_DOC[last.doc_type]} sent on ${new Date(last.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}. You will get an alert when it is checked, usually within 1–2 days.` })));
-    else if (last && last.status === 'rejected') box.append(h('div', { class: 'vf-no' }, h('b', { text: 'Please send your document again' }), h('span', { text: 'RGBKart: ' + (last.admin_note || '') })));
+    else if (last && last.status === 'rejected') box.append(h('div', { class: 'vf-no' }, h('b', { text: 'Please send your document again' }), h('span', { text: 'DeshiBasket: ' + (last.admin_note || '') })));
     else box.append(h('div', {}, h('b', { text: 'Not verified yet' }), h('span', { class: 'muted', style: 'display:block', text: 'Send one document below. It takes about a minute.' })));
     $('vfForm').hidden = !!ok || (last && last.status === 'pending');
   }
@@ -1275,7 +1275,7 @@
       }
       const { error } = await db.rpc('submit_verification', { p_doc_type: $('vfType').value, p_doc_number: $('vfNum').value.trim() || null, p_holder: $('vfName').value.trim() || null, p_files: paths, p_note: $('vfNote').value.trim() || null });
       if (error) throw error;
-      toast('Sent. RGBKart will check it soon.'); $('vfFiles').value = ''; loadVerify();
+      toast('Sent. DeshiBasket will check it soon.'); $('vfFiles').value = ''; loadVerify();
     } catch (e) { toast(friendly(e)); }
     btn.disabled = false; btn.textContent = 'Send for checking';
   };
@@ -1357,7 +1357,7 @@
       db.from('seller_shipping').select('*').eq('seller_id', me.id),
       db.from('seller_delivery').select('*').eq('seller_id', me.id).maybeSingle(),
     ]);
-    if (m.error || mine.error) { $('dlNormal').append(h('p', { class: 'hint', text: /does not exist|Could not find/i.test((mine.error || m.error).message) ? 'Delivery settings are being switched on by RGBKart. Please check again later.' : friendly(mine.error || m.error) })); $('dlSave').disabled = true; return; }
+    if (m.error || mine.error) { $('dlNormal').append(h('p', { class: 'hint', text: /does not exist|Could not find/i.test((mine.error || m.error).message) ? 'Delivery settings are being switched on by DeshiBasket. Please check again later.' : friendly(mine.error || m.error) })); $('dlSave').disabled = true; return; }
     $('dlSave').disabled = false;
     const have = new Map(mine.data.map(r => [r.method_id, r])), setup = mine.data.length > 0;
     dlRows = [];
@@ -1370,7 +1370,7 @@
         h('label', { class: 'check' }, on, h('span', {}, h('b', { text: mm.name }), h('small', { class: 'hint', style: 'display:block', text: [mm.for_class ? 'For ' + CLASS_NAME[mm.for_class] : null, mm.eta].filter(Boolean).join(' · ') }))),
         h('label', {}, 'Your fee (৳)', fee, h('small', { class: 'hint', text: `Suggested ${money(mm.fee)}` + (mm.max_fee != null ? ` · up to ${money(mm.max_fee)}` : '') }))));
     }
-    if (!$('dlSpecial').children.length) $('dlSpecial').append(h('p', { class: 'hint', text: 'RGBKart has no special methods switched on yet.' }));
+    if (!$('dlSpecial').children.length) $('dlSpecial').append(h('p', { class: 'hint', text: 'DeshiBasket has no special methods switched on yet.' }));
     $('dlFreeOver').value = fd.data && fd.data.free_over ? Number(fd.data.free_over) : '';
     loadCouriers();
   }
@@ -1392,7 +1392,7 @@
     if (error) {
       let msg = '';
       try { msg = (await error.context.json()).error; } catch (_) {}
-      if (!msg && /Failed to send|not found|404/i.test(error.message || '')) msg = 'Courier booking is being switched on by RGBKart. Please try again later.';
+      if (!msg && /Failed to send|not found|404/i.test(error.message || '')) msg = 'Courier booking is being switched on by DeshiBasket. Please try again later.';
       throw new Error(msg || error.message || 'Something went wrong.');
     }
     if (data && data.error) throw new Error(data.error);
@@ -1406,7 +1406,7 @@
   async function loadCouriers() {
     const box = $('crList'); if (!box) return; box.innerHTML = '';
     const r = await fetchMyCouriers();
-    if (r.error) { box.append(h('p', { class: 'hint', text: /does not exist|Could not find/i.test(r.error.message) ? 'Courier booking is being switched on by RGBKart. Please check again later.' : friendly(r.error) })); return; }
+    if (r.error) { box.append(h('p', { class: 'hint', text: /does not exist|Could not find/i.test(r.error.message) ? 'Courier booking is being switched on by DeshiBasket. Please check again later.' : friendly(r.error) })); return; }
     for (const [key, c] of Object.entries(CR)) {
       const have = myCouriers.find(x => x.courier === key);
       const form = h('div', { class: 'cr-form', hidden: true });
@@ -1666,7 +1666,7 @@
         h('span', { class: 'rv-stars', 'aria-label': `${x.rating} out of 5 stars`, text: starTxt(x.rating) }),
         h('b', { text: x.product_id ? (x.products && x.products.title || 'Product') : 'Your shop' }),
         h('span', { class: 'muted', text: `${x.reviewer_name} · ${new Date(x.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}${x.orders ? ' · ' + x.orders.order_no : ''}` })),
-      x.is_hidden && h('p', { class: 'rv-hid', text: 'Hidden by RGBKart' + (x.hidden_reason ? ': ' + x.hidden_reason : '') + '. It does not count in your stars.' }),
+      x.is_hidden && h('p', { class: 'rv-hid', text: 'Hidden by DeshiBasket' + (x.hidden_reason ? ': ' + x.hidden_reason : '') + '. It does not count in your stars.' }),
       h('p', { class: 'rv-text', text: x.comment || '(No comment, stars only)' }),
       !x.is_hidden && shown, !x.is_hidden && form,
       !x.is_hidden && !x.reply && !x.comment && h('div', { class: 'row-btns' }, h('button', { type: 'button', class: 'ghost', text: 'Reply', onclick: e => { e.target.parentNode.remove(); form.hidden = false; ta.focus(); } })));
@@ -1851,7 +1851,7 @@
     const label = { high: '⚠ Risky buyer', watch: '⚠ Check first', trusted: '✓ Trusted buyer', new: 'New buyer', ok: 'Buyer history' }[x.level];
     const tip = { high: 'This buyer refused or cancelled several orders before. Call to confirm, or ask for the delivery charge in advance.',
                   watch: 'This buyer refused or cancelled before. Call to confirm before you pack.',
-                  trusted: 'This buyer received orders on RGBKart before.', new: 'First order on RGBKart. Call to confirm.', ok: '' }[x.level];
+                  trusted: 'This buyer received orders on DeshiBasket before.', new: 'First order on DeshiBasket. Call to confirm.', ok: '' }[x.level];
     return h('div', { class: 'risk ' + x.level, title: tip }, h('b', { text: label }), bits.length ? h('span', { text: bits.join(' · ') + ' (all shops)' }) : null, tip && x.level !== 'trusted' ? h('small', { text: tip }) : null);
   }
   function drawOrderCount() { const n = orders.filter(o => o.status === 'pending').length; $('navOrders').hidden = !n; $('navOrders').textContent = n; }
@@ -1859,7 +1859,7 @@
   function drawInvCode() {
     const n = $('invCodeNote'); if (!n || !shop || !shop.invoice_code) return;
     n.hidden = false;
-    n.textContent = `Every order also gets your shop's own invoice number, in order: ${shop.invoice_code}-${new Date().getFullYear()}-00001, -00002 … Your invoice code ${shop.invoice_code} is set by RGBKart; ask RGBKart to change it.`;
+    n.textContent = `Every order also gets your shop's own invoice number, in order: ${shop.invoice_code}-${new Date().getFullYear()}-00001, -00002 … Your invoice code ${shop.invoice_code} is set by DeshiBasket; ask DeshiBasket to change it.`;
   }
   function drawOrders() {
     const tabs = $('ordTabs'); tabs.innerHTML = '';
@@ -1989,7 +1989,7 @@
 
   // ===================== Advertise =====================
   let adRatesS = [], myAds = [], sadPlace = null, sadBlob = null;
-  const AD_STATE = { wait: 'Waiting for payment', check: 'Payment being checked', live: 'Running', soon: 'Paid · starts soon', ended: 'Ended', paused: 'Paused by RGBKart' };
+  const AD_STATE = { wait: 'Waiting for payment', check: 'Payment being checked', live: 'Running', soon: 'Paid · starts soon', ended: 'Ended', paused: 'Paused by DeshiBasket' };
   const dhakaDay = () => new Date(Date.now() + 6 * 3600e3).toISOString().slice(0, 10);
   const plusDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
   const dmy = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -2788,7 +2788,7 @@
     ((plan && plan.benefits) || []).forEach(b => ul.append(h('li', { text: b })));
     $('featNote').textContent = openFeat
       ? `Status: ${FEAT[openFeat.status]}.` + (openFeat.status === 'awaiting_payment' ? ' Choose "Free listing" to cancel the request.' : '')
-      : 'The fee is set by RGBKart. After you save, pay from the Payment requests page. Featuring starts once your product is approved and the payment is confirmed.';
+      : 'The fee is set by DeshiBasket. After you save, pay from the Payment requests page. Featuring starts once your product is approved and the payment is confirmed.';
   }
 
   // ---------- summary ----------
@@ -2889,7 +2889,7 @@
     if (forReview && row.is_service && !row.service_mode) errs.push('Choose where the service happens (Price & details).');
     if (forReview) {
       if (!photos.length) errs.push('Add at least one photo.');
-      if (!$('fAgree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and RGBKart\'s seller rules.'); $('agreeWrap').classList.add('need'); }
+      if (!$('fAgree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and DeshiBasket\'s seller rules.'); $('agreeWrap').classList.add('need'); }
     }
     return errs;
   }
@@ -3152,7 +3152,7 @@
     const logo = $('pvLogo'); logo.innerHTML = '';
     if (shopImg.logo) logo.append(h('img', { src: shopImg.logo.url, alt: '' })); else logo.textContent = name.trim().charAt(0).toUpperCase();
     $('pvBanner').style.backgroundImage = shopImg.banner ? `url("${shopImg.banner.url}")` : '';
-    $('pvAddr').textContent = 'rgbkart.com/shop/' + ($('sSlug').value.trim() || '…');
+    $('pvAddr').textContent = 'deshibasket.com/shop/' + ($('sSlug').value.trim() || '…');
   }
   ['sName', 'sTagline', 'sSlug'].forEach(id => $(id).addEventListener('input', drawPreview));
   $('sSlug').addEventListener('input', () => { const c = $('sSlug').selectionStart; $('sSlug').value = $('sSlug').value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-'); $('sSlug').setSelectionRange(c, c); drawPreview(); });

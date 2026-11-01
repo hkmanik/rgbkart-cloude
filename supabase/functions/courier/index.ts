@@ -1,4 +1,4 @@
-// RGBKart "courier": shops book their orders with Steadfast, Pathao or RedX from Seller Center (0072_couriers.sql).
+// DeshiBasket "courier": shops book their orders with Steadfast, Pathao or RedX from Seller Center (0072_couriers.sql).
 // Paste this whole file into Supabase → Edge Functions → Deploy a new function → name it "courier".
 // Keep "Verify JWT" ON (the default): only signed-in users can call it, and it checks that the order is the caller's.
 // It needs no extra secrets: each shop connects its own courier account in Seller Center → Delivery → Courier accounts.

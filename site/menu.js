@@ -1,4 +1,4 @@
-// RGBKart main menu: "All categories" button with a category panel, then the admin-managed links (Admin → Main menu).
+// DeshiBasket main menu: "All categories" button with a category panel, then the admin-managed links (Admin → Main menu).
 // Works on any page that has a <header> and a Supabase client named `db`. Call RGBMenu.mount() once the header exists.
 (function () {
   const L = window.L || ((r, f) => r ? r[f] : ''), T = window.T || ((s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]));

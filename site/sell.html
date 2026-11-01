@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Sell your used or new item on RGBKart for free. Listings are checked by our team.">
-<meta property="og:site_name" content="RGBKart · Red &amp; Green Basket">
+<meta name="description" content="Sell your used or new item on DeshiBasket for free. Listings are checked by our team.">
+<meta property="og:site_name" content="DeshiBasket">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Sell an item | RGBKart">
-<meta property="og:description" content="Sell your used or new item on RGBKart for free. Listings are checked by our team.">
-<meta property="og:image" content="%%SITE%%/assets/og/rgbkart-share.png">
+<meta property="og:title" content="Sell an item | DeshiBasket">
+<meta property="og:description" content="Sell your used or new item on DeshiBasket for free. Listings are checked by our team.">
+<meta property="og:image" content="%%SITE%%/assets/og/deshibasket-share.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -16,10 +16,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://qrzlsomuluglbslricaf.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<title>Sell on RGBKart</title>
-<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
-<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<title>Sell on DeshiBasket</title>
+<link rel="icon" href="assets/favicon/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
@@ -44,13 +44,14 @@
   .top-in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .brand { display: inline-flex; align-items: center; gap: 9px; background: #fff; border-radius: 999px; padding: 3px 16px 3px 3px; text-decoration: none; box-shadow: 0 1px 4px rgb(0 0 0 / .22); flex: none; transition: box-shadow .15s, transform .15s; }
   .brand:hover { box-shadow: 0 3px 10px rgb(0 0 0 / .28); transform: translateY(-1px); }
-  .brand img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; background: #fff; flex: none; }
+  .brand img { width: 44px; height: 44px; flex: none; }
+  .brand img.word { width: auto; height: 26px; display: block; }
   .brand .wm { display: grid; line-height: 1.05; min-width: 0; }
   .brand b { font: 800 1.12rem/1.1 var(--display); letter-spacing: -.01em; white-space: nowrap; }
   .brand .nw { white-space: nowrap; } .brand .r { color: #E30613; } .brand .a { color: #14211C; } .brand .g { color: #00802B; }
   .brand .y { color: #F5C400; text-shadow: 0 1px 0 #A87400, 0 0 1px #A87400; }
   .brand small { font: 600 .6rem/1.2 var(--body); letter-spacing: .09em; text-transform: uppercase; color: #00802B; margin-top: 3px; white-space: nowrap; }
-  @media (max-width: 560px) { .brand { padding-right: 12px; gap: 7px; } .brand img { width: 36px; height: 36px; } .brand b { font-size: .95rem; } .brand small { display: none; } }
+  @media (max-width: 560px) { .brand { padding-right: 12px; gap: 6px; } .brand img { width: 36px; height: 36px; } .brand img.word { width: auto; height: 19px; } .brand small { display: none; } }
   .top a.small { color: #FFE066; font-size: .9rem; }
   .rgb { display: flex; height: 3px; } .rgb i { flex: 1; } .rgb i:nth-child(1) { background: #F5C400; } .rgb i:nth-child(2) { background: #F5C400; } .rgb i:nth-child(3) { background: #F5C400; }
   main { max-width: 640px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
@@ -152,7 +153,7 @@
 </head>
 <body>
 <header>
-  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="44" height="44"><span class="wm"><b translate="no"><span class="nw"><span class="r">Red</span> <span class="a">&amp;</span> <span class="g">Green</span></span> <span class="y">Basket</span></b><small>Your Online Marketplace</small></span></a><span style="display:flex;gap:14px;align-items:center"><span data-lang-switch="on-dark"></span><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
+  <div class="top"><div class="top-in"><a class="brand" href="index.html" aria-label="DeshiBasket home"><img src="assets/logo/deshibasket-icon-96.png" srcset="assets/logo/deshibasket-icon-96.png 1x, assets/logo/deshibasket-icon-192.png 2x" alt="" width="44" height="44"><span class="wm"><img class="word" src="assets/logo/deshibasket-word.png" alt="DeshiBasket" width="172" height="26"><small>Your Online Marketplace</small></span></a><span style="display:flex;gap:14px;align-items:center"><span data-lang-switch="on-dark"></span><a class="small msglink" href="messages.html" id="msgTop" hidden>Messages<b id="msgTopN" hidden></b></a><a class="small" href="login.html">Sign in</a></span></div></div>
   <div class="rgb" aria-hidden="true"><i></i><i></i><i></i></div>
 </header>
 
@@ -204,7 +205,7 @@
           <span class="pt">Free listing <span class="price">৳0</span></span>
           <span class="ways"><span class="way on">💬 Message</span><span class="way">📞 Call</span><span class="way">WhatsApp</span><span class="way">✉ Email</span></span>
           <ul>
-            <li>Buyers send you messages on RGBKart</li>
+            <li>Buyers send you messages on DeshiBasket</li>
             <li>Your phone number stays private</li>
             <li class="no">Buyers can't call, WhatsApp or email you</li>
             <li class="no">Normal position in search</li>
@@ -242,12 +243,12 @@
     </section>
 
     <div class="agree" id="agreeWrap">
-      <label class="check"><input id="agree" type="checkbox"> <span>I confirm this item is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and the rules of RGBKart.</span></label>
+      <label class="check"><input id="agree" type="checkbox"> <span>I confirm this item is legal to sell in Bangladesh, and I will follow the laws of the Government of Bangladesh and the rules of DeshiBasket.</span></label>
       <p class="agree-links"><span>Read:</span> <a href="page.html?p=seller-rules" target="_blank">Seller rules</a> · <a href="page.html?p=terms" target="_blank">Terms of use</a></p>
     </div>
     <p class="msg error" id="msg" role="alert" hidden></p>
     <button type="submit" class="primary big" id="submitBtn">Submit for approval</button>
-    <p class="hint" style="text-align:center;margin:0">RGBKart checks each listing, usually within 24 hours. Selling often? <a href="login.html">Open a free shop</a>.</p>
+    <p class="hint" style="text-align:center;margin:0">DeshiBasket checks each listing, usually within 24 hours. Selling often? <a href="login.html">Open a free shop</a>.</p>
   </form>
 
   <section class="card done" id="doneCard" hidden>
@@ -261,12 +262,12 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="session.js?v=1"></script>
-<script src="captcha.js?v=2"></script>
-<script src="phone.js?v=1"></script>
+<script src="captcha.js?v=3"></script>
+<script src="phone.js?v=2"></script>
 <script src="thumbs.js?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="i18n.js?v=38"></script>
-<script src="pay.js?v=2"></script>
+<script src="i18n.js?v=39"></script>
+<script src="pay.js?v=3"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -357,7 +358,7 @@
     $('emailHint').textContent = v === 'featured' ? '(optional, shown to buyers)' : '(optional, kept private)';
     $('contactHint').textContent = v === 'featured'
       ? 'Once Featured starts, buyers see your mobile, WhatsApp and email on this listing.'
-      : 'Your number stays private. Buyers message you on RGBKart; we only use your number to reach you about your listing.';
+      : 'Your number stays private. Buyers message you on DeshiBasket; we only use your number to reach you about your listing.';
   }
   $('plans').querySelectorAll('.plan').forEach(b => b.onclick = () => setListing(b.dataset.v));
 
@@ -375,7 +376,7 @@
     const role = profile && profile.role;
     if (role === 'seller') {
       $('hasAccount').hidden = false; $('hasAccount').innerHTML = '';
-      $('hasAccount').append('You have a shop on RGBKart. Add products from ', h('a', { href: 'seller.html#new', text: 'Seller Center' }), '.');
+      $('hasAccount').append('You have a shop on DeshiBasket. Add products from ', h('a', { href: 'seller.html#new', text: 'Seller Center' }), '.');
       $('sellForm').hidden = true; return;
     }
     if (role === 'customer') {
@@ -534,7 +535,7 @@
     if (v.whatsapp && !BD_MOBILE.test(v.whatsapp)) errs.push('Check the WhatsApp number.');
     if (!v.district) errs.push('Choose your district.');
     if (v.email && !/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(v.email)) errs.push('Check the email address.');
-    if (!$('agree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and RGBKart\'s rules.'); $('agreeWrap').classList.add('need'); }
+    if (!$('agree').checked) { errs.push('Tick the box to agree to follow the laws of Bangladesh and DeshiBasket\'s rules.'); $('agreeWrap').classList.add('need'); }
     if (v.area && !/^[A-Za-z0-9][A-Za-z0-9 .\/'()-]{1,39}$/.test(v.area)) errs.push('Use only letters, numbers and spaces for the area, like "Rampura".');
     if (errs.length) return setMsg(errs.join(' '));
 
@@ -581,9 +582,9 @@
         featOk = !fq.error;
       }
       $('doneText').textContent = listing === 'featured'
-        ? (featOk ? `We'll check it soon. You can pay ${money(plan.price)} for Featured now or later under Your listings (Pay button), or our team will contact you on ${v.phone}. Until payment is confirmed, it shows as a free listing (buyers message you on RGBKart).`
+        ? (featOk ? `We'll check it soon. You can pay ${money(plan.price)} for Featured now or later under Your listings (Pay button), or our team will contact you on ${v.phone}. Until payment is confirmed, it shows as a free listing (buyers message you on DeshiBasket).`
                   : `Your listing was sent, but Featured couldn't be requested. Tap "Make Featured" under Your listings to try again.`)
-        : 'We\'ll check it soon. Once approved, buyers can message you on RGBKart. Check Messages on this phone or browser.';
+        : 'We\'ll check it soon. Once approved, buyers can message you on DeshiBasket. Check Messages on this phone or browser.';
       delete areaCache[v.district];
       $('sellForm').hidden = true; $('doneCard').hidden = false;
       window.scrollTo(0, 0);

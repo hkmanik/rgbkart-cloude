@@ -1,5 +1,5 @@
 // Bangladesh mobile numbers in one format (24 Oct 2026). People type 01711000000, +8801711000000, 8801711000000,
-// "017 1100 0000" or 1711000000; RGBKart stores and checks 01XXXXXXXXX (what the database rules accept).
+// "017 1100 0000" or 1711000000; DeshiBasket stores and checks 01XXXXXXXXX (what the database rules accept).
 //   RGBPhone.clean(text) → '01711000000' when it is a Bangladesh mobile number, else the text without spaces/dashes
 //   RGBPhone.ok(text)    → true for a valid Bangladesh mobile number in any of those forms
 (function () {

@@ -1,4 +1,4 @@
-# RGBKart: let search engines read the shop pages, not the private ones
+# DeshiBasket: let search engines read the shop pages, not the private ones
 User-agent: *
 Disallow: /admin.html
 Disallow: /seller.html

@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#00802B">
 <meta name="robots" content="noindex">
-<title>RGBKart Admin</title>
-<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
-<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<title>DeshiBasket Admin</title>
+<link rel="icon" href="assets/favicon/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
@@ -262,7 +262,7 @@
   @media (max-width: 640px) { .hs { grid-template-columns: auto minmax(0, 1fr); } .hs .actions { grid-column: 1 / -1; justify-content: start; } }
   .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: .9rem; z-index: 60; box-shadow: 0 6px 20px rgb(0 0 0 / .2); }
   .side-logo { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 6px 8px; margin: 0 6px 10px; text-decoration: none; }
-  .side-logo img { width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 0 0 2px #F5C400; flex: none; }
+  .side-logo > img { width: 40px; height: 40px; flex: none; }
   .side-logo b { display: block; font: 800 .9rem/1.1 var(--display); letter-spacing: -.015em; white-space: nowrap; }
   .side-logo small { display: block; font: 700 .62rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: #00802B; margin-top: 2px; }
   /* Password boxes: eye button to show / hide, match hint */
@@ -371,8 +371,8 @@
 <!-- ============ Sign-in pages ============ -->
 <div class="auth-wrap" id="authWrap">
   <header id="brand">
-    <h1>RGBKart <small>Admin</small></h1>
-    <p class="muted" style="margin:4px 0 0">For the RGBKart team. Customers and sellers sign in on the main site.</p>
+    <h1>DeshiBasket <small>Admin</small></h1>
+    <p class="muted" style="margin:4px 0 0">For the DeshiBasket team. Customers and sellers sign in on the main site.</p>
   </header>
 
   <form id="login" class="card" hidden>
@@ -419,7 +419,7 @@
   <div class="scrim" id="scrim"></div>
 
   <nav class="side" id="side" aria-label="Admin menu">
-    <a class="side-logo" href="index.html" aria-label="Red &amp; Green Basket home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="40" height="40"><span><b><span style="color:#E30613">Red</span> <span style="color:#14211C">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Admin</small></span></a>
+    <a class="side-logo" href="index.html" aria-label="DeshiBasket home"><img src="assets/logo/deshibasket-icon-96.png" srcset="assets/logo/deshibasket-icon-96.png 1x, assets/logo/deshibasket-icon-192.png 2x" alt="" width="40" height="40"><span><img src="assets/logo/deshibasket-word.png" alt="DeshiBasket" width="132" height="20" style="display:block;height:20px;width:auto"><small>Admin</small></span></a>
     <div class="rgb-bar" aria-hidden="true"><i></i><i></i><i></i></div>
     <button class="nav tone-red" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
     <button class="nav tone-blue" data-view="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Reports</button>
@@ -561,10 +561,10 @@
 
     <!-- All users (0047_admin_users.sql) -->
     <section data-page="users">
-      <div class="page-head"><div><h1>Users</h1><p>Every account: RGBKart team, shops, one-time sellers, customers and guests. <b>Block</b> stops someone signing in and hides their shop and products (nothing is deleted; Unblock puts it all back). <b>Delete</b> (Master Admin only) removes the account and everything linked to it, including their orders, payments and reviews. It can't be undone. For anyone with orders or payments, Block is usually better.</p></div></div>
+      <div class="page-head"><div><h1>Users</h1><p>Every account: DeshiBasket team, shops, one-time sellers, customers and guests. <b>Block</b> stops someone signing in and hides their shop and products (nothing is deleted; Unblock puts it all back). <b>Delete</b> (Master Admin only) removes the account and everything linked to it, including their orders, payments and reviews. It can't be undone. For anyone with orders or payments, Block is usually better.</p></div></div>
       <div class="card" style="margin-top:18px">
         <div class="toolbar"><div class="filters" id="uFilter">
-          <button type="button" data-k="all" aria-pressed="true">All</button><button type="button" data-k="staff" aria-pressed="false">RGBKart team</button>
+          <button type="button" data-k="all" aria-pressed="true">All</button><button type="button" data-k="staff" aria-pressed="false">DeshiBasket team</button>
           <button type="button" data-k="shop" aria-pressed="false">Shops</button><button type="button" data-k="one_time" aria-pressed="false">One-time sellers</button>
           <button type="button" data-k="customer" aria-pressed="false">Customers</button><button type="button" data-k="guest" aria-pressed="false">Guests</button><button type="button" data-k="blocked" aria-pressed="false">Blocked</button></div>
           <input type="search" id="uSearch" placeholder="Search name, email, phone or shop" aria-label="Search users" style="flex:1;min-width:220px"></div>
@@ -725,7 +725,7 @@
     </section>
 
     <section data-page="activity" hidden>
-      <div class="page-head"><div><h1>Activity log</h1><p>Everything the RGBKart team changed, and who did it: approvals, rejections, payments, Featured, categories, home page, menu, settings, hidden reviews and more. Entries are written by the database automatically and cannot be edited or deleted. Only the Master Admin and Co-admins can see this page.</p></div>
+      <div class="page-head"><div><h1>Activity log</h1><p>Everything the DeshiBasket team changed, and who did it: approvals, rejections, payments, Featured, categories, home page, menu, settings, hidden reviews and more. Entries are written by the database automatically and cannot be edited or deleted. Only the Master Admin and Co-admins can see this page.</p></div>
         <button type="button" class="ghost" id="logCsv">⬇ Download (CSV)</button></div>
       <div class="card" style="margin-top:18px">
         <div class="toolbar" style="flex-wrap:wrap;gap:8px">
@@ -741,7 +741,7 @@
     </section>
 
     <section data-page="returns" hidden>
-      <div class="page-head"><div><h1>Returns</h1><p>All return requests on RGBKart. Shops handle their own returns; step in if a shop does not answer or a customer complains (you can accept, decline or mark received for any shop).</p></div></div>
+      <div class="page-head"><div><h1>Returns</h1><p>All return requests on DeshiBasket. Shops handle their own returns; step in if a shop does not answer or a customer complains (you can accept, decline or mark received for any shop).</p></div></div>
       <div class="card" style="margin-top:16px">
         <div class="toolbar"><div class="filters" id="retFilter">
           <button type="button" data-f="open" aria-pressed="true">Open</button><button type="button" data-f="closed" aria-pressed="false">Closed</button><button type="button" data-f="all" aria-pressed="false">All</button></div></div>
@@ -772,7 +772,7 @@
     </section>
 
     <section data-page="orders">
-      <div class="page-head"><div><h1>Orders</h1><p>All orders on RGBKart. Each shop confirms, packs and delivers its own orders and collects the cash. You can step in and cancel an order if needed.</p></div></div>
+      <div class="page-head"><div><h1>Orders</h1><p>All orders on DeshiBasket. Each shop confirms, packs and delivers its own orders and collects the cash. You can step in and cancel an order if needed.</p></div></div>
       <div class="card" style="margin-top:18px">
         <div class="toolbar"><div class="filters" id="aoFilter">
           <button type="button" data-s="open" aria-pressed="true">Open</button><button type="button" data-s="delivered" aria-pressed="false">Delivered</button>
@@ -820,7 +820,7 @@
       </div>
       <div class="card" style="margin-top:18px">
         <h2>Where sellers send money</h2>
-        <p class="msg muted" style="margin:4px 0 10px">Your RGBKart account numbers (bKash, Nagad, Upay, Rocket). Only methods that are switched on (with a number) are shown to sellers.</p>
+        <p class="msg muted" style="margin:4px 0 10px">Your DeshiBasket account numbers (bKash, Nagad, Upay, Rocket). Only methods that are switched on (with a number) are shown to sellers.</p>
         <div id="methodList"></div>
       </div>
       <h2 style="margin:26px 0 0">Rates</h2>
@@ -878,7 +878,7 @@
     <label>Name in Bangla (shown on the Bangla site; please fill it in, there is no automatic translation) <input id="cNameBn" type="text" maxlength="80" lang="bn" placeholder="যেমন: স্মার্টফোন"></label>
     <label>Web address
       <input id="cSlug" type="text" class="slug-input" maxlength="80" required pattern="[a-z0-9]+(-[a-z0-9]+)*">
-      <span class="hint">Used in links: rgbkart.com/c/<b id="cSlugPreview">…</b>. Lowercase letters, numbers and dashes.</span>
+      <span class="hint">Used in links: deshibasket.com/c/<b id="cSlugPreview">…</b>. Lowercase letters, numbers and dashes.</span>
     </label>
     <label>Inside
       <select id="cParent"></select>
@@ -950,7 +950,7 @@
   <div class="drawer-head"><h2 id="apDrawerTitle">Add product</h2><button type="button" class="icon-btn" id="apClose" aria-label="Close">✕</button></div>
   <div class="drawer-body">
     <fieldset class="ap-box"><legend>Sold by</legend>
-      <label class="check"><input type="radio" name="apWho" value="official" id="apWhoOfficial" checked> RGBKart Official (our own product)</label>
+      <label class="check"><input type="radio" name="apWho" value="official" id="apWhoOfficial" checked> DeshiBasket Official (our own product)</label>
       <label class="check"><input type="radio" name="apWho" value="seller"> A seller (shop or one-time seller)</label>
       <p class="attr-meta" id="apOfficialInfo" hidden></p>
       <div id="apOfficialSetup" hidden style="display:grid;gap:10px">
@@ -992,7 +992,7 @@
   <div class="drawer-body">
     <label>Ad space <select id="adPlace"></select></label>
     <fieldset class="ap-box"><legend>Advertiser</legend>
-      <label class="check"><input type="radio" name="adWho" value="house" checked> RGBKart (our own promotion)</label>
+      <label class="check"><input type="radio" name="adWho" value="house" checked> DeshiBasket (our own promotion)</label>
       <label class="check"><input type="radio" name="adWho" value="seller"> A seller</label>
       <select id="adSeller" aria-label="Seller" hidden></select>
     </fieldset>
@@ -1134,11 +1134,11 @@
 
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="xlsx-lite.js?v=1"></script>
+<script src="xlsx-lite.js?v=2"></script>
 <script src="session.js?v=1"></script>
 <script src="thumbs.js?v=3"></script>
-<script src="captcha.js?v=2"></script>
-<script src="phone.js?v=1"></script>
+<script src="captcha.js?v=3"></script>
+<script src="phone.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
@@ -1296,7 +1296,7 @@
     const { data: role, error } = await db.rpc('claim_staff_invite');
     if (error || !role) {
       $('noAccessText').textContent = error ? friendly(error)
-        : `${session.user.email} isn't on the RGBKart team. If you were invited, make sure you signed in with the invited email and confirmed it.`;
+        : `${session.user.email} isn't on the DeshiBasket team. If you were invited, make sure you signed in with the invited email and confirmed it.`;
       showAuth('noAccess'); return;
     }
     myRole = role; myId = session.user.id;
@@ -2289,7 +2289,7 @@
   }
 
   // ===================== Users (0047_admin_users.sql) =====================
-  const U_KIND = { staff: 'RGBKart team', shop: 'Shop', one_time: 'One-time seller', customer: 'Customer', guest: 'Guest' };
+  const U_KIND = { staff: 'DeshiBasket team', shop: 'Shop', one_time: 'One-time seller', customer: 'Customer', guest: 'Guest' };
   const U_PAGE = 50;
   let uKind = 'all', uPage = 0, uTimer = null;
   function openUser(q) { $('uSearch').value = q || ''; uKind = 'all'; $('uFilter').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.k === 'all'))); uPage = 0; go('users'); }
@@ -2313,7 +2313,7 @@
   function userCard(u) {
     const name = u.shop_name || u.full_name || (u.kind === 'guest' ? 'Guest (no account details)' : u.email || '—');
     const facts = [u.kind === 'staff' && ROLE_NAMES[u.staff_role], u.products && `${u.products} product${u.products === 1 ? '' : 's'}`, u.shop_orders && `${u.shop_orders} order${u.shop_orders === 1 ? '' : 's'} received`,
-      u.buyer_orders && `${u.buyer_orders} order${u.buyer_orders === 1 ? '' : 's'} placed`, u.payments && `${u.payments} payment${u.payments === 1 ? '' : 's'} to RGBKart`].filter(Boolean);
+      u.buyer_orders && `${u.buyer_orders} order${u.buyer_orders === 1 ? '' : 's'} placed`, u.payments && `${u.payments} payment${u.payments === 1 ? '' : 's'} to DeshiBasket`].filter(Boolean);
     const box = h('div', { class: 'reject-box', hidden: true, style: 'background:var(--surface)' });
     const mine = u.id === myId, isMaster = u.staff_role === 'master_admin';
     const blockBtn = !mine && !isMaster && (u.kind !== 'staff' || myRole === 'master_admin') && (u.blocked_at
@@ -2594,7 +2594,7 @@
   // ===================== Products review =====================
   let prods = [], prodSellers = new Map(), prodFilter = 'pending', prodWho = 'all';
   const P_STATUS = { draft: 'Draft', pending: 'To review', approved: 'Live', rejected: 'Rejected', archived: 'Hidden / sold' };
-  const REASONS = ['Photos are unclear or not of the real item', 'Price looks wrong', 'Wrong category', 'Not allowed on RGBKart', 'Title or description is misleading', 'Duplicate listing'];
+  const REASONS = ['Photos are unclear or not of the real item', 'Price looks wrong', 'Wrong category', 'Not allowed on DeshiBasket', 'Title or description is misleading', 'Duplicate listing'];
   const photoUrlAdmin = path => db.storage.from('product-images').getPublicUrl(path).data.publicUrl;
 
   async function loadProducts() {
@@ -2846,7 +2846,7 @@
         a.image_path ? h('img', { src: photoUrlAdmin(a.image_path), alt: '', class: 'ad-pic small' }) : adBanner(a, null),
         h('div', { style: 'min-width:0;display:grid;gap:3px' },
           h('div', { class: 'attr-title' }, h('b', { text: rate.name || a.placement }), h('span', { class: 'chip ' + (state === 'Running' ? 'approved' : state === 'Ended' ? 'plain' : 'pending'), text: state })),
-          h('div', { class: 'prod-meta', text: `${a.seller_id ? 'Seller: ' + ((reqSellers.get(a.seller_id) || {}).shop_name || '—') : 'RGBKart (own promotion)'} · ${fmtDay(a.starts_on)} – ${fmtDay(a.ends_on)} (${days} days)` }),
+          h('div', { class: 'prod-meta', text: `${a.seller_id ? 'Seller: ' + ((reqSellers.get(a.seller_id) || {}).shop_name || '—') : 'DeshiBasket (own promotion)'} · ${fmtDay(a.starts_on)} – ${fmtDay(a.ends_on)} (${days} days)` }),
           h('div', { class: 'prod-meta' }, h('b', { text: taka(a.amount) }), ` · ${AD_PAY[a.payment_status]}`, a.paid_at ? ` on ${fmtDate(a.paid_at)}` : '', ` · opens ${a.link_url}`)),
         h('div', { class: 'actions' },
           a.payment_status === 'unpaid' && canApprove() && actionBtn('Paid: publish', 'good', async () => {
@@ -3357,7 +3357,7 @@
     const table = (title, note, head, rows) => h('div', { class: 'card', style: 'margin-top:14px' }, h('h2', { text: title }), h('p', { class: 'msg muted', style: 'margin:2px 0 8px', text: note }),
       rows.length ? h('div', { class: 'table-wrap' }, h('table', {}, h('thead', {}, h('tr', {}, head.map(x => h('th', { text: x })))), h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', { text: c }))))))) : h('p', { class: 'empty', text: 'Nothing in this period.' }));
     box.append(
-      table('Top shops', 'By value of orders placed in this period (not cancelled). Cash goes to the shops, not RGBKart.', ['#', 'Shop', 'Orders', 'Value', 'Delivered', 'Cancelled'],
+      table('Top shops', 'By value of orders placed in this period (not cancelled). Cash goes to the shops, not DeshiBasket.', ['#', 'Shop', 'Orders', 'Value', 'Delivered', 'Cancelled'],
         d.topShops.slice(0, 10).map((x, i) => [String(i + 1), name(x.seller_id), num(x.orders), taka(x.value), num(x.delivered), num(x.cancelled)])),
       table('Top products', 'By value sold in this period (orders not cancelled).', ['#', 'Product', 'Shop', 'Pieces', 'Value'],
         d.topProducts.slice(0, 10).map((x, i) => [String(i + 1), x.title, name(x.seller_id), num(x.qty), taka(x.value)])),
@@ -3389,7 +3389,7 @@
         kpi(taka(0), 'From free listings', 'Free listings don\'t pay'),
         kpi(taka(d.ads_unpaid), 'Ads not paid yet', 'Running ads waiting for payment (today)'),
         kpi(num(d.featured_waiting), 'Featured waiting for payment', 'Today'))),
-      repOrders && h('div', { class: 'rep-group' }, h('h2', { text: 'Orders (paid to shops, not to RGBKart)' }), h('div', { class: 'kpis' },
+      repOrders && h('div', { class: 'rep-group' }, h('h2', { text: 'Orders (paid to shops, not to DeshiBasket)' }), h('div', { class: 'kpis' },
         kpi(num(repOrders.orders), 'Orders placed', `${num(repOrders.buyers)} different customers`), kpi(taka(repOrders.orders_value), 'Value of orders', 'Not cancelled · cash goes to the shops'),
         kpi(num(repOrders.delivered), 'Delivered'), kpi(num(repOrders.cancelled), 'Cancelled'), kpi(num(repOrders.open_now), 'Open orders now', 'Not yet delivered'))),
       h('div', { class: 'rep-group' }, h('h2', { text: 'Visitors' }), h('div', { class: 'kpis' },
@@ -3415,7 +3415,7 @@
   }
   $('repCsv').onclick = () => {
     if (!repData || !repRange) return toast('Open a report first.');
-    const d = repData, rows = [['RGBKart report', `${repRange[0]} to ${repRange[1]}`], [],
+    const d = repData, rows = [['DeshiBasket report', `${repRange[0]} to ${repRange[1]}`], [],
       ['Total income (BDT)', Number(d.featured_income) + Number(d.ad_income)], ['Featured income (BDT)', d.featured_income], ['Ad income (BDT)', d.ad_income], ['Free listings income (BDT)', 0],
       ['Featured paid', d.featured_paid], ['Featured free from admin', d.featured_free], ['Ads started', d.ads_started], ['Ads not paid yet (BDT, today)', d.ads_unpaid],
       ...(repOrders ? [['Orders placed', repOrders.orders], ['Value of orders (BDT, paid to shops)', repOrders.orders_value], ['Orders delivered', repOrders.delivered], ['Orders cancelled', repOrders.cancelled]] : []),
@@ -3435,7 +3435,7 @@
     const d = repData, x = repDetail, shop = id => (x.shops.get(id) || {}).shop_name || '';
     const dt = t => t ? new Date(t).toLocaleString('en-GB', { timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
     const sheets = {
-      Summary: [['RGBKart report', `${repRange[0]} to ${repRange[1]}`], [],
+      Summary: [['DeshiBasket report', `${repRange[0]} to ${repRange[1]}`], [],
         ['Total income (BDT)', Number(d.featured_income) + Number(d.ad_income)], ['Featured income (BDT)', Number(d.featured_income)], ['Ad income (BDT)', Number(d.ad_income)],
         ['Featured paid', d.featured_paid], ['Featured free from admin', d.featured_free], ['Ads started', d.ads_started],
         ...(repOrders ? [['Orders placed', repOrders.orders], ['Value of orders (BDT, paid to shops)', Number(repOrders.orders_value)], ['Orders delivered', repOrders.delivered], ['Orders cancelled', repOrders.cancelled]] : []),
@@ -3594,7 +3594,7 @@
   async function openAddProduct() {
     apPhotos = []; apDrawPhotos();
     ['apTitle', 'apTitleBn', 'apDescBn', 'apPrice', 'apSale', 'apDesc', 'apSellerSearch', 'apOffPhone', 'apOffWa', 'apOffArea'].forEach(id => $(id).value = '');
-    $('apStock').value = 1; $('apNeg').checked = false; $('apFree').checked = false; $('apOffName').value = 'RGBKart Official'; $('apOffCity').value = 'Dhaka';
+    $('apStock').value = 1; $('apNeg').checked = false; $('apFree').checked = false; $('apOffName').value = 'DeshiBasket Official'; $('apOffCity').value = 'Dhaka';
     $('apCond').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
     $('apType').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); apUse = new Map(); apVers = new Map(); apSyncType();
     $('apListing').querySelectorAll('button').forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0))); $('apFeatDaysWrap').hidden = true;
@@ -3612,7 +3612,7 @@
     apOfficial = rows.find(x => x.is_official) || null;
     apSellers = rows.filter(x => !x.is_official);
     $('apWhoOfficial').checked = true; apShowWho(); apDrawSellers();
-    $('apOffSetupNote').textContent = myRole === 'master_admin' ? 'First time only: set up the RGBKart Official shop. Buyers see these details.' : 'Ask the Master Admin to set up the RGBKart Official shop first, or add the product for a seller.';
+    $('apOffSetupNote').textContent = myRole === 'master_admin' ? 'First time only: set up the DeshiBasket Official shop. Buyers see these details.' : 'Ask the Master Admin to set up the DeshiBasket Official shop first, or add the product for a seller.';
   }
   function apDrawSellers() {
     const q = $('apSellerSearch').value.trim().toLowerCase();
@@ -3650,7 +3650,7 @@
       if (v.sale != null && !(v.sale > 0 && v.sale < v.price)) errs.push('The sale price must be lower than the price.');
     }
     if (who === 'seller' && !$('apSeller').value) errs.push('Choose the seller.');
-    if (who === 'official' && !apOfficial && myRole !== 'master_admin') errs.push('The RGBKart Official shop isn\'t set up yet.');
+    if (who === 'official' && !apOfficial && myRole !== 'master_admin') errs.push('The DeshiBasket Official shop isn\'t set up yet.');
     if (errs.length) return setMsg('apMsg', errs.join(' '), true);
     $('apSave').disabled = true; $('apSave').textContent = 'Saving…';
     try {

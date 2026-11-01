@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#00802B">
-<title>RGBKart Sign In</title>
-<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png">
-<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png">
+<title>DeshiBasket Sign In</title>
+<link rel="icon" href="assets/favicon/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="assets/favicon/favicon-180.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Hind+Siliguri:wght@400;600&display=swap">
 <style>
@@ -117,7 +117,7 @@
   .empty { color: var(--muted); text-align: center; padding: 12px 0; }
   .count { color: var(--muted); font-size: .85rem; }
   .lbrand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
-  .lbrand img { width: 64px; height: 64px; border-radius: 50%; box-shadow: 0 0 0 3px #F5C400; background: #fff; }
+  .lbrand > img { width: 64px; height: 64px; }
   .lbrand b { display: block; font: 800 clamp(1.35rem, 5vw, 1.8rem)/1.1 var(--display); letter-spacing: -.01em; }
   .lbrand small { display: block; font: 600 .7rem var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-top: 4px; }
   /* Password boxes: eye button to show / hide, match hint */
@@ -137,7 +137,7 @@
 <a class="sell-fab" href="sell.html" aria-label="Sell an item">+ Sell</a>
 <main>
   <header>
-    <h1 style="margin:0"><a href="index.html" class="lbrand" aria-label="Red &amp; Green Basket, RGBKart home"><img src="assets/logo/rgb-basket-96.png" srcset="assets/logo/rgb-basket-96.png 1x, assets/logo/rgb-basket-192.png 2x" alt="" width="64" height="64"><span><b translate="no"><span style="color:#E30613">Red</span> <span style="color:var(--fg)">&amp;</span> <span style="color:#00802B">Green</span> <span style="color:#F5C400;text-shadow:0 1px 0 #A87400,0 0 1px #A87400">Basket</span></b><small>Your Online Marketplace</small></span></a></h1>
+    <h1 style="margin:0"><a href="index.html" class="lbrand" aria-label="DeshiBasket home"><img src="assets/logo/deshibasket-icon-96.png" srcset="assets/logo/deshibasket-icon-96.png 1x, assets/logo/deshibasket-icon-192.png 2x" alt="" width="64" height="64"><span><img src="assets/logo/deshibasket-word.png" alt="DeshiBasket" width="211" height="32" style="display:block;height:32px;width:auto"><small>Your Online Marketplace</small></span></a></h1>
     <p class="sub" id="tagline">Sign in, or create an account to shop or sell.</p>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px"><a class="home-btn" href="index.html">← Home</a><div data-lang-switch></div></div>
   </header>
@@ -181,7 +181,7 @@
   <!-- First sign-in with Google/Facebook: choose account type -->
   <form id="onboard" class="card" hidden>
     <h2>Finish setting up your account</h2>
-    <p class="msg" id="onboardIntro">Tell us how you'll use RGBKart. You can't change this later.</p>
+    <p class="msg" id="onboardIntro">Tell us how you'll use DeshiBasket. You can't change this later.</p>
     <div class="seg" id="onboardRole" role="group" aria-label="Account type">
       <button type="button" data-role="customer" aria-pressed="true">As Customer<small>I want to buy</small></button>
       <button type="button" data-role="seller" aria-pressed="false">As Seller<small>I want to sell</small></button>
@@ -227,11 +227,11 @@
 </main>
 
 <script src="session.js?v=1"></script>
-<script src="captcha.js?v=2"></script>
-<script src="phone.js?v=1"></script>
+<script src="captcha.js?v=3"></script>
+<script src="phone.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="sync.js?v=1"></script>
-<script src="i18n.js?v=38"></script>
+<script src="i18n.js?v=39"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -324,7 +324,7 @@
       if (f.offers) {   // promotional emails: off unless ticked (0059_email_offers.sql)
         const lab = document.createElement('label'); lab.className = 'agree-row offers-row';
         const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = prefix + '-' + f.k; cb.name = f.k; cb.checked = keep[f.k] === 'yes';
-        const txt = document.createElement('span'); txt.textContent = role === 'seller' ? 'Send me selling tips, offers and RGBKart news by email (you can stop any time)' : 'Send me offers, discounts and RGBKart news by email (you can stop any time)';
+        const txt = document.createElement('span'); txt.textContent = role === 'seller' ? 'Send me selling tips, offers and DeshiBasket news by email (you can stop any time)' : 'Send me offers, discounts and DeshiBasket news by email (you can stop any time)';
         lab.append(cb, txt); box.append(lab); continue;
       }
       const label = document.createElement('label');
@@ -346,12 +346,12 @@
     }
   }
 
-  // "I agree to follow the laws of Bangladesh and RGBKart's rules" (required for sellers)
+  // "I agree to follow the laws of Bangladesh and DeshiBasket's rules" (required for sellers)
   function agreeBox(id, name, checked) {
     const wrap = document.createElement('div'); wrap.className = 'agree';
     const lab = document.createElement('label'); lab.className = 'agree-row';
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.id = id; cb.name = name; cb.required = true; cb.checked = checked;
-    const txt = document.createElement('span'); txt.textContent = 'I agree to follow the laws of the Government of Bangladesh and the rules of RGBKart.';
+    const txt = document.createElement('span'); txt.textContent = 'I agree to follow the laws of the Government of Bangladesh and the rules of DeshiBasket.';
     lab.append(cb, txt);
     const links = document.createElement('p'); links.className = 'agree-links';
     const a1 = document.createElement('a'); a1.href = 'page.html?p=seller-rules'; a1.target = '_blank'; a1.textContent = 'Seller rules';
@@ -673,7 +673,7 @@
 
   if (SHOP_ONLY) {
     $('signupRole').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === 'seller')));
-    $('tagline').textContent = 'Open your shop on RGBKart. Create your seller account below; we check and approve new shops quickly.';
+    $('tagline').textContent = 'Open your shop on DeshiBasket. Create your seller account below; we check and approve new shops quickly.';
     const cta = document.querySelector('.sell-cta'); if (cta) cta.hidden = true;
     setMode('signup');
   } else setMode('signin');

@@ -22,9 +22,9 @@ function get_json($url, $key) {
 }
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
-$title = 'RGBKart · Red & Green Basket';
+$title = 'DeshiBasket';
 $desc  = 'Buy and sell across all 64 districts of Bangladesh. Cash on Delivery.';
-$image = "$SITE/assets/og/rgbkart-share.png";
+$image = "$SITE/assets/og/deshibasket-share.png";
 $target = 'index.html';
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -45,7 +45,7 @@ if ($id > 0) {
       if ($vals) $price = min($vals);
     }
     $title = $p['title'] . ($price ? ' · ৳' . number_format((float)$price) : '');
-    $desc = trim(($p['short_description'] ?: '') . ' Order on RGBKart, pay in cash on delivery.');
+    $desc = trim(($p['short_description'] ?: '') . ' Order on DeshiBasket, pay in cash on delivery.');
     $imgs = $p['product_images'] ?: [];
     usort($imgs, function ($a, $b) { return $a['sort_order'] <=> $b['sort_order']; });
     if ($imgs) $image = "$SB/storage/v1/object/public/product-images/" . str_replace('%2F', '/', rawurlencode($imgs[0]['storage_path']));
@@ -56,8 +56,8 @@ if ($id > 0) {
   $rows = get_json("$SB/rest/v1/shops?$col=eq." . rawurlencode($slug) . "&select=shop_name,tagline,city,logo_path,banner_path", $KEY);
   if ($rows) {
     $s = $rows[0];
-    $title = $s['shop_name'] . ' on RGBKart';
-    $desc = trim(($s['tagline'] ?: 'A shop on RGBKart') . ($s['city'] ? ' · ' . $s['city'] : ''));
+    $title = $s['shop_name'] . ' on DeshiBasket';
+    $desc = trim(($s['tagline'] ?: 'A shop on DeshiBasket') . ($s['city'] ? ' · ' . $s['city'] : ''));
     $pic = $s['banner_path'] ?: $s['logo_path'];
     if ($pic) $image = "$SB/storage/v1/object/public/shop-assets/" . str_replace('%2F', '/', rawurlencode($pic));
   }
@@ -70,7 +70,7 @@ header('Cache-Control: public, max-age=600');
 <meta charset="utf-8">
 <title><?= h($title) ?></title>
 <meta name="description" content="<?= h($desc) ?>">
-<meta property="og:site_name" content="RGBKart · Red &amp; Green Basket">
+<meta property="og:site_name" content="DeshiBasket">
 <meta property="og:type" content="<?= $id > 0 ? 'product' : 'website' ?>">
 <meta property="og:title" content="<?= h($title) ?>">
 <meta property="og:description" content="<?= h($desc) ?>">
@@ -80,4 +80,4 @@ header('Cache-Control: public, max-age=600');
 <link rel="canonical" href="<?= h($url) ?>">
 <meta http-equiv="refresh" content="0;url=<?= h($target) ?>">
 <script>location.replace(<?= json_encode($target) ?>);</script>
-</head><body><p><a href="<?= h($target) ?>">Open on RGBKart</a></p></body></html>
+</head><body><p><a href="<?= h($target) ?>">Open on DeshiBasket</a></p></body></html>

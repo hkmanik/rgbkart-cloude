@@ -1,4 +1,4 @@
-// RGBKart reviews & ratings on shopper pages (0029_reviews.sql).
+// DeshiBasket reviews & ratings on shopper pages (0029_reviews.sql).
 // RGBReviews.stars(avg), RGBReviews.line(row) → "★★★★☆ 4.2 (12)", RGBReviews.section(db, { product: id } | { shop: sellerId }) → panel with summary + list.
 // Needs i18n.js (T, N, RGBLang). Works with or without shop.js.
 (function () {

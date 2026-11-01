@@ -45,9 +45,33 @@ update public.seller_details
    set shop_name = replace(shop_name, 'RGBKart', 'DeshiBasket')
  where is_official and shop_name like '%RGBKart%';
 
+-- 4. Order numbers (owner, 1 Nov): new orders are DB-YYMMDD-XXXXX instead of RGB-…; old orders keep theirs.
+--    "DB" is kept for order numbers, so no shop can take DB as its invoice code.
+do $$
+declare r record; def text;
+begin
+  for r in
+    select p.oid, p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname in ('place_order', 'make_invoice_code', 'admin_set_invoice_code')
+  loop
+    def := pg_get_functiondef(r.oid);
+    if r.proname = 'place_order' then
+      def := replace(def, $q$ono := 'RGB-' ||$q$, $q$ono := 'DB-' ||$q$);
+    elsif r.proname = 'make_invoice_code' then
+      def := replace(def, $q$if base = 'RGB' then base := 'RGBS'; end if;$q$, $q$if base = 'DB' then base := 'DBS'; end if;$q$);
+    else
+      def := replace(def, $q$if c ~ '^RGB' and length(c) = 3 then raise exception 'RGB is kept for order numbers. Choose another code'; end if;$q$,
+                          $q$if c = 'DB' then raise exception 'DB is kept for order numbers. Choose another code'; end if;$q$);
+    end if;
+    execute def;
+  end loop;
+end $$;
+
 -- Check: both numbers should be 0
 select
   (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.prosrc ~ '(RGBKart|Red & Green Basket|rgbkart\.com)') as functions_left,
   (select count(*) from public.site_pages
-    where (coalesce(title,'') || coalesce(body,'') || coalesce(body_bn,'')) ~ '(RGBKart|Red & Green Basket|rgbkart\.com)') as pages_left;
+    where (coalesce(title,'') || coalesce(body,'') || coalesce(body_bn,'')) ~ '(RGBKart|Red & Green Basket|rgbkart\.com)') as pages_left,
+  (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'place_order' and p.prosrc like '%''DB-''%') as db_order_numbers_on;

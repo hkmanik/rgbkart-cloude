@@ -1964,7 +1964,7 @@
     const s = RGBPrint.settings(), box = $('prSetup'); box.innerHTML = '';
     const sel = (id, opts, val) => h('select', { id }, Object.entries(opts).map(([k, v]) => h('option', { value: k, text: v[0], selected: k === val })));
     const chk = (id, label, on) => h('label', { class: 'check' }, h('input', { type: 'checkbox', id, checked: on }), label);
-    const sample = { id: 0, order_no: 'RGB-SAMPLE-0001', invoice_no: ((shop && shop.invoice_code) || 'SHOP') + '-' + new Date().getFullYear() + '-00001', created_at: new Date().toISOString(), customer_name: 'Sample Customer', phone: '01711000000', email: 'customer@example.com',
+    const sample = { id: 0, order_no: 'DB-SAMPLE-0001', invoice_no: ((shop && shop.invoice_code) || 'SHOP') + '-' + new Date().getFullYear() + '-00001', created_at: new Date().toISOString(), customer_name: 'Sample Customer', phone: '01711000000', email: 'customer@example.com',
       address: 'House 12, Road 5, Block C', area: 'Mirpur 10', district: 'Dhaka', note: 'Please call before delivery', ship_method: 'dhaka', ship_fee: 70, subtotal: 2990, total: 3060,
       order_items: [{ title: 'Sample product', variant_label: 'Black / M', qty: 1, unit_price: 2490, line_total: 2490 }, { title: 'Another product', qty: 2, unit_price: 250, line_total: 500 }] };
     const read = () => ({ docSize: $('prDoc').value, labelSize: $('prLabel').value, copies: Number($('prCopies').value) || 1, showLogo: $('prLogo').checked, barcode: $('prBarcode').checked,

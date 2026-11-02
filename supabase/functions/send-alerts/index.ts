@@ -1,9 +1,8 @@
 // DeshiBasket "send-alerts": emails new alerts from the notifications outbox through Resend.
 // Paste this whole file into Supabase → Edge Functions → Deploy a new function → "send-alerts".
-// Supabase Cron calls it every 5 minutes. It needs three secrets (Edge Functions → Secrets):
+// Supabase Cron calls it every 5 minutes. It needs one secret (Edge Functions → Secrets):
 //   RESEND_API_KEY  your Resend API key (starts with re_)
-//   ALERT_FROM      e.g.  DeshiBasket <alerts@rgbkart.com>
-//   SITE_URL        e.g.  https://deshibasket.com
+// Sender (alerts@deshibasket.com) and site address are written below (since 2 Nov 2026).
 // SMS (0071_sms.sql, 30 Oct 2026) also go out from here, through BulkSMSBD, when these secrets exist:
 //   BULKSMSBD_API_KEY    your BulkSMSBD API key
 //   BULKSMSBD_SENDER_ID  your approved sender ID (number or name) from BulkSMSBD
@@ -13,8 +12,8 @@
 const SB = Deno.env.get("SUPABASE_URL")!;
 const KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
-const FROM = Deno.env.get("ALERT_FROM") ?? "DeshiBasket <onboarding@resend.dev>";
-const SITE = (Deno.env.get("SITE_URL") ?? "https://deshibasket.com").replace(/\/+$/, "");
+const FROM = "DeshiBasket <alerts@deshibasket.com>";   // new name 2 Nov 2026 (ALERT_FROM secret no longer used)
+const SITE = "https://deshibasket.com";   // new address 2 Nov 2026 (SITE_URL secret no longer used)
 const SMS_KEY = Deno.env.get("BULKSMSBD_API_KEY") ?? "";
 const SMS_FROM = Deno.env.get("BULKSMSBD_SENDER_ID") ?? "";
 

@@ -5,7 +5,7 @@
 #   FTP_PASSWORD  that account's password
 # Optional repository variable FTP_DIR: the folder on the server, relative to the FTP account's
 # home. Leave it unset when the FTP account's home IS public_html/rgbkartdemo.
-# Optional repository variable SITE_URL: the site's address, e.g. https://www.rgbkart.com (default: https://rgbkart.com).
+# The site's address is set below (https://deshibasket.com since 2 Nov 2026).
 # It is put into link previews, robots.txt and sitemap.xml.
 name: Deploy to Hostinger
 
@@ -32,7 +32,7 @@ jobs:
 
       - name: Web address and sitemap (tools/build_seo.py)
         env:
-          SITE_URL: ${{ vars.SITE_URL }}
+          SITE_URL: https://deshibasket.com   # new name, 2 Nov 2026 (the repo variable is no longer used)
         run: python3 tools/build_seo.py
 
       - name: Install lftp

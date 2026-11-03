@@ -16,7 +16,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://qrzlsomuluglbslricaf.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<title>DeshiBasket Product</title>
+<title>Product | DeshiBasket</title>
 <link rel="icon" href="assets/favicon/favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32.png?v=2">
 <link rel="apple-touch-icon" href="assets/favicon/favicon-180.png?v=2">
@@ -345,6 +345,7 @@
 <script src="report.js?v=3"></script>
 <script src="questions.js?v=2"></script>
 <script src="share.js?v=2"></script>
+<script src="seo-product.js?v=1"></script>
 <script>
   const SUPABASE_URL = 'https://qrzlsomuluglbslricaf.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_i-6QX7ObGzF4ykfrgkITsw_HnndqdNY';
@@ -382,7 +383,7 @@
     sel = id ? sel.eq('id', id) : sel.eq('slug', slug || '');
     const r = await sel.maybeSingle();
     $('loading').hidden = true;
-    if (r.error || !r.data) { $('notFound').hidden = false; return; }
+    if (r.error || !r.data) { $('notFound').hidden = false; if (window.RGBSeo) RGBSeo.noindex(); return; }
     P = r.data;
     const attrIds = new Set([...(P.product_attribute_values || []).map(v => v.attribute_id), ...(P.product_variations || []).flatMap(v => v.product_variation_options.map(o => o.attribute_id))]);
     const [s, a, c] = await Promise.all([
@@ -591,32 +592,16 @@
     for (const [k, v] of rows) $('specs').append(h('tr', {}, h('th', { scope: 'row', text: k }), h('td', { text: v.join(', ') })));
   }
 
-  // ---------- search engines & link previews (plan 7.6) ----------
-  function setMeta(attr, key, val) {
-    let m = document.head.querySelector(`meta[${attr}="${key}"]`);
-    if (!m) { m = document.createElement('meta'); m.setAttribute(attr, key); document.head.append(m); }
-    m.setAttribute('content', val);
-  }
+  // ---------- search engines & link previews (plan 7.6; rules in seo-product.js, same as product.php) ----------
   function seoProduct() {
-    const title = L(P, 'title'), desc = (P.short_description || (P.description || '').slice(0, 150)).replace(/\s+/g, ' ').trim();
-    const img = images[0] ? images[0].url : null;
-    setMeta('name', 'description', `${title}${desc ? ': ' + desc : ''}. Order on DeshiBasket, pay in cash on delivery.`.slice(0, 300));
-    setMeta('property', 'og:title', title + ' | DeshiBasket'); setMeta('property', 'og:description', desc || 'Order on DeshiBasket, pay in cash on delivery.');
-    if (img) setMeta('property', 'og:image', img);
-    let canon = document.head.querySelector('link[rel=canonical]');
-    if (!canon) { canon = document.createElement('link'); canon.rel = 'canonical'; document.head.append(canon); }
-    canon.href = location.href.split('#')[0].replace(/[?&](lang|v)=[^&]*/g, '');
-    // Product details for Google (price, stock, stars)
-    const vs = (P.product_variations || []).filter(v => v.is_active);
-    const prices = vs.length ? vs.map(v => Number(v.sale_price || v.price)) : [Number(onSale(P) ? P.sale_price : P.price)];
-    const inStock = P.manage_stock ? (vs.length ? vs.some(v => v.stock > 0) : P.stock > 0) : P.stock_status !== 'out_of_stock';
-    const ld = { '@context': 'https://schema.org', '@type': 'Product', name: P.title, description: desc || undefined, sku: P.sku || undefined,
-      image: images.map(i => i.url).slice(0, 5), itemCondition: P.listing_type === 'pre_owned' ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
-      offers: { '@type': prices.length > 1 ? 'AggregateOffer' : 'Offer', priceCurrency: 'BDT', ...(prices.length > 1 ? { lowPrice: Math.min(...prices), highPrice: Math.max(...prices) } : { price: prices[0] }),
-        availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canon.href,
-        seller: shop ? { '@type': 'Organization', name: shop.shop_name } : undefined } };
-    if (P.rating_count > 0) ld.aggregateRating = { '@type': 'AggregateRating', ratingValue: Number(P.rating_avg).toFixed(1), reviewCount: P.rating_count };
-    const sc = document.createElement('script'); sc.type = 'application/ld+json'; sc.textContent = JSON.stringify(ld); document.head.append(sc);
+    if (!window.RGBSeo) return;
+    if (!RGBSeo.isPublic(P)) { RGBSeo.noindex(); return; }   // seller/staff preview of a draft, pending, rejected or hidden product
+    let brand = null;   // a "… Brand" detail (Phone Brand, Fashion Brand…), if the seller picked one
+    for (const v of P.product_attribute_values || []) {
+      const a = attrs.get(v.attribute_id);
+      if (a && /brand/i.test(a.name || '') && v.option_id) { const o = (a.attribute_options || []).find(x => x.id === v.option_id); if (o) { brand = o.value; break; } }
+    }
+    RGBSeo.apply(RGBSeo.build(P, { site: location.origin, imgUrl: path => imgUrl('product-images', path), shopName: shop && shop.shop_name, brand }), { keepTitle: true });
   }
 
   // ---------- reviews (0029_reviews.sql) ----------
